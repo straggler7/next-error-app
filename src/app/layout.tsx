@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "IRS Error Resolution System",

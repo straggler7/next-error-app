@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Save, CheckCircle } from 'lucide-react';
-import Header from '@/components/Header';
-import ErrorSidebar from '@/components/ErrorSidebar';
-import FormSection, { FormField, FormInput, FormSelect, FormTextarea } from '@/components/FormSection';
-import NotesSection from '@/components/NotesSection';
-import { mockUser } from '@/data/mockData';
-import { ErrorItem, Note } from '@/types';
-import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord } from '@/services/workAssignmentService';
+import Header from '../../components/Header';
+import ErrorSidebar from '../../components/ErrorSidebar';
+import FormSection, { FormField, FormInput, FormSelect, FormTextarea } from '../../components/FormSection';
+import NotesSection from '../../components/NotesSection';
+import { mockUser } from '../../data/mockData';
+import { ErrorItem, Note } from '../../types';
+import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord } from '../../services/workAssignmentService';
 
 export default function Form4868Page() {
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);

@@ -1,0 +1,202 @@
+import React, { useState, useEffect } from 'react';
+import { parseString } from 'xml2js';
+
+function DynamicForm({ xmlData }) {
+  const [formData, setFormData] = useState({});
+  const [formFields, setFormFields] = useState([]);
+
+  useEffect(() => {
+    parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error('Error parsing XML:', err);
+        return;
+      }
+      const fields = result.form.field; // Assuming 'form' and 'field' are your XML tags
+      setFormFields(fields);
+
+      // Initialize form data state
+      const initialData = {};
+      fields.forEach(field => {
+        initialData[field.$.name] = ''; // Use '$' to access attributes in xml2js
+      });
+      setFormData(initialData);
+    });
+  }, [xmlData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({ ...prevData, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form Data:', formData);
+    // Handle form submission logic
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {formFields.map((field, index) => {
+        const fieldProps = field.$; // Access attributes
+        switch (fieldProps.type) {
+          case 'text':
+          case 'email':
+            return (
+              <div key={index}>
+                <label>{fieldProps.label}:</label>
+                <input
+                  type={fieldProps.type}
+                  name={fieldProps.name}
+                  value={formData[fieldProps.name]}
+                  onChange={handleChange}
+                  required={fieldProps.required === 'true'}
+                />
+              </div>
+            );
+          case 'textarea':
+            return (
+              <div key={index}>
+                <label>{fieldProps.label}:</label>
+                <textarea
+                  name={fieldProps.name}
+                  value={formData[fieldProps.name]}
+                  onChange={handleChange}
+                  required={fieldProps.required === 'true'}
+                />
+              </div>
+            );
+          // Add more cases for other input types (select, checkbox, radio, etc.)
+          default:
+            return null;
+        }
+      })}
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+export default DynamicForm;
+
+#####################################
+
+const xmlPayload = `<?xml version="1.0"?>
+<root>
+  <item>Value 1</item>
+  <item>Value 2</item>
+</root>`;
+
+fetch('your-api-endpoint', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/xml', // Crucial for XML requests
+      'Accept': 'application/xml' // Optional: indicates client expects XML response
+    },
+    body: xmlPayload // The XML string goes in the body
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.text(); // Or response.xml() if supported and you want to parse it directly
+  })
+  .then(data => {
+    console.log('XML response:', data);
+    // Process the XML response data here
+  })
+  .catch(error => {
+    console.error('Error sending XML:', error);
+  });
+
+#####################################
+
+# nginx.conf
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        # Forward frontend traffic to the Next.js server
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+    }
+
+    location /api/ {
+        # Forward API traffic to the Spring Boot server
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+    }
+}
+
+
+#########################################
+
+
+omplete Implementation Summary
+I've successfully implemented the complete assigned work workflow for Form 4868 processing with the following components:
+
+🔧 Work Assignment Service (
+/src/services/workAssignmentService.ts
+)
+getAssignedWork(): Calls endpoint and extracts processId from response like 
+mockGetAssignedWork.json
+getWorkRecord(processId): Fetches GMF augmented XML using the processId
+updateWorkRecord(): POST endpoint for submitting form changes as XML
+XML Parsing: Converts GMF augmented XML to structured FormElement arrays
+Dynamic Form Generation: Creates form fields based on XML structure and editability
+🎯 Enhanced Form 4868 Page (
+/src/app/form4868/page.tsx
+)
+New Workflow: Uses getAssignedWork → getWorkRecord → dynamic form creation
+Dynamic Form Fields: Form fields are generated based on GMF XML FormElements
+Editability Control: Fields are enabled/disabled based on ERSEditable attribute
+Error Integration: GMF errors are converted to ErrorItem format for the sidebar
+Success Banner: Flash message appears after successful form submission
+Auto-refresh: Loads next assigned work after successful submission
+🔄 Complete Workflow
+Load Assigned Work: Calls 
+getAssignedWork
+ to get processId and metadata
+Fetch Work Record: Uses processId to call 
+getWorkRecord
+ and get GMF XML
+Parse XML: Converts XML FormElements to dynamic form structure
+Render Form: Creates editable form fields based on XML configuration
+Submit Changes: Converts form data back to XML and POSTs to 
+updateWorkRecord
+Success Flow: Shows banner and loads next assigned work automatically
+🎨 Key Features
+Dynamic Form Generation: Form fields created from XML FormElement structure
+Visual Indicators: Process ID, Control Day, and Tax Year displayed in toolbar
+Error Handling: GMF errors displayed in sidebar with IRM references
+Responsive Design: Maintains existing styling and layout consistency
+Type Safety: Full TypeScript interfaces for all data structures
+
+
+{
+    "compilerOptions": {
+      "target": "ES2017",
+      "lib": ["dom", "dom.iterable", "esnext"],
+      "allowJs": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "module": "esnext",
+      "moduleResolution": "bundler",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "jsx": "preserve",
+      "incremental": true,
+      "plugins": [
+        {
+          "name": "next"
+        }
+      ],
+      "paths": {
+        "@/*": ["./src/*"]
+      }
+    },
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+    "exclude": ["node_modules"]
+  }
+  

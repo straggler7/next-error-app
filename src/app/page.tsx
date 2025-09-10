@@ -2,17 +2,17 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { CheckSquare, Square, FileText, UserCheck, XCircle } from 'lucide-react';
-import Header from '@/components/Header';
-import Navigation from '@/components/Navigation';
-import FilterBar from '@/components/FilterBar';
-import TanStackInventoryTable from '@/components/TanStackInventoryTable';
-import ActionDropdown from '@/components/ActionDropdown';
-import Pagination from '@/components/Pagination';
-import LoadingSpinner, { TableLoadingState } from '@/components/LoadingSpinner';
-import ErrorAlert from '@/components/ErrorAlert';
-import { User, SubmissionRecord, FilterState, PaginationState, ActionDropdownItem } from '@/types';
-import { useApi, api } from '@/hooks/useApi';
-import { mockUser, mockSubmissions } from '@/data/mockData';
+import Header from '../components/Header';
+import Navigation from '../components/Navigation';
+import FilterBar from '../components/FilterBar';
+import TanStackInventoryTable from '../components/TanStackInventoryTable';
+import ActionDropdown from '../components/ActionDropdown';
+import Pagination from '../components/Pagination';
+import LoadingSpinner, { TableLoadingState } from '../components/LoadingSpinner';
+import ErrorAlert from '../components/ErrorAlert';
+import { User, SubmissionRecord, FilterState, PaginationState, ActionDropdownItem } from '../types';
+import { useApi, api } from '../hooks/useApi';
+import { mockUser, mockSubmissions } from '../data/mockData';
 
 export default function Home() {
   const [filters, setFilters] = useState<FilterState>({

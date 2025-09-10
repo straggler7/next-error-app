@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UITP-Submission xmlns:ns1="http://www.irs.gov/efile"
+  xmlns="GMFModInput.xsd">
+  <GMFAugmentedData>
+    <FormElements>
+      <!-- Identification Section -->
+      <FormElement name="form_id" value="4868" ERSEditable="false" xpath="/Form4868/form_id" />
+      <FormElement name="tax_year" value="2024" ERSEditable="false" xpath="/Form4868/tax_year" />
+      <FormElement name="first_name" value="John" ERSEditable="true" xpath="/Form4868/identification/first_name" />
+      <FormElement name="last_name" value="Doe" ERSEditable="true" xpath="/Form4868/identification/last_name" />
+      <FormElement name="ssn" value="123-45-6789" ERSEditable="true" xpath="/Form4868/identification/ssn" />
+      <FormElement name="street" value="123 Main Street" ERSEditable="true" xpath="/Form4868/identification/address/street" />
+      <FormElement name="city" value="Anytown" ERSEditable="true" xpath="/Form4868/identification/address/city" />
+      <FormElement name="state" value="CA" ERSEditable="true" xpath="/Form4868/identification/address/state" />
+      <FormElement name="zip_code" value="90210" ERSEditable="true" xpath="/Form4868/identification/address/zip_code" />
+      
+      <!-- Income Tax Information -->
+      <FormElement name="total_tax_liability" value="7500.00" ERSEditable="true" xpath="/Form4868/income_tax_information/total_tax_liability" />
+      <FormElement name="total_payments" value="6500.00" ERSEditable="true" xpath="/Form4868/income_tax_information/total_payments" />
+      <FormElement name="balance_due" value="1000.00" ERSEditable="true" xpath="/Form4868/income_tax_information/balance_due" />
+      <FormElement name="amount_paid_with_extension" value="1000.00" ERSEditable="true" xpath="/Form4868/income_tax_information/amount_paid_with_extension" />
+      
+      <!-- Filing Status -->
+      <FormElement name="is_out_of_country" value="false" ERSEditable="true" xpath="/Form4868/filing_status/is_out_of_country" />
+    </FormElements>
+
+    <GMFErrors>
+      <!-- Sample errors that might be generated for this form -->
+      <GMFError Id="101" Description="SSN format is invalid" />
+      <GMFError Id="102" Description="Zip code format is invalid" />
+      <GMFError Id="103" Description="State code is invalid" />
+      <GMFError Id="104" Description="Balance due does not match calculated amount" />
+      <GMFError Id="105" Description="Amount paid with extension exceeds balance due" />
+    </GMFErrors>
+  </GMFAugmentedData>
+
+  <SubmissionData>
+    <GMFModForm4868>
+      <NAPEIFNameCtrlUndrprt>DOE, JOHN</NAPEIFNameCtrlUndrprt>
+      <EIFAccessInd>Y</EIFAccessInd>
+      <NAPAccessInd>Y</NAPAccessInd>
+      <NAPEIFResponseInd>Y</NAPEIFResponseInd>
+      <PrimaryTINAutoTinCorr>123456789</PrimaryTINAutoTinCorr>
+      <CodeAndEditEmployeeNum>0</CodeAndEditEmployeeNum>
+      <NAPTINValCkReqCnt>0</NAPTINValCkReqCnt>
+      <NAPTINValCkRspnsCnt>0</NAPTINValCkRspnsCnt>
+      <CodeAndEditEmploveeNum>0</CodeAndEditEmploveeNum>
+      <MeFReceiptDate>2024-04-15T12:00:00-04:00</MeFReceiptDate>
+      <MftCd>MFT48</MftCd>
+      <PrimaryTransCd>4868</PrimaryTransCd>
+      <SecondaryTransCd>0000</SecondaryTransCd>
+      <NAPAccessInd2>N</NAPAccessInd2>
+      <SecondaryTransAmt>0</SecondaryTransAmt>
+      <NameCtrlUnderprint>DOE, JOHN</NameCtrlUnderprint>
+      <NAPEIFResponseInd2>N</NAPEIFResponseInd2>
+    </GMFModForm4868>
+  </SubmissionData>
+</UITP-Submission>

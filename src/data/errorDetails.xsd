@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="Form4868">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="form_id" type="xs:string"/>
+        <xs:element name="tax_year" type="xs:integer"/>
+        <xs:element name="identification" type="IdentificationType"/>
+        <xs:element name="income_tax_information" type="IncomeTaxInformationType"/>
+        <xs:element name="filing_status" type="FilingStatusType"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="IdentificationType">
+    <xs:sequence>
+      <xs:element name="first_name" type="xs:string"/>
+      <xs:element name="last_name" type="xs:string"/>
+      <xs:element name="ssn" type="SsnPatternType"/>
+      <xs:element name="address" type="AddressType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AddressType">
+    <xs:sequence>
+      <xs:element name="street" type="xs:string"/>
+      <xs:element name="city" type="xs:string"/>
+      <xs:element name="state" type="xs:string"/>
+      <xs:element name="zip_code" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="IncomeTaxInformationType">
+    <xs:sequence>
+      <xs:element name="total_tax_liability" type="xs:decimal"/>
+      <xs:element name="total_payments" type="xs:decimal"/>
+      <xs:element name="balance_due" type="xs:decimal"/>
+      <xs:element name="amount_paid_with_extension" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FilingStatusType">
+    <xs:sequence>
+      <xs:element name="is_out_of_country" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="SsnPatternType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{3}-\d{2}-\d{4}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>

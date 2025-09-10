@@ -1,0 +1,91 @@
+<!--
+Mock data for Form 4868 submissions.
+Each XML block represents a single form submission.
+-->
+
+<!-- Submission 1: A single filer with a balance due. -->
+
+<Form4868>
+<form_id>4868</form_id>
+<tax_year>2024</tax_year>
+<identification>
+<first_name>John</first_name>
+<last_name>Doe</last_name>
+<ssn>123-45-6789</ssn>
+<address>
+<street>123 Main Street</street>
+<city>Anytown</city>
+<state>CA</state>
+<zip_code>90210</zip_code>
+</address>
+</identification>
+<income_tax_information>
+<total_tax_liability>7500.00</total_tax_liability>
+<total_payments>6500.00</total_payments>
+<balance_due>1000.00</balance_due>
+<amount_paid_with_extension>1000.00</amount_paid_with_extension>
+</income_tax_information>
+<filing_status>
+<is_out_of_country>false</is_out_of_country>
+</filing_status>
+</Form4868>
+
+<!-- Submission 2: A joint filer with an expected refund. -->
+
+<Form4868>
+<form_id>4868</form_id>
+<tax_year>2024</tax_year>
+<identification>
+<first_name>Jane</first_name>
+<last_name>Smith</last_name>
+<ssn>987-65-4321</ssn>
+<address>
+<street>456 Oak Avenue</street>
+<city>Springfield</city>
+<state>IL</state>
+<zip_code>62704</zip_code>
+</address>
+</identification>
+<spouse_identification>
+<first_name>Peter</first_name>
+<last_name>Smith</last_name>
+<ssn>111-22-3333</ssn>
+</spouse_identification>
+<income_tax_information>
+<total_tax_liability>12000.00</total_tax_liability>
+<total_payments>12500.00</total_payments>
+<balance_due>0.00</balance_due>
+<amount_paid_with_extension>0.00</amount_paid_with_extension>
+</income_tax_information>
+<filing_status>
+<is_out_of_country>false</is_out_of_country>
+</filing_status>
+</Form4868>
+
+<!-- Submission 3: A filer who is out of the country. -->
+
+<Form4868>
+<form_id>4868</form_id>
+<tax_year>2024</tax_year>
+<identification>
+<first_name>Michael</first_name>
+<last_name>Jones</last_name>
+<ssn>444-55-6666</ssn>
+<address>
+<street>789 International Way</street>
+<city>London</city>
+<state>--</state>
+<zip_code>SW1A 0AA</zip_code>
+<foreign_country>United Kingdom</foreign_country>
+</address>
+</identification>
+<income_tax_information>
+<total_tax_liability>3000.00</total_tax_liability>
+<total_payments>2000.00</total_payments>
+<balance_due>1000.00</balance_due>
+<amount_paid_with_extension>0.00</amount_paid_with_extension>
+</income_tax_information>
+<filing_status>
+<is_out_of_country>true</is_out_of_country>
+</filing_status>
+</Form4868>

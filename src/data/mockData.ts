@@ -1,0 +1,191 @@
+import { User, SubmissionRecord } from '../types';
+
+export const mockUser: User = {
+  name: 'Sarah Thompson',
+  role: 'Tax Examiner'
+};
+
+export const mockSubmissions: SubmissionRecord[] = [
+  {
+    id: 'ABCD90210',
+    dln: '00217-102-05701-4',
+    serviceCenter: 'Ogden',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Error Code 004', 'Error Code 107'],
+    status: 'New',
+    assignedTo: 'Unassigned',
+    controlDay: '2025-106',
+    updatedDate: '2024-08-12'
+  },
+  {
+    id: 'EFGH34567',
+    dln: '00218-103-05702-5',
+    serviceCenter: 'Austin',
+    formType: 'Form 4868',
+    returnType: 'Paper',
+    taxPeriod: '2025',
+    errors: ['Missing TIN'],
+    status: 'Assigned',
+    assignedTo: 'Thompson, Sarah',
+    controlDay: '2025-088',
+    updatedDate: '2024-08-14'
+  },
+  {
+    id: 'IJKL78901',
+    dln: '00219-104-05703-6',
+    serviceCenter: 'Fresno',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Field 01ED', 'Error Code 107', 'Missing TIN'],
+    status: 'New',
+    assignedTo: 'Unassigned',
+    controlDay: '2025-123',
+    updatedDate: '2024-08-15'
+  },
+  {
+    id: 'MNOP12345',
+    dln: '00220-105-05704-7',
+    serviceCenter: 'Kansas City',
+    formType: 'Form 4868',
+    returnType: 'Paper',
+    taxPeriod: '2025',
+    errors: ['Error Code 004'],
+    status: 'QR Review',
+    assignedTo: 'Garcia, Maria',
+    controlDay: '2025-093',
+    updatedDate: '2024-08-10'
+  },
+  {
+    id: 'QRST56789',
+    dln: '00221-106-05705-8',
+    serviceCenter: 'Memphis',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Field 01ED', 'Missing TIN'],
+    status: 'New',
+    assignedTo: 'Unassigned',
+    controlDay: '2025-109',
+    updatedDate: '2024-08-11'
+  },
+  {
+    id: 'UVWX98765',
+    dln: '00222-107-05706-9',
+    serviceCenter: 'Ogden',
+    formType: 'Form 4868',
+    returnType: 'Paper',
+    taxPeriod: '2025',
+    errors: ['Error Code 004', 'Missing TIN'],
+    status: 'Assigned',
+    assignedTo: 'Davis, Robert',
+    controlDay: '2025-111',
+    updatedDate: '2024-08-15'
+  },
+  {
+    id: 'YZAB43210',
+    dln: '00223-108-05707-0',
+    serviceCenter: 'Austin',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Field 01ED', 'Error Code 107'],
+    status: 'QR Review',
+    assignedTo: 'Wilson, Jennifer',
+    controlDay: '2025-096',
+    updatedDate: '2024-08-09'
+  },
+  {
+    id: 'CDEF87654',
+    dln: '00224-109-05708-1',
+    serviceCenter: 'Fresno',
+    formType: 'Form 4868',
+    returnType: 'Paper',
+    taxPeriod: '2025',
+    errors: ['Missing TIN', 'Error Code 004'],
+    status: 'New',
+    assignedTo: 'Unassigned',
+    controlDay: '2025-113',
+    updatedDate: '2024-08-16'
+  },
+  {
+    id: 'GHIJ21098',
+    dln: '00225-110-05709-2',
+    serviceCenter: 'Kansas City',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Field 01ED'],
+    status: 'Assigned',
+    assignedTo: 'Brown, Michael',
+    controlDay: '2025-103',
+    updatedDate: '2024-08-08'
+  },
+  {
+    id: 'KLMN65432',
+    dln: '00226-111-05710-3',
+    serviceCenter: 'Fresno',
+    formType: 'Form 4868',
+    returnType: 'Paper',
+    taxPeriod: '2025',
+    errors: ['Error Code 107', 'Missing TIN'],
+    status: 'QR Review',
+    assignedTo: 'Davis, Sarah',
+    controlDay: '2025-105',
+    updatedDate: '2024-08-10'
+  },
+  {
+    id: 'OPQR98765',
+    dln: '00227-112-05711-4',
+    serviceCenter: 'Memphis',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Error Code 108', 'Invalid Date'],
+    status: 'Suspended',
+    assignedTo: 'Wilson, James',
+    controlDay: '2025-108',
+    updatedDate: '2024-08-12'
+  },
+  {
+    id: 'STUV54321',
+    dln: '00228-113-05712-5',
+    serviceCenter: 'Ogden',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Error Code 108', 'Invalid Date'],
+    status: 'Suspended',
+    assignedTo: 'Wilson, James',
+    controlDay: '2025-108',
+    updatedDate: '2024-08-12'
+  },
+  {
+    id: 'WXYZ98765',
+    dln: '00229-114-05713-6',
+    serviceCenter: 'Ogden',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Error Code 108', 'Invalid Date'],
+    status: 'Suspended',
+    assignedTo: 'Wilson, James',
+    controlDay: '2025-108',
+    updatedDate: '2024-08-12'
+  },
+  {
+    id: 'ABCD13579',
+    dln: '00230-115-05714-7',
+    serviceCenter: 'Ogden',
+    formType: 'Form 4868',
+    returnType: 'Electronic',
+    taxPeriod: '2025',
+    errors: ['Error Code 108', 'Invalid Date'],
+    status: 'Suspended',
+    assignedTo: 'Wilson, James',
+    controlDay: '2025-108',
+    updatedDate: '2024-08-12'
+  }
+];

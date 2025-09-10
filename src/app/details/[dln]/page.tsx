@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Save } from 'lucide-react';
-import Header from '@/components/Header';
-import ErrorSidebar from '@/components/ErrorSidebar';
-import FormSection, { FormField, FormInput, FormSelect, FormTextarea } from '@/components/FormSection';
-import NotesSection from '@/components/NotesSection';
-import { mockUser, mockSubmissions } from '@/data/mockData';
-import { SubmissionRecord, ErrorItem, Note } from '@/types';
+import Header from '../../../components/Header';
+import ErrorSidebar from '../../../components/ErrorSidebar';
+import FormSection, { FormField, FormInput, FormSelect, FormTextarea } from '../../../components/FormSection';
+import NotesSection from '../../../components/NotesSection';
+import { mockUser, mockSubmissions } from '../../../data/mockData';
+import { SubmissionRecord, ErrorItem, Note } from '../../../types';
 
 export default function DetailsPage() {
   const params = useParams();
