@@ -12,7 +12,7 @@ interface NavigationProps {
 export default function Navigation({ className = '', onFilterChange }: NavigationProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const [activeFilter, setActiveFilter] = useState('all');
 
   const handleFilterClick = (filter: { type: string; value: string }, href: string, itemId: string) => {

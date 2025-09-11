@@ -14,6 +14,7 @@ export interface FormElement {
   value: string;
   ERSEditable: boolean;
   xpath: string;
+  [key: string]: string | number | boolean;
 }
 
 export interface GMFError {
@@ -82,25 +83,45 @@ class WorkAssignmentService {
     // In a real implementation, this would make an HTTP GET request
     // For now, we'll simulate with mock data
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    
+
+    const response = await fetch('/api/work/getAssignedWork');
+    const data = await response.json();
     console.log('Fetching assigned work...');
-    return { ...this.mockAssignedWork };
+    // return { ...this.mockAssignedWork };
+    return data;
   }
 
   // Get work record using processId - returns GMF augmented XML data
   async getWorkRecord(processId: number): Promise<WorkRecord> {
     // In a real implementation, this would make an HTTP GET request
     // GET /api/work/getWorkRecord?processId={processId}
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+    // await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+
+    const response = await fetch(`/api/era/inventory/workrecords/documents/${processId}`);
+    const data = await response.text();
     
     console.log(`Fetching work record for processId: ${processId}`);
     
     return {
       processId,
-      gmfAugmentedData: { ...this.mockGMFData },
+      gmfAugmentedData: this.parseGMFXml(data),
       submissionData: {} // Additional submission data if needed
     };
   }
+
+  // async getWorkRecord(processId: number): Promise<WorkRecord> {
+  //   // In a real implementation, this would make an HTTP GET request
+  //   // GET /api/work/getWorkRecord?processId={processId}
+  //   await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+    
+  //   console.log(`Fetching work record for processId: ${processId}`);
+    
+  //   return {
+  //     processId,
+  //     gmfAugmentedData: { ...this.mockGMFData },
+  //     submissionData: {} // Additional submission data if needed
+  //   };
+  // }
 
   // Parse GMF XML string to structured data (if needed for real XML parsing)
   parseGMFXml(xmlString: string): GMFAugmentedData {

@@ -13,21 +13,9 @@ import { SubmissionRecord, ErrorItem, Note } from '../../../types';
 export default function DetailsPage() {
   const params = useParams();
   const dln = params.dln as string;
-  
+
   // Find the record by DLN
   const record = mockSubmissions.find(r => r.dln === dln);
-  
-  if (!record) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header user={mockUser} showBackButton backHref="/" />
-        <div className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">Record Not Found</h1>
-          <p className="text-gray-600 mt-2">The requested DLN could not be found.</p>
-        </div>
-      </div>
-    );
-  }
 
   // Mock form data state
   const [formData, setFormData] = useState<Partial<SubmissionRecord>>({
@@ -48,6 +36,20 @@ export default function DetailsPage() {
     processedDate: '2024-04-16',
     confirmationNumber: 'CNF123456789'
   });
+  
+  
+  if (!record) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header user={mockUser} showBackButton backHref="/" />
+        <div className="p-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-800">Record Not Found</h1>
+          <p className="text-gray-600 mt-2">The requested DLN could not be found.</p>
+        </div>
+      </div>
+    );
+  }
+
 
   // Mock errors data
   const mockErrors: ErrorItem[] = [
