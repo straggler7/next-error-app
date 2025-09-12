@@ -47,8 +47,10 @@ export default function Form4868Page() {
     loadAssignedWork();
   }, []);
 
-  const loadAssignedWork = async () => {
-    setLoading(true);
+  const loadAssignedWork = async (showLoadingState = true) => {
+    if (showLoadingState) {
+      setLoading(true);
+    }
     try {
       // Step 1: Get assigned work
       const workResponse = await workAssignmentService.getAssignedWork();
@@ -69,7 +71,9 @@ export default function Form4868Page() {
     } catch (error) {
       console.error('Error loading assigned work:', error);
     } finally {
-      setLoading(false);
+      if (showLoadingState) {
+        setLoading(false);
+      }
     }
   };
 
@@ -96,7 +100,7 @@ export default function Form4868Page() {
         
         // Fetch new assigned work after successful submission
         try {
-          await loadAssignedWork();
+          await loadAssignedWork(false); // Skip loading state to avoid UI blocking
           setFlashMessage('Form submitted successfully and new record retrieved');
         } catch (fetchError) {
           console.error('Error fetching new assigned work:', fetchError);
