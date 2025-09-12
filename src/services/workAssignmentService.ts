@@ -1,12 +1,19 @@
 // Service for handling assigned work workflow
 export interface AssignedWork {
   processId: number;
+  payloadId: number;
   gmfUuid: string;
   submissionId: string;
   formType: string;
   controlDay: string;
   taxPeriod: string;
   [key: string]: string | number;
+}
+
+export interface AssignedWorkResponse {
+  hasWork: boolean;
+  work?: AssignedWork;
+  message?: string;
 }
 
 export interface FormElement {
@@ -28,9 +35,10 @@ export interface GMFAugmentedData {
 }
 
 export interface WorkRecord {
-  processId: number;
+  processId?: number;
+  payloadId?: number;
   gmfAugmentedData: GMFAugmentedData;
-  submissionData: any; // Raw submission data
+  submissionData?: any; // Raw submission data
 }
 
 class WorkAssignmentService {
@@ -39,6 +47,7 @@ class WorkAssignmentService {
   // Mock data for getAssignedWork
   private mockAssignedWork: AssignedWork = {
     processId: 1,
+    payloadId: 1,
     gmfUuid: "12345678-1234-1234-1234-123456789012",
     submissionId: "12345678-1234-1234-1234-123456789012",
     formType: "4868",
@@ -79,31 +88,55 @@ class WorkAssignmentService {
   };
 
   // Get assigned work - returns processId and other metadata
-  async getAssignedWork(): Promise<AssignedWork> {
+  async getAssignedWork(): Promise<AssignedWorkResponse> {
     // In a real implementation, this would make an HTTP GET request
     // For now, we'll simulate with mock data
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
 
-    const response = await fetch('/api/work/getAssignedWork');
-    const data = await response.json();
-    console.log('Fetching assigned work...');
-    // return { ...this.mockAssignedWork };
-    return data;
+    try {
+      const response = await fetch('/api/work/getAssignedWork');
+      
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 204) {
+          return {
+            hasWork: false,
+            message: "No work records available to assign at this time."
+          };
+        }
+        throw new Error(`Failed to fetch assigned work: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Fetching assigned work...');
+      
+      return {
+        hasWork: true,
+        work: data
+      };
+    } catch (error) {
+      console.error('Error fetching assigned work:', error);
+      // Fallback to mock data if API fails
+      console.log('Falling back to mock data');
+      return {
+        hasWork: true,
+        work: { ...this.mockAssignedWork }
+      };
+    }
   }
 
   // Get work record using processId - returns GMF augmented XML data
-  async getWorkRecord(processId: number): Promise<WorkRecord> {
+  async getWorkRecord(payloadId: number): Promise<WorkRecord> {
     // In a real implementation, this would make an HTTP GET request
     // GET /api/work/getWorkRecord?processId={processId}
     // await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
 
-    const response = await fetch(`/api/era/inventory/workrecords/documents/${processId}`);
+    const response = await fetch(`/api/era/inventory/workrecords/documents/${payloadId}`);
     const data = await response.text();
     
-    console.log(`Fetching work record for processId: ${processId}`);
+    console.log(`Fetching work record for payloadId: ${payloadId}`);
     
     return {
-      processId,
+      payloadId,
       gmfAugmentedData: this.parseGMFXml(data),
       submissionData: {} // Additional submission data if needed
     };
@@ -189,7 +222,15 @@ class WorkAssignmentService {
     
     // In a real implementation, this would make an HTTP POST request
     // POST /api/work/updateWorkRecord with { processId, xmlData }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    // await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+
+    const response = await fetch(`/api/work/updateWorkRecord?processId=${processId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/xml'
+      },
+      body: xmlData
+    });
     
     console.log(`Updating work record for processId: ${processId}`);
     console.log('XML Data:', xmlData);

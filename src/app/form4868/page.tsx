@@ -8,7 +8,7 @@ import FormSection, { FormField, FormInput, FormSelect, FormTextarea } from '../
 import NotesSection from '../../components/NotesSection';
 import { mockUser } from '../../data/mockData';
 import { ErrorItem, Note } from '../../types';
-import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord } from '../../services/workAssignmentService';
+import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from '../../services/workAssignmentService';
 
 export default function Form4868Page() {
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
@@ -18,6 +18,8 @@ export default function Form4868Page() {
   const [submitting, setSubmitting] = useState(false);
   const [flashMessage, setFlashMessage] = useState<string>('');
   const [showFlash, setShowFlash] = useState(false);
+  const [noWorkAvailable, setNoWorkAvailable] = useState(false);
+  const [noWorkMessage, setNoWorkMessage] = useState<string>('');
 
   // Convert GMF errors to ErrorItem format for sidebar
   const convertGMFErrorsToErrorItems = (gmfErrors: GMFError[]): ErrorItem[] => {
@@ -49,11 +51,19 @@ export default function Form4868Page() {
     setLoading(true);
     try {
       // Step 1: Get assigned work
-      const work = await workAssignmentService.getAssignedWork();
-      setAssignedWork(work);
+      const workResponse = await workAssignmentService.getAssignedWork();
       
-      // Step 2: Get work record using processId
-      const record = await workAssignmentService.getWorkRecord(work.processId);
+      if (!workResponse.hasWork) {
+        setNoWorkAvailable(true);
+        setNoWorkMessage(workResponse.message || 'No work records available to assign at this time.');
+        return;
+      }
+      
+      setAssignedWork(workResponse.work!);
+      setNoWorkAvailable(false);
+      
+      // Step 2: Get work record using payloadId
+      const record = await workAssignmentService.getWorkRecord(workResponse.work!.payloadId);
       setWorkRecord(record);
       setFormElements([...record.gmfAugmentedData.FormElements]);
     } catch (error) {
@@ -87,11 +97,20 @@ export default function Form4868Page() {
         // Fetch new assigned work after successful submission
         try {
           // Step 1: Get new assigned work
-          const newWork = await workAssignmentService.getAssignedWork();
-          setAssignedWork(newWork);
+          const newWorkResponse = await workAssignmentService.getAssignedWork();
           
-          // Step 2: Get work record using new processId
-          const newRecord = await workAssignmentService.getWorkRecord(newWork.processId);
+          if (!newWorkResponse.hasWork) {
+            setNoWorkAvailable(true);
+            setNoWorkMessage(newWorkResponse.message || 'No more work records available to assign.');
+            setFlashMessage('Form submitted successfully - No more work available');
+            return;
+          }
+          
+          setAssignedWork(newWorkResponse.work!);
+          setNoWorkAvailable(false);
+          
+          // Step 2: Get work record using new payloadId
+          const newRecord = await workAssignmentService.getWorkRecord(newWorkResponse.work!.payloadId);
           setWorkRecord(newRecord);
           setFormElements([...newRecord.gmfAugmentedData.FormElements]);
           
@@ -142,6 +161,25 @@ export default function Form4868Page() {
         <div className="p-8 text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-600 mt-4">Loading assigned work...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (noWorkAvailable) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header user={mockUser} showBackButton backHref="/" />
+        <div className="p-8 text-center">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-gray-800 mb-2">No Work Records Available</h1>
+            <p className="text-gray-600">{noWorkMessage}</p>
+          </div>
         </div>
       </div>
     );
