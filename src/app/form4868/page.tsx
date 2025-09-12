@@ -96,27 +96,8 @@ export default function Form4868Page() {
         
         // Fetch new assigned work after successful submission
         try {
-          // Step 1: Get new assigned work
-          const newWorkResponse = await workAssignmentService.getAssignedWork();
-          
-          if (!newWorkResponse.hasWork) {
-            setNoWorkAvailable(true);
-            setNoWorkMessage(newWorkResponse.message || 'No more work records available to assign.');
-            setFlashMessage('Form submitted successfully - No more work available');
-            return;
-          }
-          
-          setAssignedWork(newWorkResponse.work!);
-          setNoWorkAvailable(false);
-          
-          // Step 2: Get work record using new payloadId
-          const newRecord = await workAssignmentService.getWorkRecord(newWorkResponse.work!.payloadId);
-          setWorkRecord(newRecord);
-          setFormElements([...newRecord.gmfAugmentedData.FormElements]);
-          
-          // Update flash message to indicate new record fetched
+          await loadAssignedWork();
           setFlashMessage('Form submitted successfully and new record retrieved');
-          
         } catch (fetchError) {
           console.error('Error fetching new assigned work:', fetchError);
           setFlashMessage('Form submitted successfully but failed to fetch new record');
