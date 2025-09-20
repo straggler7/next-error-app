@@ -28,7 +28,7 @@ export default function Header({ user, showBackButton = false, backHref = '/' }:
             </Link>
           )}
           <h1 className="text-lg sm:text-2xl font-semibold truncate">
-            <span className="hidden sm:inline">IRS Error Resolution System</span>
+            <span className="hidden sm:inline">IRS Error Resolution Application</span>
             <span className="sm:hidden">IRS ERS</span>
           </h1>
         </div>

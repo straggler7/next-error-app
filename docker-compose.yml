@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  irs-error-resolution:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4003:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    container_name: irs-error-resolution-app
+
+  # Development service (optional)
+  irs-error-resolution-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4003:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    container_name: irs-error-resolution-dev
+    profiles:
+      - dev

@@ -25,8 +25,12 @@ export interface FormElement {
 }
 
 export interface GMFError {
-  Id: string;
-  Description: string;
+  Id?: string;
+  Description?: string;
+  code?: string;
+  type?: string;
+  description?: string;
+  errorFields?: string[];
 }
 
 export interface GMFAugmentedData {
@@ -34,10 +38,20 @@ export interface GMFAugmentedData {
   GMFErrors: GMFError[];
 }
 
+export interface SubmissionHeader {
+  GMFUUID: string;
+  SubmissionId: string;
+  DLN: string;
+  FormType: string;
+  Source: string;
+  Timestamp: string;
+}
+
 export interface WorkRecord {
   processId?: number;
   payloadId?: number;
   gmfAugmentedData: GMFAugmentedData;
+  submissionHeader?: SubmissionHeader;
   submissionData?: any; // Raw submission data
 }
 
@@ -79,11 +93,30 @@ class WorkAssignmentService {
       { name: "is_out_of_country", value: "false", ERSEditable: true, xpath: "/Form4868/filing_status/is_out_of_country" }
     ],
     GMFErrors: [
-      { Id: "101", Description: "SSN format is invalid" },
-      { Id: "102", Description: "Zip code format is invalid" },
-      { Id: "103", Description: "State code is invalid" },
-      { Id: "104", Description: "Balance due does not match calculated amount" },
-      { Id: "105", Description: "Amount paid with extension exceeds balance due" }
+      { 
+        code: "01TIN", 
+        type: "FIELD", 
+        description: "Taxpayer Identification Number",
+        errorFields: ["ssn"]
+      },
+      { 
+        code: "01ED", 
+        type: "FIELD", 
+        description: "Address Validation Error",
+        errorFields: ["street", "city", "zip_code"]
+      },
+      { 
+        code: "004", 
+        type: "CONSISTENCY", 
+        description: "EIF/NAP Mismatch",
+        errorFields: ["ssn", "first_name", "last_name"]
+      },
+      { 
+        code: "107", 
+        type: "CONSISTENCY", 
+        description: "Tax Calculation Error",
+        errorFields: ["total_tax_liability", "total_payments", "balance_due"]
+      }
     ]
   };
 
@@ -135,9 +168,11 @@ class WorkAssignmentService {
     
     console.log(`Fetching work record for payloadId: ${payloadId}`);
     
+    const parsedData = this.parseGMFXml(data);
     return {
       payloadId,
-      gmfAugmentedData: this.parseGMFXml(data),
+      gmfAugmentedData: parsedData.gmfAugmentedData,
+      submissionHeader: parsedData.submissionHeader,
       submissionData: {} // Additional submission data if needed
     };
   }
@@ -157,7 +192,7 @@ class WorkAssignmentService {
   // }
 
   // Parse GMF XML string to structured data (if needed for real XML parsing)
-  parseGMFXml(xmlString: string): GMFAugmentedData {
+  parseGMFXml(xmlString: string): { gmfAugmentedData: GMFAugmentedData; submissionHeader?: SubmissionHeader } {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
     
@@ -176,19 +211,64 @@ class WorkAssignmentService {
       });
     }
     
-    // Parse GMFErrors
+    // Parse GMFErrors - handle both old and new formats
     const errorNodes = xmlDoc.getElementsByTagName('GMFError');
     for (let i = 0; i < errorNodes.length; i++) {
       const error = errorNodes[i];
-      gmfErrors.push({
-        Id: error.getAttribute('Id') || '',
-        Description: error.getAttribute('Description') || ''
-      });
+      
+      // Check for new format first
+      const code = error.getAttribute('code');
+      const type = error.getAttribute('type');
+      const description = error.getAttribute('description');
+      
+      if (code && type && description) {
+        // New format
+        const errorFieldNodes = error.getElementsByTagName('errorField');
+        const errorFields: string[] = [];
+        for (let j = 0; j < errorFieldNodes.length; j++) {
+          errorFields.push(errorFieldNodes[j].textContent || '');
+        }
+        
+        gmfErrors.push({
+          code,
+          type,
+          description,
+          errorFields
+        });
+      } else {
+        // Old format fallback
+        gmfErrors.push({
+          Id: error.getAttribute('Id') || '',
+          Description: error.getAttribute('Description') || ''
+        });
+      }
+    }
+    
+    // Parse SubmissionHeader
+    let submissionHeader: SubmissionHeader | undefined;
+    const headerNode = xmlDoc.getElementsByTagName('SubmissionHeader')[0];
+    if (headerNode) {
+      const getTextContent = (tagName: string) => {
+        const node = headerNode.getElementsByTagName(tagName)[0];
+        return node?.textContent || '';
+      };
+      
+      submissionHeader = {
+        GMFUUID: getTextContent('GMFUUID'),
+        SubmissionId: getTextContent('SubmissionId'),
+        DLN: getTextContent('DLN'),
+        FormType: getTextContent('FormType'),
+        Source: getTextContent('Source'),
+        Timestamp: getTextContent('Timestamp')
+      };
     }
     
     return {
-      FormElements: formElements,
-      GMFErrors: gmfErrors
+      gmfAugmentedData: {
+        FormElements: formElements,
+        GMFErrors: gmfErrors
+      },
+      submissionHeader
     };
   }
 

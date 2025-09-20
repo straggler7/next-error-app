@@ -28,15 +28,19 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
     <ul className="space-y-3">
       {errorList.map((error) => (
         <li key={error.id} className="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200 hover:border-gray-300 hover:shadow-sm">
-          <div 
-            className="p-4 cursor-pointer bg-gray-50 transition-colors hover:bg-gray-100"
-            onClick={() => toggleErrorExpansion(error.id)}
-          >
+          <div className="p-2 bg-gray-50">
             <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
+              <div 
+                className="flex-1 min-w-0 cursor-pointer transition-colors hover:bg-gray-100 p-1 rounded"
+                onClick={() => {
+                  if (onErrorSelect) {
+                    onErrorSelect(error);
+                  }
+                }}
+              >
                 <div className="flex flex-col gap-1">
                   <span className="inline-block bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-bold font-mono border border-red-200 w-fit">
-                    {error.code}
+                    {error.type === 'FIELD' ? 'Field Error' : 'Error Code'} {error.code}
                   </span>
                   <p className="text-sm text-gray-600 font-medium leading-tight">
                     {error.description}
@@ -55,11 +59,16 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
                 `}>
                   {error.status}
                 </span>
-                {expandedErrors.includes(error.id) ? (
-                  <ChevronDown size={16} className="text-gray-500" />
-                ) : (
-                  <ChevronRight size={16} className="text-gray-500" />
-                )}
+                <button
+                  onClick={() => toggleErrorExpansion(error.id)}
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                >
+                  {expandedErrors.includes(error.id) ? (
+                    <ChevronDown size={16} className="text-gray-500" />
+                  ) : (
+                    <ChevronRight size={16} className="text-gray-500" />
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -93,8 +102,8 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
   );
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col h-full">
-      <div className="p-4 flex-shrink-0">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col">
+      <div className="p-4">
         <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">Errors</h3>
         
         {/* Error Tabs */}
@@ -120,10 +129,8 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
             Updated ({errors.filter(e => e.status === 'updated').length})
           </button>
         </div>
-      </div>
 
-      {/* Error List */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {/* Error List */}
         <div className="space-y-3">
           {activeTab === 'active' && renderErrorList(activeErrors)}
           {activeTab === 'updated' && renderErrorList(updatedErrors)}

@@ -5,8 +5,12 @@
   "scripts": {
     "dev": "next dev -p 4003 --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start -p 3000",
+    "lint": "eslint",
+    "docker:build": "docker build -t irs-error-resolution .",
+    "docker:run": "docker run -p 4003:3000 irs-error-resolution",
+    "docker:dev": "docker-compose --profile dev up --build",
+    "docker:prod": "docker-compose up --build"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",

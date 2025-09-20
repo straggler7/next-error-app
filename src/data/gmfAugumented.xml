@@ -4,11 +4,17 @@
   <GMFAugmentedData>
     <FormElements>
       <!-- Identification Section -->
-      <FormElement name="form_id" value="4868" ERSEditable="false" xpath="/Form4868/form_id" />
-      <FormElement name="tax_year" value="2024" ERSEditable="false" xpath="/Form4868/tax_year" />
+      <FormElement name="form_id" value="4868" ERSEditable="true" xpath="/Form4868/form_id" />
+      <FormElement name="tax_year" value="2024" ERSEditable="true" xpath="/Form4868/tax_year" />
+      <FormElement name="extension_due_date" value="20251015" ERSEditable="true" xpath="/Form4868/extension_due_date" />
+      <FormElement name="received_date" value="20250430" ERSEditable="true" xpath="/Form4868/received_date" />
+      <FormElement name="name" value="John Doe &amp; Jane Doe" ERSEditable="true" xpath="/Form4868/identification/name" />
       <FormElement name="first_name" value="John" ERSEditable="true" xpath="/Form4868/identification/first_name" />
       <FormElement name="last_name" value="Doe" ERSEditable="true" xpath="/Form4868/identification/last_name" />
+      <FormElement name="spouse_first_name" value="Jane" ERSEditable="true" xpath="/Form4868/identification/spouse_first_name" />
+      <FormElement name="spouse_last_name" value="Doe" ERSEditable="true" xpath="/Form4868/identification/spouse_last_name" />
       <FormElement name="ssn" value="123-45-6789" ERSEditable="true" xpath="/Form4868/identification/ssn" />
+      <FormElement name="spouse_ssn" value="321-54-6789" ERSEditable="true" xpath="/Form4868/identification/spouse_ssn" />
       <FormElement name="street" value="123 Main Street" ERSEditable="true" xpath="/Form4868/identification/address/street" />
       <FormElement name="city" value="Anytown" ERSEditable="true" xpath="/Form4868/identification/address/city" />
       <FormElement name="state" value="CA" ERSEditable="true" xpath="/Form4868/identification/address/state" />
@@ -21,17 +27,40 @@
       <FormElement name="amount_paid_with_extension" value="1000.00" ERSEditable="true" xpath="/Form4868/income_tax_information/amount_paid_with_extension" />
       
       <!-- Filing Status -->
-      <FormElement name="is_out_of_country" value="false" ERSEditable="true" xpath="/Form4868/filing_status/is_out_of_country" />
+      <FormElement name="is_out_of_country" value="true" ERSEditable="true" xpath="/Form4868/filing_status/is_out_of_country" />
     </FormElements>
 
     <GMFErrors>
       <!-- Sample errors that might be generated for this form -->
-      <GMFError Id="101" Description="SSN format is invalid" />
-      <GMFError Id="102" Description="Zip code format is invalid" />
-      <GMFError Id="103" Description="State code is invalid" />
-      <GMFError Id="104" Description="Balance due does not match calculated amount" />
-      <GMFError Id="105" Description="Amount paid with extension exceeds balance due" />
+      <GMFError code="01TIN" type="FIELD" description="Taxpayer Identification Number">
+        <errorFields>
+          <errorField>ssn</errorField>
+          <errorField>spouse_ssn</errorField>
+        </errorFields>
+      </GMFError>
+      <GMFError code="01ED" type="FIELD" description="Extended Due Date">
+        <errorFields>
+          <errorField>street</errorField>
+          <errorField>city</errorField>
+          <errorField>zip_code</errorField>
+        </errorFields>
+      </GMFError>
+      <GMFError code="004" type="CONSISTENCY" description="EIF/NAP Mismatch">
+        <errorFields>
+          <errorField>ssn</errorField>
+          <errorField>first_name</errorField>
+          <errorField>last_name</errorField>
+        </errorFields>
+      </GMFError>
+      <GMFError code="107" type="CONSISTENCY" description="Tax Calculation Error">
+        <errorFields>
+          <errorField>total_tax_liability</errorField>
+          <errorField>total_payments</errorField>
+          <errorField>balance_due</errorField>
+        </errorFields>
+      </GMFError>
     </GMFErrors>
+
   </GMFAugmentedData>
 
   <SubmissionData>
@@ -55,4 +84,13 @@
       <NAPEIFResponseInd2>N</NAPEIFResponseInd2>
     </GMFModForm4868>
   </SubmissionData>
+  <SubmissionWrapper></SubmissionWrapper>
+  <SubmissionHeader>
+    <GMFUUID>12345678-1234-1234-1234-123456789012</GMFUUID>
+    <SubmissionId>J081210</SubmissionId>
+    <DLN>00217-102-05737-4</DLN>
+    <FormType>4868</FormType>
+    <Source>MeF-Digital</Source>
+    <Timestamp>2024-04-15T12:00:00-04:00</Timestamp>
+  </SubmissionHeader>
 </UITP-Submission>

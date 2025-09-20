@@ -1,0 +1,18 @@
+{
+    "01TIN": {
+        "errorType": "FIELD",
+        "errorFields": ["ssn"]
+    },
+    "01ED": {
+        "errorType": "FIELD",
+        "errorFields": ["ED"]
+    },
+    "004": {
+        "errorType": "CONSISTENCY",
+        "errorFields": ["TIN", "nameControl"]
+    },
+    "107": {
+        "errorType": "CONSISTENCY",
+        "errorFields": ["RECEIPTDATE", "tax"]
+    }
+}

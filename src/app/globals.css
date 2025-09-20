@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --color-irs-blue: #002e6d;
+  --color-button-blue: #0f507e;
 }
 
 @theme inline {
@@ -39,4 +41,16 @@ body {
 
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
+}
+
+.info-badge {
+  display: inline-block;
+  background: rgb(15, 80, 126);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left: 0.75rem;
+  border: 1px solid #bbdefb;
 }

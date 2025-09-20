@@ -3,7 +3,7 @@ import "./globals.css";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 export const metadata: Metadata = {
-  title: "IRS Error Resolution System",
+  title: "IRS Error Resolution Application",
   description: "Professional tax error resolution and management system",
 };
 

@@ -14,23 +14,51 @@ export default function Form4868Page() {
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
   const [workRecord, setWorkRecord] = useState<WorkRecord | null>(null);
   const [formElements, setFormElements] = useState<FormElement[]>([]);
+  const [originalFormElements, setOriginalFormElements] = useState<FormElement[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [flashMessage, setFlashMessage] = useState<string>('');
   const [showFlash, setShowFlash] = useState(false);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>('');
+  const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
 
   // Convert GMF errors to ErrorItem format for sidebar
   const convertGMFErrorsToErrorItems = (gmfErrors: GMFError[]): ErrorItem[] => {
+    // Use the new GMFError structure if available
+    if (workRecord?.gmfAugmentedData?.GMFErrors && workRecord.gmfAugmentedData.GMFErrors.length > 0) {
+      const newErrors = workRecord.gmfAugmentedData.GMFErrors.filter(error => error.code);
+      if (newErrors.length > 0) {
+        return newErrors.map((error, index) => ({
+          id: `err-${error.code}`,
+          code: error.code || 'UNKNOWN',
+          type: error.type || 'UNKNOWN',
+          description: error.description || 'No description available',
+          status: 'active' as const,
+          errorFields: error.errorFields || [],
+          irm: {
+            title: `IRM 3.12.${180 + index} - ${error.type || 'UNKNOWN'} Error Resolution`,
+            content: `Resolve the following ${error.type?.toLowerCase() || 'unknown'} error: ${error.description || 'No description available'}`,
+            steps: [
+              'Review the error description',
+              'Correct the identified issue in the highlighted fields',
+              'Validate the correction'
+            ]
+          }
+        }));
+      }
+    }
+    
+    // Fallback to old format
     return gmfErrors.map((error, index) => ({
       id: `err-${error.Id}`,
-      code: `Error Code ${error.Id}`,
-      description: error.Description,
+      code: `Error Code ${error.Id || 'UNKNOWN'}`,
+      description: error.Description || 'No description available',
       status: 'active' as const,
+      errorFields: [],
       irm: {
         title: `IRM 3.12.${180 + index} - Error Resolution`,
-        content: `Resolve the following error: ${error.Description}`,
+        content: `Resolve the following error: ${error.Description || 'No description available'}`,
         steps: [
           'Review the error description',
           'Correct the identified issue',
@@ -58,16 +86,24 @@ export default function Form4868Page() {
       if (!workResponse.hasWork) {
         setNoWorkAvailable(true);
         setNoWorkMessage(workResponse.message || 'No work records available to assign at this time.');
+        // Clear existing work data when no work is available
+        setAssignedWork(null);
+        setWorkRecord(null);
+        setFormElements([]);
         return;
       }
       
+      console.log('Setting new assigned work:', workResponse.work!.payloadId);
       setAssignedWork(workResponse.work!);
       setNoWorkAvailable(false);
       
       // Step 2: Get work record using payloadId
       const record = await workAssignmentService.getWorkRecord(workResponse.work!.payloadId);
+      console.log('Setting new work record and form elements');
       setWorkRecord(record);
-      setFormElements([...record.gmfAugmentedData.FormElements]);
+      const elements = [...record.gmfAugmentedData.FormElements];
+      setFormElements(elements);
+      setOriginalFormElements([...elements]);
     } catch (error) {
       console.error('Error loading assigned work:', error);
     } finally {
@@ -78,14 +114,33 @@ export default function Form4868Page() {
   };
 
   const handleInputChange = (fieldName: string, value: string) => {
-    setFormElements(prev => 
-      workAssignmentService.updateFormElementValue(prev, fieldName, value)
-    );
+    setFormElements(prev => {
+      const updated = workAssignmentService.updateFormElementValue(prev, fieldName, value);
+      
+      // Auto-update name control when name field changes
+      if (fieldName === 'name') {
+        // Calculate new name control based on the updated name
+        const tempElements = [...updated];
+        const nameElement = tempElements.find(el => el.name === 'name');
+        if (nameElement) {
+          nameElement.value = value;
+        }
+        
+        // Generate name control using the updated name
+        const nameControl = generateNameControlFromValue(value);
+        return workAssignmentService.updateFormElementValue(updated, 'name_control', nameControl);
+      }
+      
+      return updated;
+    });
   };
 
   const handleSubmit = async () => {
     if (!assignedWork || !workRecord) return;
 
+    // Clear any highlighted fields on submit
+    setHighlightedFields([]);
+    
     setSubmitting(true);
     try {
       const result = await workAssignmentService.updateWorkRecord(
@@ -100,7 +155,9 @@ export default function Form4868Page() {
         
         // Fetch new assigned work after successful submission
         try {
+          console.log('Before loadAssignedWork - Current assignedWork:', assignedWork?.payloadId);
           await loadAssignedWork(false); // Skip loading state to avoid UI blocking
+          console.log('After loadAssignedWork completed');
           setFlashMessage('Form submitted successfully and new record retrieved');
         } catch (fetchError) {
           console.error('Error fetching new assigned work:', fetchError);
@@ -137,6 +194,133 @@ export default function Form4868Page() {
   const isFormElementEditable = (name: string): boolean => {
     const element = workAssignmentService.getFormElementByName(formElements, name);
     return element?.ERSEditable || false;
+  };
+
+  // Helper function to generate combined name display
+  const generateCombinedName = (): string => {
+    const firstName = getFormElementValue('first_name');
+    const lastName = getFormElementValue('last_name');
+    const spouseFirstName = getFormElementValue('spouse_first_name');
+    const spouseLastName = getFormElementValue('spouse_last_name');
+    
+    let name = '';
+    if (firstName && lastName) {
+      name = `${firstName} ${lastName}`;
+    }
+    
+    if (spouseFirstName && spouseLastName) {
+      if (name) {
+        name += ` & ${spouseFirstName} ${spouseLastName}`;
+      } else {
+        name = `${spouseFirstName} ${spouseLastName}`;
+      }
+    }
+    
+    return name;
+  };
+
+  // Helper function to generate name control from a given name value (Form 4868 - individuals only)
+  const generateNameControlFromValue = (nameField: string): string => {
+    if (!nameField) return '';
+
+    // Clean and normalize the name
+    const cleanName = nameField.trim().toUpperCase();
+    
+    // For individuals: check if joint return (contains "AND" or "&")
+    const isJointReturn = cleanName.includes(' AND ') || cleanName.includes(' & ');
+    
+    if (isJointReturn) {
+      // Joint return: use primary taxpayer's last name (first name mentioned)
+      const parts = cleanName.split(/\s+AND\s+|\s+&\s+/);
+      if (parts.length >= 2) {
+        const primaryName = parts[0].trim();
+        const lastNameMatch = primaryName.match(/\b(\w+)$/);
+        if (lastNameMatch) {
+          const lastName = lastNameMatch[1];
+          // Return first 4 characters of last name, no padding if less than 4
+          return lastName.substring(0, Math.min(4, lastName.length));
+        }
+      }
+    }
+    
+    // Single individual or sole proprietor: extract last name
+    const nameParts = cleanName.split(/\s+/);
+    if (nameParts.length >= 2) {
+      // Last word is typically the last name
+      let lastName = nameParts[nameParts.length - 1];
+      
+      // Remove common suffixes and use the actual last name
+      const suffixes = ['JR', 'SR', 'III', 'IV', 'V', 'II'];
+      for (const suffix of suffixes) {
+        if (lastName === suffix && nameParts.length >= 3) {
+          // Use the second-to-last word as the actual last name
+          lastName = nameParts[nameParts.length - 2];
+          break;
+        }
+      }
+      
+      // Return first 4 characters of last name, no padding if less than 4
+      return lastName.substring(0, Math.min(4, lastName.length));
+    }
+    
+    // Fallback: single name (like sole proprietor business name)
+    // Use first 4 characters of the entire name, no padding
+    const singleName = cleanName.replace(/\s+/g, '');
+    return singleName.substring(0, Math.min(4, singleName.length));
+  };
+
+  // Helper function to generate name control based on IRS rules
+  const generateNameControl = (): string => {
+    const nameField = getFormElementValue('name');
+    return generateNameControlFromValue(nameField);
+  };
+
+  // Helper function to get original value
+  const getOriginalValue = (name: string): string => {
+    const element = workAssignmentService.getFormElementByName(originalFormElements, name);
+    return element?.value || '';
+  };
+
+  // Helper function to handle error field highlighting
+  const handleErrorClick = (errorFields: string[]) => {
+    setHighlightedFields(errorFields);
+    // Focus on the first field if it exists
+    if (errorFields.length > 0) {
+      const firstField = document.getElementById(errorFields[0]);
+      if (firstField) {
+        firstField.focus();
+      }
+    }
+  };
+
+  // Helper function to clear field highlighting
+  const clearFieldHighlight = () => {
+    setHighlightedFields([]);
+  };
+
+  // Helper function to calculate Days Active from control day
+  const calculateDaysActive = (controlDay: string): number => {
+    if (!controlDay) return 0;
+    
+    // Control day format: "2025-106" (year-julian day)
+    const [yearStr, julianDayStr] = controlDay.split('-');
+    const year = parseInt(yearStr);
+    const julianDay = parseInt(julianDayStr);
+    
+    // Create date from julian day
+    const controlDate = new Date(year, 0, julianDay); // January 1st + (julianDay - 1)
+    const today = new Date();
+    
+    // Calculate difference in days
+    const diffTime = today.getTime() - controlDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    return Math.max(0, diffDays);
+  };
+
+  // Helper function to get DLN from submission header
+  const getDLN = (): string => {
+    return workRecord?.submissionHeader?.DLN || 'N/A';
   };
 
   if (loading) {
@@ -199,21 +383,24 @@ export default function Form4868Page() {
       {/* Top Toolbar */}
       <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mt-4 mb-6 border border-gray-100">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold border border-purple-200">
-              Form: {getFormElementValue('form_id')}
+          <div className="flex items-center gap-1">
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+              DLN: {getDLN()}
             </span>
-            <span className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-              Tax Year: {getFormElementValue('tax_year')}
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+              Form Type: {getFormElementValue('form_id')}
             </span>
-            <span className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
-              Process ID: {assignedWork.processId}
+            <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
+              Tax Period: {getFormElementValue('tax_year')}
             </span>
-            <span className="inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm font-medium border border-orange-200">
+            <span className="info-badge inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm font-medium border border-orange-200">
               Control Day: {assignedWork.controlDay}
             </span>
+            <span className="info-badge inline-block bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm font-medium border border-red-200">
+              Days Active: {calculateDaysActive(assignedWork.controlDay)}
+            </span>
           </div>
-          <button className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-sm">
+          <button className="inline-flex items-center gap-2 px-6 py-2 bg-[#0f507e] text-white text-sm font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm">
             View RRD Data
           </button>
         </div>
@@ -222,8 +409,8 @@ export default function Form4868Page() {
       {/* Main Content Layout */}
       <div className="lg:grid lg:grid-cols-[40%_60%] gap-4 px-4 pb-4 flex flex-col lg:flex-none">
         {/* Left Sidebar */}
-        <div className="flex flex-col gap-4 lg:h-[calc(100vh-200px)]">
-          <ErrorSidebar errors={errorItems} />
+        <div className="flex flex-col gap-4">
+          <ErrorSidebar errors={errorItems} onErrorSelect={(error) => handleErrorClick(error.errorFields || [])} />
           <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col">
             <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">Notes</h3>
             <NotesSection notes={mockNotes} onAddNote={handleAddNote} />
@@ -231,63 +418,86 @@ export default function Form4868Page() {
         </div>
 
         {/* Main Form Area */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col">
-          <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col" style={{ marginRight: '1rem' }}>
+          <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-200" style={{ display: 'none' }}>
             <h2 className="text-xl font-semibold text-gray-800">Form 4868 - Application for Automatic Extension</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             <form className="space-y-8">
               {/* Taxpayer Information */}
-              <FormSection title="Taxpayer Information">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <FormField label="First Name" required>
+              <FormSection title="Form 4868 - Application for Automatic Extension">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                  <FormField 
+                    label="Name(s)" 
+                    required
+                    originalValue={getOriginalValue('name')}
+                    currentValue={getFormElementValue('name')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('name') || highlightedFields.includes('first_name') || highlightedFields.includes('last_name') || highlightedFields.includes('spouse_first_name') || highlightedFields.includes('spouse_last_name')}
+                  >
                     <FormInput
-                      value={getFormElementValue('first_name')}
-                      onChange={(value) => handleInputChange('first_name', value)}
-                      placeholder="Enter first name"
-                      error={!isFormElementEditable('first_name')}
+                      id="combined_name"
+                      value={getFormElementValue('name')}
+                      onChange={(value) => handleInputChange('name', value)}
+                      onBlur={clearFieldHighlight}
+                      placeholder="Name(s)"
                     />
                   </FormField>
-                  <FormField label="Last Name" required>
+
+
+                  <FormField 
+                    label="Name Control"
+                    originalValue={getOriginalValue('name_control')}
+                    currentValue={getFormElementValue('name_control') || generateNameControl()}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('name_control')}
+                  >
                     <FormInput
-                      value={getFormElementValue('last_name')}
-                      onChange={(value) => handleInputChange('last_name', value)}
-                      placeholder="Enter last name"
-                      error={!isFormElementEditable('last_name')}
+                      id="name_control"
+                      value={getFormElementValue('name_control') || generateNameControl()}
+                      onChange={(value) => handleInputChange('name_control', value.toUpperCase().substring(0, 4))}
+                      onBlur={clearFieldHighlight}
+                      placeholder="4-character name control"
                     />
                   </FormField>
-                  <FormField label="SSN" required>
+                  <FormField 
+                    label="SSN" 
+                    required
+                    originalValue={getOriginalValue('ssn')}
+                    currentValue={getFormElementValue('ssn')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('ssn')}
+                  >
                     <FormInput
+                      id="ssn"
                       value={getFormElementValue('ssn')}
                       onChange={(value) => handleInputChange('ssn', value)}
+                      onBlur={clearFieldHighlight}
                       placeholder="XXX-XX-XXXX"
                       error={!isFormElementEditable('ssn')}
                     />
                   </FormField>
-                  <FormField label="Tax Year" required>
-                    <FormInput
-                      type="number"
-                      value={getFormElementValue('tax_year')}
-                      onChange={(value) => handleInputChange('tax_year', value)}
-                      placeholder="2024"
-                      error={!isFormElementEditable('tax_year')}
-                    />
-                  </FormField>
-                </div>
-              </FormSection>
 
-              {/* Address Information */}
-              <FormSection title="Address Information">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <FormField label="Street Address" required>
+                  <FormField 
+                    label="Spouse SSN" 
+                    required
+                    originalValue={getOriginalValue('spouse_ssn')}
+                    currentValue={getFormElementValue('spouse_ssn')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('spouse_ssn')}
+                  >
                     <FormInput
-                      value={getFormElementValue('street')}
-                      onChange={(value) => handleInputChange('street', value)}
-                      placeholder="Enter street address"
-                      error={!isFormElementEditable('street')}
+                      id="spouse_ssn"
+                      value={getFormElementValue('spouse_ssn')}
+                      onChange={(value) => handleInputChange('spouse_ssn', value)}
+                      onBlur={clearFieldHighlight}
+                      placeholder="XXX-XX-XXXX"
+                      error={!isFormElementEditable('spouse_ssn')}
                     />
                   </FormField>
+
                   <FormField label="City" required>
                     <FormInput
                       value={getFormElementValue('city')}
@@ -312,12 +522,7 @@ export default function Form4868Page() {
                       error={!isFormElementEditable('zip_code')}
                     />
                   </FormField>
-                </div>
-              </FormSection>
 
-              {/* Tax Information */}
-              <FormSection title="Tax Information">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <FormField label="Total Tax Liability" required>
                     <FormInput
                       type="number"
@@ -358,12 +563,7 @@ export default function Form4868Page() {
                       error={!isFormElementEditable('amount_paid_with_extension')}
                     />
                   </FormField>
-                </div>
-              </FormSection>
 
-              {/* Filing Status */}
-              <FormSection title="Filing Status">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <FormField label="Out of Country">
                     <FormSelect
                       value={getFormElementValue('is_out_of_country')}
@@ -376,15 +576,24 @@ export default function Form4868Page() {
                   </FormField>
                 </div>
               </FormSection>
-
+              <FormSection title="">
+                <div>
+                  <FormField label="Action Code" required>
+                    <FormInput
+                      onChange={(value) => handleInputChange('action_code', value)}
+                      placeholder="Enter action code for suspension"
+                    />
+                  </FormField>
+                </div>
+              </FormSection>
             </form>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 mt-6">
+          <div className="flex justify-start gap-4 pt-6 border-t border-gray-200 mt-6">
             <button 
               type="button"
-              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleSubmit}
               disabled={submitting}
             >
@@ -392,14 +601,14 @@ export default function Form4868Page() {
             </button>
             <button 
               type="button"
-              className="px-6 py-2 bg-yellow-600 text-white font-medium rounded-lg transition-all duration-200 hover:bg-yellow-700 hover:-translate-y-0.5 shadow-sm"
+              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
               onClick={() => console.log('Suspend form')}
             >
               Suspend
             </button>
             <button 
               type="button"
-              className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg transition-all duration-200 hover:bg-green-700 hover:-translate-y-0.5 shadow-sm"
+              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
               onClick={() => console.log('Close out form')}
             >
               Close Out

@@ -11,7 +11,7 @@ interface FormSectionProps {
 export default function FormSection({ title, children, className = '' }: FormSectionProps) {
   return (
     <div className={`mb-8 ${className}`}>
-      <div className="mb-6 pb-3 border-b-2 border-gray-200">
+      <div className="mb-4 pb-3 border-b-2 border-gray-200">
         <h3 className="text-lg font-bold text-gray-800 tracking-tight">{title}</h3>
       </div>
       {children}
@@ -26,6 +26,10 @@ interface FormFieldProps {
   success?: string;
   children: ReactNode;
   className?: string;
+  originalValue?: string;
+  currentValue?: string;
+  showChangeIndicator?: boolean;
+  isHighlighted?: boolean;
 }
 
 export function FormField({ 
@@ -34,15 +38,26 @@ export function FormField({
   error, 
   success, 
   children, 
-  className = '' 
+  className = '',
+  originalValue,
+  currentValue,
+  showChangeIndicator = false,
+  isHighlighted = false
 }: FormFieldProps) {
+  const hasChanged = showChangeIndicator && originalValue && currentValue && originalValue !== currentValue;
+  
   return (
-    <div className={`mb-6 ${className}`}>
+    <div className={`mb-2 ${className} ${isHighlighted ? 'ring-2 ring-red-500 ring-opacity-50 rounded-md p-2 bg-red-50' : ''}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
         {label}
         {required && <span className="text-red-600 ml-1">*</span>}
       </label>
       {children}
+      {hasChanged && (
+        <div className="mt-1 text-xs text-blue-600 font-medium">
+          Changed: "{originalValue}" → "{currentValue}"
+        </div>
+      )}
       {error && (
         <span className="block text-red-600 text-xs mt-2 font-medium leading-tight">
           {error}
@@ -63,8 +78,11 @@ interface FormInputProps {
   placeholder?: string;
   value?: string;
   onChange?: (value: string) => void;
+  onBlur?: () => void;
   error?: boolean;
   className?: string;
+  disabled?: boolean;
+  id?: string;
 }
 
 export function FormInput({ 
@@ -73,18 +91,25 @@ export function FormInput({
   placeholder, 
   value, 
   onChange, 
+  onBlur,
   error = false,
-  className = '' 
+  className = '',
+  disabled = false,
+  id
 }: FormInputProps) {
   return (
     <input
+      id={id}
       type={type}
       step={step}
       placeholder={placeholder}
       value={value}
+      disabled={disabled}
       onChange={(e) => onChange?.(e.target.value)}
+      onBlur={onBlur}
       className={`
-        w-full px-4 py-3.5 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700
+        w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 text-gray-700
+        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}
         ${error 
           ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
           : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
@@ -115,7 +140,7 @@ export function FormSelect({
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
       className={`
-        w-full px-4 py-3.5 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 cursor-pointer
+        w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 cursor-pointer
         ${error 
           ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
           : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
@@ -152,7 +177,7 @@ export function FormTextarea({
       onChange={(e) => onChange?.(e.target.value)}
       rows={rows}
       className={`
-        w-full px-4 py-3.5 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 resize-vertical leading-relaxed
+        w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 resize-vertical leading-relaxed
         ${error 
           ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
           : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'

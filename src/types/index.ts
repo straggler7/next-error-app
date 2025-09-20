@@ -7,8 +7,10 @@ export interface User {
 export interface ErrorItem {
   id: string;
   code: string;
+  type: string;
   description: string;
   status: 'active' | 'updated' | 'resolved';
+  errorFields?: string[];
   irm?: {
     title: string;
     content: string;
