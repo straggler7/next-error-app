@@ -117,18 +117,41 @@ export default function Form4868Page() {
     setFormElements(prev => {
       const updated = workAssignmentService.updateFormElementValue(prev, fieldName, value);
       
-      // Auto-update name control when name field changes
-      if (fieldName === 'name') {
-        // Calculate new name control based on the updated name
+      // Auto-update name control when any individual name field changes
+      if (['first_name', 'last_name', 'spouse_first_name', 'spouse_last_name'].includes(fieldName)) {
+        // Create a temporary state to calculate name control with the new value
         const tempElements = [...updated];
-        const nameElement = tempElements.find(el => el.name === 'name');
-        if (nameElement) {
-          nameElement.value = value;
-        }
         
-        // Generate name control using the updated name
-        const nameControl = generateNameControlFromValue(value);
-        return workAssignmentService.updateFormElementValue(updated, 'name_control', nameControl);
+        // Calculate name control using the updated individual name fields
+        const getValueFromTemp = (name: string): string => {
+          const element = tempElements.find(el => el.name === name);
+          return element?.value || '';
+        };
+        
+        const firstName = getValueFromTemp('first_name');
+        const lastName = getValueFromTemp('last_name');
+        
+        if (lastName) {
+          const cleanLastName = lastName.trim().toUpperCase();
+          
+          // Remove common suffixes
+          const suffixes = ['JR', 'SR', 'III', 'IV', 'V', 'II'];
+          let nameForControl = cleanLastName;
+          
+          for (const suffix of suffixes) {
+            if (cleanLastName.endsWith(` ${suffix}`)) {
+              nameForControl = cleanLastName.replace(` ${suffix}`, '').trim();
+              break;
+            }
+          }
+          
+          const nameControl = nameForControl.substring(0, Math.min(4, nameForControl.length));
+          return workAssignmentService.updateFormElementValue(updated, 'name_control', nameControl);
+        } else if (firstName) {
+          const cleanFirstName = firstName.trim().toUpperCase();
+          const nameControl = cleanFirstName.substring(0, Math.min(4, cleanFirstName.length));
+          return workAssignmentService.updateFormElementValue(updated, 'name_control', nameControl);
+        }
       }
       
       return updated;
@@ -219,60 +242,45 @@ export default function Form4868Page() {
     return name;
   };
 
-  // Helper function to generate name control from a given name value (Form 4868 - individuals only)
-  const generateNameControlFromValue = (nameField: string): string => {
-    if (!nameField) return '';
-
-    // Clean and normalize the name
-    const cleanName = nameField.trim().toUpperCase();
+  // Helper function to generate name control using individual name fields (Form 4868 - individuals only)
+  const generateNameControl = (): string => {
+    const firstName = getFormElementValue('first_name');
+    const lastName = getFormElementValue('last_name');
+    const spouseFirstName = getFormElementValue('spouse_first_name');
+    const spouseLastName = getFormElementValue('spouse_last_name');
     
-    // For individuals: check if joint return (contains "AND" or "&")
-    const isJointReturn = cleanName.includes(' AND ') || cleanName.includes(' & ');
-    
-    if (isJointReturn) {
-      // Joint return: use primary taxpayer's last name (first name mentioned)
-      const parts = cleanName.split(/\s+AND\s+|\s+&\s+/);
-      if (parts.length >= 2) {
-        const primaryName = parts[0].trim();
-        const lastNameMatch = primaryName.match(/\b(\w+)$/);
-        if (lastNameMatch) {
-          const lastName = lastNameMatch[1];
-          // Return first 4 characters of last name, no padding if less than 4
-          return lastName.substring(0, Math.min(4, lastName.length));
-        }
-      }
-    }
-    
-    // Single individual or sole proprietor: extract last name
-    const nameParts = cleanName.split(/\s+/);
-    if (nameParts.length >= 2) {
-      // Last word is typically the last name
-      let lastName = nameParts[nameParts.length - 1];
+    // Primary taxpayer's last name is used for name control
+    if (lastName) {
+      const cleanLastName = lastName.trim().toUpperCase();
       
-      // Remove common suffixes and use the actual last name
+      // Remove common suffixes
       const suffixes = ['JR', 'SR', 'III', 'IV', 'V', 'II'];
+      let nameForControl = cleanLastName;
+      
       for (const suffix of suffixes) {
-        if (lastName === suffix && nameParts.length >= 3) {
-          // Use the second-to-last word as the actual last name
-          lastName = nameParts[nameParts.length - 2];
+        if (cleanLastName.endsWith(` ${suffix}`)) {
+          nameForControl = cleanLastName.replace(` ${suffix}`, '').trim();
           break;
         }
       }
       
       // Return first 4 characters of last name, no padding if less than 4
-      return lastName.substring(0, Math.min(4, lastName.length));
+      return nameForControl.substring(0, Math.min(4, nameForControl.length));
     }
     
-    // Fallback: single name (like sole proprietor business name)
-    // Use first 4 characters of the entire name, no padding
-    const singleName = cleanName.replace(/\s+/g, '');
-    return singleName.substring(0, Math.min(4, singleName.length));
+    // Fallback: if no last name, use first name
+    if (firstName) {
+      const cleanFirstName = firstName.trim().toUpperCase();
+      return cleanFirstName.substring(0, Math.min(4, cleanFirstName.length));
+    }
+    
+    return '';
   };
 
-  // Helper function to generate name control based on IRS rules
-  const generateNameControl = (): string => {
-    const nameField = getFormElementValue('name');
-    return generateNameControlFromValue(nameField);
+  // Helper function to generate name control from a given name value (for backward compatibility)
+  const generateNameControlFromValue = (nameField: string): string => {
+    // This function is kept for compatibility but now delegates to the main function
+    return generateNameControl();
   };
 
   // Helper function to get original value
@@ -428,6 +436,74 @@ export default function Form4868Page() {
               {/* Taxpayer Information */}
               <FormSection title="Form 4868 - Application for Automatic Extension">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                <FormField 
+                    label="First Name" 
+                    required
+                    originalValue={getOriginalValue('first_name')}
+                    currentValue={getFormElementValue('first_name')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('first_name')}
+                  >
+                    <FormInput
+                      id="first_name"
+                      value={getFormElementValue('first_name')}
+                      onChange={(value) => handleInputChange('first_name', value)}
+                      onBlur={clearFieldHighlight}
+                      placeholder="First Name"
+                    />
+                  </FormField>
+
+                  <FormField 
+                    label="Last Name" 
+                    required
+                    originalValue={getOriginalValue('last_name')}
+                    currentValue={getFormElementValue('last_name')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('last_name')}
+                  >
+                    <FormInput
+                      id="last_name"
+                      value={getFormElementValue('last_name')}
+                      onChange={(value) => handleInputChange('last_name', value)}
+                      onBlur={clearFieldHighlight}
+                      placeholder="Last Name"
+                    />
+                  </FormField>
+
+                  <FormField 
+                    label="Spouse First Name" 
+                    required
+                    originalValue={getOriginalValue('spouse_first_name')}
+                    currentValue={getFormElementValue('spouse_first_name')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('spouse_first_name')}
+                  >
+                    <FormInput
+                      id="spouse_first_name"
+                      value={getFormElementValue('spouse_first_name')}
+                      onChange={(value) => handleInputChange('spouse_first_name', value)}
+                      onBlur={clearFieldHighlight}
+                      placeholder="Spouse First Name"
+                    />
+                  </FormField>
+
+                  <FormField 
+                    label="Spouse Last Name" 
+                    required
+                    originalValue={getOriginalValue('spouse_last_name')}
+                    currentValue={getFormElementValue('spouse_last_name')}
+                    showChangeIndicator={true}
+                    isHighlighted={highlightedFields.includes('spouse_last_name')}
+                  >
+                    <FormInput
+                      id="spouse_last_name"
+                      value={getFormElementValue('spouse_last_name')}
+                      onChange={(value) => handleInputChange('spouse_last_name', value)}
+                      onBlur={clearFieldHighlight}
+                      placeholder="Spouse Last Name"
+                    />
+                  </FormField>
 
                   <FormField 
                     label="Name(s)" 
