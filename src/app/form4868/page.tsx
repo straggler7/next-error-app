@@ -22,6 +22,7 @@ export default function Form4868Page() {
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>('');
   const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
+  const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
 
   // Convert GMF errors to ErrorItem format for sidebar
   const convertGMFErrorsToErrorItems = (gmfErrors: GMFError[]): ErrorItem[] => {
@@ -291,13 +292,21 @@ export default function Form4868Page() {
   };
 
   // Helper function to handle error field highlighting
-  const handleErrorClick = (errorFields: string[]) => {
-    setHighlightedFields(errorFields);
-    // Focus on the first field if it exists
-    if (errorFields.length > 0) {
-      const firstField = document.getElementById(errorFields[0]);
-      if (firstField) {
-        firstField.focus();
+  const handleErrorClick = (error: ErrorItem) => {
+    // If clicking the same error, clear highlights
+    if (selectedErrorId === error.id) {
+      setHighlightedFields([]);
+      setSelectedErrorId(null);
+    } else {
+      // Clear previous highlights and set new ones
+      setHighlightedFields(error.errorFields || []);
+      setSelectedErrorId(error.id);
+      // Focus on the first field if it exists
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstField = document.getElementById(error.errorFields[0]);
+        if (firstField) {
+          firstField.focus();
+        }
       }
     }
   };
@@ -305,6 +314,7 @@ export default function Form4868Page() {
   // Helper function to clear field highlighting
   const clearFieldHighlight = () => {
     setHighlightedFields([]);
+    setSelectedErrorId(null);
   };
 
   // Helper function to calculate Days Active from control day
@@ -419,7 +429,7 @@ export default function Form4868Page() {
       <div className="flex flex-col lg:grid lg:grid-cols-[25%_75%] gap-4 px-4 pb-4">
         {/* Left Sidebar */}
         <div className="flex flex-col gap-4">
-          <ErrorSidebar errors={errorItems} onErrorSelect={(error) => handleErrorClick(error.errorFields || [])} />
+          <ErrorSidebar errors={errorItems} onErrorSelect={handleErrorClick} selectedErrorId={selectedErrorId} />
           <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col">
             <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">Notes</h3>
             <NotesSection notes={mockNotes} onAddNote={handleAddNote} />
@@ -450,7 +460,6 @@ export default function Form4868Page() {
                       id="first_name"
                       value={getFormElementValue('first_name')}
                       onChange={(value) => handleInputChange('first_name', value)}
-                      onBlur={clearFieldHighlight}
                       placeholder="First Name"
                     />
                   </FormField>
@@ -467,7 +476,6 @@ export default function Form4868Page() {
                       id="last_name"
                       value={getFormElementValue('last_name')}
                       onChange={(value) => handleInputChange('last_name', value)}
-                      onBlur={clearFieldHighlight}
                       placeholder="Last Name"
                     />
                   </FormField>
@@ -484,7 +492,6 @@ export default function Form4868Page() {
                       id="spouse_first_name"
                       value={getFormElementValue('spouse_first_name')}
                       onChange={(value) => handleInputChange('spouse_first_name', value)}
-                      onBlur={clearFieldHighlight}
                       placeholder="Spouse First Name"
                     />
                   </FormField>
@@ -501,28 +508,9 @@ export default function Form4868Page() {
                       id="spouse_last_name"
                       value={getFormElementValue('spouse_last_name')}
                       onChange={(value) => handleInputChange('spouse_last_name', value)}
-                      onBlur={clearFieldHighlight}
                       placeholder="Spouse Last Name"
                     />
                   </FormField>
-
-                  <FormField 
-                    label="Name(s)" 
-                    required
-                    originalValue={getOriginalValue('name')}
-                    currentValue={getFormElementValue('name')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('name') || highlightedFields.includes('first_name') || highlightedFields.includes('last_name') || highlightedFields.includes('spouse_first_name') || highlightedFields.includes('spouse_last_name')}
-                  >
-                    <FormInput
-                      id="combined_name"
-                      value={getFormElementValue('name')}
-                      onChange={(value) => handleInputChange('name', value)}
-                      onBlur={clearFieldHighlight}
-                      placeholder="Name(s)"
-                    />
-                  </FormField>
-
 
                   <FormField 
                     label="Name Control"
@@ -535,10 +523,10 @@ export default function Form4868Page() {
                       id="name_control"
                       value={getFormElementValue('name_control') || generateNameControl()}
                       onChange={(value) => handleInputChange('name_control', value.toUpperCase().substring(0, 4))}
-                      onBlur={clearFieldHighlight}
                       placeholder="4-character name control"
                     />
                   </FormField>
+
                   <FormField 
                     label="SSN" 
                     required
@@ -551,7 +539,6 @@ export default function Form4868Page() {
                       id="ssn"
                       value={getFormElementValue('ssn')}
                       onChange={(value) => handleInputChange('ssn', value)}
-                      onBlur={clearFieldHighlight}
                       placeholder="XXX-XX-XXXX"
                       error={!isFormElementEditable('ssn')}
                     />
@@ -569,7 +556,6 @@ export default function Form4868Page() {
                       id="spouse_ssn"
                       value={getFormElementValue('spouse_ssn')}
                       onChange={(value) => handleInputChange('spouse_ssn', value)}
-                      onBlur={clearFieldHighlight}
                       placeholder="XXX-XX-XXXX"
                       error={!isFormElementEditable('spouse_ssn')}
                     />
@@ -583,6 +569,7 @@ export default function Form4868Page() {
                       error={!isFormElementEditable('city')}
                     />
                   </FormField>
+
                   <FormField label="State" required>
                     <FormInput
                       value={getFormElementValue('state')}
@@ -591,6 +578,7 @@ export default function Form4868Page() {
                       error={!isFormElementEditable('state')}
                     />
                   </FormField>
+
                   <FormField label="ZIP Code" required>
                     <FormInput
                       value={getFormElementValue('zip_code')}
@@ -671,7 +659,10 @@ export default function Form4868Page() {
             <button 
               type="button"
               className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleSubmit}
+              onClick={() => {
+                clearFieldHighlight();
+                handleSubmit();
+              }}
               disabled={submitting}
             >
               {submitting ? 'Submitting...' : 'Submit'}
@@ -679,14 +670,20 @@ export default function Form4868Page() {
             <button 
               type="button"
               className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
-              onClick={() => console.log('Suspend form')}
+              onClick={() => {
+                clearFieldHighlight();
+                console.log('Suspend form');
+              }}
             >
               Suspend
             </button>
             <button 
               type="button"
               className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
-              onClick={() => console.log('Close out form')}
+              onClick={() => {
+                clearFieldHighlight();
+                console.log('Close out form');
+              }}
             >
               Close Out
             </button>

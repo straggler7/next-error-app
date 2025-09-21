@@ -7,9 +7,10 @@ import { ErrorItem } from '../types';
 interface ErrorSidebarProps {
   errors: ErrorItem[];
   onErrorSelect?: (error: ErrorItem) => void;
+  selectedErrorId?: string | null;
 }
 
-export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProps) {
+export default function ErrorSidebar({ errors, onErrorSelect, selectedErrorId }: ErrorSidebarProps) {
   const [activeTab, setActiveTab] = useState<'active' | 'updated'>('active');
   const [expandedErrors, setExpandedErrors] = useState<string[]>([]);
 
@@ -27,11 +28,19 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
   const renderErrorList = (errorList: ErrorItem[]) => (
     <ul className="space-y-3">
       {errorList.map((error) => (
-        <li key={error.id} className="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200 hover:border-gray-300 hover:shadow-sm">
-          <div className="p-2 bg-gray-50">
+        <li key={error.id} className={`border rounded-lg bg-white overflow-hidden transition-all duration-200 hover:shadow-sm ${
+          selectedErrorId === error.id 
+            ? 'border-red-500 ring-2 ring-red-200 bg-red-50' 
+            : 'border-gray-200 hover:border-gray-300'
+        }`}>
+          <div className={`p-2 ${selectedErrorId === error.id ? 'bg-red-50' : 'bg-gray-50'}`}>
             <div className="flex items-center justify-between">
               <div 
-                className="flex-1 min-w-0 cursor-pointer transition-colors hover:bg-gray-100 p-1 rounded"
+                className={`flex-1 min-w-0 cursor-pointer transition-colors p-1 rounded ${
+                  selectedErrorId === error.id 
+                    ? 'bg-red-100 hover:bg-red-200' 
+                    : 'hover:bg-gray-100'
+                }`}
                 onClick={() => {
                   if (onErrorSelect) {
                     onErrorSelect(error);
