@@ -55,6 +55,7 @@ export default function Form4868Page() {
       code: `Error Code ${error.Id || 'UNKNOWN'}`,
       description: error.Description || 'No description available',
       status: 'active' as const,
+      type: 'FIELD',
       errorFields: [],
       irm: {
         title: `IRM 3.12.${180 + index} - Error Resolution`,
@@ -415,7 +416,7 @@ export default function Form4868Page() {
       </div>
 
       {/* Main Content Layout */}
-      <div className="lg:grid lg:grid-cols-[40%_60%] gap-4 px-4 pb-4 flex flex-col lg:flex-none">
+      <div className="flex flex-col lg:grid lg:grid-cols-[25%_75%] gap-4 px-4 pb-4">
         {/* Left Sidebar */}
         <div className="flex flex-col gap-4">
           <ErrorSidebar errors={errorItems} onErrorSelect={(error) => handleErrorClick(error.errorFields || [])} />
@@ -435,7 +436,7 @@ export default function Form4868Page() {
             <form className="space-y-8">
               {/* Taxpayer Information */}
               <FormSection title="Form 4868 - Application for Automatic Extension">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-1">
 
                 <FormField 
                     label="First Name" 

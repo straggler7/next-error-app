@@ -58,6 +58,7 @@ export default function DetailsPage() {
       code: 'Error Code 004',
       description: 'Invalid taxpayer identification number format',
       status: 'active',
+      type: 'FIELD',
       irm: {
         title: 'IRM 3.12.179 - TIN Validation',
         content: 'Verify the taxpayer identification number format and validate against IRS records.',
@@ -73,6 +74,7 @@ export default function DetailsPage() {
       code: 'Error Code 107',
       description: 'Missing or invalid filing status',
       status: 'active',
+      type: 'FIELD',
       irm: {
         title: 'IRM 3.12.180 - Filing Status Verification',
         content: 'Ensure the filing status is properly indicated and matches taxpayer circumstances.',

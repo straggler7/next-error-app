@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 interface FormSectionProps {
   title: string;
@@ -54,8 +55,8 @@ export function FormField({
       </label>
       {children}
       {hasChanged && (
-        <div className="mt-1 text-xs text-blue-600 font-medium">
-          Changed: "{originalValue}" → "{currentValue}"
+        <div className="mt-1 text-xs text-gray-600 font-medium flex items-center gap-1">
+          Changed: {originalValue} <ArrowRight className="w-3 h-3" /> {currentValue}
         </div>
       )}
       {error && (

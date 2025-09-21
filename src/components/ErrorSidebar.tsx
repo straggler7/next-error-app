@@ -38,7 +38,7 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
                   }
                 }}
               >
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   <span className="inline-block bg-red-50 text-red-700 px-2 py-1 rounded text-xs font-bold font-mono border border-red-200 w-fit">
                     {error.type === 'FIELD' ? 'Field Error' : 'Error Code'} {error.code}
                   </span>
@@ -48,7 +48,7 @@ export default function ErrorSidebar({ errors, onErrorSelect }: ErrorSidebarProp
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-3">
-                <span className={`
+                <span style={{ display: 'none' }} className={`
                   px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide
                   ${error.status === 'active' 
                     ? 'bg-yellow-100 text-yellow-800' 
