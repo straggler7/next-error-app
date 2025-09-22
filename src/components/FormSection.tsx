@@ -7,13 +7,22 @@ interface FormSectionProps {
   title: string;
   children: ReactNode;
   className?: string;
+  metadata?: {
+    receivedDate?: string;
+    taxPeriod?: string;
+  };
 }
 
-export default function FormSection({ title, children, className = '' }: FormSectionProps) {
+export default function FormSection({ title, children, className = '', metadata }: FormSectionProps) {
   return (
     <div className={`mb-8 ${className}`}>
       <div className="mb-4 pb-3 border-b-2 border-gray-200">
         <h3 className="text-lg font-bold text-gray-800 tracking-tight">{title}</h3>
+        {metadata && (
+          <div className="mt-2 text-sm text-gray-600">
+            <span className="font-bold">Received Date:</span> {metadata.receivedDate || 'N/A'} | <span className="font-bold">Tax Period:</span> {metadata.taxPeriod || 'N/A'}
+          </div>
+        )}
       </div>
       {children}
     </div>

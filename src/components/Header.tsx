@@ -15,7 +15,7 @@ export default function Header({ user, showBackButton = false, backHref = '/' }:
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   return (
-    <div className="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-4 sm:px-8 py-4 shadow-md">
+    <div className="bg-color-irs-blue bg-gradient-to-r from-[#00599c] to-[#00599c] text-white px-4 sm:px-8 py-4 shadow-md">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
           {showBackButton && (

@@ -342,6 +342,10 @@ export default function Form4868Page() {
     return workRecord?.submissionHeader?.DLN || 'N/A';
   };
 
+  const getProgramCode = (): string => {
+    return workRecord?.submissionHeader?.programCode || 'N/A';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -406,12 +410,12 @@ export default function Form4868Page() {
             <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
               DLN: {getDLN()}
             </span>
-            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+            {/* <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
               Form Type: {getFormElementValue('form_id')}
-            </span>
-            <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
+            </span> */}
+            {/* <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
               Tax Period: {getFormElementValue('tax_year')}
-            </span>
+            </span> */}
             <span className="info-badge inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm font-medium border border-orange-200">
               Control Day: {assignedWork.controlDay}
             </span>
@@ -437,7 +441,7 @@ export default function Form4868Page() {
         </div>
 
         {/* Main Form Area */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col" style={{ marginRight: '1rem' }}>
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col" style={{ height: 'fit-content' }}>
           <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-200" style={{ display: 'none' }}>
             <h2 className="text-xl font-semibold text-gray-800">Form 4868 - Application for Automatic Extension</h2>
           </div>
@@ -445,7 +449,13 @@ export default function Form4868Page() {
           <div className="flex-1 overflow-y-auto">
             <form className="space-y-8">
               {/* Taxpayer Information */}
-              <FormSection title="Form 4868 - Application for Automatic Extension">
+              <FormSection 
+                title="Form 4868 - Application for Automatic Extension"
+                metadata={{
+                  receivedDate: workRecord?.submissionHeader?.Timestamp ? new Date(workRecord.submissionHeader.Timestamp).toLocaleDateString() : undefined,
+                  taxPeriod: getFormElementValue('tax_year') || undefined
+                }}
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-1">
 
                 <FormField 
@@ -655,7 +665,7 @@ export default function Form4868Page() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-start gap-4 pt-6 border-t border-gray-200 mt-6">
+          <div className="flex justify-start gap-4 pt-4 border-t border-gray-200 mt-4">
             <button 
               type="button"
               className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"

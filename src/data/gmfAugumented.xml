@@ -40,23 +40,25 @@
       </GMFError>
       <GMFError code="01ED" type="FIELD" description="Extended Due Date">
         <errorFields>
-          <errorField>street</errorField>
-          <errorField>city</errorField>
-          <errorField>zip_code</errorField>
+          <errorField>received_date</errorField>
+          <errorField>extension_due_date</errorField>
+          <errorField>tax_year</errorField>
         </errorFields>
       </GMFError>
       <GMFError code="004" type="CONSISTENCY" description="EIF/NAP Mismatch">
         <errorFields>
           <errorField>ssn</errorField>
+          <errorField>spouse_ssn</errorField>
           <errorField>first_name</errorField>
           <errorField>last_name</errorField>
+          <errorField>spouse_first_name</errorField>
+          <errorField>spouse_last_name</errorField>
         </errorFields>
       </GMFError>
-      <GMFError code="107" type="CONSISTENCY" description="Tax Calculation Error">
+      <GMFError code="107" type="CONSISTENCY" description="Timely Filing for Tax Period">
         <errorFields>
-          <errorField>total_tax_liability</errorField>
-          <errorField>total_payments</errorField>
-          <errorField>balance_due</errorField>
+          <errorField>tax_year</errorField>
+          <errorField>received_date</errorField>
         </errorFields>
       </GMFError>
     </GMFErrors>

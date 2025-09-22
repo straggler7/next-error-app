@@ -43,6 +43,7 @@ export interface SubmissionHeader {
   SubmissionId: string;
   DLN: string;
   FormType: string;
+  programCode?: string;
   Source: string;
   Timestamp: string;
 }
