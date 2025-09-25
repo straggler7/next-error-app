@@ -571,6 +571,15 @@ export default function Form4868Page() {
                     />
                   </FormField>
 
+                  <FormField label="Street" required>
+                    <FormInput
+                      value={getFormElementValue('street')}
+                      onChange={(value) => handleInputChange('street', value)}
+                      placeholder="Enter street address"
+                      error={!isFormElementEditable('street')}
+                    />
+                  </FormField>
+
                   <FormField label="City" required>
                     <FormInput
                       value={getFormElementValue('city')}
