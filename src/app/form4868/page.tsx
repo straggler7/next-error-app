@@ -456,208 +456,228 @@ export default function Form4868Page() {
                   taxPeriod: getFormElementValue('tax_year') || undefined
                 }}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-1">
+                <div className="space-y-8 px-1">
+                  {/* Names Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Names</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                      <FormField 
+                          label="First Name" 
+                          required
+                          originalValue={getOriginalValue('first_name')}
+                          currentValue={getFormElementValue('first_name')}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('first_name')}
+                        >
+                          <FormInput
+                            id="first_name"
+                            value={getFormElementValue('first_name')}
+                            onChange={(value) => handleInputChange('first_name', value)}
+                            placeholder="First Name"
+                          />
+                        </FormField>
 
-                <FormField 
-                    label="First Name" 
-                    required
-                    originalValue={getOriginalValue('first_name')}
-                    currentValue={getFormElementValue('first_name')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('first_name')}
-                  >
-                    <FormInput
-                      id="first_name"
-                      value={getFormElementValue('first_name')}
-                      onChange={(value) => handleInputChange('first_name', value)}
-                      placeholder="First Name"
-                    />
-                  </FormField>
+                        <FormField 
+                          label="Last Name" 
+                          required
+                          originalValue={getOriginalValue('last_name')}
+                          currentValue={getFormElementValue('last_name')}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('last_name')}
+                        >
+                          <FormInput
+                            id="last_name"
+                            value={getFormElementValue('last_name')}
+                            onChange={(value) => handleInputChange('last_name', value)}
+                            placeholder="Last Name"
+                          />
+                        </FormField>
 
-                  <FormField 
-                    label="Last Name" 
-                    required
-                    originalValue={getOriginalValue('last_name')}
-                    currentValue={getFormElementValue('last_name')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('last_name')}
-                  >
-                    <FormInput
-                      id="last_name"
-                      value={getFormElementValue('last_name')}
-                      onChange={(value) => handleInputChange('last_name', value)}
-                      placeholder="Last Name"
-                    />
-                  </FormField>
+                        <FormField 
+                          label="Spouse First Name" 
+                          required
+                          originalValue={getOriginalValue('spouse_first_name')}
+                          currentValue={getFormElementValue('spouse_first_name')}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('spouse_first_name')}
+                        >
+                          <FormInput
+                            id="spouse_first_name"
+                            value={getFormElementValue('spouse_first_name')}
+                            onChange={(value) => handleInputChange('spouse_first_name', value)}
+                            placeholder="Spouse First Name"
+                          />
+                        </FormField>
 
-                  <FormField 
-                    label="Spouse First Name" 
-                    required
-                    originalValue={getOriginalValue('spouse_first_name')}
-                    currentValue={getFormElementValue('spouse_first_name')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('spouse_first_name')}
-                  >
-                    <FormInput
-                      id="spouse_first_name"
-                      value={getFormElementValue('spouse_first_name')}
-                      onChange={(value) => handleInputChange('spouse_first_name', value)}
-                      placeholder="Spouse First Name"
-                    />
-                  </FormField>
+                        <FormField 
+                          label="Spouse Last Name" 
+                          required
+                          originalValue={getOriginalValue('spouse_last_name')}
+                          currentValue={getFormElementValue('spouse_last_name')}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('spouse_last_name')}
+                        >
+                          <FormInput
+                            id="spouse_last_name"
+                            value={getFormElementValue('spouse_last_name')}
+                            onChange={(value) => handleInputChange('spouse_last_name', value)}
+                            placeholder="Spouse Last Name"
+                          />
+                        </FormField>
 
-                  <FormField 
-                    label="Spouse Last Name" 
-                    required
-                    originalValue={getOriginalValue('spouse_last_name')}
-                    currentValue={getFormElementValue('spouse_last_name')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('spouse_last_name')}
-                  >
-                    <FormInput
-                      id="spouse_last_name"
-                      value={getFormElementValue('spouse_last_name')}
-                      onChange={(value) => handleInputChange('spouse_last_name', value)}
-                      placeholder="Spouse Last Name"
-                    />
-                  </FormField>
+                        <FormField 
+                          label="Name Control"
+                          originalValue={getOriginalValue('name_control')}
+                          currentValue={getFormElementValue('name_control') || generateNameControl()}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('name_control')}
+                        >
+                          <FormInput
+                            id="name_control"
+                            value={getFormElementValue('name_control') || generateNameControl()}
+                            onChange={(value) => handleInputChange('name_control', value.toUpperCase().substring(0, 4))}
+                            placeholder="4-character name control"
+                          />
+                        </FormField>
 
-                  <FormField 
-                    label="Name Control"
-                    originalValue={getOriginalValue('name_control')}
-                    currentValue={getFormElementValue('name_control') || generateNameControl()}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('name_control')}
-                  >
-                    <FormInput
-                      id="name_control"
-                      value={getFormElementValue('name_control') || generateNameControl()}
-                      onChange={(value) => handleInputChange('name_control', value.toUpperCase().substring(0, 4))}
-                      placeholder="4-character name control"
-                    />
-                  </FormField>
+                        <FormField 
+                          label="SSN" 
+                          required
+                          originalValue={getOriginalValue('ssn')}
+                          currentValue={getFormElementValue('ssn')}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('ssn')}
+                        >
+                          <FormInput
+                            id="ssn"
+                            value={getFormElementValue('ssn')}
+                            onChange={(value) => handleInputChange('ssn', value)}
+                            placeholder="XXX-XX-XXXX"
+                            error={!isFormElementEditable('ssn')}
+                          />
+                        </FormField>
 
-                  <FormField 
-                    label="SSN" 
-                    required
-                    originalValue={getOriginalValue('ssn')}
-                    currentValue={getFormElementValue('ssn')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('ssn')}
-                  >
-                    <FormInput
-                      id="ssn"
-                      value={getFormElementValue('ssn')}
-                      onChange={(value) => handleInputChange('ssn', value)}
-                      placeholder="XXX-XX-XXXX"
-                      error={!isFormElementEditable('ssn')}
-                    />
-                  </FormField>
+                        <FormField 
+                          label="Spouse SSN" 
+                          required
+                          originalValue={getOriginalValue('spouse_ssn')}
+                          currentValue={getFormElementValue('spouse_ssn')}
+                          showChangeIndicator={true}
+                          isHighlighted={highlightedFields.includes('spouse_ssn')}
+                        >
+                          <FormInput
+                            id="spouse_ssn"
+                            value={getFormElementValue('spouse_ssn')}
+                            onChange={(value) => handleInputChange('spouse_ssn', value)}
+                            placeholder="XXX-XX-XXXX"
+                            error={!isFormElementEditable('spouse_ssn')}
+                          />
+                        </FormField>
+                    </div>
+                  </div>
 
-                  <FormField 
-                    label="Spouse SSN" 
-                    required
-                    originalValue={getOriginalValue('spouse_ssn')}
-                    currentValue={getFormElementValue('spouse_ssn')}
-                    showChangeIndicator={true}
-                    isHighlighted={highlightedFields.includes('spouse_ssn')}
-                  >
-                    <FormInput
-                      id="spouse_ssn"
-                      value={getFormElementValue('spouse_ssn')}
-                      onChange={(value) => handleInputChange('spouse_ssn', value)}
-                      placeholder="XXX-XX-XXXX"
-                      error={!isFormElementEditable('spouse_ssn')}
-                    />
-                  </FormField>
+                  {/* Address Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Address</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                      <FormField label="Street" required>
+                        <FormInput
+                          value={getFormElementValue('street')}
+                          onChange={(value) => handleInputChange('street', value)}
+                          placeholder="Enter street address"
+                          error={!isFormElementEditable('street')}
+                        />
+                      </FormField>
 
-                  <FormField label="Street" required>
-                    <FormInput
-                      value={getFormElementValue('street')}
-                      onChange={(value) => handleInputChange('street', value)}
-                      placeholder="Enter street address"
-                      error={!isFormElementEditable('street')}
-                    />
-                  </FormField>
+                      <FormField label="City" required>
+                        <FormInput
+                          value={getFormElementValue('city')}
+                          onChange={(value) => handleInputChange('city', value)}
+                          placeholder="Enter city"
+                          error={!isFormElementEditable('city')}
+                        />
+                      </FormField>
 
-                  <FormField label="City" required>
-                    <FormInput
-                      value={getFormElementValue('city')}
-                      onChange={(value) => handleInputChange('city', value)}
-                      placeholder="Enter city"
-                      error={!isFormElementEditable('city')}
-                    />
-                  </FormField>
+                      <FormField label="State" required>
+                        <FormInput
+                          value={getFormElementValue('state')}
+                          onChange={(value) => handleInputChange('state', value)}
+                          placeholder="Enter state"
+                          error={!isFormElementEditable('state')}
+                        />
+                      </FormField>
 
-                  <FormField label="State" required>
-                    <FormInput
-                      value={getFormElementValue('state')}
-                      onChange={(value) => handleInputChange('state', value)}
-                      placeholder="Enter state"
-                      error={!isFormElementEditable('state')}
-                    />
-                  </FormField>
+                      <FormField label="ZIP Code" required>
+                        <FormInput
+                          value={getFormElementValue('zip_code')}
+                          onChange={(value) => handleInputChange('zip_code', value)}
+                          placeholder="Enter ZIP code"
+                          error={!isFormElementEditable('zip_code')}
+                        />
+                      </FormField>
+                    </div>
+                  </div>
 
-                  <FormField label="ZIP Code" required>
-                    <FormInput
-                      value={getFormElementValue('zip_code')}
-                      onChange={(value) => handleInputChange('zip_code', value)}
-                      placeholder="Enter ZIP code"
-                      error={!isFormElementEditable('zip_code')}
-                    />
-                  </FormField>
+                  {/* Tax Information Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Tax Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                      <FormField label="Total Tax Liability" required>
+                        <FormInput
+                          type="number"
+                          step="0.01"
+                          value={getFormElementValue('total_tax_liability')}
+                          onChange={(value) => handleInputChange('total_tax_liability', value)}
+                          placeholder="0.00"
+                          error={!isFormElementEditable('total_tax_liability')}
+                        />
+                      </FormField>
 
-                  <FormField label="Total Tax Liability" required>
-                    <FormInput
-                      type="number"
-                      step="0.01"
-                      value={getFormElementValue('total_tax_liability')}
-                      onChange={(value) => handleInputChange('total_tax_liability', value)}
-                      placeholder="0.00"
-                      error={!isFormElementEditable('total_tax_liability')}
-                    />
-                  </FormField>
-                  <FormField label="Total Payments" required>
-                    <FormInput
-                      type="number"
-                      step="0.01"
-                      value={getFormElementValue('total_payments')}
-                      onChange={(value) => handleInputChange('total_payments', value)}
-                      placeholder="0.00"
-                      error={!isFormElementEditable('total_payments')}
-                    />
-                  </FormField>
-                  <FormField label="Balance Due" required>
-                    <FormInput
-                      type="number"
-                      step="0.01"
-                      value={getFormElementValue('balance_due')}
-                      onChange={(value) => handleInputChange('balance_due', value)}
-                      placeholder="0.00"
-                      error={!isFormElementEditable('balance_due')}
-                    />
-                  </FormField>
-                  <FormField label="Amount Paid with Extension">
-                    <FormInput
-                      type="number"
-                      step="0.01"
-                      value={getFormElementValue('amount_paid_with_extension')}
-                      onChange={(value) => handleInputChange('amount_paid_with_extension', value)}
-                      placeholder="0.00"
-                      error={!isFormElementEditable('amount_paid_with_extension')}
-                    />
-                  </FormField>
+                      <FormField label="Total Payments" required>
+                        <FormInput
+                          type="number"
+                          step="0.01"
+                          value={getFormElementValue('total_payments')}
+                          onChange={(value) => handleInputChange('total_payments', value)}
+                          placeholder="0.00"
+                          error={!isFormElementEditable('total_payments')}
+                        />
+                      </FormField>
 
-                  <FormField label="Out of Country">
-                    <FormSelect
-                      value={getFormElementValue('is_out_of_country')}
-                      onChange={(value) => handleInputChange('is_out_of_country', value)}
-                      error={!isFormElementEditable('is_out_of_country')}
-                    >
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
-                    </FormSelect>
-                  </FormField>
+                      <FormField label="Balance Due" required>
+                        <FormInput
+                          type="number"
+                          step="0.01"
+                          value={getFormElementValue('balance_due')}
+                          onChange={(value) => handleInputChange('balance_due', value)}
+                          placeholder="0.00"
+                          error={!isFormElementEditable('balance_due')}
+                        />
+                      </FormField>
+
+                      <FormField label="Amount Paid with Extension">
+                        <FormInput
+                          type="number"
+                          step="0.01"
+                          value={getFormElementValue('amount_paid_with_extension')}
+                          onChange={(value) => handleInputChange('amount_paid_with_extension', value)}
+                          placeholder="0.00"
+                          error={!isFormElementEditable('amount_paid_with_extension')}
+                        />
+                      </FormField>
+
+                      <FormField label="Out of Country">
+                        <FormSelect
+                          value={getFormElementValue('is_out_of_country')}
+                          onChange={(value) => handleInputChange('is_out_of_country', value)}
+                          error={!isFormElementEditable('is_out_of_country')}
+                        >
+                          <option value="false">No</option>
+                          <option value="true">Yes</option>
+                        </FormSelect>
+                      </FormField>
+                    </div>
+                  </div>
                 </div>
               </FormSection>
               <FormSection title="">
