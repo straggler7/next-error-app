@@ -131,24 +131,30 @@ export function FormInput({
 }
 
 interface FormSelectProps {
+  id?: string;
   value?: string;
   onChange?: (value: string) => void;
+  onBlur?: () => void;
   error?: boolean;
   children: ReactNode;
   className?: string;
 }
 
 export function FormSelect({ 
+  id,
   value, 
   onChange, 
+  onBlur,
   error = false, 
   children, 
   className = '' 
 }: FormSelectProps) {
   return (
     <select
+      id={id}
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
+      onBlur={onBlur}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 cursor-pointer
         ${error 

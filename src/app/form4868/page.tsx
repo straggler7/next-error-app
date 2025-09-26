@@ -580,39 +580,75 @@ export default function Form4868Page() {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Address</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-                      <FormField label="Street" required>
+                      <FormField 
+                        label="Street" 
+                        required
+                        originalValue={getOriginalValue('street')}
+                        currentValue={getFormElementValue('street')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('street')}
+                      >
                         <FormInput
+                          id="street"
                           value={getFormElementValue('street')}
                           onChange={(value) => handleInputChange('street', value)}
                           placeholder="Enter street address"
                           error={!isFormElementEditable('street')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="City" required>
+                      <FormField 
+                        label="City" 
+                        required
+                        originalValue={getOriginalValue('city')}
+                        currentValue={getFormElementValue('city')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('city')}
+                      >
                         <FormInput
+                          id="city"
                           value={getFormElementValue('city')}
                           onChange={(value) => handleInputChange('city', value)}
                           placeholder="Enter city"
                           error={!isFormElementEditable('city')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="State" required>
+                      <FormField 
+                        label="State" 
+                        required
+                        originalValue={getOriginalValue('state')}
+                        currentValue={getFormElementValue('state')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('state')}
+                      >
                         <FormInput
+                          id="state"
                           value={getFormElementValue('state')}
                           onChange={(value) => handleInputChange('state', value)}
                           placeholder="Enter state"
                           error={!isFormElementEditable('state')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="ZIP Code" required>
+                      <FormField 
+                        label="ZIP Code" 
+                        required
+                        originalValue={getOriginalValue('zip_code')}
+                        currentValue={getFormElementValue('zip_code')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('zip_code')}
+                      >
                         <FormInput
+                          id="zip_code"
                           value={getFormElementValue('zip_code')}
                           onChange={(value) => handleInputChange('zip_code', value)}
                           placeholder="Enter ZIP code"
                           error={!isFormElementEditable('zip_code')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
                     </div>
@@ -622,55 +658,98 @@ export default function Form4868Page() {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Tax Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
-                      <FormField label="Total Tax Liability" required>
+                      <FormField 
+                        label="Total Tax Liability" 
+                        required
+                        originalValue={getOriginalValue('total_tax_liability')}
+                        currentValue={getFormElementValue('total_tax_liability')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('total_tax_liability')}
+                      >
                         <FormInput
+                          id="total_tax_liability"
                           type="number"
                           step="0.01"
                           value={getFormElementValue('total_tax_liability')}
                           onChange={(value) => handleInputChange('total_tax_liability', value)}
                           placeholder="0.00"
                           error={!isFormElementEditable('total_tax_liability')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="Total Payments" required>
+                      <FormField 
+                        label="Total Payments" 
+                        required
+                        originalValue={getOriginalValue('total_payments')}
+                        currentValue={getFormElementValue('total_payments')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('total_payments')}
+                      >
                         <FormInput
+                          id="total_payments"
                           type="number"
                           step="0.01"
                           value={getFormElementValue('total_payments')}
                           onChange={(value) => handleInputChange('total_payments', value)}
                           placeholder="0.00"
                           error={!isFormElementEditable('total_payments')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="Balance Due" required>
+                      <FormField 
+                        label="Balance Due" 
+                        required
+                        originalValue={getOriginalValue('balance_due')}
+                        currentValue={getFormElementValue('balance_due')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('balance_due')}
+                      >
                         <FormInput
+                          id="balance_due"
                           type="number"
                           step="0.01"
                           value={getFormElementValue('balance_due')}
                           onChange={(value) => handleInputChange('balance_due', value)}
                           placeholder="0.00"
                           error={!isFormElementEditable('balance_due')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="Amount Paid with Extension">
+                      <FormField 
+                        label="Amount Paid with Extension"
+                        originalValue={getOriginalValue('amount_paid_with_extension')}
+                        currentValue={getFormElementValue('amount_paid_with_extension')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('amount_paid_with_extension')}
+                      >
                         <FormInput
+                          id="amount_paid_with_extension"
                           type="number"
                           step="0.01"
                           value={getFormElementValue('amount_paid_with_extension')}
                           onChange={(value) => handleInputChange('amount_paid_with_extension', value)}
                           placeholder="0.00"
                           error={!isFormElementEditable('amount_paid_with_extension')}
+                          onBlur={() => clearFieldHighlight()}
                         />
                       </FormField>
 
-                      <FormField label="Out of Country">
+                      <FormField 
+                        label="Out of Country"
+                        originalValue={getOriginalValue('is_out_of_country')}
+                        currentValue={getFormElementValue('is_out_of_country')}
+                        showChangeIndicator={true}
+                        isHighlighted={highlightedFields.includes('is_out_of_country')}
+                      >
                         <FormSelect
+                          id="is_out_of_country"
                           value={getFormElementValue('is_out_of_country')}
                           onChange={(value) => handleInputChange('is_out_of_country', value)}
                           error={!isFormElementEditable('is_out_of_country')}
+                          onBlur={() => clearFieldHighlight()}
                         >
                           <option value="false">No</option>
                           <option value="true">Yes</option>
