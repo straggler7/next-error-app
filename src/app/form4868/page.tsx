@@ -734,6 +734,7 @@ export default function Form4868Page() {
                           placeholder="0.00"
                           error={!isFormElementEditable('amount_paid_with_extension')}
                           onBlur={() => clearFieldHighlight()}
+                          disabled={true}
                         />
                       </FormField>
 
@@ -750,6 +751,7 @@ export default function Form4868Page() {
                           onChange={(value) => handleInputChange('is_out_of_country', value)}
                           error={!isFormElementEditable('is_out_of_country')}
                           onBlur={() => clearFieldHighlight()}
+                          disabled={true}
                         >
                           <option value="false">No</option>
                           <option value="true">Yes</option>

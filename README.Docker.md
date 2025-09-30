@@ -128,3 +128,19 @@ For production deployment, consider:
 - Set up CI/CD pipeline with Docker
 - Add health checks to containers
 - Consider using Docker Swarm or Kubernetes for orchestration
+
+### docker commands
+
+-- docker
+
+docker build -t irs-error-resolution .
+docker run -p 4003:3000 irs-error-resolution
+
+-- docker-compose
+
+docker-compose build --no-cache
+docker-compose up --build
+
+docker-compose up -d
+docker-compose down
+

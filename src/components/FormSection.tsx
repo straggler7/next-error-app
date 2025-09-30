@@ -135,6 +135,7 @@ interface FormSelectProps {
   value?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
+  disabled?: boolean;
   error?: boolean;
   children: ReactNode;
   className?: string;
@@ -145,6 +146,7 @@ export function FormSelect({
   value, 
   onChange, 
   onBlur,
+  disabled = false,
   error = false, 
   children, 
   className = '' 
@@ -155,6 +157,7 @@ export function FormSelect({
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
+      disabled={disabled}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 cursor-pointer
         ${error 
