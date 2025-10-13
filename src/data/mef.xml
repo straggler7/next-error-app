@@ -1,0 +1,40 @@
+<UITP-Submission>
+    <SubmissionData>
+        <GMFModForm4868>
+            <NAPEIFNameCtrlUndrprt> </NAPEIFNameCtrlUndrprt>
+            <EIFAccessInd>2</EIFAccessInd>
+            <NAPAccessInd>3</NAPAccessInd>
+            <NAPEIFResponseInd>L</NAPEIFResponseInd>
+            <PrimaryTINAutoTinCorr> </PrimaryTINAutoTinCorr>
+            <NAPTINValCkReqCnt>0</NAPTINValCkReqCnt>
+            <NAPTINValCkRspnsCnt>0</NAPTINValCkRspnsCnt>
+            <CodeAndEditEmployeeNum>0</CodeAndEditEmployeeNum>
+            <MeFReceiptDate>2001-12-17</MeFReceiptDate>
+            <MftCd>30</MftCd>
+            <PrimaryTransCd>405</PrimaryTransCd>
+            <PrimaryTransAmt>0</PrimaryTransAmt>
+            <SecondaryTransCd>405</SecondaryTransCd>
+            <SecondaryTransAmt>0</SecondaryTransAmt>
+            <NameCtrlUnderprint> </NameCtrlUnderprint>
+            <NAPAccessInd2>3</NAPAccessInd2>
+            <NAPEIFResponseInd2>L</NAPEIFResponseInd2>
+        </GMFModForm4868>
+    </SubmissionData>
+    <SubmissionWrapper></SubmissionWrapper>
+    <SubmissionHeader>
+        <GMFUUID>J081202</GMFUUID>
+        <SubmissionID>J081202</SubmissionID>
+        <DLN>12345678901234</DLN>
+        <FormType>4868</FormType>
+        <Source>MeF-Digital</Source>
+        <Timestamp>2001-12-17T09:30:47Z</Timestamp>
+        <LargeFile>
+            <CRChecksum>true</CRChecksum>
+            <LargeFileLocation>src/test/samplefiles/4868.xml</LargeFileLocation>
+        </LargeFile>
+        <FilingSchemaVersion>2024</FilingSchemaVersion>
+        <ValidationSchemaVersion>2024v2.0</ValidationSchemaVersion>
+    </SubmissionHeader>
+    <Version>2024v2.0</Version>
+    <MeFEventID>J081202</MeFEventID>
+</UITP-Submission>
