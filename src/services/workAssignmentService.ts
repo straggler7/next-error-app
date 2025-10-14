@@ -159,6 +159,23 @@ class WorkAssignmentService {
   }
 
   // Get work record using processId - returns GMF augmented XML data
+  async getJsonWorkRecord(payloadId: number): Promise<any> {
+    // In a real implementation, this would make an HTTP GET request
+    // GET /api/work/getWorkRecord?processId={processId}
+
+    const response = await fetch(`/api/era/inventory/workrecords/documents/${payloadId}`);
+    const data = await response.text();
+    
+    console.log(`Fetching JSON work record for payloadId: ${payloadId}`);
+    
+    const jsonData = JSON.parse(data);
+    console.log('parsed json data -------------')
+    console.log(jsonData);
+    return jsonData;
+  }
+
+
+  // Get work record using processId - returns GMF augmented XML data
   async getWorkRecord(payloadId: number): Promise<WorkRecord> {
     // In a real implementation, this would make an HTTP GET request
     // GET /api/work/getWorkRecord?processId={processId}

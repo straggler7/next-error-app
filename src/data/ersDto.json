@@ -255,7 +255,7 @@
         "currentMm":9,
         "p132CurrentYyyyMmAsInt": 202509,
         "yearInProcessDt":null,
-        "ersReasonCds": ["135", "004", "103"],
+        "ersReasonCds": ["135", "0049", "10399"],
         "errReasonCdsMap":{
             "ERR-004-CODE": "ERR-004-CODE: 004",
             "ERR-103-CODE": "ERR-103-CODE: 103",
@@ -263,7 +263,7 @@
         },
         "editableFields": {
             "TaxPeriodEndDt": "Return/ReturnHeader/TaxPeriodEndDt",
-            "primaryNameContro1Txt":"Return/ReturnHeader/Filer/PrimaryNameControlTxt",
+            "primaryNameControlTxt":"Return/ReturnHeader/Filer/PrimaryNameControlTxt",
             "nameLine1Txt": "Return/ReturnHeader/Filer/NameLine1Txt",
             "primarySSN":"Return/ReturnHeader/Filer/PrimarySSN"
         }
