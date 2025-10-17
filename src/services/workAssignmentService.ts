@@ -340,6 +340,54 @@ class WorkAssignmentService {
     };
   }
 
+  // Update JSON work record - submit updated jsonWorkRecord with form changes
+  async updateJsonWorkRecord(processId: number, formElements: FormElement[], originalJsonWorkRecord: any): Promise<{ success: boolean; message: string }> {
+    // Clone the original jsonWorkRecord to avoid mutation
+    const updatedJsonWorkRecord = JSON.parse(JSON.stringify(originalJsonWorkRecord));
+    
+    // Update the workRecord fields with new form values
+    if (updatedJsonWorkRecord?.workRecord) {
+      formElements.forEach(element => {
+        // Update the field value in the workRecord
+        if (updatedJsonWorkRecord.workRecord.hasOwnProperty(element.name)) {
+          updatedJsonWorkRecord.workRecord[element.name] = element.value;
+        }
+      });
+      
+      // Update timestamp to track when the record was modified
+      updatedJsonWorkRecord.workRecord.lastModified = new Date().toISOString();
+    }
+    
+    // In a real implementation, this would make an HTTP POST request
+    // POST /api/work/updateJsonWorkRecord with the complete updated JSON structure
+    // await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+
+    try {
+      const response = await fetch(`/api/work/updateJsonWorkRecord?processId=${processId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedJsonWorkRecord)
+      });
+      
+      console.log(`Updating JSON work record for processId: ${processId}`);
+      console.log('Updated JSON Work Record:', updatedJsonWorkRecord);
+      
+      // Simulate successful submission
+      return {
+        success: true,
+        message: 'JSON work record updated successfully'
+      };
+    } catch (error) {
+      console.error('Error updating JSON work record:', error);
+      return {
+        success: false,
+        message: 'Failed to update JSON work record'
+      };
+    }
+  }
+
   // Get form elements by section for easier form rendering
   getFormElementsBySection(formElements: FormElement[]) {
     const sections = {

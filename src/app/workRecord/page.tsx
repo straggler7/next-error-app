@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
-import ErrorSidebar from "../../components/ErrorSidebar";
 import FormSection, { FormField, FormInput } from "../../components/FormSection";
 import NotesSection from "../../components/NotesSection";
 import { mockUser } from "../../data/mockData";
@@ -268,9 +267,10 @@ export default function Form4868ERSPage() {
     
     setSubmitting(true);
     try {
-      const result = await workAssignmentService.updateWorkRecord(
+      const result = await workAssignmentService.updateJsonWorkRecord(
         assignedWork.processId, 
-        formElements
+        formElements,
+        jsonWorkRecord
       );
       
       if (result.success) {
@@ -336,7 +336,7 @@ export default function Form4868ERSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 overflow-x-hidden">
       <Header user={mockUser} showBackButton backHref="/home" />
 
       {showFlash && (
@@ -358,32 +358,55 @@ export default function Form4868ERSPage() {
               </span>
             )}
             {landingSelectionData && (
+              // <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+              //   {landingSelectionData.program && `Program: ${landingSelectionData.program}`}
+              //   {landingSelectionData.statusCode && `Status: ${landingSelectionData.statusCode}`}
+              //   {landingSelectionData.serviceCenter && ` | ${landingSelectionData.serviceCenter.toUpperCase()}`}
+              // </span>
               <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
-                {landingSelectionData.program && `Program: ${landingSelectionData.program}`}
-                {landingSelectionData.statusCode && `Status: ${landingSelectionData.statusCode}`}
-                {landingSelectionData.serviceCenter && ` | ${landingSelectionData.serviceCenter.toUpperCase()}`}
-              </span>
+              {landingSelectionData.program && `Service Center: ${landingSelectionData.serviceCenter.toUpperCase()}`}
+            </span>
+
             )}
           </div>
-          <button className="inline-flex items-center gap-2 px-6 py-2 bg-[#0f507e] text-white text-sm font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm">
+          {/* <button className="inline-flex items-center gap-2 px-6 py-2 bg-[#0f507e] text-white text-sm font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm">
             View RRD Data
-          </button>
+          </button> */}
         </div>
-        {console.log(jsonWorkRecord)}
       </div>
 
-      {/* Layout */}
-      <div className="flex flex-col lg:grid lg:grid-cols-[25%_75%] gap-4 px-4 pb-4">
-        {/* Left Sidebar */}
-        <div className="flex flex-col gap-4">
-          <ErrorSidebar errors={errorItems} onErrorSelect={handleErrorClick} selectedErrorId={selectedErrorId} />
-          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col">
-            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">Notes</h3>
-            <NotesSection notes={mockNotes} onAddNote={(content) => console.log("Add note:", content)} />
-          </div>
+      {/* Error Badges Section */}
+      <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
+        <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">Active Errors</div>
+        <div className="error-badges-container flex flex-wrap gap-2">
+          {errorItems.map((error) => (
+            <div
+              key={error.id}
+              className={`error-badge cursor-pointer transition-all duration-200 px-3.5 py-2 rounded-2xl text-sm font-medium flex items-center gap-2 ${
+                selectedErrorId === error.id
+                  ? 'bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5'
+                  : 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md'
+              }`}
+              onClick={() => handleErrorClick(error)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-80">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+              {error.code} - {error.description}
+            </div>
+          ))}
+          {errorItems.length === 0 && (
+            <div className="text-gray-500 text-sm italic">No active errors</div>
+          )}
         </div>
-        {/* Main Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col" style={{ height: "fit-content" }}>
+      </div>
+
+      {/* Main Content Grid - 60% Form / 40% Notes */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
+        {/* Form Section (Left 60%) */}
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
             <form className="space-y-8">
               <FormSection 
@@ -396,7 +419,7 @@ export default function Form4868ERSPage() {
                 <div className="space-y-8 px-1">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Editable Fields</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {editableFieldKeys.map((key) => (
                         <FormField
                           key={key}
@@ -465,6 +488,27 @@ export default function Form4868ERSPage() {
             >
               Close Out
             </button>
+            <button
+              type="button"
+              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
+              onClick={() => {
+                clearFieldHighlight();
+                console.log("Delete form");
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+
+        {/* Notes Section (Right 40%) */}
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col max-h-[600px] min-w-0 overflow-hidden">
+          <div className="notes-title text-lg font-semibold mb-4 pb-2 border-b border-gray-200 text-gray-700 flex-shrink-0">
+            Resolution Notes
+          </div>
+          
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <NotesSection notes={mockNotes} onAddNote={(content) => console.log("Add note:", content)} />
           </div>
         </div>
       </div>

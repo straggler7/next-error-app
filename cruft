@@ -401,3 +401,19 @@ docker-compose up --build
 
 docker-compose up -d
 docker-compose down
+
+========================================
+json-form-and-landing-page changes
+
+src/app/form4868-ers/page.tsx
+modified:   cruft
+modified:   src/app/form4868-ers/page.tsx
+modified:   src/app/globals.css
+new file:   src/app/home/page.tsx
+new file:   src/app/landing/page.tsx
+new file:   src/app/workRecord/page.tsx
+modified:   src/components/Header.tsx
+new file:   src/services/landingSearchService.ts
+modified:   src/services/workAssignmentService.ts
+
+====

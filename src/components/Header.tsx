@@ -23,7 +23,7 @@ export default function Header({ user, showBackButton = false, backHref = '/' }:
               href={backHref}
               className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 hover:bg-white/20 hover:border-white/30 hover:-translate-y-0.5 whitespace-nowrap"
             >
-              <span className="hidden sm:inline">← Back to Submissions</span>
+              <span className="hidden sm:inline">← Back</span>
               <span className="sm:hidden">← Back</span>
             </Link>
           )}
