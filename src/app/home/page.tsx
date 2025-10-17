@@ -190,22 +190,38 @@ export default function HomePage() {
     if (!isSubmitButtonEnabled) return;
     
     try {
-      // Store selections and navigate to form4868-ers
-      const selectionResult = await landingSearchService.selectProgramAndServiceCenter({
-        program: programForm.program,
-        statusCode: programForm.statusCode,
-        serviceCenter: programForm.serviceCenter
+      // Make GET request to auto-assign endpoint with headers
+      const response = await fetch('/api/v1/era/inventories/auto-assign', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SERVICE_CENTER': programForm.serviceCenter.toUpperCase(),
+          'PROGRAM_CODE': programForm.program || programForm.statusCode,
+          'SEID': 'u1000'
+        }
       });
-      
-      if (selectionResult.success) {
-        // Navigate to form4868-ers page
+
+      if (response.ok) {
+        const eraDto = await response.json();
+        
+        // Store the ERA DTO data for the workRecord page
+        sessionStorage.setItem('eraDto', JSON.stringify(eraDto));
+        sessionStorage.setItem('selectionData', JSON.stringify({
+          program: programForm.program,
+          statusCode: programForm.statusCode,
+          serviceCenter: programForm.serviceCenter,
+          seid: 'u1000'
+        }));
+        
+        // Navigate to workRecord page
         router.push('/workRecord');
       } else {
-        setProgramStatusError(selectionResult.message || "Selection failed. Please try again.");
+        const errorText = await response.text();
+        setProgramStatusError(`Failed to get work assignment: ${errorText}`);
       }
     } catch (error) {
       console.error('Program selection error:', error);
-      setProgramStatusError("An error occurred. Please try again.");
+      setProgramStatusError("An error occurred while getting work assignment. Please try again.");
     }
   };
 

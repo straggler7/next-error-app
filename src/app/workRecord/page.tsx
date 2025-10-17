@@ -24,6 +24,8 @@ export default function Form4868ERSPage() {
   const router = useRouter();
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
   const [jsonWorkRecord, setJsonWorkRecord] = useState<any>(null);
+  const [eraDto, setEraDto] = useState<any>(null);
+  const [inventoryId, setInventoryId] = useState<string | null>(null);
   const [formElements, setFormElements] = useState<FormElement[]>([]);
   const [originalFormElements, setOriginalFormElements] = useState<FormElement[]>([]);
   const [landingSearchData, setLandingSearchData] = useState<any>(null);
@@ -46,6 +48,26 @@ export default function Form4868ERSPage() {
       xpath: editableFields[fieldKey]
     }));
   };
+
+  // Convert ERA DTO to form elements
+  const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
+    // Check both workRecord level and root level for editableFields
+    const editableFields = eraData?.workRecord?.editableFields || eraData?.editableFields;
+    if (!editableFields) return [];
+    
+    // Get the data source (workRecord or root)
+    const dataSource = eraData?.workRecord || eraData;
+    
+    return Object.keys(editableFields).map((fieldKey, index) => ({
+      id: fieldKey,
+      name: fieldKey,
+      label: toLabel(fieldKey),
+      value: dataSource[fieldKey] || '',
+      type: 'text',
+      ERSEditable: true,
+      xpath: editableFields[fieldKey]
+    }));
+  };
   const [loading, setLoading] = useState(true);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>('');
@@ -54,11 +76,28 @@ export default function Form4868ERSPage() {
 
   // Convert ERS reason codes to ErrorItem format for sidebar
   const convertErsErrorsToErrorItems = (): ErrorItem[] => {
-    if (!jsonWorkRecord?.workRecord) return [];
+    // Try ERA DTO first, then fallback to jsonWorkRecord
+    let errorSource = null;
+    let ersReasonCds: string[] = [];
+    let errReasonCdsMap: Record<string, string> = {};
     
-    const workRecord = jsonWorkRecord.workRecord;
-    const ersReasonCds = workRecord.ersReasonCds || [];
-    const errReasonCdsMap = workRecord.errReasonCdsMap || {};
+    if (eraDto) {
+      // For ERA DTO, check both root level and workRecord level
+      errorSource = eraDto.workRecord || eraDto;
+      ersReasonCds = errorSource.ersReasonCds || [];
+      errReasonCdsMap = errorSource.errReasonCdsMap || {};
+    } else if (jsonWorkRecord?.workRecord) {
+      errorSource = jsonWorkRecord.workRecord;
+      ersReasonCds = errorSource.ersReasonCds || [];
+      errReasonCdsMap = errorSource.errReasonCdsMap || {};
+    }
+    
+    if (!errorSource || ersReasonCds.length === 0) {
+      console.log('No errors found. ErrorSource:', errorSource, 'ersReasonCds:', ersReasonCds);
+      return [];
+    }
+    
+    // console.log('Converting errors:', ersReasonCds, 'with map:', errReasonCdsMap);
     
     return ersReasonCds.map((code: string, index: number) => ({
       id: `ers-error-${index}`,
@@ -128,23 +167,47 @@ export default function Form4868ERSPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Check if user came from landing page
-    const searchData = landingSearchService.getStoredSearchData();
-    const selectionData = landingSearchService.getStoredSelectionData();
-    const searchType = landingSearchService.getSearchType();
+    // Load ERA DTO from sessionStorage
+    const storedEraDto = sessionStorage.getItem('eraDto');
+    const storedSelectionData = sessionStorage.getItem('selectionData');
     
-    if (searchData) {
-      setLandingSearchData(searchData);
-      console.log('Landing page search data found:', searchData);
+    if (storedEraDto) {
+      const eraDtoData = JSON.parse(storedEraDto);
+      setEraDto(eraDtoData);
+      setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
+      
+      // Convert ERA DTO to form elements
+      const elements = convertEraDtoToFormElements(eraDtoData);
+      setFormElements(elements);
+      setOriginalFormElements([...elements]);
+      
+      console.log('ERA DTO loaded from sessionStorage:', eraDtoData);
+      console.log('Form elements created:', elements);
+      console.log('ERA DTO workRecord:', eraDtoData.workRecord);
+    } else {
+      // Fallback: Load from eraDto.json for development/testing
+      import('../../data/eraDto.json').then((eraData) => {
+        setEraDto(eraData.default);
+        setInventoryId(String(eraData.default.inventoryId));
+        
+        // Convert ERA DTO to form elements
+        const elements = convertEraDtoToFormElements(eraData.default);
+        setFormElements(elements);
+        setOriginalFormElements([...elements]);
+        
+        console.log('ERA DTO loaded from fallback file:', eraData.default);
+        console.log('Form elements created:', elements);
+        console.log('ERA DTO workRecord:', eraData.default.workRecord);
+      });
     }
     
-    if (selectionData) {
+    if (storedSelectionData) {
+      const selectionData = JSON.parse(storedSelectionData);
       setLandingSelectionData(selectionData);
-      console.log('Landing page selection data found:', selectionData);
+      console.log('Selection data loaded:', selectionData);
     }
     
-    // Load assigned work (this will now consider landing page data)
-    loadAssignedWork();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -152,56 +215,79 @@ export default function Form4868ERSPage() {
     setOriginalValues(initialValues);
   }, [initialValues]);
 
-  const loadAssignedWork = async (showLoadingState = true) => {
-    if (showLoadingState) {
-      setLoading(true);
-    }
+  // Load next work record from auto-assign endpoint
+  const loadNextWorkRecord = async () => {
     try {
-      // Step 1: Get assigned work
-      const workResponse = await workAssignmentService.getAssignedWork();
+      setLoading(true);
       
-      if (!workResponse.hasWork) {
+      // Get selection data from sessionStorage
+      const storedSelectionData = sessionStorage.getItem('selectionData');
+      if (!storedSelectionData) {
         setNoWorkAvailable(true);
-        setNoWorkMessage(workResponse.message || 'No work records available to assign at this time.');
-        // Clear existing work data when no work is available
-        setAssignedWork(null);
-        setJsonWorkRecord(null);
-        setFormElements([]);
+        setNoWorkMessage('No selection data available. Please return to home page.');
         return;
       }
       
-      console.log('Setting new assigned work:', workResponse.work!.payloadId);
-      setAssignedWork(workResponse.work!);
-      setNoWorkAvailable(false);
+      const selectionData = JSON.parse(storedSelectionData);
       
-      // Step 2: Get work record using payloadId
-      const record = await workAssignmentService.getJsonWorkRecord(workResponse.work!.payloadId);
-      console.log('Setting new work record and form elements from json');
-      console.log(record);
-      setJsonWorkRecord(record);
-      const elements = convertJsonWorkRecordToFormElements(record);
-      console.log('Converted form elements:', elements);
-      setFormElements(elements);
-      setOriginalFormElements([...elements]);
-    } catch (error) {
-      console.error('Error loading assigned work:', error);
-    } finally {
-      if (showLoadingState) {
-        setLoading(false);
+      // Make GET request to auto-assign endpoint
+      const response = await fetch('/api/v1/era/inventories/auto-assign', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SERVICE_CENTER': selectionData.serviceCenter.toUpperCase(),
+          'PROGRAM_CODE': selectionData.program || selectionData.statusCode,
+          'SEID': selectionData.seid || 'u1000'
+        }
+      });
+
+      if (response.ok) {
+        const eraDtoData = await response.json();
+        
+        // Update state with new ERA DTO
+        setEraDto(eraDtoData);
+        setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
+        
+        // Convert to form elements
+        const elements = convertEraDtoToFormElements(eraDtoData);
+        setFormElements(elements);
+        setOriginalFormElements([...elements]);
+        
+        // Update sessionStorage
+        sessionStorage.setItem('eraDto', JSON.stringify(eraDtoData));
+        
+        setNoWorkAvailable(false);
+        console.log('New work record loaded:', eraDtoData);
+      } else if (response.status === 204) {
+        setNoWorkAvailable(true);
+        setNoWorkMessage('No more work records available at this time.');
+      } else {
+        throw new Error(`Failed to get work assignment: ${response.statusText}`);
       }
+    } catch (error) {
+      console.error('Error loading next work record:', error);
+      setNoWorkAvailable(true);
+      setNoWorkMessage('Error loading work record. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getDLN = () => jsonWorkRecord?.workRecord?.dln || ersWorkRecord?.dln || "N/A";
+  const getDLN = () => eraDto?.dln || jsonWorkRecord?.workRecord?.dln || ersWorkRecord?.dln || "N/A";
 
   const handleInputChange = (fieldKey: string, val: string) => {
+    console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
+    
     if (formElements.length > 0) {
       // Update form elements if using API data
       setFormElements(prev => {
-        return workAssignmentService.updateFormElementValue(prev, fieldKey, val);
+        const updated = workAssignmentService.updateFormElementValue(prev, fieldKey, val);
+        console.log(`Updated formElements for ${fieldKey}:`, updated.find(el => el.name === fieldKey));
+        return updated;
       });
     } else {
       // Update local values if using ersDto fallback
+      console.log(`Updating local values for ${fieldKey}`);
       setValues((prev) => ({ ...prev, [fieldKey]: val }));
     }
   };
@@ -248,17 +334,10 @@ export default function Form4868ERSPage() {
   const [showFlash, setShowFlash] = useState(false);
 
   const handleSubmit = async () => {
-    if (!assignedWork) {
-      // Fallback behavior when no assigned work
-      setHighlightedFields([]);
-      setSubmitting(true);
-      try {
-        setFlashMessage("Form submitted successfully");
-        setShowFlash(true);
-        setTimeout(() => setShowFlash(false), 3000);
-      } finally {
-        setSubmitting(false);
-      }
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available. Please return to home page.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
       return;
     }
 
@@ -267,33 +346,73 @@ export default function Form4868ERSPage() {
     
     setSubmitting(true);
     try {
-      const result = await workAssignmentService.updateJsonWorkRecord(
-        assignedWork.processId, 
-        formElements,
-        jsonWorkRecord
-      );
+      // Create updated ERA DTO with form changes
+      const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
       
-      if (result.success) {
-        // Show initial success message
-        setFlashMessage('Form submitted successfully');
+      // Ensure workRecord exists
+      if (!updatedEraDto.workRecord) {
+        updatedEraDto.workRecord = {};
+      }
+      
+      // Update form element values in the workRecord section
+      formElements.forEach(element => {
+        console.log(`Updating field ${element.name}: "${element.value}"`);
+        updatedEraDto.workRecord[element.name] = element.value;
+      });
+      
+      console.log('Original ERA DTO:', eraDto);
+      console.log('Updated ERA DTO being sent:', updatedEraDto);
+      console.log('Form elements being applied:', formElements);
+      console.log('WorkRecord after updates:', updatedEraDto.workRecord);
+      
+      // POST to revalidate endpoint
+      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/revalidate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedEraDto)
+      });
+      
+      if (response.status === 200) {
+        // Get the updated record from response and show form
+        const updatedRecord = await response.json();
+        
+        setEraDto(updatedRecord);
+        setInventoryId(updatedRecord.inventoryId || updatedRecord.id);
+        
+        // Convert to form elements
+        const elements = convertEraDtoToFormElements(updatedRecord);
+        setFormElements(elements);
+        setOriginalFormElements([...elements]);
+        
+        // Update sessionStorage
+        sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
+        
+        setFlashMessage('Form submitted successfully and record updated');
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 4000);
+        
+      } else if (response.status === 204) {
+        // No content - get next record from auto-assign
+        setFlashMessage('Form submitted successfully. Loading next record...');
         setShowFlash(true);
         
-        // Fetch new assigned work after successful submission
         try {
-          console.log('Before loadAssignedWork - Current assignedWork:', assignedWork?.payloadId);
-          await loadAssignedWork(false); // Skip loading state to avoid UI blocking
-          console.log('After loadAssignedWork completed');
+          await loadNextWorkRecord();
           setFlashMessage('Form submitted successfully and new record retrieved');
         } catch (fetchError) {
-          console.error('Error fetching new assigned work:', fetchError);
+          console.error('Error fetching next work record:', fetchError);
           setFlashMessage('Form submitted successfully but failed to fetch new record');
         }
         
-        // Hide flash message after 4 seconds (longer to show the full message)
-        setTimeout(() => {
-          setShowFlash(false);
-        }, 4000);
+        setTimeout(() => setShowFlash(false), 4000);
+        
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Revalidate failed: ${errorText}`);
       }
+      
     } catch (error) {
       console.error('Error submitting form:', error);
       setFlashMessage('Error submitting form. Please try again.');
@@ -316,7 +435,7 @@ export default function Form4868ERSPage() {
     );
   }
 
-  if (noWorkAvailable) {
+  if (noWorkAvailable || (!loading && !eraDto)) {
     return (
       <div className="min-h-screen bg-gray-100">
         <Header user={mockUser} showBackButton backHref="/home" />
@@ -412,8 +531,8 @@ export default function Form4868ERSPage() {
               <FormSection 
                 title="Form 4868 - Application for Automatic Extension"
                 metadata={{
-                  receivedDate: jsonWorkRecord?.workRecord?.transDt ? new Date(jsonWorkRecord.workRecord.transDt).toLocaleDateString() : (ersWorkRecord?.transDt ? new Date(ersWorkRecord.transDt).toLocaleDateString() : undefined),
-                  taxPeriod: ersWorkRecord?.taxPrd,
+                  receivedDate: eraDto?.transDt ? new Date(eraDto.transDt).toLocaleDateString() : (jsonWorkRecord?.workRecord?.transDt ? new Date(jsonWorkRecord.workRecord.transDt).toLocaleDateString() : (ersWorkRecord?.transDt ? new Date(ersWorkRecord.transDt).toLocaleDateString() : undefined)),
+                  taxPeriod: eraDto?.taxPrd || ersWorkRecord?.taxPrd,
                 }}
               >
                 <div className="space-y-8 px-1">
