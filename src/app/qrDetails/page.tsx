@@ -322,7 +322,7 @@ export default function QRDetailsPage() {
 
         {/* Error Badges Section */}
         {qrData?.metadata.errors && qrData.metadata.errors.length > 0 && (
-          <div className="bg-white rounded-xl p-5 mb-6 shadow-sm border border-gray-100">
+          <div className="bg-white rounded-xl p-5 mb-6 shadow-sm border border-gray-100" style={{display: 'none'}}>
             <div className="flex items-center gap-2 mb-4">
               <AlertCircle className="w-5 h-5 text-red-600" />
               <h3 className="text-base font-semibold text-gray-900">Active Errors</h3>
