@@ -5,10 +5,11 @@ import { FilterState } from '../types';
 
 interface FilterBarProps {
   filters: FilterState;
-  onFilterChange: (filters: FilterState) => void;
+  onFiltersChange: (filters: FilterState) => void;
+  showQRFilters?: boolean;
 }
 
-export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
+export default function FilterBar({ filters, onFiltersChange, showQRFilters = false }: FilterBarProps) {
   const assignees = [
     'All Assignees',
     'Unassigned',
@@ -19,7 +20,13 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
     'Brown, Michael'
   ];
 
-  const statuses = [
+  const statuses = showQRFilters ? [
+    'All QR Status',
+    'pending',
+    'approved',
+    'rejected',
+    'rework'
+  ] : [
     'All Status',
     'New',
     'Assigned',
@@ -40,7 +47,7 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
             type="text"
             placeholder="Search ID, DLN, Form Type..."
             value={filters.searchAll}
-            onChange={(e) => onFilterChange({ ...filters, searchAll: e.target.value })}
+            onChange={(e) => onFiltersChange({ ...filters, searchAll: e.target.value })}
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm w-full sm:min-w-64 lg:min-w-80 transition-all duration-200 focus:outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
           />
         </div>
@@ -48,7 +55,7 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
         <div className="flex gap-3 sm:gap-4">
           <select
             value={filters.assignedTo}
-            onChange={(e) => onFilterChange({ ...filters, assignedTo: e.target.value })}
+            onChange={(e) => onFiltersChange({ ...filters, assignedTo: e.target.value })}
             className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm flex-1 sm:min-w-36 cursor-pointer transition-all duration-200 focus:outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
           >
             {assignees.map((assignee) => (
@@ -60,11 +67,11 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
           
           <select
             value={filters.status}
-            onChange={(e) => onFilterChange({ ...filters, status: e.target.value })}
+            onChange={(e) => onFiltersChange({ ...filters, status: e.target.value })}
             className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm flex-1 sm:min-w-36 cursor-pointer transition-all duration-200 focus:outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
           >
             {statuses.map((status) => (
-              <option key={status} value={status === 'All Status' ? '' : status}>
+              <option key={status} value={status === 'All Status' || status === 'All QR Status' ? '' : status}>
                 {status}
               </option>
             ))}

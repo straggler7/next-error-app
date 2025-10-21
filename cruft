@@ -417,3 +417,25 @@ new file:   src/services/landingSearchService.ts
 modified:   src/services/workAssignmentService.ts
 
 ====
+
+Taxpayer Name Control(01NC)
+Name Control():
+Taxpayer Identification Number(01TIN)
+NAP Access Indicator(01NA1)
+NAP EIF Response Indicator(01NR1)
+Tax Period(01TXP)
+Transaction Date(01TDT)
+Master File Tax Code(01MFT)
+Primary Transaction Code(01TC)
+Secondary Transaction Code(01STC)
+Tertiary Transaction Code(01TTC)
+Doc Code(01DC)
+
+search-form (flex flex-col gap-6)
+└── search-fields-grid (flex flex-col gap-6)
+    ├── form-group (DLN)
+    ├── form-group (Name Control)
+    ├── form-group (TIN)
+    ├── form-group (Taxpayer Name)
+    ├── search-input-group (button)
+    └── error-message

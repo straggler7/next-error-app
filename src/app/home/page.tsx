@@ -17,6 +17,8 @@ interface ProgramFormData {
   program: string;
   statusCode: string;
   serviceCenter: string;
+  seid: string;
+  qualityReview: boolean;
 }
 
 export default function HomePage() {
@@ -34,7 +36,9 @@ export default function HomePage() {
   const [programForm, setProgramForm] = useState<ProgramFormData>({
     program: "",
     statusCode: "",
-    serviceCenter: "austin"
+    serviceCenter: "austin",
+    seid: "",
+    qualityReview: false
   });
   
   // UI state
@@ -197,7 +201,7 @@ export default function HomePage() {
           'Content-Type': 'application/json',
           'SERVICE_CENTER': programForm.serviceCenter.toUpperCase(),
           'PROGRAM_CODE': programForm.program || programForm.statusCode,
-          'SEID': 'u1000'
+          'SEID': programForm.seid || 'u1000'
         }
       });
 
@@ -210,11 +214,16 @@ export default function HomePage() {
           program: programForm.program,
           statusCode: programForm.statusCode,
           serviceCenter: programForm.serviceCenter,
-          seid: 'u1000'
+          seid: programForm.seid || 'u1000'
         }));
         
-        // Navigate to workRecord page
-        router.push('/workRecord');
+        // Navigate to QR Inventory if quality review is selected, otherwise workRecord
+        if (programForm.qualityReview) {
+        //   router.push(`/qrInventory${programForm.seid ? `?seid=${programForm.seid}` : ''}`);
+          router.push(`/qrInventory`);
+        } else {
+          router.push('/workRecord');
+        }
       } else {
         const errorText = await response.text();
         setProgramStatusError(`Failed to get work assignment: ${errorText}`);
@@ -230,171 +239,144 @@ export default function HomePage() {
       <Header user={mockUser} />
       
       <div className="main-container flex flex-col p-4">
-        <div className="content-layout flex flex-col items-center gap-3">
-          <div className="main-content bg-white rounded-xl shadow-lg p-5 flex flex-col items-center justify-start w-full max-w-4xl overflow-visible">
-            <div className="content-wrapper w-full flex flex-col items-center gap-0">
+        <div className="content-layout flex flex-col items-center gap-6">
+          
+          {/* Welcome Section */}
+          <div className="welcome-section text-center mb-8 w-full max-w-6xl">
+            <h1 className="welcome-title text-3xl font-semibold text-[#003d6b] mb-2">
+              Welcome to ERA
+            </h1>
+            <p className="welcome-subtitle text-base text-gray-500 mb-4 leading-relaxed hidden">
+              Search by DLN, Name Control, TIN, or Taxpayer Name, or select your program/status code and service center to begin error resolution processing.
+            </p>
+          </div>
+
+          {/* Two-Card Layout */}
+          <div className="cards-container grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl">
+            
+            {/* Left Card: Program & Status Code Selection */}
+            <div className="card bg-white rounded-xl p-8 border" style={{ 
+              borderRadius: '12px', 
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
+              borderColor: '#f1f3f4' 
+            }}>
+              <h2 className="card-title text-xl font-semibold text-[#003d6b] mb-6 pb-3" style={{ borderBottom: '2px solid #e9ecef' }}>
+                Program & Status Code Selection
+              </h2>
               
-              {/* Welcome Section */}
-              <div className="welcome-section text-center mb-4 w-full">
-                <h1 className="welcome-title text-3xl font-semibold text-[#003d6b] mb-2">
-                  Welcome to ERA
-                </h1>
-                <p className="welcome-subtitle text-base text-gray-500 mb-4 leading-relaxed hidden">
-                  Search by DLN, Name Control, TIN, or Taxpayer Name, or select your program/status code and service center to begin error resolution processing.
-                </p>
-              </div>
+              <form className="selection-form flex flex-col gap-6" onSubmit={handleProgramSubmit}>
+                {/* Quality Review Section */}
+                <div className="checkbox-container flex items-center gap-3 mb-4">
+                  <input 
+                    type="checkbox" 
+                    id="qualityReviewCheckbox" 
+                    className="w-5 h-5 accent-blue-600"
+                    checked={programForm.qualityReview}
+                    onChange={(e) => setProgramForm(prev => ({ ...prev, qualityReview: e.target.checked }))}
+                  />
+                  <label className="checkbox-label font-semibold text-gray-800 text-base cursor-pointer" htmlFor="qualityReviewCheckbox">
+                    Work on Quality Review
+                  </label>
+                </div>
 
-              {/* Enhanced Search Section */}
-              <div className="search-section w-full max-w-3xl mb-3">
-                <form className="dln-search-form w-full flex flex-col gap-3" onSubmit={handleSearchSubmit}>
+                {/* SEID Field - shown when quality review is checked */}
+                {programForm.qualityReview && (
                   <div className="form-group">
-                    <div className="search-fields-grid grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
-                      <div className="form-group">
-                        <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="dlnInput">
-                          DLN Number
-                        </label>
-                        <input
-                          type="text"
-                          className="form-input w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300"
-                          id="dlnInput"
-                          name="dln"
-                          placeholder="Enter 17-digit DLN"
-                          maxLength={20}
-                          value={searchForm.dln}
-                          onChange={(e) => handleSearchInputChange('dln', e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="nameControlInput">
-                          Name Control
-                        </label>
-                        <input
-                          type="text"
-                          className="form-input w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300"
-                          id="nameControlInput"
-                          name="nameControl"
-                          placeholder="Enter name control"
-                          maxLength={4}
-                          value={searchForm.nameControl}
-                          onChange={(e) => handleSearchInputChange('nameControl', e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="tinInput">
-                          TIN
-                        </label>
-                        <input
-                          type="text"
-                          className="form-input w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300"
-                          id="tinInput"
-                          name="tin"
-                          placeholder="Enter TIN (SSN/EIN)"
-                          maxLength={11}
-                          value={searchForm.tin}
-                          onChange={(e) => handleSearchInputChange('tin', e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="taxpayerNameInput">
-                          Taxpayer Name
-                        </label>
-                        <input
-                          type="text"
-                          className="form-input w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300"
-                          id="taxpayerNameInput"
-                          name="taxpayerName"
-                          placeholder="Enter taxpayer name"
-                          maxLength={50}
-                          value={searchForm.taxpayerName}
-                          onChange={(e) => handleSearchInputChange('taxpayerName', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="search-input-group flex gap-3 items-stretch w-full justify-center">
-                      <button
-                        type="submit"
-                        className={`btn btn-primary search-btn px-7 py-3.5 rounded-lg font-semibold transition-all duration-200 min-w-[180px] ${
-                          isSearchButtonEnabled
-                            ? 'bg-[#0066cc] text-white hover:bg-[#0052a3] hover:shadow-lg'
-                            : 'bg-gray-400 text-gray-500 cursor-not-allowed'
-                        }`}
-                        disabled={!isSearchButtonEnabled}
-                      >
-                        Search Records
-                      </button>
-                    </div>
-                    {searchError && (
-                      <div className="error-message text-red-600 text-sm mt-2 font-medium">
-                        {searchError}
-                      </div>
-                    )}
-                  </div>
-                </form>
-              </div>
-
-              {/* Section Divider */}
-              <div className="section-divider flex items-center justify-center w-full my-6 relative">
-                <span className="divider-text bg-white px-4 text-sm text-gray-500 relative z-10">
-                  select program code or status code
-                </span>
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-              </div>
-
-              {/* Program Selection Form */}
-              <form className="selection-form w-full max-w-2xl" onSubmit={handleProgramSubmit}>
-                <div className="form-row flex flex-col md:flex-row gap-6 mb-4">
-                  <div className="form-group flex-1">
-                    <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="programSelect">
-                      Program Selection
+                    <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="seidInput">
+                      SEID
                     </label>
-                    <select
-                      className="form-select w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300 cursor-pointer"
-                      id="programSelect"
-                      name="program"
-                      value={programForm.program}
-                      onChange={(e) => handleProgramInputChange('program', e.target.value)}
-                    >
-                      <option value="">Select a program...</option>
-                      <option value="44720">44720</option>
-                      <option value="44730">44730</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group flex-1">
-                    <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
-                      Status Code
-                    </label>
-                    <select
-                      className="form-select w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300 cursor-pointer"
-                      id="statusCodeSelect"
-                      name="statusCode"
-                      value={programForm.statusCode}
-                      onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
-                    >
-                      <option value="">Select a status code...</option>
-                      <option value="224">Status Code 224</option>
-                      <option value="225">Status Code 225</option>
-                      <option value="226">Status Code 226</option>
-                    </select>
-                  </div>
-                </div>
-                
-                {programStatusError && (
-                  <div className="error-message text-red-600 text-sm mb-4 font-medium">
-                    {programStatusError}
+                    <input 
+                      type="text" 
+                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                      style={{
+                        padding: '0.875rem 1.125rem',
+                        border: '2px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.4',
+                        background: '#fafafa',
+                        color: '#374151'
+                      }}
+                      id="seidInput" 
+                      name="seid" 
+                      placeholder="Enter SEID"
+                      maxLength={20}
+                      value={programForm.seid}
+                      onChange={(e) => handleProgramInputChange('seid', e.target.value)}
+                    />
                   </div>
                 )}
 
-                <div className="form-group mb-6">
+                <div className="form-group">
+                  <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="programSelect">
+                    Program Selection
+                  </label>
+                  <select 
+                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                    style={{
+                      padding: '0.875rem 1.125rem',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.4',
+                      background: '#fafafa',
+                      color: '#374151'
+                    }}
+                    id="programSelect" 
+                    name="program"
+                    value={programForm.program}
+                    onChange={(e) => handleProgramInputChange('program', e.target.value)}
+                  >
+                    <option value="">Select a program...</option>
+                    <option value="44720">44720</option>
+                    <option value="44730">44730</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
+                    Status Code
+                  </label>
+                  <select 
+                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                    style={{
+                      padding: '0.875rem 1.125rem',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.4',
+                      background: '#fafafa',
+                      color: '#374151'
+                    }}
+                    id="statusCodeSelect" 
+                    name="statusCode"
+                    value={programForm.statusCode}
+                    onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
+                  >
+                    <option value="">Select a status code...</option>
+                    <option value="224">Status Code 224</option>
+                    <option value="225">Status Code 225</option>
+                    <option value="226">Status Code 226</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
                     Service Center
                   </label>
-                  <select
-                    className="form-select w-full px-4 py-3.5 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-150 text-gray-700 hover:border-gray-300 cursor-pointer"
-                    id="serviceCenterSelect"
-                    name="serviceCenter"
+                  <select 
+                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                    style={{
+                      padding: '0.875rem 1.125rem',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.4',
+                      background: '#fafafa',
+                      color: '#374151'
+                    }}
+                    id="serviceCenterSelect" 
+                    name="serviceCenter" 
                     required
                     value={programForm.serviceCenter}
                     onChange={(e) => handleProgramInputChange('serviceCenter', e.target.value)}
@@ -405,26 +387,209 @@ export default function HomePage() {
                     <option value="charlotte">Charlotte</option>
                   </select>
                   {serviceCenterError && (
-                    <div className="error-message text-red-600 text-sm mt-1 font-medium">
+                    <div className="error-message text-red-600 text-sm mt-1 italic">
                       {serviceCenterError}
                     </div>
                   )}
                 </div>
 
-                <div className="action-section flex justify-center">
-                  <button
-                    type="submit"
-                    className={`btn btn-primary px-8 py-3.5 rounded-lg font-semibold transition-all duration-200 min-w-[180px] ${
-                      isSubmitButtonEnabled
-                        ? 'bg-[#0066cc] text-white hover:bg-[#0052a3] hover:shadow-lg'
-                        : 'bg-gray-400 text-gray-500 cursor-not-allowed'
-                    }`}
+                <div className="action-section">
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary w-full font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      border: '2px solid #0066cc',
+                      borderRadius: '8px',
+                      backgroundColor: isSubmitButtonEnabled ? '#0066cc' : '#9ca3af',
+                      borderColor: isSubmitButtonEnabled ? '#0066cc' : '#9ca3af',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      minWidth: '180px'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (isSubmitButtonEnabled) {
+                        e.currentTarget.style.backgroundColor = '#0052a3';
+                        e.currentTarget.style.borderColor = '#0052a3';
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 102, 204, 0.2)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (isSubmitButtonEnabled) {
+                        e.currentTarget.style.backgroundColor = '#0066cc';
+                        e.currentTarget.style.borderColor = '#0066cc';
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'none';
+                      }
+                    }}
                     disabled={!isSubmitButtonEnabled}
                   >
-                    Continue to Details
+                    {programForm.qualityReview ? 'Continue to QR' : 'Continue to Details'}
                   </button>
+                  {programStatusError && (
+                    <div className="error-message text-red-600 text-sm mt-2 italic">
+                      {programStatusError}
+                    </div>
+                  )}
                 </div>
               </form>
+            </div>
+
+            {/* Right Card: Search Records */}
+            <div className="card bg-white rounded-xl p-8 border" style={{ 
+              borderRadius: '12px', 
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
+              borderColor: '#f1f3f4' 
+            }}>
+              <h2 className="card-title text-xl font-semibold text-[#003d6b] mb-6 pb-3" style={{ borderBottom: '2px solid #e9ecef' }}>
+                Search Records
+              </h2>
+              
+              <div className="search-section w-full">
+                <form className="search-form w-full flex flex-col gap-6" onSubmit={handleSearchSubmit}>
+                  <div className="search-fields-grid flex flex-col gap-6 w-full">
+                    <div className="form-group">
+                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="dlnInput">
+                        DLN Number
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        style={{
+                          padding: '0.875rem 1.125rem',
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '0.95rem',
+                          lineHeight: '1.4',
+                          background: '#fafafa',
+                          color: '#374151'
+                        }}
+                        id="dlnInput"
+                        name="dln"
+                        placeholder="Enter 17-digit DLN"
+                        maxLength={20}
+                        value={searchForm.dln}
+                        onChange={(e) => handleSearchInputChange('dln', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="nameControlInput">
+                        Name Control
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        style={{
+                          padding: '0.875rem 1.125rem',
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '0.95rem',
+                          lineHeight: '1.4',
+                          background: '#fafafa',
+                          color: '#374151'
+                        }}
+                        id="nameControlInput"
+                        name="nameControl"
+                        placeholder="Enter name control"
+                        maxLength={4}
+                        value={searchForm.nameControl}
+                        onChange={(e) => handleSearchInputChange('nameControl', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="tinInput">
+                        TIN
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        style={{
+                          padding: '0.875rem 1.125rem',
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '0.95rem',
+                          lineHeight: '1.4',
+                          background: '#fafafa',
+                          color: '#374151'
+                        }}
+                        id="tinInput"
+                        name="tin"
+                        placeholder="Enter TIN (SSN/EIN)"
+                        maxLength={11}
+                        value={searchForm.tin}
+                        onChange={(e) => handleSearchInputChange('tin', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="taxpayerNameInput">
+                        Taxpayer Name
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        style={{
+                          padding: '0.875rem 1.125rem',
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '0.95rem',
+                          lineHeight: '1.4',
+                          background: '#fafafa',
+                          color: '#374151'
+                        }}
+                        id="taxpayerNameInput"
+                        name="taxpayerName"
+                        placeholder="Enter taxpayer name"
+                        maxLength={50}
+                        value={searchForm.taxpayerName}
+                        onChange={(e) => handleSearchInputChange('taxpayerName', e.target.value)}
+                      />
+                    </div>
+                    <div className="search-input-group">
+                      <button
+                        type="submit"
+                        className="btn btn-primary search-btn w-full font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                        style={{
+                          padding: '0.75rem 1.5rem',
+                          border: '2px solid #0066cc',
+                          borderRadius: '8px',
+                          backgroundColor: isSearchButtonEnabled ? '#0066cc' : '#9ca3af',
+                          borderColor: isSearchButtonEnabled ? '#0066cc' : '#9ca3af',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          minWidth: '120px'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (isSearchButtonEnabled) {
+                            e.currentTarget.style.backgroundColor = '#0052a3';
+                            e.currentTarget.style.borderColor = '#0052a3';
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 102, 204, 0.2)';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (isSearchButtonEnabled) {
+                            e.currentTarget.style.backgroundColor = '#0066cc';
+                            e.currentTarget.style.borderColor = '#0066cc';
+                            e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.transform = 'none';
+                          }
+                        }}
+                        disabled={!isSearchButtonEnabled}
+                      >
+                        Search Records
+                      </button>
+                    </div>
+                    {searchError && (
+                      <div className="error-message text-red-600 text-sm mt-2 italic">
+                        {searchError}
+                      </div>
+                    )}
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>

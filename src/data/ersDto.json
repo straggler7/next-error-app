@@ -93,6 +93,8 @@
         "irsInARowInd":null,
         "filler_4":null,
         "NameCtrlUndrprt":null,
+        "napAccessInd": "2",
+        "eifAccessInd": "3",
         "napEifTaxPrdUndrprt":null,
         "preparerSsn":null,
         "preparerEin":null,

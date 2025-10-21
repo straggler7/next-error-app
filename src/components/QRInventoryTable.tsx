@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,30 +8,25 @@ import {
   createColumnHelper,
   ColumnDef,
 } from '@tanstack/react-table';
-import { SubmissionRecord } from '../types';
-import StatusBadge from './StatusBadge';
+import { QRInventoryRecord } from '../services/qrInventoryService';
 
-interface TanStackInventoryTableProps<T = SubmissionRecord> {
-  records: T[];
+interface QRInventoryTableProps {
+  records: QRInventoryRecord[];
   selectedRecords: string[];
   onSelectionChange: (selectedIds: string[]) => void;
-  onRowClick?: (record: T) => void;
-  columns?: ColumnDef<T, any>[];
-  getRecordId?: (record: T) => string;
+  onRowClick?: (record: QRInventoryRecord) => void;
 }
 
-const columnHelper = createColumnHelper<SubmissionRecord>();
+const columnHelper = createColumnHelper<QRInventoryRecord>();
 
-export default function TanStackInventoryTable<T = SubmissionRecord>({ 
+export default function QRInventoryTable({ 
   records, 
   selectedRecords, 
   onSelectionChange,
-  onRowClick,
-  columns: customColumns,
-  getRecordId = (record: T) => (record as any).id
-}: TanStackInventoryTableProps<T>) {
+  onRowClick
+}: QRInventoryTableProps) {
   
-  const defaultColumns = useMemo<ColumnDef<SubmissionRecord, any>[]>(() => [
+  const columns = useMemo<ColumnDef<QRInventoryRecord, any>[]>(() => [
     columnHelper.display({
       id: 'select',
       header: ({ table }) => (
@@ -46,10 +40,11 @@ export default function TanStackInventoryTable<T = SubmissionRecord>({
       cell: ({ row }) => (
         <input
           type="checkbox"
-          checked={selectedRecords.includes((row.original as any).id)}
+          checked={selectedRecords.includes(row.original.id)}
           onChange={(e) => {
+            e.stopPropagation();
             const isChecked = e.target.checked;
-            const recordId = (row.original as any).id;
+            const recordId = row.original.id;
             
             if (isChecked) {
               onSelectionChange([...selectedRecords, recordId]);
@@ -64,13 +59,8 @@ export default function TanStackInventoryTable<T = SubmissionRecord>({
     }),
     columnHelper.accessor('id', {
       header: 'ID',
-      cell: ({ getValue, row }) => (
-        <Link 
-          href={`/details/${(row.original as any).dln}`}
-          className="text-blue-600 hover:text-blue-800 font-medium"
-        >
-          {getValue()}
-        </Link>
+      cell: ({ getValue }) => (
+        <span className="font-medium text-blue-600">{getValue()}</span>
       ),
       size: 120,
     }),
@@ -111,16 +101,39 @@ export default function TanStackInventoryTable<T = SubmissionRecord>({
       },
       size: 200,
     }),
-    columnHelper.accessor('status', {
-      header: 'Status',
-      cell: ({ getValue }) => (
-        <StatusBadge status={getValue()} />
-      ),
-      size: 100,
+    columnHelper.accessor('qrStatus', {
+      header: 'QR Status',
+      cell: ({ getValue }) => {
+        const status = getValue();
+        const statusColors = {
+          pending: 'bg-yellow-100 text-yellow-800',
+          approved: 'bg-green-100 text-green-800',
+          rejected: 'bg-red-100 text-red-800',
+          rework: 'bg-orange-100 text-orange-800'
+        };
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        );
+      },
+      size: 120,
     }),
     columnHelper.accessor('assignedTo', {
       header: 'Assigned To',
+      size: 150,
+    }),
+    columnHelper.accessor('originalAssignee', {
+      header: 'Original Assignee',
+      size: 150,
+    }),
+    columnHelper.accessor('qrReviewDate', {
+      header: 'QR Review Date',
       size: 120,
+    }),
+    columnHelper.accessor('qrReviewer', {
+      header: 'QR Reviewer',
+      size: 150,
     }),
     columnHelper.accessor('controlDay', {
       header: 'Control Day',
@@ -131,8 +144,6 @@ export default function TanStackInventoryTable<T = SubmissionRecord>({
       size: 120,
     }),
   ], [selectedRecords, onSelectionChange]);
-
-  const columns = customColumns || (defaultColumns as ColumnDef<T, any>[]);
 
   const table = useReactTable({
     data: records,
@@ -173,7 +184,7 @@ export default function TanStackInventoryTable<T = SubmissionRecord>({
                 cursor-pointer transition-colors duration-200 border-b border-gray-200
                 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                 hover:bg-blue-50
-                ${selectedRecords.includes(getRecordId(row.original)) ? 'bg-blue-100' : ''}
+                ${selectedRecords.includes(row.original.id) ? 'bg-blue-100' : ''}
               `}
             >
               {row.getVisibleCells().map(cell => (

@@ -537,7 +537,15 @@ export default function Form4868ERSPage() {
               >
                 <div className="space-y-8 px-1">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Editable Fields</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                      <FormField label="Clear Code" required>
+                        <FormInput
+                          onChange={(value) => handleInputChange('clear_code', value)}
+                          placeholder="Enter clear code"
+                        />
+                      </FormField>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {editableFieldKeys.map((key) => (
                         <FormField

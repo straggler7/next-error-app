@@ -8,20 +8,27 @@ interface ActionDropdownProps {
   items: ActionDropdownItem[];
   buttonText?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function ActionDropdown({ 
   items, 
   buttonText = 'Actions',
-  className = '' 
+  className = '',
+  disabled = false
 }: ActionDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className={`relative inline-block ${className}`}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg border border-blue-600 transition-all duration-200 hover:bg-blue-700 hover:border-blue-700 hover:-translate-y-0.5 min-w-32 shadow-sm"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`inline-flex items-center justify-center gap-2 px-6 py-2 text-sm font-medium rounded-lg border transition-all duration-200 min-w-32 shadow-sm ${
+          disabled 
+            ? 'bg-gray-400 text-gray-500 border-gray-400 cursor-not-allowed' 
+            : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:-translate-y-0.5'
+        }`}
       >
         {buttonText}
         <ChevronDown size={16} />

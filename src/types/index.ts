@@ -73,6 +73,7 @@ export interface ActionDropdownItem {
   label: string;
   icon: React.ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 export type StatusBadgeVariant = 'new' | 'assigned' | 'qr-review' | 'suspended';
