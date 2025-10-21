@@ -190,9 +190,9 @@ export default function QRInventory() {
     }),
   ], []);
 
-  // Handle row click to navigate to details
+  // Handle row click to navigate to QR details
   const handleRowClick = (record: QRInventoryRecord) => {
-    router.push(`/workRecord?dln=${record.dln}&from=qr`);
+    router.push(`/qrDetails?dln=${record.dln}&from=qr`);
   };
 
   return (
