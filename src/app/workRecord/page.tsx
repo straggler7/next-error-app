@@ -10,6 +10,7 @@ import { ErrorItem, Note } from "../../types";
 import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from "../../services/workAssignmentService";
 import { landingSearchService } from "../../services/landingSearchService";
 import ersDto from "../../data/ersDto.json";
+import fieldMappings from "../../data/fieldConfig4868.json";
 
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
 const toLabel = (key: string) =>
@@ -49,24 +50,42 @@ export default function Form4868ERSPage() {
     }));
   };
 
-  // Convert ERA DTO to form elements
+  // Convert ERA DTO to form elements using fieldMappings
   const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
-    // Check both workRecord level and root level for editableFields
-    const editableFields = eraData?.workRecord?.editableFields || eraData?.editableFields;
-    if (!editableFields) return [];
+    if (!eraData) return [];
     
     // Get the data source (workRecord or root)
     const dataSource = eraData?.workRecord || eraData;
     
-    return Object.keys(editableFields).map((fieldKey, index) => ({
-      id: fieldKey,
-      name: fieldKey,
-      label: toLabel(fieldKey),
-      value: dataSource[fieldKey] || '',
-      type: 'text',
-      ERSEditable: true,
-      xpath: editableFields[fieldKey]
-    }));
+    // Create form elements based on fieldMappings
+    const formElements: FormElement[] = [];
+    
+    // Separate editable and non-editable fields
+    const editableFields: FormElement[] = [];
+    const nonEditableFields: FormElement[] = [];
+    
+    Object.entries(fieldMappings).forEach(([fieldKey, config]: [string, any], index) => {
+      const fieldValue = dataSource[fieldKey] || '';
+      
+      const formElement: FormElement = {
+        id: fieldKey,
+        name: fieldKey,
+        label: config.label,
+        value: fieldValue,
+        type: 'text',
+        ERSEditable: config.editable,
+        xpath: `/${fieldKey}` // Default xpath, can be customized if needed
+      };
+      
+      if (config.editable) {
+        editableFields.push(formElement);
+      } else {
+        nonEditableFields.push(formElement);
+      }
+    });
+    console.log(nonEditableFieldKeys);
+    // Return editable fields first, then non-editable fields
+    return [...editableFields, ...nonEditableFields];
   };
   const [loading, setLoading] = useState(true);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
@@ -118,19 +137,36 @@ export default function Form4868ERSPage() {
     }));
   };
 
-  // Editable fields list from ersDto or formElements
   const editableFieldKeys: string[] = useMemo(() => {
     if (formElements.length > 0) {
       // Use actual form elements from API
       return formElements.filter(el => el.ERSEditable).map(el => el.name);
     }
-    // Fallback to ersDto
-    const ef = ersWorkRecord?.editableFields || {};
-    const keys = Object.keys(ef);
-    // Ensure TaxPeriodEndDt is present as required
-    if (!keys.includes("TaxPeriodEndDt")) keys.unshift("TaxPeriodEndDt");
-    return keys;
-  }, [formElements, ersWorkRecord]);
+    
+    // Fallback to ersDto structure
+    const editableFields = eraDto?.workRecord?.editableFields || eraDto?.editableFields || ersWorkRecord?.editableFields;
+    if (editableFields) {
+      return Object.keys(editableFields);
+    }
+    
+    // Default fallback
+    return [
+      'primarySSN',
+      'nameLine1Txt',
+      'primaryNameControlTxt',
+      'taxPeriodEndDt',
+      'transactionDate',
+      'irsSubmissionDate'
+    ];
+  }, [formElements, eraDto, ersWorkRecord]);
+
+  // Non-editable fields list from formElements
+  const nonEditableFieldKeys: string[] = useMemo(() => {
+    if (formElements.length > 0) {
+      return formElements.filter(el => !el.ERSEditable).map(el => el.name);
+    }
+    return [];
+  }, [formElements]);
 
   // Map DTO keys to actual WorkRecord property names (handle typos/mismatches)
   const dtoToRecordKey: Record<string, string> = {
@@ -314,6 +350,18 @@ export default function Form4868ERSPage() {
       return element?.value || '';
     }
     return values[name] || '';
+  };
+
+  // Helper function to get form element label by name
+  const getFormElementLabel = (name: string): string => {
+    if (formElements.length > 0) {
+      const element = workAssignmentService.getFormElementByName(formElements, name);
+      return String(element?.label || toLabel(name));
+    }
+    
+    // Fallback to fieldMappings or toLabel
+    const fieldConfig = (fieldMappings as any)[name];
+    return fieldConfig?.label || toLabel(name);
   };
 
   // Helper function to get original value
@@ -550,7 +598,7 @@ export default function Form4868ERSPage() {
                       {editableFieldKeys.map((key) => (
                         <FormField
                           key={key}
-                          label={key === "TaxPeriodEndDt" ? "Tax Period End Date" : toLabel(key)}
+                          label={getFormElementLabel(key)}
                           originalValue={getOriginalValue(key)}
                           currentValue={getFormElementValue(key)}
                           showChangeIndicator={true}
@@ -560,12 +608,35 @@ export default function Form4868ERSPage() {
                             id={key}
                             value={getFormElementValue(key)}
                             onChange={(v) => handleInputChange(key, v)}
-                            placeholder={`Enter ${key === "TaxPeriodEndDt" ? "YYYY-MM-DD" : toLabel(key)}`}
+                            placeholder={`Enter ${getFormElementLabel(key)}`}
                             onBlur={() => clearFieldHighlight()}
                           />
                         </FormField>
                       ))}
                     </div>
+
+                    {/* Non-Editable Fields Section */}
+                    {nonEditableFieldKeys.length > 0 && (
+                      <div className="mt-8">
+                        <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {nonEditableFieldKeys.map((key) => (
+                            <FormField
+                              key={key}
+                              label={getFormElementLabel(key)}
+                            >
+                              <FormInput
+                                id={key}
+                                value={getFormElementValue(key)}
+                                disabled={true}
+                                placeholder="N/A"
+                              />
+                            </FormField>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </FormSection>
