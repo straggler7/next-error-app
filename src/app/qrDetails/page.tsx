@@ -6,8 +6,10 @@ import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
 import NotesSection from "../../components/NotesSection";
 import { mockUser } from "../../data/mockData";
-import { FormElement } from "../../services/workAssignmentService";
 import { Note } from "../../types";
+import fieldMappings from "../../data/fieldConfig4868.json";
+import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
+import { QRInventoryRecord } from "../../services/qrInventoryService";
 
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
 const toLabel = (key: string) =>
@@ -18,80 +20,116 @@ const toLabel = (key: string) =>
     .trim()
     .replace(/^\w/, (c) => c.toUpperCase());
 
-interface QRDetailsData {
-  before: any;
-  after: any;
-  metadata: {
-    dln: string;
-    serviceCenter: string;
-    taxPeriod: string;
-    submissionAge: number;
-    lastModifiedBy: string;
-    lastModifiedDate: string;
-    errors: string[];
-  };
-}
 
 interface ComparisonFieldProps {
+  fieldKey: string;
   label: string;
   beforeValue: string;
   afterValue: string;
   isModified: boolean;
+  isEditable: boolean;
 }
 
 const ComparisonField: React.FC<ComparisonFieldProps> = ({
+  fieldKey,
   label,
   beforeValue,
   afterValue,
-  isModified
+  isModified,
+  isEditable
 }) => {
   const displayBeforeValue = beforeValue || 'Not provided';
   const displayAfterValue = afterValue || 'Not provided';
   
-  return (
-    <div className={`grid grid-cols-2 gap-4 mb-4 p-3 rounded-lg ${
-      isModified ? 'bg-orange-50' : 'bg-gray-50'
-    }`}>
-      <div className="flex-1">
-        <label className="block mb-2 text-sm font-medium text-gray-700">
-          {label}
-        </label>
-        <input
-          type="text"
-          className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
-            isModified 
-              ? 'border-2 border-red-300 text-gray-600' 
-              : 'border-gray-300 text-gray-600'
-          } ${!beforeValue ? 'italic' : ''}`}
-          value={displayBeforeValue}
-          readOnly
-        />
+  if (isEditable) {
+    // Show before/after comparison for editable fields
+    return (
+      <div className={`grid grid-cols-2 gap-4 mb-4 p-3 rounded-lg ${
+        isModified ? 'bg-orange-50' : 'bg-gray-50'
+      }`}>
+        <div className="flex-1">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            {label} (Before)
+          </label>
+          <input
+            type="text"
+            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+              isModified 
+                ? 'border-2 border-red-300 text-gray-600' 
+                : 'border-gray-300 text-gray-600'
+            } ${!beforeValue ? 'italic' : ''}`}
+            value={displayBeforeValue}
+            readOnly
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            {label} (After)
+          </label>
+          <input
+            type="text"
+            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+              isModified 
+                ? 'border-2 border-green-300 text-gray-900 font-medium' 
+                : 'border-gray-300 text-gray-900'
+            }`}
+            value={displayAfterValue}
+            readOnly
+          />
+        </div>
       </div>
-      <div className="flex-1">
-        <label className="block mb-2 text-sm font-medium text-gray-700">
-          &nbsp;
-        </label>
-        <input
-          type="text"
-          className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
-            isModified 
-              ? 'border-2 border-green-300 text-gray-900 font-medium' 
-              : 'border-gray-300 text-gray-900'
-          }`}
-          value={displayAfterValue}
-          readOnly
-        />
+    );
+  } else {
+    // Show before/after comparison for non-editable fields (system information) as well
+    return (
+      <div className={`grid grid-cols-2 gap-4 mb-4 p-3 rounded-lg ${
+        isModified ? 'bg-blue-50' : 'bg-gray-50'
+      }`}>
+        <div className="flex-1">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            {label} (Before)
+          </label>
+          <input
+            type="text"
+            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+              isModified 
+                ? 'border-2 border-blue-300 text-gray-600' 
+                : 'border-gray-300 text-gray-600'
+            } ${!beforeValue ? 'italic' : ''}`}
+            value={displayBeforeValue}
+            readOnly
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            {label} (After)
+          </label>
+          <input
+            type="text"
+            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+              isModified 
+                ? 'border-2 border-blue-300 text-gray-900 font-medium' 
+                : 'border-gray-300 text-gray-900'
+            }`}
+            value={displayAfterValue}
+            readOnly
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default function QRDetailsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const inventoryId = searchParams.get('inventoryId');
   const dln = searchParams.get('dln');
+  const serviceCenter = searchParams.get('serviceCenter');
+  const seid = searchParams.get('seid');
   
   const [qrData, setQRData] = useState<QRDetailsData | null>(null);
+  const [inventoryRecord, setInventoryRecord] = useState<QRInventoryRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notes, setNotes] = useState<Note[]>([
@@ -115,131 +153,123 @@ export default function QRDetailsPage() {
     }
   ]);
 
+  // Helper function to get field value from eraDto-like object
+  const getFieldValue = (data: any, fieldKey: string): string => {
+    if (!data) return '';
+    
+    // Get the data source (workRecord or root)
+    const dataSource = data?.workRecord || data;
+    return (dataSource[fieldKey] || '').toString();
+  };
+
+  // Helper function to get field label from fieldMappings
+  const getFieldLabel = (fieldKey: string): string => {
+    const fieldConfig = (fieldMappings as any)[fieldKey];
+    return fieldConfig?.label || toLabel(fieldKey);
+  };
+
+  // Helper function to check if field is editable
+  const isFieldEditable = (fieldKey: string): boolean => {
+    const fieldConfig = (fieldMappings as any)[fieldKey];
+    return fieldConfig?.editable || false;
+  };
+
   // Load QR details data
   const loadQRDetails = async () => {
+    if (!inventoryId) {
+      setError('No inventory ID provided');
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log('Starting loadQRDetails with inventoryId:', inventoryId);
       setLoading(true);
       setError(null);
 
-      // Mock API call - in real implementation, this would fetch before/after data
-      const response = await fetch(`/api/v1/era/qr-details?dln=${dln}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await QRDetailsService.getQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
+      console.log('API response data:', data);
       setQRData(data);
     } catch (err) {
       console.error('Error fetching QR details:', err);
       setError(err instanceof Error ? err.message : 'Failed to load QR details');
       
-      // Mock data for development
-      setQRData({
-        before: {
-          name: "Johnson, Michael R",
-          address: "1247 Oak Street",
-          city: "Springfield",
-          zipCode: "62701",
-          taxYear: "2025",
-          socialSecurityNumber: "",
-          spouseSocialSecurityNumber: "987-65-4321",
-          totalTaxLiability: "8750.00",
-          totalPayments: "1550.00",
-          balanceDue: "7200.00",
-          amountBeingPaid: "1550.00"
-        },
-        after: {
-          name: "Johnson, Michael R",
-          address: "1247 Oak Street, Apt 2B",
-          city: "Springfield",
-          zipCode: "62701",
-          taxYear: "2025",
-          socialSecurityNumber: "123-45-6789",
-          spouseSocialSecurityNumber: "987-65-4321",
-          totalTaxLiability: "9250.00",
-          totalPayments: "2050.00",
-          balanceDue: "7200.00",
-          amountBeingPaid: "2050.00"
-        },
-        metadata: {
-          dln: dln || "00217-102-05701-4",
-          serviceCenter: "Austin",
-          taxPeriod: "2025",
-          submissionAge: 2,
-          lastModifiedBy: "1ABCD (Sarah Thompson)",
-          lastModifiedDate: "2025-01-03 14:30:15",
-          errors: ["01ED - Extended Due Date", "01TIN - Missing TIN"]
-        }
-      });
+      // Load mock data as fallback
+      console.log('Loading mock data as fallback...');
+      const mockData = QRDetailsService.getMockQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
+      setQRData(mockData);
     } finally {
       setLoading(false);
     }
   };
 
+  // Load inventory record from sessionStorage
   useEffect(() => {
-    if (dln) {
-      loadQRDetails();
+    const storedRecord = sessionStorage.getItem('selectedQRRecord');
+    if (storedRecord) {
+      try {
+        const parsedRecord = JSON.parse(storedRecord);
+        setInventoryRecord(parsedRecord);
+        console.log('Loaded inventory record from sessionStorage:', parsedRecord);
+      } catch (error) {
+        console.error('Error parsing stored inventory record:', error);
+      }
     }
-  }, [dln]);
+  }, []);
+
+  useEffect(() => {
+    console.log('QR Details useEffect triggered with params:', { inventoryId, dln, serviceCenter, seid });
+    loadQRDetails();
+  }, [inventoryId, dln, serviceCenter, seid]);
+
 
   // Compare before and after values to determine if field is modified
   const isFieldModified = (beforeValue: any, afterValue: any): boolean => {
     return beforeValue !== afterValue;
   };
 
-  // Get comparison fields from the data
+  // Get comparison fields from fieldMappings
   const getComparisonFields = () => {
     if (!qrData) return [];
 
-    const fields = [
-      { key: 'name', label: 'Name' },
-      { key: 'address', label: 'Address' },
-      { key: 'city', label: 'City, Town or Post Office' },
-      { key: 'zipCode', label: 'Zip Code' },
-      { key: 'taxYear', label: 'Tax Year' },
-      { key: 'socialSecurityNumber', label: 'Social Security Number' },
-      { key: 'spouseSocialSecurityNumber', label: 'Spouse\'s Social Security Number' },
-      { key: 'totalTaxLiability', label: 'Total Tax Liability' },
-      { key: 'totalPayments', label: 'Total Payments' },
-      { key: 'balanceDue', label: 'Balance Due' },
-      { key: 'amountBeingPaid', label: 'Amount Being Paid' }
-    ];
+    return Object.keys(fieldMappings).map(fieldKey => {
+      const beforeValue = getFieldValue(qrData.before, fieldKey);
+      const afterValue = getFieldValue(qrData.after, fieldKey);
+      const isEditable = isFieldEditable(fieldKey);
+      const isModified = isFieldModified(beforeValue, afterValue);
 
-    return fields.map(field => ({
-      ...field,
-      beforeValue: qrData.before[field.key] || '',
-      afterValue: qrData.after[field.key] || '',
-      isModified: isFieldModified(qrData.before[field.key], qrData.after[field.key])
-    }));
+      return {
+        fieldKey,
+        label: getFieldLabel(fieldKey),
+        beforeValue,
+        afterValue,
+        isModified,
+        isEditable
+      };
+    });
   };
 
   const handleQRComplete = async () => {
     try {
       // API call to complete QR
-      console.log('QR Complete for DLN:', dln);
+      console.log('QR Complete for inventoryId:', inventoryId);
       alert('QR Review completed successfully!');
       router.push('/qrInventory');
     } catch (error) {
       console.error('Error completing QR:', error);
-      alert('Failed to complete QR review');
+      alert('Error completing QR review');
     }
   };
 
   const handleRework = async () => {
     try {
-      // API call to request rework
-      console.log('Rework requested for DLN:', dln);
-      alert('Rework requested successfully!');
+      // API call to rework QR
+      console.log('Rework QR for inventoryId:', inventoryId);
+      alert('QR sent for rework!');
       router.push('/qrInventory');
     } catch (error) {
-      console.error('Error requesting rework:', error);
-      alert('Failed to request rework');
+      console.error('Error reworking QR:', error);
+      alert('Error sending QR for rework');
     }
   };
 
@@ -304,42 +334,27 @@ export default function QRDetailsPage() {
             <div className="flex-1 text-left ml-6">
               <div className="flex flex-wrap gap-3">
                 <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                  DLN: {qrData?.metadata.dln}
+                  DLN: {inventoryRecord?.dln || dln}
                 </span>
                 <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                  Service Center: {qrData?.metadata.serviceCenter}
+                  Service Center: {inventoryRecord?.serviceCenter || serviceCenter}
                 </span>
-                <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                  Tax Period: {qrData?.metadata.taxPeriod}
-                </span>
-                <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                  Submission Age: {qrData?.metadata.submissionAge} Days
-                </span>
+                {inventoryRecord && (
+                  <>
+                    <span className="inline-block bg-green-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+                      Status: {inventoryRecord.status}
+                    </span>
+                    <span className="inline-block bg-purple-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+                      Form Type: {inventoryRecord.formType}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Error Badges Section */}
-        {qrData?.metadata.errors && qrData.metadata.errors.length > 0 && (
-          <div className="bg-white rounded-xl p-5 mb-6 shadow-sm border border-gray-100" style={{display: 'none'}}>
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <h3 className="text-base font-semibold text-gray-900">Active Errors</h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {qrData.metadata.errors.map((error, index) => (
-                <div
-                  key={index}
-                  className="inline-flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-2xl text-sm font-medium hover:bg-red-100 transition-colors duration-200"
-                >
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {error}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -349,28 +364,57 @@ export default function QRDetailsPage() {
               <div className="text-lg font-semibold mb-4 text-gray-700 border-b-2 border-gray-200 pb-2">
                 FORM 4868 - Application for Automatic Extension
                 <p className="text-sm font-normal mt-2 text-gray-600">
-                  Received Date: 2025-09-25 | Tax Period: {qrData?.metadata.taxPeriod}
+                  Received Date: 2025-09-25 | Tax Period: {qrData?.after?.workRecord?.taxPrd || qrData?.before?.workRecord?.taxPrd || 'N/A'}
                 </p>
               </div>
               
               <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-6 flex items-center gap-2 text-sm text-gray-700">
                 <User className="w-4 h-4 text-gray-500" />
                 <span>
-                  <strong>Last modified by:</strong> {qrData?.metadata.lastModifiedBy} at {qrData?.metadata.lastModifiedDate}
+                  <strong>Last modified by:</strong> {inventoryRecord?.seid || seid || 'Unknown'} at {inventoryRecord?.updatedDate || qrData?.metadata.lastModifiedDate}
                 </span>
               </div>
               
-              {/* Comparison Fields */}
+              {/* Editable Fields - Show Before/After Comparison */}
+              <div className="mb-8">
+                <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
+                  Editable Fields
+                </h4>
+                {comparisonFields
+                  .filter(field => field.isEditable)
+                  .map((field) => (
+                    <ComparisonField
+                      key={field.fieldKey}
+                      fieldKey={field.fieldKey}
+                      label={field.label}
+                      beforeValue={field.beforeValue}
+                      afterValue={field.afterValue}
+                      isModified={field.isModified}
+                      isEditable={field.isEditable}
+                    />
+                  ))}
+              </div>
+
+              {/* Non-Editable Fields - System Information */}
               <div>
-                {comparisonFields.map((field, index) => (
-                  <ComparisonField
-                    key={index}
-                    label={field.label}
-                    beforeValue={field.beforeValue}
-                    afterValue={field.afterValue}
-                    isModified={field.isModified}
-                  />
-                ))}
+                <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
+                  System Information (Before/After Comparison)
+                </h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {comparisonFields
+                    .filter(field => !field.isEditable)
+                    .map((field) => (
+                      <ComparisonField
+                        key={field.fieldKey}
+                        fieldKey={field.fieldKey}
+                        label={field.label}
+                        beforeValue={field.beforeValue}
+                        afterValue={field.afterValue}
+                        isModified={field.isModified}
+                        isEditable={field.isEditable}
+                      />
+                    ))}
+                </div>
               </div>
             </div>
             

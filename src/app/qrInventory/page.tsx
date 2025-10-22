@@ -192,7 +192,23 @@ export default function QRInventory() {
 
   // Handle row click to navigate to QR details
   const handleRowClick = (record: QRInventoryRecord) => {
-    router.push(`/qrDetails?dln=${record.dln}&from=qr`);
+    const serviceCenterMap: { [key: number]: string } = {
+      16: 'Austin',
+      17: 'Ogden',
+      18: 'Kansas City',
+      19: 'Fresno',
+      20: 'Memphis',
+      21: 'Charlotte'
+    };
+    const serviceCenter = serviceCenterMap[record.serviceCenterId] || 'Unknown';
+    
+    // Store the full record in sessionStorage for access on QR Details page
+    sessionStorage.setItem('selectedQRRecord', JSON.stringify({
+      ...record,
+      serviceCenter // Add the mapped service center name
+    }));
+    
+    router.push(`/qrDetails?inventoryId=${record.inventoryId}&dln=${record.dln}&serviceCenter=${encodeURIComponent(serviceCenter)}&seid=${record.seid}`);
   };
 
   return (
