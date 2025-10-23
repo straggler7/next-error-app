@@ -121,13 +121,13 @@ export default function Form4868ERSPage() {
     return ersReasonCds.map((code: string, index: number) => ({
       id: `ers-error-${index}`,
       code: code,
-      description: errReasonCdsMap[`ERR-${code}-CODE`] || `Error code: ${code}`,
+      description: errReasonCdsMap[code] || `Error code: ${code}`,
       type: 'Error' as const,
       status: 'active' as const,
       errorFields: [],
       irm: {
         title: `IRM 3.12.${180 + index} - Error Resolution`,
-        content: `Resolve the following error: ${errReasonCdsMap[`ERR-${code}-CODE`] || `Error code: ${code}`}`,
+        content: `Resolve the following error: ${errReasonCdsMap[code] || `Error code: ${code}`}`,
         steps: [
           'Review the error description',
           'Correct the identified issue in the highlighted fields',
@@ -997,7 +997,7 @@ export default function Form4868ERSPage() {
               className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                 deleting
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-red-600 text-white hover:bg-red-700 hover:-translate-y-0.5'
+                  : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
               }`}
               onClick={() => {
                 clearFieldHighlight();

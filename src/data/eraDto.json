@@ -261,9 +261,9 @@
         "yearInProcessDt":null,
         "ersReasonCds": ["135", "004", "103"],
         "errReasonCdsMap":{
-            "ERR-004-CODE": "ERR-004-CODE: 004",
-            "ERR-103-CODE": "ERR-103-CODE: 103",
-            "ERR-135-CODE": "ERR-135-CODE: 135"
+            "004": "EIF/NAP Mismatch",
+            "103": "Invalid Master File Tax Code",
+            "135": "Extended Due Date"
         },
         "editableFields": {
             "TaxPeriodEndDt": "Return/ReturnHeader/TaxPeriodEndDt",
