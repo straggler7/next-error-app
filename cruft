@@ -463,3 +463,14 @@ Also make a similar deleteHandler for delete button and use eventStatus 'DELETED
 git branch: json-form-and-landing-page-api-changes-qr-pages
 
 git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis
+
+{
+  "inventoryId": 14,
+  "status": "RESOLVED",
+  "assignmentComplete": false,
+  "message": null,
+  "inventoryItem": {
+    "inventoryId": 14,
+    "workRecord": { /* updated work record data */ }
+  }
+}
