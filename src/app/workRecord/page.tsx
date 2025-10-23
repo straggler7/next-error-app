@@ -204,6 +204,7 @@ export default function Form4868ERSPage() {
   const [actionCode, setActionCode] = useState<string>('');
   const [suspending, setSuspending] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [closingOut, setClosingOut] = useState(false);
 
   useEffect(() => {
     // Load ERA DTO from sessionStorage
@@ -466,6 +467,82 @@ export default function Form4868ERSPage() {
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
       setSuspending(false);
+    }
+  };
+
+  const handleCloseout = async () => {
+    console.log('handleCloseout called');
+    console.log('inventoryId:', inventoryId);
+    
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available. Please return to home page.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Clear any highlighted fields on closeout
+    setHighlightedFields([]);
+    
+    setClosingOut(true);
+    console.log('Setting closingOut to true');
+    try {
+      // Create updated ERA DTO with form changes
+      const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
+      
+      // Ensure workRecord exists
+      if (!updatedEraDto.workRecord) {
+        updatedEraDto.workRecord = {};
+      }
+      
+      // Update form element values in the workRecord section
+      formElements.forEach(element => {
+        updatedEraDto.workRecord[element.name] = element.value;
+      });
+      
+      const storedSelectionData = sessionStorage.getItem('selectionData');
+      const selectionData = JSON.parse(storedSelectionData || '{}');
+
+      console.log('Making PATCH request to:', `/api/v1/era/inventories/items/${inventoryId}/event`);
+      console.log('Request body:', { eventStatus: "CLOSEOUT" });
+      
+      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': selectionData.SEID || 'u1000'
+        },
+        body: JSON.stringify({
+          "eventStatus":"CLOSEOUT",
+        })
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      if (response.status === 200) {
+        const result = await response.json();
+        
+        setFlashMessage('Record closed out successfully. Returning to home...');
+        setShowFlash(true);
+        
+        // Navigate to home after a brief delay to show the message
+        setTimeout(() => {
+          router.push('/home');
+        }, 2000);
+        
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Closeout failed: ${errorText}`);
+      }
+      
+    } catch (error) {
+      console.error('Error closing out record:', error);
+      setFlashMessage('Error closing out record. Please try again.');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      setClosingOut(false);
     }
   };
 
@@ -901,13 +978,19 @@ export default function Form4868ERSPage() {
             </button>
             <button
               type="button"
-              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
+              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                closingOut
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+              }`}
               onClick={() => {
+                console.log('Close Out button clicked');
                 clearFieldHighlight();
-                console.log("Close out form");
+                handleCloseout();
               }}
+              disabled={closingOut}
             >
-              Close Out
+              {closingOut ? "Closing Out..." : "Close Out"}
             </button>
             <button
               type="button"

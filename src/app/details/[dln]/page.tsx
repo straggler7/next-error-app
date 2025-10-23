@@ -332,13 +332,13 @@ export default function DetailsPage() {
             >
               Suspend
             </button>
-            <button 
+            {/* <button 
               type="button"
               className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg transition-all duration-200 hover:bg-green-700 hover:-translate-y-0.5 shadow-sm"
               onClick={() => console.log('Close out form')}
             >
               Close Out
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

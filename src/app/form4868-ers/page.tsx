@@ -455,7 +455,7 @@ export default function Form4868ERSPage() {
             >
               Suspend
             </button>
-            <button
+            {/* <button
               type="button"
               className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
               onClick={() => {
@@ -464,7 +464,7 @@ export default function Form4868ERSPage() {
               }}
             >
               Close Out
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
