@@ -454,3 +454,12 @@ search-form (flex flex-col gap-6)
     Doc Code(01DC)
     
     
+
+    Suspend should only be active when Action Code field has a value or keep it disabled
+on suspend click, make a similar fetch call as the submit button, create a suspendHandler. The only change will be is, in json  body of the request, the "eventStatus" is "SUSPEND"
+Also make a similar deleteHandler for delete button and use eventStatus 'DELETED'
+
+
+git branch: json-form-and-landing-page-api-changes-qr-pages
+
+git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis

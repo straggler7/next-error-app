@@ -83,7 +83,7 @@ export default function Form4868ERSPage() {
         nonEditableFields.push(formElement);
       }
     });
-    console.log(nonEditableFieldKeys);
+    
     // Return editable fields first, then non-editable fields
     return [...editableFields, ...nonEditableFields];
   };
@@ -201,6 +201,9 @@ export default function Form4868ERSPage() {
   const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
   const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [actionCode, setActionCode] = useState<string>('');
+  const [suspending, setSuspending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     // Load ERA DTO from sessionStorage
@@ -381,6 +384,173 @@ export default function Form4868ERSPage() {
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
 
+  const handleSuspend = async () => {
+    if (!inventoryId || !actionCode.trim()) {
+      setFlashMessage("Action Code is required for suspension.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Clear any highlighted fields on suspend
+    setHighlightedFields([]);
+    
+    setSuspending(true);
+    try {
+      // Create updated ERA DTO with form changes
+      const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
+      
+      // Ensure workRecord exists
+      if (!updatedEraDto.workRecord) {
+        updatedEraDto.workRecord = {};
+      }
+      
+      // Update form element values in the workRecord section
+      formElements.forEach(element => {
+        updatedEraDto.workRecord[element.name] = element.value;
+      });
+      
+      // Add action code
+      updatedEraDto.workRecord.action_code = actionCode;
+      
+      const storedSelectionData = sessionStorage.getItem('selectionData');
+      const selectionData = JSON.parse(storedSelectionData || '{}');
+
+      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': selectionData.SEID || 'u1000'
+        },
+        body: JSON.stringify({
+          "event": {
+            "eventStatus":"SUSPEND",
+          },
+          "inventoryItem": {
+            "inventoryId": inventoryId,
+            "workRecord": JSON.stringify(updatedEraDto)
+          }
+        })
+      });
+
+      if (response.status === 200) {
+        const result = await response.json();
+        
+        if (result.assignmentComplete) {
+          setFlashMessage('Record suspended successfully. Loading next record...');
+          setShowFlash(true);
+          
+          try {
+            await loadNextWorkRecord();
+            setFlashMessage('Record suspended successfully and new record retrieved');
+          } catch (fetchError) {
+            console.error('Error fetching next work record:', fetchError);
+            setFlashMessage('Record suspended successfully but failed to fetch new record');
+          }
+        } else {
+          setFlashMessage('Record suspended successfully');
+          setShowFlash(true);
+        }
+        
+        setTimeout(() => setShowFlash(false), 4000);
+        
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Suspend failed: ${errorText}`);
+      }
+      
+    } catch (error) {
+      console.error('Error suspending record:', error);
+      setFlashMessage('Error suspending record. Please try again.');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      setSuspending(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available. Please return to home page.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Clear any highlighted fields on delete
+    setHighlightedFields([]);
+    
+    setDeleting(true);
+    try {
+      // Create updated ERA DTO with form changes
+      const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
+      
+      // Ensure workRecord exists
+      if (!updatedEraDto.workRecord) {
+        updatedEraDto.workRecord = {};
+      }
+      
+      // Update form element values in the workRecord section
+      formElements.forEach(element => {
+        updatedEraDto.workRecord[element.name] = element.value;
+      });
+      
+      const storedSelectionData = sessionStorage.getItem('selectionData');
+      const selectionData = JSON.parse(storedSelectionData || '{}');
+
+      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': selectionData.SEID || 'u1000'
+        },
+        body: JSON.stringify({
+          "event": {
+            "eventStatus":"DELETED",
+          },
+          "inventoryItem": {
+            "inventoryId": inventoryId,
+            "workRecord": JSON.stringify(updatedEraDto)
+          }
+        })
+      });
+
+      if (response.status === 200) {
+        const result = await response.json();
+        
+        if (result.assignmentComplete) {
+          setFlashMessage('Record deleted successfully. Loading next record...');
+          setShowFlash(true);
+          
+          try {
+            await loadNextWorkRecord();
+            setFlashMessage('Record deleted successfully and new record retrieved');
+          } catch (fetchError) {
+            console.error('Error fetching next work record:', fetchError);
+            setFlashMessage('Record deleted successfully but failed to fetch new record');
+          }
+        } else {
+          setFlashMessage('Record deleted successfully');
+          setShowFlash(true);
+        }
+        
+        setTimeout(() => setShowFlash(false), 4000);
+        
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Delete failed: ${errorText}`);
+      }
+      
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      setFlashMessage('Error deleting record. Please try again.');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!inventoryId) {
       setFlashMessage("No inventory ID available. Please return to home page.");
@@ -413,33 +583,77 @@ export default function Form4868ERSPage() {
       console.log('Form elements being applied:', formElements);
       console.log('WorkRecord after updates:', updatedEraDto.workRecord);
       
+      const storedSelectionData = sessionStorage.getItem('selectionData');
+      const selectionData = JSON.parse(storedSelectionData || '{}');
+
       // POST to revalidate endpoint
-      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/revalidate`, {
-        method: 'POST',
+      // const response = await fetch(`/api/v1/era/inventories/${inventoryId}/revalidate`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'SEID': selectionData.SEID || 'u1000'
+      //   },
+      //   body: JSON.stringify(updatedEraDto)
+      // });
+
+      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
+        method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'SEID': selectionData.SEID || 'u1000'
         },
-        body: JSON.stringify(updatedEraDto)
+        body: JSON.stringify({
+          "event": {
+            "eventStatus":"RESOLVED",
+          },
+          "inventoryItem": {
+            "inventoryId": inventoryId,
+            "workRecord": JSON.stringify(updatedEraDto)
+          }
+        })
       });
-      
+
       if (response.status === 200) {
-        // Get the updated record from response and show form
-        const updatedRecord = await response.json();
+        const result = await response.json();
         
-        setEraDto(updatedRecord);
-        setInventoryId(updatedRecord.inventoryId || updatedRecord.id);
-        
-        // Convert to form elements
-        const elements = convertEraDtoToFormElements(updatedRecord);
-        setFormElements(elements);
-        setOriginalFormElements([...elements]);
-        
-        // Update sessionStorage
-        sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
-        
-        setFlashMessage('Form submitted successfully and record updated');
-        setShowFlash(true);
-        setTimeout(() => setShowFlash(false), 4000);
+        if (result.assignmentComplete) {
+          // Assignment complete - get next record from auto-assign
+          setFlashMessage('Form submitted successfully. Loading next record...');
+          setShowFlash(true);
+          
+          try {
+            await loadNextWorkRecord();
+            setFlashMessage('Form submitted successfully and new record retrieved');
+          } catch (fetchError) {
+            console.error('Error fetching next work record:', fetchError);
+            setFlashMessage('Form submitted successfully but failed to fetch new record');
+          }
+          
+          setTimeout(() => setShowFlash(false), 4000);
+        } else {
+          // Assignment not complete - update current record with workRecord from inventoryItem
+          const updatedRecord = result.inventoryItem?.workRecord;
+          
+          if (updatedRecord) {
+            setEraDto(updatedRecord);
+            setInventoryId(result.inventoryId || updatedRecord.inventoryId || updatedRecord.id);
+            
+            // Convert to form elements
+            const elements = convertEraDtoToFormElements(updatedRecord);
+            setFormElements(elements);
+            setOriginalFormElements([...elements]);
+            
+            // Update sessionStorage
+            sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
+            
+            setFlashMessage('Form submitted successfully and record updated');
+          } else {
+            setFlashMessage('Form submitted successfully');
+          }
+          
+          setShowFlash(true);
+          setTimeout(() => setShowFlash(false), 4000);
+        }
         
       } else if (response.status === 204) {
         // No content - get next record from auto-assign
@@ -644,7 +858,11 @@ export default function Form4868ERSPage() {
                 <div>
                   <FormField label="Action Code" required>
                     <FormInput
-                      onChange={(value) => handleInputChange('action_code', value)}
+                      value={actionCode}
+                      onChange={(value) => {
+                        setActionCode(value);
+                        handleInputChange('action_code', value);
+                      }}
                       placeholder="Enter action code for suspension"
                     />
                   </FormField>
@@ -668,13 +886,18 @@ export default function Form4868ERSPage() {
             </button>
             <button
               type="button"
-              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
+              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                !actionCode.trim() || suspending
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+              }`}
               onClick={() => {
                 clearFieldHighlight();
-                console.log("Suspend form");
+                handleSuspend();
               }}
+              disabled={!actionCode.trim() || suspending}
             >
-              Suspend
+              {suspending ? "Suspending..." : "Suspend"}
             </button>
             <button
               type="button"
@@ -688,13 +911,18 @@ export default function Form4868ERSPage() {
             </button>
             <button
               type="button"
-              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm"
+              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                deleting
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-red-600 text-white hover:bg-red-700 hover:-translate-y-0.5'
+              }`}
               onClick={() => {
                 clearFieldHighlight();
-                console.log("Delete form");
+                handleDelete();
               }}
+              disabled={deleting}
             >
-              Delete
+              {deleting ? "Deleting..." : "Delete"}
             </button>
           </div>
         </div>
