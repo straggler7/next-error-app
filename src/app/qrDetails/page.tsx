@@ -341,10 +341,10 @@ export default function QRDetailsPage() {
                 </span>
                 {inventoryRecord && (
                   <>
-                    <span className="inline-block bg-green-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+                    <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-green-200">
                       Status: {inventoryRecord.status}
                     </span>
-                    <span className="inline-block bg-purple-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+                    <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
                       Form Type: {inventoryRecord.formType}
                     </span>
                   </>
