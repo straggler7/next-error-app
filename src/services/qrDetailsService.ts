@@ -1,6 +1,6 @@
 export interface QRDetailsData {
-  before: any; // eraDto-like object
-  after: any;  // eraDto-like object
+  NEW: any; // eraDto-like object
+  QR_HOLD: any;  // eraDto-like object
   metadata: {
     dln: string;
     serviceCenter: string;
@@ -45,7 +45,7 @@ export class QRDetailsService {
   // Mock data for development/fallback
   static getMockQRDetails(inventoryId: string, dln?: string, serviceCenter?: string, seid?: string): QRDetailsData {
     return {
-      before: {
+      NEW: {
         workRecord: {
           primaryNameControlTxt: "JOHN",
           nameLine1Txt: "Johnson, Michael R",
@@ -60,7 +60,7 @@ export class QRDetailsService {
           tertiaryTransCd: "409"
         }
       },
-      after: {
+      QR_HOLD: {
         workRecord: {
           primaryNameControlTxt: "JOHN",
           nameLine1Txt: "Johnson, Michael R",

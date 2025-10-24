@@ -233,8 +233,8 @@ export default function QRDetailsPage() {
     if (!qrData) return [];
 
     return Object.keys(fieldMappings).map(fieldKey => {
-      const beforeValue = getFieldValue(qrData.before, fieldKey);
-      const afterValue = getFieldValue(qrData.after, fieldKey);
+      const beforeValue = getFieldValue(qrData.NEW, fieldKey);
+      const afterValue = getFieldValue(qrData.QR_HOLD, fieldKey);
       const isEditable = isFieldEditable(fieldKey);
       const isModified = isFieldModified(beforeValue, afterValue);
 
@@ -364,7 +364,7 @@ export default function QRDetailsPage() {
               <div className="text-lg font-semibold mb-4 text-gray-700 border-b-2 border-gray-200 pb-2">
                 FORM 4868 - Application for Automatic Extension
                 <p className="text-sm font-normal mt-2 text-gray-600">
-                  Received Date: 2025-09-25 | Tax Period: {qrData?.after?.workRecord?.taxPrd || qrData?.before?.workRecord?.taxPrd || 'N/A'}
+                  Received Date: 2025-09-25 | Tax Period: {qrData?.QR_HOLD?.workRecord?.taxPrd || qrData?.NEW?.workRecord?.taxPrd || 'N/A'}
                 </p>
               </div>
               
@@ -398,7 +398,6 @@ export default function QRDetailsPage() {
               {/* Non-Editable Fields - System Information */}
               <div>
                 <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
-                  System Information (Before/After Comparison)
                 </h4>
                 <div className="grid grid-cols-1 gap-4">
                   {comparisonFields
