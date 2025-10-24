@@ -132,6 +132,9 @@ export default function QRDetailsPage() {
   const [inventoryRecord, setInventoryRecord] = useState<QRInventoryRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [flashMessage, setFlashMessage] = useState<string>("");
+  const [showFlash, setShowFlash] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [notes, setNotes] = useState<Note[]>([
     {
       id: '1',
@@ -182,6 +185,12 @@ export default function QRDetailsPage() {
       return;
     }
 
+    // Prevent duplicate calls if already loading
+    if (loading) {
+      console.log('Already loading, skipping duplicate call');
+      return;
+    }
+
     try {
       console.log('Starting loadQRDetails with inventoryId:', inventoryId);
       setLoading(true);
@@ -219,8 +228,10 @@ export default function QRDetailsPage() {
 
   useEffect(() => {
     console.log('QR Details useEffect triggered with params:', { inventoryId, dln, serviceCenter, seid });
-    loadQRDetails();
-  }, [inventoryId, dln, serviceCenter, seid]);
+    if (inventoryId) {
+      loadQRDetails();
+    }
+  }, [inventoryId]); // Only depend on inventoryId to prevent duplicate calls
 
 
   // Compare before and after values to determine if field is modified
@@ -250,14 +261,46 @@ export default function QRDetailsPage() {
   };
 
   const handleQRComplete = async () => {
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    setCompleting(true);
     try {
-      // API call to complete QR
-      console.log('QR Complete for inventoryId:', inventoryId);
-      alert('QR Review completed successfully!');
-      router.push('/qrInventory');
+      const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/reviewComplete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inventoryId: inventoryId,
+          completedBy: 'u1000', // You might want to get this from user context
+          completedAt: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setFlashMessage('QR Review completed successfully! Returning to inventory...');
+        setShowFlash(true);
+        
+        // Navigate back to QR inventory after showing success message
+        setTimeout(() => {
+          router.push('/qrInventory');
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        throw new Error(`QR Complete failed: ${errorText}`);
+      }
     } catch (error) {
       console.error('Error completing QR:', error);
-      alert('Error completing QR review');
+      setFlashMessage('Error completing QR review. Please try again.');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -315,8 +358,13 @@ export default function QRDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header user={mockUser} />
+      <Header user={mockUser} showBackButton backHref="/qrInventory" />
       
+      {showFlash && (
+        <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right">
+          <span>{flashMessage}</span>
+        </div>
+      )}
       <div className="flex flex-col p-4 mx-auto w-full">
         {/* Top Toolbar */}
         <div className="bg-white rounded-xl shadow-sm p-5 mb-6 border border-gray-100">
@@ -422,9 +470,14 @@ export default function QRDetailsPage() {
               <div className="flex gap-4">
                 <button
                   onClick={handleQRComplete}
-                  className="bg-blue-600 text-white px-6 py-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
+                  disabled={completing}
+                  className={`px-6 py-3 rounded text-sm font-medium transition-colors duration-200 ${
+                    completing
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  QR Complete
+                  {completing ? 'Completing...' : 'QR Complete'}
                 </button>
                 <button
                   onClick={handleRework}

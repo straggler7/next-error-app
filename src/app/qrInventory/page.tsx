@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
@@ -36,11 +36,19 @@ export default function QRInventory() {
   const [qrRecords, setQRRecords] = useState<QRInventoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasInitiallyLoaded = useRef(false);
 
 
   // Load QR records
   const loadQRRecords = async () => {
+    // Prevent duplicate calls if already loading
+    if (loading) {
+      console.log('QR Inventory: Already loading, skipping duplicate call');
+      return;
+    }
+
     try {
+      console.log('QR Inventory: Starting loadQRRecords');
       setLoading(true);
       setError(null);
 
@@ -84,8 +92,19 @@ export default function QRInventory() {
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
-    loadQRRecords();
-  }, [filters, pagination.currentPage, pagination.pageSize]);
+    console.log('QR Inventory useEffect triggered, hasInitiallyLoaded:', hasInitiallyLoaded.current);
+    
+    // On first mount, always load
+    if (!hasInitiallyLoaded.current) {
+      hasInitiallyLoaded.current = true;
+      loadQRRecords();
+    } else {
+      // On subsequent changes, only load if not currently loading
+      if (!loading) {
+        loadQRRecords();
+      }
+    }
+  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize]); // Use specific filter properties instead of entire object
 
   // Filter the records based on current filters
   const filteredRecords = qrRecords;
