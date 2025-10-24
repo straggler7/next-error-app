@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
@@ -135,6 +135,7 @@ export default function QRDetailsPage() {
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const isLoadingRef = useRef(false);
   const [notes, setNotes] = useState<Note[]>([
     {
       id: '1',
@@ -178,18 +179,20 @@ export default function QRDetailsPage() {
   };
 
   // Load QR details data
-  const loadQRDetails = async () => {
+  const loadQRDetails = useCallback(async () => {
     if (!inventoryId) {
       setError('No inventory ID provided');
       setLoading(false);
       return;
     }
 
-    // Prevent duplicate calls if already loading
-    if (loading) {
+    // Prevent duplicate calls using ref instead of state
+    if (isLoadingRef.current) {
       console.log('Already loading, skipping duplicate call');
       return;
     }
+
+    isLoadingRef.current = true;
 
     try {
       console.log('Starting loadQRDetails with inventoryId:', inventoryId);
@@ -209,8 +212,9 @@ export default function QRDetailsPage() {
       setQRData(mockData);
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
     }
-  };
+  }, [inventoryId, dln, serviceCenter, seid]); // Add dependencies for useCallback
 
   // Load inventory record from sessionStorage
   useEffect(() => {
@@ -231,7 +235,7 @@ export default function QRDetailsPage() {
     if (inventoryId) {
       loadQRDetails();
     }
-  }, [inventoryId]); // Only depend on inventoryId to prevent duplicate calls
+  }, [inventoryId, loadQRDetails]); // Include loadQRDetails since it's now memoized
 
 
   // Compare before and after values to determine if field is modified
