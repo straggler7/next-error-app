@@ -192,6 +192,11 @@ export default function HomePage() {
     e.preventDefault();
     
     if (!isSubmitButtonEnabled) return;
+
+    if (programForm.qualityReview && !programForm.seid) {
+      router.push('/qrInventory');
+      return;
+    }
     
     try {
       // Make GET request to auto-assign endpoint with headers
@@ -216,14 +221,16 @@ export default function HomePage() {
           serviceCenter: programForm.serviceCenter,
           seid: programForm.seid || 'u1000'
         }));
+
+        router.push('/workRecord');
         
         // Navigate to QR Inventory if quality review is selected, otherwise workRecord
-        if (programForm.qualityReview) {
-        //   router.push(`/qrInventory${programForm.seid ? `?seid=${programForm.seid}` : ''}`);
-          router.push(`/qrInventory`);
-        } else {
-          router.push('/workRecord');
-        }
+        // if (programForm.qualityReview) {
+        // //   router.push(`/qrInventory${programForm.seid ? `?seid=${programForm.seid}` : ''}`);
+        //   router.push(`/qrInventory`);
+        // } else {
+        //   router.push('/workRecord');
+        // }
       } else {
         const errorText = await response.text();
         setProgramStatusError(`Failed to get work assignment: ${errorText}`);
@@ -280,7 +287,7 @@ export default function HomePage() {
                 </div>
 
                 {/* SEID Field - shown when quality review is checked */}
-                {programForm.qualityReview && (
+                {/* {programForm.qualityReview && ( */}
                   <div className="form-group">
                     <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="seidInput">
                       SEID
@@ -305,7 +312,7 @@ export default function HomePage() {
                       onChange={(e) => handleProgramInputChange('seid', e.target.value)}
                     />
                   </div>
-                )}
+                {/* )} */}
 
                 <div className="form-group">
                   <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="programSelect">
