@@ -17,15 +17,16 @@ export class QRDetailsService {
     try {
     //   const response = await fetch(`/api/v1/era/qrdetails/${inventoryId}`, {
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'inventoryId': `${inventoryId}`
+        'Content-Type': 'application/json'
+        // 'inventoryId': `${inventoryId}`
       };
       
       if (dln) headers['dln'] = dln;
       if (serviceCenter) headers['serviceCenter'] = serviceCenter;
       if (seid) headers['seid'] = seid;
       
-      const response = await fetch(`/api/v1/era/qr-details.json`, {
+      // const response = await fetch(`/api/v1/era/qr-details.json`, {
+      const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/review`, {
         method: 'GET',
         headers,
       });
