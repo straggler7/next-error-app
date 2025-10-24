@@ -87,6 +87,7 @@ export class QRInventoryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'SEID': filters.seid || 'u1000'
         },
         body: JSON.stringify({
           status: 'QR_HOLD',
