@@ -193,7 +193,24 @@ export default function HomePage() {
     
     if (!isSubmitButtonEnabled) return;
 
-    if (programForm.qualityReview && !programForm.seid) {
+    console.log('programForm.qualityReview:', programForm.qualityReview);
+    console.log('programForm:', programForm);
+    
+    if (programForm.qualityReview) {
+      const selectionData = {
+        program: programForm.program,
+        statusCode: programForm.statusCode,
+        serviceCenter: programForm.serviceCenter,
+        seid: programForm.seid || 'u1000'
+      };
+      
+      console.log('Storing selectionData:', selectionData);
+      sessionStorage.setItem('selectionData', JSON.stringify(selectionData));
+      
+      // Verify it was stored
+      const stored = sessionStorage.getItem('selectionData');
+      console.log('Stored data verification:', stored);
+
       router.push('/qrInventory');
       return;
     }

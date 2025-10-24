@@ -74,19 +74,29 @@ export class QRInventoryService {
       if (filters.searchAll) {
         params.append('search', filters.searchAll);
       }
-      if (filters.assignedTo) {
-        params.append('assignedTo', filters.assignedTo);
-      }
-      if (filters.serviceCenter) {
-        params.append('serviceCenter', filters.serviceCenter);
-      }
+      // if (filters.assignedTo) {
+      //   params.append('assignedTo', filters.assignedTo);
+      // }
+      // if (filters.serviceCenter) {
+      //   params.append('serviceCenter', filters.serviceCenter);
+      // }
 
       // const response = await fetch(`/api/era/inventory?${params.toString()}`, {
-      const response = await fetch(`/api/inventories.json`, {
-        method: 'GET',
+        // const response = await fetch(`/api/inventories.json`, {
+      const response = await fetch(`/api/era/inventories/inventory-search`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          status: 'QR_HOLD',
+          // page: page.toString(),
+          // pageSize: pageSize.toString(),
+          seid: filters.seid,
+          program: filters.program,
+          statusCode: filters.statusCode,
+          serviceCenter: filters.serviceCenter
+        })
       });
 
       if (!response.ok) {

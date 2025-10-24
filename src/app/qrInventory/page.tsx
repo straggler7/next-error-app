@@ -44,23 +44,29 @@ export default function QRInventory() {
       setLoading(true);
       setError(null);
 
-      // Get selection data from session storage
-      const selectionData = sessionStorage.getItem('selectionData');
-      const parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
+      // Get selection data from session storage (client-side only)
+      let parsedSelectionData: any = {};
+      if (typeof window !== 'undefined') {
+        const selectionData = sessionStorage.getItem('selectionData');
+        console.log('QR Inventory - Raw selectionData from sessionStorage:', selectionData);
+        parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
+        console.log('QR Inventory - Parsed selectionData:', parsedSelectionData);
+      }
 
       const qrFilters: QRInventoryFilters = {
-        searchAll: filters.searchAll,
-        assignedTo: filters.assignedTo,
+        // searchAll: filters.searchAll,
+        // assignedTo: filters.assignedTo,
         qrStatus: filters.status,
+        seid: parsedSelectionData.seid,
         program: parsedSelectionData.program,
-        statusCode: parsedSelectionData.statusCode
+        statusCode: parsedSelectionData.statusCode,
+        serviceCenter: parsedSelectionData.serviceCenter
       };
 
       const response = await QRInventoryService.getQRRecords(
         qrFilters,
         pagination.currentPage,
-        pagination.pageSize,
-        seid || undefined
+        pagination.pageSize
       );
 
       setQRRecords(response.records);
@@ -125,10 +131,13 @@ export default function QRInventory() {
       id: 'programCode',
       header: 'Program Code',
       cell: () => {
-        // Get program code from session storage
-        const selectionData = sessionStorage.getItem('selectionData');
-        const parsedData = selectionData ? JSON.parse(selectionData) : {};
-        return <span>{parsedData.program || 'N/A'}</span>;
+        // Get program code from session storage (client-side only)
+        if (typeof window !== 'undefined') {
+          const selectionData = sessionStorage.getItem('selectionData');
+          const parsedData = selectionData ? JSON.parse(selectionData) : {};
+          return <span>{parsedData.program || 'N/A'}</span>;
+        }
+        return <span>N/A</span>;
       },
       size: 120,
     }),
@@ -202,11 +211,13 @@ export default function QRInventory() {
     };
     const serviceCenter = serviceCenterMap[record.serviceCenterId] || 'Unknown';
     
-    // Store the full record in sessionStorage for access on QR Details page
-    sessionStorage.setItem('selectedQRRecord', JSON.stringify({
-      ...record,
-      serviceCenter // Add the mapped service center name
-    }));
+    // Store the full record in sessionStorage for access on QR Details page (client-side only)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedQRRecord', JSON.stringify({
+        ...record,
+        serviceCenter // Add the mapped service center name
+      }));
+    }
     
     router.push(`/qrDetails?inventoryId=${record.inventoryId}&dln=${record.dln}&serviceCenter=${encodeURIComponent(serviceCenter)}&seid=${record.seid}`);
   };
@@ -236,18 +247,21 @@ export default function QRInventory() {
                     <p>SEID: {seid}</p>
                   )}
                   {(() => {
-                    const selectionData = sessionStorage.getItem('selectionData');
-                    const parsedData = selectionData ? JSON.parse(selectionData) : {};
-                    return (
-                      <>
-                        {parsedData.program && (
-                          <p>Program: {parsedData.program}</p>
-                        )}
-                        {parsedData.statusCode && (
-                          <p>Status Code: {parsedData.statusCode}</p>
-                        )}
-                      </>
-                    );
+                    if (typeof window !== 'undefined') {
+                      const selectionData = sessionStorage.getItem('selectionData');
+                      const parsedData = selectionData ? JSON.parse(selectionData) : {};
+                      return (
+                        <>
+                          {parsedData.program && (
+                            <p>Program: {parsedData.program}</p>
+                          )}
+                          {parsedData.statusCode && (
+                            <p>Status Code: {parsedData.statusCode}</p>
+                          )}
+                        </>
+                      );
+                    }
+                    return null;
                   })()}
                 </div>
               </div>
