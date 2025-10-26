@@ -413,9 +413,6 @@ export default function Form4868ERSPage() {
         updatedEraDto.workRecord[element.name] = element.value;
       });
       
-      // Add action code
-      updatedEraDto.workRecord.action_code = actionCode;
-      
       const storedSelectionData = sessionStorage.getItem('selectionData');
       const selectionData = JSON.parse(storedSelectionData || '{}');
 
@@ -431,7 +428,8 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord
+            "workRecord": updatedEraDto.workRecord,
+            "suspendStatusCode": actionCode
           }
         })
       });
@@ -972,7 +970,7 @@ export default function Form4868ERSPage() {
                       value={actionCode}
                       onChange={(value) => {
                         setActionCode(value);
-                        handleInputChange('action_code', value);
+                        handleInputChange('suspendStatusCode', value);
                       }}
                       placeholder="Enter action code for suspension"
                     />
