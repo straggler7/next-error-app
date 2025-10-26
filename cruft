@@ -460,9 +460,14 @@ on suspend click, make a similar fetch call as the submit button, create a suspe
 Also make a similar deleteHandler for delete button and use eventStatus 'DELETED'
 
 
+===============
+GIT Branches
+===============
+
 git branch: json-form-and-landing-page-api-changes-qr-pages
 
 git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis
+(10/26/2025)
 
 {
   "inventoryId": 14,
@@ -474,3 +479,9 @@ git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis
     "workRecord": { /* updated work record data */ }
   }
 }
+
+        "errReasonCdsMap":{
+            "ERR-004-CODE": "ERR-004-CODE: 004",
+            "ERR-103-CODE": "ERR-103-CODE: 103",
+            "ERR-135-CODE": "ERR-135-CODE: 135"
+        },

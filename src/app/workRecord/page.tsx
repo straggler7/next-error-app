@@ -431,7 +431,7 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": JSON.stringify(updatedEraDto.workRecord)
+            "workRecord": updatedEraDto.workRecord
           }
         })
       });
@@ -597,7 +597,7 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": JSON.stringify(updatedEraDto.workRecord)
+            "workRecord": updatedEraDto.workRecord
           }
         })
       });
@@ -703,7 +703,7 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": JSON.stringify(updatedEraDto.workRecord)
+            "workRecord": updatedEraDto.workRecord
           }
         })
       });
