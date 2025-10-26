@@ -76,5 +76,13 @@ export interface ActionDropdownItem {
   disabled?: boolean;
 }
 
+export type InvetoryItem = {
+  inventoryId: number;
+  workRecord: {
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 export type StatusBadgeVariant = 'new' | 'assigned' | 'qr-review' | 'suspended';
 export type PriorityLevel = 'high' | 'medium' | 'low';

@@ -139,7 +139,7 @@ export default function QRInventory() {
           17: 'Ogden',
           18: 'Kansas City',
           19: 'Fresno',
-          20: 'Memphis',
+          20: 'Andover',
           21: 'Charlotte'
         };
         return serviceCenterMap[getValue()] || 'Unknown';
@@ -225,7 +225,7 @@ export default function QRInventory() {
       17: 'Ogden',
       18: 'Kansas City',
       19: 'Fresno',
-      20: 'Memphis',
+      20: 'Andover',
       21: 'Charlotte'
     };
     const serviceCenter = serviceCenterMap[record.serviceCenterId] || 'Unknown';

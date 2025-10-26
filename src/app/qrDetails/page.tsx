@@ -275,9 +275,10 @@ export default function QRDetailsPage() {
     setCompleting(true);
     try {
       const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/reviewComplete`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'SEID': seid || 'U1000'
         },
         body: JSON.stringify({
           inventoryId: inventoryId,
@@ -309,14 +310,51 @@ export default function QRDetailsPage() {
   };
 
   const handleRework = async () => {
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
     try {
-      // API call to rework QR
-      console.log('Rework QR for inventoryId:', inventoryId);
-      alert('QR sent for rework!');
-      router.push('/qrInventory');
+      // Make GET call to retrieve the inventory item with workRecord
+      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const inventoryItem = await response.json();
+        console.log('Retrieved inventory item for rework:', inventoryItem);
+        
+        // Extract workRecord from the inventory item response
+        const workRecord = inventoryItem.workRecord;
+        
+        if (workRecord) {
+          // Store the entire inventory item as eraDto in sessionStorage for the workRecord page
+          sessionStorage.setItem('eraDto', JSON.stringify(inventoryItem));
+          
+          // Navigate to workRecord page with qrReviewer flag
+          const searchParams = new URLSearchParams({
+            qrReviewer: 'true'
+          });
+          
+          router.push(`/workRecord?${searchParams.toString()}`);
+        } else {
+          throw new Error('No work record found in inventory item');
+        }
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to retrieve inventory item: ${errorText}`);
+      }
     } catch (error) {
       console.error('Error reworking QR:', error);
-      alert('Error sending QR for rework');
+      setFlashMessage('Error retrieving work record for rework. Please try again.');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
     }
   };
 

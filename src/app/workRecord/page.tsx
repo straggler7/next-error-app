@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Header from "../../components/Header";
 import FormSection, { FormField, FormInput } from "../../components/FormSection";
 import NotesSection from "../../components/NotesSection";
@@ -23,6 +23,8 @@ const toLabel = (key: string) =>
 
 export default function Form4868ERSPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isQrReviewer = searchParams.get('qrReviewer') === 'true';
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
   const [jsonWorkRecord, setJsonWorkRecord] = useState<any>(null);
   const [eraDto, setEraDto] = useState<any>(null);
@@ -429,7 +431,7 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": JSON.stringify(updatedEraDto)
+            "workRecord": JSON.stringify(updatedEraDto.workRecord)
           }
         })
       });
@@ -438,15 +440,23 @@ export default function Form4868ERSPage() {
         const result = await response.json();
         
         if (result.assignmentComplete) {
-          setFlashMessage('Record suspended successfully. Loading next record...');
-          setShowFlash(true);
-          
-          try {
-            await loadNextWorkRecord();
-            setFlashMessage('Record suspended successfully and new record retrieved');
-          } catch (fetchError) {
-            console.error('Error fetching next work record:', fetchError);
-            setFlashMessage('Record suspended successfully but failed to fetch new record');
+          if (isQrReviewer) {
+            setFlashMessage('Record suspended successfully. Returning to QR inventory...');
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push('/qrInventory');
+            }, 2000);
+          } else {
+            setFlashMessage('Record suspended successfully. Loading next record...');
+            setShowFlash(true);
+            
+            try {
+              await loadNextWorkRecord();
+              setFlashMessage('Record suspended successfully and new record retrieved');
+            } catch (fetchError) {
+              console.error('Error fetching next work record:', fetchError);
+              setFlashMessage('Record suspended successfully but failed to fetch new record');
+            }
           }
         } else {
           setFlashMessage('Record suspended successfully');
@@ -503,10 +513,10 @@ export default function Form4868ERSPage() {
       const storedSelectionData = sessionStorage.getItem('selectionData');
       const selectionData = JSON.parse(storedSelectionData || '{}');
 
-      console.log('Making PATCH request to:', `/api/v1/era/inventories/items/${inventoryId}/event`);
+      console.log('Making PATCH request to:', `/api/v1/era/inventories/${inventoryId}/event`);
       console.log('Request body:', { eventStatus: "CLOSEOUT" });
       
-      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
+      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/event`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -587,7 +597,7 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": JSON.stringify(updatedEraDto)
+            "workRecord": JSON.stringify(updatedEraDto.workRecord)
           }
         })
       });
@@ -596,15 +606,23 @@ export default function Form4868ERSPage() {
         const result = await response.json();
         
         if (result.assignmentComplete) {
-          setFlashMessage('Record deleted successfully. Loading next record...');
-          setShowFlash(true);
-          
-          try {
-            await loadNextWorkRecord();
-            setFlashMessage('Record deleted successfully and new record retrieved');
-          } catch (fetchError) {
-            console.error('Error fetching next work record:', fetchError);
-            setFlashMessage('Record deleted successfully but failed to fetch new record');
+          if (isQrReviewer) {
+            setFlashMessage('Record deleted successfully. Returning to QR inventory...');
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push('/qrInventory');
+            }, 2000);
+          } else {
+            setFlashMessage('Record deleted successfully. Loading next record...');
+            setShowFlash(true);
+            
+            try {
+              await loadNextWorkRecord();
+              setFlashMessage('Record deleted successfully and new record retrieved');
+            } catch (fetchError) {
+              console.error('Error fetching next work record:', fetchError);
+              setFlashMessage('Record deleted successfully but failed to fetch new record');
+            }
           }
         } else {
           setFlashMessage('Record deleted successfully');
@@ -685,7 +703,7 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": JSON.stringify(updatedEraDto)
+            "workRecord": JSON.stringify(updatedEraDto.workRecord)
           }
         })
       });
@@ -694,19 +712,27 @@ export default function Form4868ERSPage() {
         const result = await response.json();
         
         if (result.assignmentComplete) {
-          // Assignment complete - get next record from auto-assign
-          setFlashMessage('Form submitted successfully. Loading next record...');
-          setShowFlash(true);
-          
-          try {
-            await loadNextWorkRecord();
-            setFlashMessage('Form submitted successfully and new record retrieved');
-          } catch (fetchError) {
-            console.error('Error fetching next work record:', fetchError);
-            setFlashMessage('Form submitted successfully but failed to fetch new record');
+          // Assignment complete - get next record from auto-assign or navigate to QR inventory
+          if (isQrReviewer) {
+            setFlashMessage('Form submitted successfully. Returning to QR inventory...');
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push('/qrInventory');
+            }, 2000);
+          } else {
+            setFlashMessage('Form submitted successfully. Loading next record...');
+            setShowFlash(true);
+            
+            try {
+              await loadNextWorkRecord();
+              setFlashMessage('Form submitted successfully and new record retrieved');
+            } catch (fetchError) {
+              console.error('Error fetching next work record:', fetchError);
+              setFlashMessage('Form submitted successfully but failed to fetch new record');
+            }
+            
+            setTimeout(() => setShowFlash(false), 4000);
           }
-          
-          setTimeout(() => setShowFlash(false), 4000);
         } else {
           // Assignment not complete - update current record with workRecord from inventoryItem
           const updatedRecord = result.inventoryItem?.workRecord;
@@ -733,19 +759,27 @@ export default function Form4868ERSPage() {
         }
         
       } else if (response.status === 204) {
-        // No content - get next record from auto-assign
-        setFlashMessage('Form submitted successfully. Loading next record...');
-        setShowFlash(true);
-        
-        try {
-          await loadNextWorkRecord();
-          setFlashMessage('Form submitted successfully and new record retrieved');
-        } catch (fetchError) {
-          console.error('Error fetching next work record:', fetchError);
-          setFlashMessage('Form submitted successfully but failed to fetch new record');
+        // No content - get next record from auto-assign or navigate to QR inventory
+        if (isQrReviewer) {
+          setFlashMessage('Form submitted successfully. Returning to QR inventory...');
+          setShowFlash(true);
+          setTimeout(() => {
+            router.push('/qrInventory');
+          }, 2000);
+        } else {
+          setFlashMessage('Form submitted successfully. Loading next record...');
+          setShowFlash(true);
+          
+          try {
+            await loadNextWorkRecord();
+            setFlashMessage('Form submitted successfully and new record retrieved');
+          } catch (fetchError) {
+            console.error('Error fetching next work record:', fetchError);
+            setFlashMessage('Form submitted successfully but failed to fetch new record');
+          }
+          
+          setTimeout(() => setShowFlash(false), 4000);
         }
-        
-        setTimeout(() => setShowFlash(false), 4000);
         
       } else {
         const errorText = await response.text();

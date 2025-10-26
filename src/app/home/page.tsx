@@ -36,7 +36,7 @@ export default function HomePage() {
   const [programForm, setProgramForm] = useState<ProgramFormData>({
     program: "",
     statusCode: "",
-    serviceCenter: "austin",
+    serviceCenter: "andover",
     seid: "",
     qualityReview: false
   });
@@ -406,7 +406,8 @@ export default function HomePage() {
                     onChange={(e) => handleProgramInputChange('serviceCenter', e.target.value)}
                   >
                     <option value="">Select a service center...</option>
-                    <option value="austin">Austin (Default)</option>
+                    <option value="andover">Andover</option>
+                    <option value="austin">Austin</option>
                     <option value="ogden">Ogden</option>
                     <option value="charlotte">Charlotte</option>
                   </select>
