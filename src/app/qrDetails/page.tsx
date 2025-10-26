@@ -319,10 +319,12 @@ export default function QRDetailsPage() {
 
     try {
       // Make GET call to retrieve the inventory item with workRecord
-      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}`, {
+      // const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}`, {
+      const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/rework`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'SEID': seid || 'U1000'
         }
       });
 
