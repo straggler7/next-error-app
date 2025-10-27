@@ -207,9 +207,9 @@ export default function QRDetailsPage() {
       setError(err instanceof Error ? err.message : 'Failed to load QR details');
       
       // Load mock data as fallback
-      console.log('Loading mock data as fallback...');
-      const mockData = QRDetailsService.getMockQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
-      setQRData(mockData);
+      // console.log('Loading mock data as fallback...');
+      // const mockData = QRDetailsService.getMockQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
+      // setQRData(mockData);
     } finally {
       setLoading(false);
       isLoadingRef.current = false;

@@ -90,7 +90,7 @@ export class QRInventoryService {
           'SEID': filters.seid || 'u1000'
         },
         body: JSON.stringify({
-          status: 'QR_HOLD',
+          // status: 'QR_HOLD',
           // page: page.toString(),
           // pageSize: pageSize.toString(),
           seid: filters.seid,
