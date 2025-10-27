@@ -135,8 +135,8 @@ export default function DailySummary() {
     setPagination(newPagination);
   };
 
-  // Handle rework functionality - similar to QR Details page
-  const handleRework = async (record: QRInventoryRecord) => {
+  // Handle reopen functionality - similar to QR Details page
+  const handleReopen = async (record: QRInventoryRecord) => {
     const inventoryId = record.inventoryId;
     
     if (!inventoryId) {
@@ -148,7 +148,7 @@ export default function DailySummary() {
 
     try {
       // Make GET call to retrieve the inventory item with workRecord
-      const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/rework`, {
+      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/reopen`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export default function DailySummary() {
 
       if (response.ok) {
         const inventoryItem = await response.json();
-        console.log('Retrieved inventory item for rework:', inventoryItem);
+        console.log('Retrieved inventory item for reopen:', inventoryItem);
         
         // Extract workRecord from the inventory item response
         const workRecord = inventoryItem.workRecord;
@@ -181,8 +181,8 @@ export default function DailySummary() {
         throw new Error(`Failed to retrieve inventory item: ${errorText}`);
       }
     } catch (error) {
-      console.error('Error reworking record:', error);
-      setFlashMessage('Error retrieving work record for rework. Please try again.');
+      console.error('Error reopening record:', error);
+      setFlashMessage('Error retrieving work record for reopen. Please try again.');
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     }
@@ -190,7 +190,7 @@ export default function DailySummary() {
 
   const columnHelper = createColumnHelper<QRInventoryRecord>();
 
-  // Daily summary columns - same as QR inventory plus Rework button
+  // Daily summary columns - same as QR inventory plus Reopen button
   const dailySummaryColumns = useMemo<ColumnDef<QRInventoryRecord, any>[]>(() => [
     columnHelper.accessor('dln', {
       header: 'DLN',
@@ -284,19 +284,19 @@ export default function DailySummary() {
       header: 'Updated Date',
       size: 120,
     }),
-    // Add Rework button column
+    // Add Reopen button column
     columnHelper.display({
-      id: 'rework',
+      id: 'reopen',
       header: 'Actions',
       cell: ({ row }) => (
         <button
           onClick={(e) => {
             e.stopPropagation(); // Prevent row click
-            handleRework(row.original);
+            handleReopen(row.original);
           }}
           className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-700 transition-colors duration-200"
         >
-          Rework
+          Reopen
         </button>
       ),
       size: 100,
