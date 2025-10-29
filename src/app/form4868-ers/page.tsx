@@ -369,7 +369,6 @@ export default function Form4868ERSPage() {
             View RRD Data
           </button>
         </div>
-        {console.log(jsonWorkRecord)}
       </div>
 
       {/* Layout */}

@@ -485,3 +485,18 @@ git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis
             "ERR-103-CODE": "ERR-103-CODE: 103",
             "ERR-135-CODE": "ERR-135-CODE: 135"
         },
+
+
+/* next.nextConfig.ts */
+const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",               // when frontend calls /api/*
+        destination: "http://localhost:12000/:path*", // proxy to backend
+      },
+    ];
+  },
+};
+
+export default nextConfig;
