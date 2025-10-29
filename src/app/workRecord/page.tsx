@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "../../components/Header";
+import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
+import InfoAlert from "../../components/InfoAlert";
 import FormSection, { FormField, FormInput } from "../../components/FormSection";
 import NotesSection from "../../components/NotesSection";
 import { mockUser } from "../../data/mockData";
@@ -261,6 +263,7 @@ export default function Form4868ERSPage() {
   const loadNextWorkRecord = async () => {
     try {
       setLoading(true);
+      setActionCode('');
       
       // Get selection data from sessionStorage
       const storedSelectionData = sessionStorage.getItem('selectionData');
@@ -300,6 +303,12 @@ export default function Form4868ERSPage() {
         
         setNoWorkAvailable(false);
         console.log('New work record loaded:', eraDtoData);
+        
+        // Show info alert for new work record
+        const dln = eraDtoData?.dln || eraDtoData?.workRecord?.dln || 'N/A';
+        setInfoMessage(`New work record loaded, DLN: ${dln}`);
+        setShowInfo(true);
+        setTimeout(() => setShowInfo(false), 10000);
       } else if (response.status === 204) {
         setNoWorkAvailable(true);
         setNoWorkMessage('No more work records available at this time.');
@@ -386,6 +395,8 @@ export default function Form4868ERSPage() {
 
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
+  const [infoMessage, setInfoMessage] = useState<string>("");
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleSuspend = async () => {
     if (!inventoryId || !actionCode.trim()) {
@@ -797,7 +808,14 @@ export default function Form4868ERSPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100">
-        <Header user={mockUser} showBackButton backHref="/home" />
+        {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
+        <Header user={mockUser} />
+        
+        {/* Breadcrumbs */}
+        <div className="px-4 pt-4 pb-2">
+          <Breadcrumbs items={createBreadcrumbs.workRecord()} />
+        </div>
+        
         <div className="p-8 text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-600 mt-4">Loading assigned work...</p>
@@ -809,7 +827,14 @@ export default function Form4868ERSPage() {
   if (noWorkAvailable || (!loading && !eraDto)) {
     return (
       <div className="min-h-screen bg-gray-100">
-        <Header user={mockUser} showBackButton backHref="/home" />
+        {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
+        <Header user={mockUser} />
+        
+        {/* Breadcrumbs */}
+        <div className="px-4 pt-4 pb-2">
+          <Breadcrumbs items={createBreadcrumbs.workRecord()} />
+        </div>
+        
         <div className="p-8 text-center">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
             <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
@@ -827,7 +852,23 @@ export default function Form4868ERSPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
-      <Header user={mockUser} showBackButton backHref="/home" />
+      <Header user={mockUser} />
+      {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
+
+      {/* Breadcrumbs */}
+      <div className="px-4 pt-4 pb-2">
+        <Breadcrumbs items={createBreadcrumbs.workRecord()} />
+      </div>
+
+      {/* Info Alert */}
+      {showInfo && (
+        <div className="px-4 pb-2">
+          <InfoAlert 
+            message={infoMessage}
+            onClose={() => setShowInfo(false)}
+          />
+        </div>
+      )}
 
       {showFlash && (
         <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right">

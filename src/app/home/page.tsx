@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
+import ErrorAlert from "../../components/ErrorAlert";
 import { mockUser } from "../../data/mockData";
 import { landingSearchService } from "../../services/landingSearchService";
 
@@ -100,8 +101,8 @@ export default function HomePage() {
     const hasProgram = programForm.program || programForm.statusCode;
     const hasServiceCenter = programForm.serviceCenter;
     
-    setProgramStatusError(hasProgram ? "" : "Please select a program or status code.");
-    setServiceCenterError(hasServiceCenter ? "" : "Please select a service center.");
+    // setProgramStatusError(hasProgram ? "" : "Please select a program or status code.");
+    // setServiceCenterError(hasServiceCenter ? "" : "Please select a service center.");
     
     setIsSubmitButtonEnabled(Boolean(hasProgram && hasServiceCenter));
   }, [programForm]);
@@ -250,7 +251,8 @@ export default function HomePage() {
         // }
       } else {
         const errorText = await response.text();
-        setProgramStatusError(`Failed to get work assignment: ${errorText}`);
+        setProgramStatusError(`No work records available. Please try again.`);
+        console.error('Program selection error:', errorText);
       }
     } catch (error) {
       console.error('Program selection error:', error);
@@ -263,7 +265,7 @@ export default function HomePage() {
       <Header user={mockUser} />
       
       <div className="main-container flex flex-col p-4">
-        <div className="content-layout flex flex-col items-center gap-6">
+        <div className="content-layout flex flex-col items-center gap-4">
           
           {/* Welcome Section */}
           <div className="welcome-section text-center mb-8 w-full max-w-6xl">
@@ -275,8 +277,36 @@ export default function HomePage() {
             </p>
           </div>
 
+          {/* Error Alerts Section */}
+          <div className="error-alerts-section w-full max-w-6xl">
+            {searchError && (
+              <ErrorAlert 
+                type="error"
+                message={searchError}
+                onClose={() => setSearchError("")}
+                className="mb-4"
+              />
+            )}
+            {programStatusError && (
+              <ErrorAlert 
+                type="error"
+                message={programStatusError}
+                onClose={() => setProgramStatusError("")}
+                className="mb-4"
+              />
+            )}
+            {serviceCenterError && (
+              <ErrorAlert 
+                type="error"
+                message={serviceCenterError}
+                onClose={() => setServiceCenterError("")}
+                className="mb-4"
+              />
+            )}
+          </div>
+
           {/* Two-Card Layout */}
-          <div className="cards-container grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl">
+          <div className="cards-container grid grid-cols-1 lg:grid-cols-2 gap-4 w-full max-w-6xl">
             
             {/* Left Card: Program & Status Code Selection */}
             <div className="card bg-white rounded-xl p-8 border" style={{ 
@@ -288,7 +318,7 @@ export default function HomePage() {
                 Program & Status Code Selection
               </h2>
               
-              <form className="selection-form flex flex-col gap-6" onSubmit={handleProgramSubmit}>
+              <form className="selection-form flex flex-col gap-4" onSubmit={handleProgramSubmit}>
                 {/* Quality Review Section */}
                 <div className="checkbox-container flex items-center gap-3 mb-4">
                   <input 
@@ -411,11 +441,6 @@ export default function HomePage() {
                     <option value="ogden">Ogden</option>
                     <option value="charlotte">Charlotte</option>
                   </select>
-                  {serviceCenterError && (
-                    <div className="error-message text-red-600 text-sm mt-1 italic">
-                      {serviceCenterError}
-                    </div>
-                  )}
                 </div>
 
                 <div className="action-section">
@@ -453,11 +478,6 @@ export default function HomePage() {
                   >
                     {programForm.qualityReview ? 'Continue to QR' : 'Continue to Details'}
                   </button>
-                  {programStatusError && (
-                    <div className="error-message text-red-600 text-sm mt-2 italic">
-                      {programStatusError}
-                    </div>
-                  )}
                 </div>
               </form>
             </div>
@@ -473,8 +493,8 @@ export default function HomePage() {
               </h2>
               
               <div className="search-section w-full">
-                <form className="search-form w-full flex flex-col gap-6" onSubmit={handleSearchSubmit}>
-                  <div className="search-fields-grid flex flex-col gap-6 w-full">
+                <form className="search-form w-full flex flex-col gap-4" onSubmit={handleSearchSubmit}>
+                  <div className="search-fields-grid flex flex-col gap-4 w-full">
                     <div className="form-group">
                       <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="dlnInput">
                         DLN Number
@@ -607,11 +627,6 @@ export default function HomePage() {
                         Search Records
                       </button>
                     </div>
-                    {searchError && (
-                      <div className="error-message text-red-600 text-sm mt-2 italic">
-                        {searchError}
-                      </div>
-                    )}
                   </div>
                 </form>
               </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
+import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import FilterBar from '../../components/FilterBar';
 import TanStackInventoryTable from '../../components/TanStackInventoryTable';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
@@ -79,10 +80,10 @@ export default function DailySummary() {
           'SEID': parsedSelectionData.seid || 'u1000'
         },
         body: JSON.stringify({
-          seid: parsedSelectionData.seid,
-          programCode: parsedSelectionData.program,
-          statusCode: parsedSelectionData.statusCode,
-          serviceCenter: parsedSelectionData.serviceCenter
+          // seid: parsedSelectionData.seid,
+          // programCode: parsedSelectionData.program,
+          // statusCode: parsedSelectionData.statusCode,
+          // serviceCenter: parsedSelectionData.serviceCenter
         })
       });
 
@@ -99,7 +100,9 @@ export default function DailySummary() {
         totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load daily summary records');
+      setError('Failed to load daily summary records');
+      console.error('Daily Summary: Error loading daily summary records:', err);
+      console.error(err instanceof Error ? err.message : 'Failed to load daily summary records');
     } finally {
       setLoading(false);
     }
@@ -330,6 +333,11 @@ export default function DailySummary() {
     <div className="min-h-screen bg-gray-50">
       <Header user={mockUser} />
       
+      {/* Breadcrumbs */}
+      <div className="px-4 pt-4 pb-2">
+        <Breadcrumbs items={createBreadcrumbs.dailySummary()} />
+      </div>
+      
       {showFlash && (
         <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right">
           <span>{flashMessage}</span>
@@ -341,13 +349,13 @@ export default function DailySummary() {
           {/* Header */}
           <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
             <div className="flex items-center gap-4">
-              <button
+              {/* <button
                 onClick={() => router.back()}
                 className="back-button inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-gray-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5"
               >
                 <ArrowLeft size={16} className="mr-2" />
                 Back to Search
-              </button>
+              </button> */}
               <div>
                 <h2 className="card-title text-xl font-semibold text-[#003d6b]">
                   Daily Summary
@@ -383,11 +391,11 @@ export default function DailySummary() {
           </div>
 
           {/* Filter Bar */}
-          <FilterBar 
+          {/* <FilterBar 
             filters={filters}
             onFiltersChange={handleFilterChange}
             showQRFilters={true}
-          />
+          /> */}
 
           {/* Error Alert */}
           {error && (

@@ -500,3 +500,24 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+
+Header
+├── Welcome Section
+├── Error Alerts Section ← All errors now show here
+└── Two-Card Layout (Forms)
+
+
+cruft
+src/app/daily-summary/page.tsx
+src/app/form4868-ers/page.tsx
+
+modified:   cruft
+        modified:   src/app/daily-summary/page.tsx
+        modified:   src/app/home/page.tsx
+        modified:   src/app/qrDetails/page.tsx
+        modified:   src/app/qrInventory/page.tsx
+        modified:   src/app/workRecord/page.tsx
+        new file:   src/components/Breadcrumbs.tsx
+        modified:   src/components/Header.tsx
+        new file:   src/components/InfoAlert.tsx

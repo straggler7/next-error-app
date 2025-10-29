@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
+import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
 import NotesSection from "../../components/NotesSection";
 import { mockUser } from "../../data/mockData";
 import { Note } from "../../types";
@@ -402,7 +403,13 @@ export default function QRDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header user={mockUser} showBackButton backHref="/qrInventory" />
+      {/* <Header user={mockUser} showBackButton backHref="/qrInventory" /> */}
+      <Header user={mockUser} />
+      
+      {/* Breadcrumbs */}
+      <div className="px-4 pt-4 pb-2">
+        <Breadcrumbs items={createBreadcrumbs.qrDetails()} />
+      </div>
       
       {showFlash && (
         <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right">

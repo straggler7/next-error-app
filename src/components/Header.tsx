@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { User } from '../types';
 import { ChevronDown, User as UserIcon } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 export default function Header({ user, showBackButton = false, backHref = '/' }: HeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="bg-color-irs-blue bg-gradient-to-r from-[#00599c] to-[#00599c] text-white px-4 sm:px-8 py-4 shadow-md">
@@ -56,18 +58,21 @@ export default function Header({ user, showBackButton = false, backHref = '/' }:
                   onClick={() => setIsUserMenuOpen(false)}
                 />
                 <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl min-w-40 z-20">
-                  <a 
+                  {/* <a 
                     href="#" 
                     className="block px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:text-blue-900 transition-colors"
                   >
                     Profile Settings
-                  </a>
-                  <a 
-                    href="#" 
-                    className="block px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:text-blue-900 transition-colors"
+                  </a> */}
+                  <button 
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      router.push('/daily-summary');
+                    }}
+                    className="block w-full text-left px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:text-blue-900 transition-colors"
                   >
-                    Change Password
-                  </a>
+                    Daily Summary
+                  </button>
                   <hr className="my-2 border-gray-200" />
                   <a 
                     href="#" 
