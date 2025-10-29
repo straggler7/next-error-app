@@ -420,17 +420,7 @@ export default function QRDetailsPage() {
         {/* Top Toolbar */}
         <div className="bg-white rounded-xl shadow-sm p-5 mb-6 border border-gray-100">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <button
-                onClick={() => router.push('/qrInventory')}
-                className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 font-medium text-sm"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Inventory
-              </button>
-            </div>
-            
-            <div className="flex-1 text-left ml-6">
+            <div className="flex-1 text-left">
               <div className="flex flex-wrap gap-3">
                 <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
                   DLN: {inventoryRecord?.dln || dln}
