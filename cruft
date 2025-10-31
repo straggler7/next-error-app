@@ -524,3 +524,14 @@ modified:   cruft
         new file:   src/components/Breadcrumbs.tsx
         modified:   src/components/Header.tsx
         new file:   src/components/InfoAlert.tsx
+
+{
+  "event": {
+    "eventStatus": "SUSPEND"
+  },
+  "inventoryItem": {
+    "inventoryId": "",
+    "workRecord": {},
+    "suspendStatusCode": "SOME_CODE"
+  }
+}

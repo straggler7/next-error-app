@@ -72,8 +72,8 @@ export default function DailySummary() {
       };
 
       // Use the daily summary endpoint
-      // const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
-      const response = await fetch('/api/v1/era/inventories/daily-summary', {
+      const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
+      // const response = await fetch('/api/v1/era/inventories/daily-summary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,9 +100,9 @@ export default function DailySummary() {
         totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
       }));
     } catch (err) {
-      setError('Failed to load daily summary records');
-      console.error('Daily Summary: Error loading daily summary records:', err);
-      console.error(err instanceof Error ? err.message : 'Failed to load daily summary records');
+      setError('Failed to load daily summary records.');
+      // console.error('Daily Summary: Error loading daily summary records:', err);
+      // console.error(err instanceof Error ? err.message : 'Failed to load daily summary records');
     } finally {
       setLoading(false);
     }

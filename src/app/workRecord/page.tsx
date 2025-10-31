@@ -205,6 +205,7 @@ export default function Form4868ERSPage() {
   const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
   const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [clearCodesInput, setClearCodesInput] = useState<string>('');
   const [actionCode, setActionCode] = useState<string>('');
   const [suspending, setSuspending] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -264,6 +265,7 @@ export default function Form4868ERSPage() {
     try {
       setLoading(true);
       setActionCode('');
+      setClearCodesInput('');
       
       // Get selection data from sessionStorage
       const storedSelectionData = sessionStorage.getItem('selectionData');
@@ -308,7 +310,7 @@ export default function Form4868ERSPage() {
         const dln = eraDtoData?.dln || eraDtoData?.workRecord?.dln || 'N/A';
         setInfoMessage(`New work record loaded, DLN: ${dln}`);
         setShowInfo(true);
-        setTimeout(() => setShowInfo(false), 10000);
+        setTimeout(() => setShowInfo(false), 20000);
       } else if (response.status === 204) {
         setNoWorkAvailable(true);
         setNoWorkMessage('No more work records available at this time.');
@@ -398,9 +400,26 @@ export default function Form4868ERSPage() {
   const [infoMessage, setInfoMessage] = useState<string>("");
   const [showInfo, setShowInfo] = useState(false);
 
+  // Helper function to parse clear codes from comma-separated input
+  const getClearCodesArray = () => {
+    console.log('getting clear codes array from clearCodesInput:', clearCodesInput);
+    
+    if (!clearCodesInput.trim()) {
+      return [];
+    }
+    
+    const result = clearCodesInput
+      .split(',')
+      .map(code => code.trim())
+      .filter(code => code.length > 0);
+    
+    console.log('final clear codes array:', result);
+    return result;
+  };
+
   const handleSuspend = async () => {
     if (!inventoryId || !actionCode.trim()) {
-      setFlashMessage("Action Code is required for suspension.");
+      setFlashMessage("Action Code is required for Suspend.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
       return;
@@ -440,7 +459,8 @@ export default function Form4868ERSPage() {
           "inventoryItem": {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
-            "suspendStatusCode": actionCode
+            "suspendStatusCode": actionCode,
+            "clearCodes": getClearCodesArray()
           }
         })
       });
@@ -532,7 +552,14 @@ export default function Form4868ERSPage() {
           'SEID': selectionData.SEID || 'u1000'
         },
         body: JSON.stringify({
-          "eventStatus":"CLOSEOUT",
+          "event": {
+            "eventStatus":"CLOSEOUT",
+          },
+          "inventoryItem": {
+            "inventoryId": inventoryId,
+            "workRecord": updatedEraDto.workRecord,
+            "clearCodes": getClearCodesArray()
+          }
         })
       });
       
@@ -606,7 +633,8 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord
+            "workRecord": updatedEraDto.workRecord,
+            "clearCodes": getClearCodesArray()
           }
         })
       });
@@ -712,7 +740,8 @@ export default function Form4868ERSPage() {
           },
           "inventoryItem": {
             "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord
+            "workRecord": updatedEraDto.workRecord,
+            "clearCodes": getClearCodesArray()
           }
         })
       });
@@ -950,10 +979,11 @@ export default function Form4868ERSPage() {
                 <div className="space-y-8 px-1">
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                      <FormField label="Clear Code" required>
+                      <FormField label="Clear Codes" required>
                         <FormInput
-                          onChange={(value) => handleInputChange('clear_code', value)}
-                          placeholder="Enter clear code"
+                          value={clearCodesInput}
+                          onChange={(value) => setClearCodesInput(value)}
+                          placeholder="Enter comma separated clear code(s)"
                         />
                       </FormField>
                     </div>
