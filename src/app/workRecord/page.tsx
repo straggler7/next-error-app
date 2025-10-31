@@ -27,6 +27,7 @@ export default function Form4868ERSPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isQrReviewer = searchParams.get('qrReviewer') === 'true';
+  const isReopen = searchParams.get('reopen') === 'true';
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
   const [jsonWorkRecord, setJsonWorkRecord] = useState<any>(null);
   const [eraDto, setEraDto] = useState<any>(null);
@@ -475,6 +476,12 @@ export default function Form4868ERSPage() {
             setTimeout(() => {
               router.push('/qrInventory');
             }, 2000);
+          } else if (isReopen) {
+            setFlashMessage('Record suspended successfully. Returning to daily summary...');
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push('/daily-summary');
+            }, 2000);
           } else {
             setFlashMessage('Record suspended successfully. Loading next record...');
             setShowFlash(true);
@@ -566,6 +573,12 @@ export default function Form4868ERSPage() {
           setTimeout(() => {
             router.push('/qrInventory');
           }, 2000);
+        } else if (isReopen) {
+          setFlashMessage('Record closed out successfully. Returning to daily summary...');
+          setShowFlash(true);
+          setTimeout(() => {
+            router.push('/daily-summary');
+          }, 2000);
         } else {
           setFlashMessage('Record closed out successfully. Returning to home...');
           setShowFlash(true);
@@ -646,6 +659,12 @@ export default function Form4868ERSPage() {
             setShowFlash(true);
             setTimeout(() => {
               router.push('/qrInventory');
+            }, 2000);
+          } else if (isReopen) {
+            setFlashMessage('Record deleted successfully. Returning to daily summary...');
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push('/daily-summary');
             }, 2000);
           } else {
             setFlashMessage('Record deleted successfully. Loading next record...');
@@ -755,6 +774,12 @@ export default function Form4868ERSPage() {
             setTimeout(() => {
               router.push('/qrInventory');
             }, 2000);
+          } else if (isReopen) {
+            setFlashMessage('Form submitted successfully. Returning to daily summary...');
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push('/daily-summary');
+            }, 2000);
           } else {
             setFlashMessage('Form submitted successfully. Loading next record...');
             setShowFlash(true);
@@ -802,6 +827,12 @@ export default function Form4868ERSPage() {
           setShowFlash(true);
           setTimeout(() => {
             router.push('/qrInventory');
+          }, 2000);
+        } else if (isReopen) {
+          setFlashMessage('Form submitted successfully. Returning to daily summary...');
+          setShowFlash(true);
+          setTimeout(() => {
+            router.push('/daily-summary');
           }, 2000);
         } else {
           setFlashMessage('Form submitted successfully. Loading next record...');

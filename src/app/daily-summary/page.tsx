@@ -172,7 +172,8 @@ export default function DailySummary() {
           
           // Navigate to workRecord page with qrReviewer flag
           const searchParams = new URLSearchParams({
-            qrReviewer: 'false'
+            qrReviewer: 'false',
+            reopen: 'true'
           });
           
           router.push(`/workRecord?${searchParams.toString()}`);
