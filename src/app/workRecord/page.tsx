@@ -551,16 +551,7 @@ export default function Form4868ERSPage() {
           'Content-Type': 'application/json',
           'SEID': selectionData.SEID || 'u1000'
         },
-        body: JSON.stringify({
-          "event": {
-            "eventStatus":"CLOSEOUT",
-          },
-          "inventoryItem": {
-            "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getClearCodesArray()
-          }
-        })
+        body: JSON.stringify({"eventStatus":"CLOSEOUT"})
       });
       
       console.log('Response status:', response.status);
