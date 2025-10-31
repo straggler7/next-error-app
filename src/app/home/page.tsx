@@ -251,7 +251,7 @@ export default function HomePage() {
         // }
       } else {
         const errorText = await response.text();
-        setProgramStatusError(`No work records available. Please try again.`);
+        setProgramStatusError(`Work record already assigned. ${errorText}`);
         console.error('Program selection error:', errorText);
       }
     } catch (error) {
