@@ -560,14 +560,21 @@ export default function Form4868ERSPage() {
       if (response.status === 200) {
         const result = await response.json();
         
-        setFlashMessage('Record closed out successfully. Returning to home...');
-        setShowFlash(true);
-        
-        // Navigate to home after a brief delay to show the message
-        setTimeout(() => {
-          router.push('/home');
-        }, 2000);
-        
+        if (isQrReviewer) {
+          setFlashMessage('Record closed out successfully. Returning to QR inventory...');
+          setShowFlash(true);
+          setTimeout(() => {
+            router.push('/qrInventory');
+          }, 2000);
+        } else {
+          setFlashMessage('Record closed out successfully. Returning to home...');
+          setShowFlash(true);
+          
+          // Navigate to home after a brief delay to show the message
+          setTimeout(() => {
+            router.push('/home');
+          }, 2000);
+        }
       } else {
         const errorText = await response.text();
         throw new Error(`Closeout failed: ${errorText}`);
