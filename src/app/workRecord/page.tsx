@@ -773,7 +773,8 @@ export default function Form4868ERSPage() {
           }
         } else {
           // Assignment not complete - update current record with workRecord from inventoryItem
-          const updatedRecord = result.inventoryItem?.workRecord;
+          // const updatedRecord = result.inventoryItem?.workRecord;
+          const updatedRecord = result.inventoryItem;
           
           if (updatedRecord) {
             setEraDto(updatedRecord);
