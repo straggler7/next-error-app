@@ -1008,7 +1008,7 @@ export default function Form4868ERSPage() {
               >
                 <div className="space-y-8 px-1">
                   <div>
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-2">
                       <FormField label="Clear Codes" required>
                         <FormInput
                           value={clearCodesInput}
@@ -1041,7 +1041,7 @@ export default function Form4868ERSPage() {
 
                     {/* Non-Editable Fields Section */}
                     {nonEditableFieldKeys.length > 0 && (
-                      <div className="mt-8">
+                      <div className="mt-2">
                         <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

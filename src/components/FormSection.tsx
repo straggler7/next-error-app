@@ -15,7 +15,7 @@ interface FormSectionProps {
 
 export default function FormSection({ title, children, className = '', metadata }: FormSectionProps) {
   return (
-    <div className={`mb-8 ${className}`}>
+    <div className={`mb-4 ${className}`}>
       <div className="mb-4 pb-3 border-b-2 border-gray-200">
         <h3 className="text-lg font-bold text-gray-800 tracking-tight">{title}</h3>
         {metadata && (
@@ -119,7 +119,7 @@ export function FormInput({
       onBlur={onBlur}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 text-gray-700
-        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-gray-50'}
+        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
         ${error 
           ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
           : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'

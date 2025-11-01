@@ -282,12 +282,12 @@ export default function QRInventory() {
                       const parsedData = selectionData ? JSON.parse(selectionData) : {};
                       return (
                         <>
-                          {parsedData.program && (
+                          {/* {parsedData.program && (
                             <p>Program: {parsedData.program}</p>
                           )}
                           {parsedData.statusCode && (
                             <p>Status Code: {parsedData.statusCode}</p>
-                          )}
+                          )} */}
                         </>
                       );
                     }
