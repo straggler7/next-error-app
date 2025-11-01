@@ -85,7 +85,7 @@ export default function QRInventory() {
         totalPages: response.totalPages
       }));
     } catch (err) {
-      setError('Failed to load QR records');
+      // setError('Failed to load QR records');
       console.error('QR Inventory: Error loading QR records:', err);
       console.error(err instanceof Error ? err.message : 'Failed to load QR records');
     } finally {
@@ -167,15 +167,15 @@ export default function QRInventory() {
       header: 'Form Type',
       size: 100,
     }),
-    columnHelper.accessor('formType', {
-      id: 'returnType',
-      header: 'Return Type',
-      cell: ({ getValue }) => {
-        const formType = getValue();
-        return formType?.includes('Electronic') ? 'Electronic' : 'Paper';
-      },
-      size: 100,
-    }),
+    // columnHelper.accessor('formType', {
+    //   id: 'returnType',
+    //   header: 'Return Type',
+    //   cell: ({ getValue }) => {
+    //     const formType = getValue();
+    //     return formType?.includes('Electronic') ? 'Electronic' : 'Paper';
+    //   },
+    //   size: 100,
+    // }),
     columnHelper.accessor('taxPeriod', {
       header: 'Tax Period',
       size: 100,
@@ -193,7 +193,7 @@ export default function QRInventory() {
           </div>
         );
       },
-      size: 200,
+      size: 150,
     }),
     columnHelper.accessor('status', {
       header: 'Status',

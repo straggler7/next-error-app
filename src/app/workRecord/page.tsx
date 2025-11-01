@@ -222,6 +222,14 @@ export default function Form4868ERSPage() {
       setEraDto(eraDtoData);
       setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
       
+      // Populate clear codes and action code from stored DTO
+      if (eraDtoData.clearCodes && Array.isArray(eraDtoData.clearCodes)) {
+        setClearCodesInput(eraDtoData.clearCodes.join(', '));
+      }
+      if (eraDtoData.suspendStatusCode) {
+        setActionCode(eraDtoData.suspendStatusCode);
+      }
+      
       // Convert ERA DTO to form elements
       const elements = convertEraDtoToFormElements(eraDtoData);
       setFormElements(elements);
@@ -230,6 +238,8 @@ export default function Form4868ERSPage() {
       console.log('ERA DTO loaded from sessionStorage:', eraDtoData);
       console.log('Form elements created:', elements);
       console.log('ERA DTO workRecord:', eraDtoData.workRecord);
+      console.log('Clear codes populated:', eraDtoData.clearCodes);
+      console.log('Action code populated:', eraDtoData.suspendStatusCode);
     } else {
       // Fallback: Load from eraDto.json for development/testing
       import('../../data/eraDto.json').then((eraData) => {
@@ -295,6 +305,14 @@ export default function Form4868ERSPage() {
         // Update state with new ERA DTO
         setEraDto(eraDtoData);
         setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
+        
+        // Populate clear codes and action code from new DTO
+        if (eraDtoData.clearCodes && Array.isArray(eraDtoData.clearCodes)) {
+          setClearCodesInput(eraDtoData.clearCodes.join(', '));
+        }
+        if (eraDtoData.suspendStatusCode) {
+          setActionCode(eraDtoData.suspendStatusCode);
+        }
         
         // Convert to form elements
         const elements = convertEraDtoToFormElements(eraDtoData);
@@ -967,7 +985,7 @@ export default function Form4868ERSPage() {
 
       {/* Error Badges Section */}
       <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
-        <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">Active Errors</div>
+        <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">Errors</div>
         <div className="error-badges-container flex flex-wrap gap-2">
           {errorItems.map((error) => (
             <div
@@ -1082,64 +1100,68 @@ export default function Form4868ERSPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-start gap-4 pt-4 border-t border-gray-200 mt-4">
-            <button
-              type="button"
-              className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => {
-                clearFieldHighlight();
-                handleSubmit();
-              }}
-              disabled={submitting}
-            >
-              {submitting ? "Submitting..." : "Submit"}
-            </button>
-            <button
-              type="button"
-              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                !actionCode.trim() || suspending
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
-              }`}
-              onClick={() => {
-                clearFieldHighlight();
-                handleSuspend();
-              }}
-              disabled={!actionCode.trim() || suspending}
-            >
-              {suspending ? "Suspending..." : "Suspend"}
-            </button>
-            <button
-              type="button"
-              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                closingOut
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
-              }`}
-              onClick={() => {
-                console.log('Close Out button clicked');
-                clearFieldHighlight();
-                handleCloseout();
-              }}
-              disabled={closingOut}
-            >
-              {closingOut ? "Closing Out..." : "Close Out"}
-            </button>
-            <button
-              type="button"
-              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                deleting
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
-              }`}
-              onClick={() => {
-                clearFieldHighlight();
-                handleDelete();
-              }}
-              disabled={deleting}
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </button>
+          <div className="flex justify-between pt-4 border-t border-gray-200 mt-4">
+            <div className="flex gap-4">
+              <button
+                type="button"
+                className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => {
+                  clearFieldHighlight();
+                  handleSubmit();
+                }}
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </button>
+              <button
+                type="button"
+                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                  !actionCode.trim() || suspending
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                }`}
+                onClick={() => {
+                  clearFieldHighlight();
+                  handleSuspend();
+                }}
+                disabled={!actionCode.trim() || suspending}
+              >
+                {suspending ? "Suspending..." : "Suspend"}
+              </button>
+            </div>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                  closingOut
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                }`}
+                onClick={() => {
+                  console.log('Close Out button clicked');
+                  clearFieldHighlight();
+                  handleCloseout();
+                }}
+                disabled={closingOut}
+              >
+                {closingOut ? "Closing Out..." : "Close Out"}
+              </button>
+              <button
+                type="button"
+                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                  deleting
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                }`}
+                onClick={() => {
+                  clearFieldHighlight();
+                  handleDelete();
+                }}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
 

@@ -72,8 +72,8 @@ export default function DailySummary() {
       };
 
       // Use the daily summary endpoint
-      const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
-      // const response = await fetch('/api/v1/era/inventories/daily-summary', {
+      // const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
+      const response = await fetch('/api/v1/era/inventories/daily-summary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,8 +100,8 @@ export default function DailySummary() {
         totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
       }));
     } catch (err) {
-      setError('Failed to load daily summary records.');
-      // console.error('Daily Summary: Error loading daily summary records:', err);
+      // setError('Failed to load daily summary records.');
+      console.error('Daily Summary: Error loading daily summary records:', err);
       // console.error(err instanceof Error ? err.message : 'Failed to load daily summary records');
     } finally {
       setLoading(false);
@@ -236,15 +236,15 @@ export default function DailySummary() {
       header: 'Form Type',
       size: 100,
     }),
-    columnHelper.accessor('formType', {
-      id: 'returnType',
-      header: 'Return Type',
-      cell: ({ getValue }) => {
-        const formType = getValue();
-        return formType?.includes('Electronic') ? 'Electronic' : 'Paper';
-      },
-      size: 100,
-    }),
+    // columnHelper.accessor('formType', {
+    //   id: 'returnType',
+    //   header: 'Return Type',
+    //   cell: ({ getValue }) => {
+    //     const formType = getValue();
+    //     return formType?.includes('Electronic') ? 'Electronic' : 'Paper';
+    //   },
+    //   size: 100,
+    // }),
     columnHelper.accessor('taxPeriod', {
       header: 'Tax Period',
       size: 100,
@@ -262,7 +262,7 @@ export default function DailySummary() {
           </div>
         );
       },
-      size: 200,
+      size: 150,
     }),
     columnHelper.accessor('status', {
       header: 'Status',

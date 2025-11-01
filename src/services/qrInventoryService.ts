@@ -116,7 +116,7 @@ export class QRInventoryService {
       };
     } catch (error) {
       console.error('Error fetching QR records:', error);
-      throw new Error('Failed to fetch QR inventory records');
+      // throw new Error('Failed to fetch QR inventory records');
     }
   }
 }
