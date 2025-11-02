@@ -212,6 +212,7 @@ export default function Form4868ERSPage() {
   const [deleting, setDeleting] = useState(false);
   const [closingOut, setClosingOut] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
+  const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
   useEffect(() => {
     // Load ERA DTO from sessionStorage
@@ -294,6 +295,7 @@ export default function Form4868ERSPage() {
       setLoading(true);
       setActionCode('');
       setClearCodesInput('');
+      setAdditionalNotes('');
       
       // Get selection data from sessionStorage
       const storedSelectionData = sessionStorage.getItem('selectionData');
@@ -304,6 +306,7 @@ export default function Form4868ERSPage() {
       }
       
       const selectionData = JSON.parse(storedSelectionData);
+      console.log('Selection data:', selectionData);
       
       // Make GET request to auto-assign endpoint
       const response = await fetch('/api/v1/era/inventories/auto-assign', {
@@ -474,7 +477,7 @@ export default function Form4868ERSPage() {
     const fieldChanges: any[] = [];
     const storedSelectionData = sessionStorage.getItem('selectionData');
     const selectionData = JSON.parse(storedSelectionData || '{}');
-    const currentSeid = selectionData.SEID || 'unknown';
+    const currentSeid = selectionData.seid || 'unknown';
     
     // Check for form field changes
     formElements.forEach(element => {
@@ -512,13 +515,14 @@ export default function Form4868ERSPage() {
       });
     }
     
-    // Create new note if there are changes
-    if (fieldChanges.length > 0) {
+    // Create new note if there are changes or additional notes
+    if (fieldChanges.length > 0 || additionalNotes.trim()) {
       const newNote = {
         author: currentSeid,
         createdTime: new Date().toISOString(),
         comments: {
-          fieldChanges: fieldChanges
+          ...(fieldChanges.length > 0 && { fieldChanges: fieldChanges }),
+          ...(additionalNotes.trim() && { additionalComments: additionalNotes })
         }
       };
       
@@ -564,7 +568,7 @@ export default function Form4868ERSPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.SEID || 'u1000'
+          'SEID': selectionData.seid || 'u1000'
         },
         body: JSON.stringify({
           "event": {
@@ -582,6 +586,9 @@ export default function Form4868ERSPage() {
 
       if (response.status === 200) {
         const result = await response.json();
+        
+        // Clear additional notes after successful operation
+        setAdditionalNotes('');
         
         if (result.assignmentComplete) {
           if (isQrReviewer) {
@@ -670,7 +677,7 @@ export default function Form4868ERSPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.SEID || 'u1000'
+          'SEID': selectionData.seid || 'u1000'
         },
         body: JSON.stringify({
           "event": {
@@ -690,6 +697,9 @@ export default function Form4868ERSPage() {
 
       if (response.status === 200) {
         const result = await response.json();
+        
+        // Clear additional notes after successful operation
+        setAdditionalNotes('');
         
         if (isQrReviewer) {
           setFlashMessage('Record closed out successfully. Returning to QR inventory...');
@@ -760,7 +770,7 @@ export default function Form4868ERSPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.SEID || 'u1000'
+          'SEID': selectionData.seid || 'u1000'
         },
         body: JSON.stringify({
           "event": {
@@ -777,6 +787,9 @@ export default function Form4868ERSPage() {
 
       if (response.status === 200) {
         const result = await response.json();
+        
+        // Clear additional notes after successful operation
+        setAdditionalNotes('');
         
         if (result.assignmentComplete) {
           if (isQrReviewer) {
@@ -865,7 +878,7 @@ export default function Form4868ERSPage() {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
-      //     'SEID': selectionData.SEID || 'u1000'
+      //     'SEID': selectionData.seid || 'u1000'
       //   },
       //   body: JSON.stringify(updatedEraDto)
       // });
@@ -874,7 +887,7 @@ export default function Form4868ERSPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.SEID || 'u1000'
+          'SEID': selectionData.seid || 'u1000'
         },
         body: JSON.stringify({
           "event": {
@@ -891,6 +904,9 @@ export default function Form4868ERSPage() {
 
       if (response.status === 200) {
         const result = await response.json();
+        
+        // Clear additional notes after successful operation
+        setAdditionalNotes('');
         
         if (result.assignmentComplete) {
           // Assignment complete - get next record from auto-assign or navigate to QR inventory
@@ -947,6 +963,9 @@ export default function Form4868ERSPage() {
         }
         
       } else if (response.status === 204) {
+        // Clear additional notes after successful operation
+        setAdditionalNotes('');
+        
         // No content - get next record from auto-assign or navigate to QR inventory
         if (isQrReviewer) {
           setFlashMessage('Form submitted successfully. Returning to QR inventory...');
@@ -1276,10 +1295,24 @@ export default function Form4868ERSPage() {
         {/* Notes Section (Right 40%) */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col max-h-[600px] min-w-0 overflow-hidden">
           <div className="notes-title text-lg font-semibold mb-4 pb-2 border-b border-gray-200 text-gray-700 flex-shrink-0">
-            Resolution Notes
+            Notes
           </div>
           
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* Additional Notes Input */}
+            <div className="additional-notes-input mb-4 flex-shrink-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Add Additional Notes:
+              </label>
+              <textarea
+                value={additionalNotes}
+                onChange={(e) => setAdditionalNotes(e.target.value)}
+                placeholder="Enter additional notes here..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+              />
+            </div>
+            
             <div className="notes-content overflow-y-auto flex-1 space-y-4">
               {notes.length === 0 ? (
                 <div className="text-gray-500 text-sm">No notes available</div>

@@ -533,7 +533,7 @@ export default function QRDetailsPage() {
           {/* Notes Section (Right 40%) */}
           <div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b-2 border-gray-200 pb-2">
-              Resolution Notes
+              Notes
             </h3>
             <NotesSection notes={notes} onAddNote={handleAddNote} />
           </div>

@@ -39,7 +39,7 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
                 onClick={() => handleClick(item.href!)}
                 className="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors duration-200 flex items-center gap-1 cursor-pointer"
               >
-                {index === 0 && <Home className="w-4 h-4" />}
+                {/* {index === 0 && <Home className="w-4 h-4" />} */}
                 {item.label}
               </button>
             ) : (
