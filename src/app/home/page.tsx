@@ -320,7 +320,7 @@ export default function HomePage() {
               
               <form className="selection-form flex flex-col gap-4" onSubmit={handleProgramSubmit}>
                 {/* Quality Review Section */}
-                <div className="checkbox-container flex items-center gap-3 mb-4">
+                <div className="checkbox-container flex items-center gap-2 mb-2">
                   <input 
                     type="checkbox" 
                     id="qualityReviewCheckbox" 
@@ -344,7 +344,7 @@ export default function HomePage() {
                       className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
                       style={{
                         padding: '0.875rem 1.125rem',
-                        border: '2px solid #e5e7eb',
+                        border: '1px solid #e5e7eb',
                         borderRadius: '8px',
                         fontSize: '0.95rem',
                         lineHeight: '1.4',
@@ -369,7 +369,7 @@ export default function HomePage() {
                     className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
                     style={{
                       padding: '0.875rem 1.125rem',
-                      border: '2px solid #e5e7eb',
+                      border: '1px solid #e5e7eb',
                       borderRadius: '8px',
                       fontSize: '0.95rem',
                       lineHeight: '1.4',
@@ -395,7 +395,7 @@ export default function HomePage() {
                     className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
                     style={{
                       padding: '0.875rem 1.125rem',
-                      border: '2px solid #e5e7eb',
+                      border: '1px solid #e5e7eb',
                       borderRadius: '8px',
                       fontSize: '0.95rem',
                       lineHeight: '1.4',
@@ -422,7 +422,7 @@ export default function HomePage() {
                     className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
                     style={{
                       padding: '0.875rem 1.125rem',
-                      border: '2px solid #e5e7eb',
+                      border: '1px solid #e5e7eb',
                       borderRadius: '8px',
                       fontSize: '0.95rem',
                       lineHeight: '1.4',
@@ -449,14 +449,14 @@ export default function HomePage() {
                     className="btn btn-primary w-full font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
                     style={{
                       padding: '0.75rem 1.5rem',
-                      border: '2px solid #0066cc',
+                      border: '1px solid #0066cc',
                       borderRadius: '8px',
                       backgroundColor: isSubmitButtonEnabled ? '#0066cc' : '#9ca3af',
                       borderColor: isSubmitButtonEnabled ? '#0066cc' : '#9ca3af',
                       color: 'white',
                       fontSize: '0.9rem',
                       fontWeight: '600',
-                      minWidth: '180px'
+                      minWidth: '180px',
                     }}
                     onMouseEnter={(e) => {
                       if (isSubmitButtonEnabled) {
@@ -504,7 +504,7 @@ export default function HomePage() {
                         className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
-                          border: '2px solid #e5e7eb',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '0.95rem',
                           lineHeight: '1.4',
@@ -528,7 +528,7 @@ export default function HomePage() {
                         className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
-                          border: '2px solid #e5e7eb',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '0.95rem',
                           lineHeight: '1.4',
@@ -552,7 +552,7 @@ export default function HomePage() {
                         className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
-                          border: '2px solid #e5e7eb',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '0.95rem',
                           lineHeight: '1.4',
@@ -576,7 +576,7 @@ export default function HomePage() {
                         className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
-                          border: '2px solid #e5e7eb',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '8px',
                           fontSize: '0.95rem',
                           lineHeight: '1.4',
@@ -597,7 +597,7 @@ export default function HomePage() {
                         className="btn btn-primary search-btn w-full font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
                         style={{
                           padding: '0.75rem 1.5rem',
-                          border: '2px solid #0066cc',
+                          border: '1px solid #0066cc',
                           borderRadius: '8px',
                           backgroundColor: isSearchButtonEnabled ? '#0066cc' : '#9ca3af',
                           borderColor: isSearchButtonEnabled ? '#0066cc' : '#9ca3af',

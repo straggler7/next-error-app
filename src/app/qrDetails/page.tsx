@@ -43,31 +43,31 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
   if (isEditable) {
     // Show before/after comparison for editable fields
     return (
-      <div className={`grid grid-cols-2 gap-4 mb-4 p-3 rounded-lg ${
+      <div className={`grid grid-cols-2 gap-2 mb-2 p-2 rounded-lg ${
         isModified ? 'bg-orange-50' : 'bg-gray-50'
       }`}>
         <div className="flex-1">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
+          <label className="block mb-2 text-sm font-semibold text-gray-700">
             {label} (Before)
           </label>
           <input
             type="text"
-            className={`w-full px-3 py-2 text-sm bg-gray-50 border rounded cursor-not-allowed ${
+            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
               isModified 
-                ? 'border-2 border-red-300 text-gray-600' 
-                : 'border-gray-300 text-gray-600'
+                ? 'border-2 border-red-300 text-gray-900' 
+                : 'border-gray-300 text-gray-900'
             } ${!beforeValue ? 'italic' : ''}`}
             value={displayBeforeValue}
             readOnly
           />
         </div>
         <div className="flex-1">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
+          <label className="block mb-2 text-sm font-semibold text-gray-700">
             {label} (After)
           </label>
           <input
             type="text"
-            className={`w-full px-3 py-2 text-sm bg-gray-50 border rounded cursor-not-allowed ${
+            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
               isModified 
                 ? 'border-2 border-green-300 text-gray-900 font-medium' 
                 : 'border-gray-300 text-gray-900'
@@ -81,31 +81,31 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
   } else {
     // Show before/after comparison for non-editable fields (system information) as well
     return (
-      <div className={`grid grid-cols-2 gap-4 mb-4 p-3 rounded-lg ${
+      <div className={`grid grid-cols-2 gap-2 mb-2 p-2 rounded-lg ${
         isModified ? 'bg-blue-50' : 'bg-gray-50'
       }`}>
         <div className="flex-1">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
+          <label className="block mb-2 text-sm font-semibold text-gray-700">
             {label} (Before)
           </label>
           <input
             type="text"
-            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
               isModified 
-                ? 'border-2 border-blue-300 text-gray-600' 
-                : 'border-gray-300 text-gray-600'
+                ? 'border-2 border-blue-300 text-gray-900' 
+                : 'border-gray-300 text-gray-900'
             } ${!beforeValue ? 'italic' : ''}`}
             value={displayBeforeValue}
             readOnly
           />
         </div>
         <div className="flex-1">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
+          <label className="block mb-2 text-sm font-semibold text-gray-700">
             {label} (After)
           </label>
           <input
             type="text"
-            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
               isModified 
                 ? 'border-2 border-blue-300 text-gray-900 font-medium' 
                 : 'border-gray-300 text-gray-900'
@@ -471,10 +471,7 @@ export default function QRDetailsPage() {
               </div>
               
               {/* Editable Fields - Show Before/After Comparison */}
-              <div className="mb-8">
-                <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
-                  Editable Fields
-                </h4>
+              <div className="grid grid-cols-1 gap-2">
                 {comparisonFields
                   .filter(field => field.isEditable)
                   .map((field) => (
@@ -492,9 +489,7 @@ export default function QRDetailsPage() {
 
               {/* Non-Editable Fields - System Information */}
               <div>
-                <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
-                </h4>
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-2">
                   {comparisonFields
                     .filter(field => !field.isEditable)
                     .map((field) => (
@@ -513,7 +508,7 @@ export default function QRDetailsPage() {
             </div>
             
             {/* Action Buttons */}
-            <div className="border-t-2 border-gray-200 pt-4 mt-6">
+            <div className="border-t-2 border-gray-200 pt-4 mt-4">
               <div className="flex gap-4">
                 <button
                   onClick={handleQRComplete}

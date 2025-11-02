@@ -645,4 +645,38 @@ Initial review completed. SSN field requires verification due to EIF/NAP mismatc
       "additionalComments":"this is a comment.\nThis is another comment.\nThis is yet another comment"
     }
   }
+
+
+  notes:
+  [
+    {
+        "author": "u1000",
+        "createdTime": "2025-11-02T01:36:20.967Z",
+        "comments": {
+            "fieldChanges": [
+                {
+                    "fieldName": "Taxpayer Name Control (01NC)",
+                    "beforeValue": "SEAG",
+                    "afterValue": "SEAXYY"
+                }
+            ],
+            "additionalComments": [
+                "foo bar baz \n",
+                "this is another comment"
+            ]
+        }
+    },
+    {
+        "author": "unknown",
+        "createdTime": "2025-11-02T01:36:20.967Z",
+        "comments": {
+            "fieldChanges": [
+                {
+                    "fieldName": "Taxpayer Name Control (01NC)",
+                    "beforeValue": "SEAG",
+                    "afterValue": "SEAGXXX"
+                }
+            ]
+        }
+    }
 ]
