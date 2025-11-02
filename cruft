@@ -535,6 +535,114 @@ modified:   cruft
   "inventoryItem": {
     "inventoryId": "",
     "workRecord": {},
-    "suspendStatusCode": "SOME_CODE"
+    "suspendStatusCode": "SOME_CODE",
   }
 }
+
+notes: [
+  {
+    "author": "",
+    "createdTime": "2025-10-26T12:00:00-04:00",
+    "comments": {
+      "fieldChanges": [
+        {
+          "fieldName": "Taxpayer Name Control (01NC)",
+          "beforeValue": "value1",
+          "afterValue": "value2"
+        },
+        {
+          "fieldName": "Taxpayer Identification Number (01TIN)",
+          "beforeValue": "value2",
+          "afterValue": "value3"
+        }
+      ],
+      "additionalComments": "this is a comment.\nThis is another comment.\nThis is yet another comment"
+    }
+  }
+]
+
+==================
+
+
+The eraDtoData can have notes key, which will be json as well and in this format
+{
+  "event": {
+    "eventStatus": "SUSPEND"
+  },
+  "inventoryItem": {
+    "inventoryId": "",
+    "workRecord": {},
+    "suspendStatusCode": "SOME_CODE"
+    "notes": string
+  }
+}
+
+when the notes string is JSON parsed , it will have this structure
+notes: [
+  {
+    "author": "",
+    "createdTime": "2025-10-26T12:00:00-04:00",
+    "comments": {
+      "fieldChanges": [
+        {
+          "fieldName": "Taxpayer Name Control (01NC)",
+          "beforeValue": "value1",
+          "afterValue": "value2"
+        },
+        {
+          "fieldName": "Taxpayer Identification Number (01TIN)",
+          "beforeValue": "value2",
+          "afterValue": "value3"
+        }
+      ],
+      "additionalComments": "this is a comment.\nThis is another comment.\nThis is yet another comment"
+    }
+  }
+]
+
+when the eraDto is parsed, retrieve the notes and display in the notes section
+Author: 
+Created At: 
+Field Changes:
+    Field Name: before value -> after value
+    ...
+Additional Comments
+
+and in the payload of Submit, Suspend, Close Out, Delete, add notes key.
+if the notes is empty [], then add a new object and add it to the list that should be
+{ author: 'seid',  
+
+2025-08-28 10:30
+Initial review completed. SSN field requires verification due to EIF/NAP mismatch.
+
+{
+  "author": "seid_from_session",
+  "createdTime": "2025-11-01T21:32:00.000Z",
+  "comments": {
+    "fieldChanges": [
+      {
+        "fieldName": "Field Name",
+        "beforeValue": "old_value",
+        "afterValue": "new_value"
+      }
+    ]
+  }
+}
+
+[
+  {
+    "author":"unknown",
+    "createdTime":"2025-11-02T01:36:20.967Z",
+    "comments":{
+      "fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAXX"}]
+    }
+  },
+    {
+    "author":"unknown",
+    "createdTime":"2025-11-03T01:36:20.967Z",
+    "comments":{
+      "fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAYY"}],
+      "additionalComments":"this is a comment.\nThis is another comment.\nThis is yet another comment"
+    }
+  }
+]

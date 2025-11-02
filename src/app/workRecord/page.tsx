@@ -211,6 +211,7 @@ export default function Form4868ERSPage() {
   const [suspending, setSuspending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [closingOut, setClosingOut] = useState(false);
+  const [notes, setNotes] = useState<any[]>([]);
 
   useEffect(() => {
     // Load ERA DTO from sessionStorage
@@ -228,6 +229,22 @@ export default function Form4868ERSPage() {
       }
       if (eraDtoData.suspendStatusCode) {
         setActionCode(eraDtoData.suspendStatusCode);
+      }
+      
+      // Parse and set notes from stored DTO
+      if (eraDtoData.notes) {
+        try {
+          const parsedNotes = typeof eraDtoData.notes === 'string' 
+            ? JSON.parse(eraDtoData.notes) 
+            : eraDtoData.notes;
+          setNotes(Array.isArray(parsedNotes) ? parsedNotes : []);
+          console.log('Notes parsed:', parsedNotes);
+        } catch (error) {
+          console.error('Error parsing notes:', error);
+          setNotes([]);
+        }
+      } else {
+        setNotes([]);
       }
       
       // Convert ERA DTO to form elements
@@ -312,6 +329,22 @@ export default function Form4868ERSPage() {
         }
         if (eraDtoData.suspendStatusCode) {
           setActionCode(eraDtoData.suspendStatusCode);
+        }
+        
+        // Parse and set notes from new DTO
+        if (eraDtoData.notes) {
+          try {
+            const parsedNotes = typeof eraDtoData.notes === 'string' 
+              ? JSON.parse(eraDtoData.notes) 
+              : eraDtoData.notes;
+            setNotes(Array.isArray(parsedNotes) ? parsedNotes : []);
+            console.log('Notes parsed from new record:', parsedNotes);
+          } catch (error) {
+            console.error('Error parsing notes from new record:', error);
+            setNotes([]);
+          }
+        } else {
+          setNotes([]);
         }
         
         // Convert to form elements
@@ -436,6 +469,68 @@ export default function Form4868ERSPage() {
     return result;
   };
 
+  // Helper function to generate notes with field changes
+  const generateNotesWithChanges = () => {
+    const fieldChanges: any[] = [];
+    const storedSelectionData = sessionStorage.getItem('selectionData');
+    const selectionData = JSON.parse(storedSelectionData || '{}');
+    const currentSeid = selectionData.SEID || 'unknown';
+    
+    // Check for form field changes
+    formElements.forEach(element => {
+      const originalElement = originalFormElements.find(orig => orig.name === element.name);
+      if (originalElement && originalElement.value !== element.value) {
+        fieldChanges.push({
+          fieldName: element.label || element.name,
+          beforeValue: originalElement.value || '',
+          afterValue: element.value || ''
+        });
+      }
+    });
+    
+    // Check for clear codes changes
+    const originalClearCodes = eraDto?.clearCodes || [];
+    const currentClearCodes = getClearCodesArray();
+    const originalClearCodesStr = Array.isArray(originalClearCodes) ? originalClearCodes.join(', ') : '';
+    const currentClearCodesStr = currentClearCodes.join(', ');
+    
+    if (originalClearCodesStr !== currentClearCodesStr) {
+      fieldChanges.push({
+        fieldName: 'Clear Codes',
+        beforeValue: originalClearCodesStr,
+        afterValue: currentClearCodesStr
+      });
+    }
+    
+    // Check for action code changes
+    const originalActionCode = eraDto?.suspendStatusCode || '';
+    if (originalActionCode !== actionCode) {
+      fieldChanges.push({
+        fieldName: 'Action Code',
+        beforeValue: originalActionCode,
+        afterValue: actionCode
+      });
+    }
+    
+    // Create new note if there are changes
+    if (fieldChanges.length > 0) {
+      const newNote = {
+        author: currentSeid,
+        createdTime: new Date().toISOString(),
+        comments: {
+          fieldChanges: fieldChanges
+        }
+      };
+      
+      // Add to existing notes
+      const updatedNotes = [...notes, newNote];
+      return JSON.stringify(updatedNotes);
+    }
+    
+    // Return existing notes as string if no changes
+    return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
+  };
+
   const handleSuspend = async () => {
     if (!inventoryId || !actionCode.trim()) {
       setFlashMessage("Action Code is required for Suspend.");
@@ -479,7 +574,8 @@ export default function Form4868ERSPage() {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
             "suspendStatusCode": actionCode,
-            "clearCodes": getClearCodesArray()
+            "clearCodes": getClearCodesArray(),
+            "notes": generateNotesWithChanges()
           }
         })
       });
@@ -576,7 +672,17 @@ export default function Form4868ERSPage() {
           'Content-Type': 'application/json',
           'SEID': selectionData.SEID || 'u1000'
         },
-        body: JSON.stringify({"eventStatus":"CLOSEOUT"})
+        body: JSON.stringify({
+          "event": {
+            "eventStatus":"CLOSEOUT",
+          },
+          "inventoryItem": {
+            "inventoryId": inventoryId,
+            "workRecord": updatedEraDto.workRecord,
+            "clearCodes": getClearCodesArray(),
+            "notes": generateNotesWithChanges()
+          }
+        })
       });
       
       console.log('Response status:', response.status);
@@ -663,7 +769,8 @@ export default function Form4868ERSPage() {
           "inventoryItem": {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getClearCodesArray()
+            "clearCodes": getClearCodesArray(),
+            "notes": generateNotesWithChanges()
           }
         })
       });
@@ -776,7 +883,8 @@ export default function Form4868ERSPage() {
           "inventoryItem": {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getClearCodesArray()
+            "clearCodes": getClearCodesArray(),
+            "notes": generateNotesWithChanges()
           }
         })
       });
@@ -1172,7 +1280,50 @@ export default function Form4868ERSPage() {
           </div>
           
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <NotesSection notes={mockNotes} onAddNote={(content) => console.log("Add note:", content)} />
+            <div className="notes-content overflow-y-auto flex-1 space-y-4">
+              {notes.length === 0 ? (
+                <div className="text-gray-500 text-sm">No notes available</div>
+              ) : (
+                notes.map((note, index) => (
+                  <div key={index} className="note-entry border-b border-gray-100 pb-4 last:border-b-0">
+                    <div className="note-header mb-2">
+                      <div className="text-sm font-medium text-gray-700">
+                        Author: {note.author || 'Unknown'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Created At: {note.createdTime ? new Date(note.createdTime).toLocaleString() : 'Unknown'}
+                      </div>
+                    </div>
+                    
+                    {note.comments && (
+                      <div className="note-comments">
+                        {note.comments.fieldChanges && note.comments.fieldChanges.length > 0 && (
+                          <div className="field-changes mb-3">
+                            <div className="text-sm font-medium text-gray-600 mb-1">Field Changes:</div>
+                            <div className="ml-4 space-y-1">
+                              {note.comments.fieldChanges.map((change, changeIndex) => (
+                                <div key={changeIndex} className="text-xs text-gray-600">
+                                  <span className="font-medium">{change.fieldName}:</span> {change.beforeValue} → {change.afterValue}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {note.comments.additionalComments && (
+                          <div className="additional-comments">
+                            <div className="text-sm font-medium text-gray-600 mb-1">Additional Comments:</div>
+                            <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
+                              {note.comments.additionalComments}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
