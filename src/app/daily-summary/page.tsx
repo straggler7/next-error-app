@@ -72,8 +72,8 @@ export default function DailySummary() {
       };
 
       // Use the daily summary endpoint
-      // const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
-      const response = await fetch('/api/v1/era/inventories/daily-summary', {
+      const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
+      // const response = await fetch('/api/v1/era/inventories/daily-summary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
