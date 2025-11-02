@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
-import NotesSection from "../../components/NotesSection";
 import { mockUser } from "../../data/mockData";
-import { Note } from "../../types";
 import fieldMappings from "../../data/fieldConfig4868.json";
 import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
 import { QRInventoryRecord } from "../../services/qrInventoryService";
@@ -54,7 +52,7 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
           </label>
           <input
             type="text"
-            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+            className={`w-full px-3 py-2 text-sm bg-gray-50 border rounded cursor-not-allowed ${
               isModified 
                 ? 'border-2 border-red-300 text-gray-600' 
                 : 'border-gray-300 text-gray-600'
@@ -69,7 +67,7 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
           </label>
           <input
             type="text"
-            className={`w-full px-3 py-2 text-sm bg-white border rounded cursor-not-allowed ${
+            className={`w-full px-3 py-2 text-sm bg-gray-50 border rounded cursor-not-allowed ${
               isModified 
                 ? 'border-2 border-green-300 text-gray-900 font-medium' 
                 : 'border-gray-300 text-gray-900'
@@ -137,26 +135,8 @@ export default function QRDetailsPage() {
   const [showFlash, setShowFlash] = useState(false);
   const [completing, setCompleting] = useState(false);
   const isLoadingRef = useRef(false);
-  const [notes, setNotes] = useState<Note[]>([
-    {
-      id: '1',
-      content: 'Initial review completed. SSN field requires verification due to EIF/NAP mismatch.',
-      timestamp: '2025-08-28 10:30',
-      author: 'Agent Smith'
-    },
-    {
-      id: '2',
-      content: 'Contacted taxpayer via phone. Confirmed correct SSN is 123-45-6789. Updating system records.',
-      timestamp: '2025-08-28 11:15',
-      author: 'Agent Johnson'
-    },
-    {
-      id: '3',
-      content: 'QR Review: Address format corrected. SSN verification completed. Ready for final approval.',
-      timestamp: '2025-08-28 14:45',
-      author: 'Supervisor Davis'
-    }
-  ]);
+  const [parsedNotes, setParsedNotes] = useState<any[]>([]);
+  const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
   // Helper function to get field value from eraDto-like object
   const getFieldValue = (data: any, fieldKey: string): string => {
@@ -165,6 +145,27 @@ export default function QRDetailsPage() {
     // Get the data source (workRecord or root)
     const dataSource = data?.workRecord || data;
     return (dataSource[fieldKey] || '').toString();
+  };
+
+  // Helper function to generate notes with additional comments
+  const generateNotesWithAdditionalComments = () => {
+    // Create new note if there are additional notes
+    if (additionalNotes.trim()) {
+      const newNote = {
+        author: seid || 'unknown',
+        createdTime: new Date().toISOString(),
+        comments: {
+          additionalComments: additionalNotes
+        }
+      };
+      
+      // Add to existing notes
+      const updatedNotes = [...parsedNotes, newNote];
+      return JSON.stringify(updatedNotes);
+    }
+    
+    // Return existing notes as string if no additional comments
+    return parsedNotes.length > 0 ? JSON.stringify(parsedNotes) : JSON.stringify([]);
   };
 
   // Helper function to get field label from fieldMappings
@@ -203,6 +204,22 @@ export default function QRDetailsPage() {
       const data = await QRDetailsService.getQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
       console.log('API response data:', data);
       setQRData(data);
+      
+      // Parse and set notes from QR_HOLD data
+      if (data?.QR_HOLD?.notes) {
+        try {
+          const notesData = typeof data.QR_HOLD.notes === 'string' 
+            ? JSON.parse(data.QR_HOLD.notes) 
+            : data.QR_HOLD.notes;
+          setParsedNotes(Array.isArray(notesData) ? notesData : []);
+          console.log('Notes parsed from QR_HOLD:', notesData);
+        } catch (error) {
+          console.error('Error parsing notes from QR_HOLD:', error);
+          setParsedNotes([]);
+        }
+      } else {
+        setParsedNotes([]);
+      }
     } catch (err) {
       console.error('Error fetching QR details:', err);
       setError(err instanceof Error ? err.message : 'Failed to load QR details');
@@ -283,12 +300,16 @@ export default function QRDetailsPage() {
         },
         body: JSON.stringify({
           inventoryId: inventoryId,
-          completedBy: 'u1000', // You might want to get this from user context
-          completedAt: new Date().toISOString()
+          completedBy: seid || 'u1000',
+          completedAt: new Date().toISOString(),
+          notes: generateNotesWithAdditionalComments()
         })
       });
 
       if (response.ok) {
+        // Clear additional notes after successful operation
+        setAdditionalNotes('');
+        
         setFlashMessage('QR Review completed successfully! Returning to inventory...');
         setShowFlash(true);
         
@@ -361,21 +382,6 @@ export default function QRDetailsPage() {
     }
   };
 
-  const handleAddNote = (content: string) => {
-    const newNote: Note = {
-      id: Date.now().toString(),
-      content,
-      timestamp: new Date().toLocaleString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      author: mockUser.name
-    };
-    setNotes([newNote, ...notes]);
-  };
 
   if (loading) {
     return (
@@ -531,11 +537,71 @@ export default function QRDetailsPage() {
           </div>
 
           {/* Notes Section (Right 40%) */}
-          <div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b-2 border-gray-200 pb-2">
+          <div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-sm flex flex-col max-h-[600px] min-w-0 overflow-hidden">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b-2 border-gray-200 pb-2 flex-shrink-0">
               Notes
             </h3>
-            <NotesSection notes={notes} onAddNote={handleAddNote} />
+            
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              {/* Additional Notes Input */}
+              <div className="additional-notes-input mb-4 flex-shrink-0">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Add Additional Notes:
+                </label>
+                <textarea
+                  value={additionalNotes}
+                  onChange={(e) => setAdditionalNotes(e.target.value)}
+                  placeholder="Enter additional notes here..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="notes-content overflow-y-auto flex-1 space-y-4">
+                {parsedNotes.length === 0 ? (
+                  <div className="text-gray-500 text-sm">No notes available</div>
+                ) : (
+                  parsedNotes.map((note: any, index: number) => (
+                    <div key={index} className="note-entry border-b border-gray-100 pb-4 last:border-b-0">
+                      <div className="note-header mb-2">
+                        <div className="text-sm font-medium text-gray-700">
+                          Author: {note.author || 'Unknown'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Created At: {note.createdTime ? new Date(note.createdTime).toLocaleString() : 'Unknown'}
+                        </div>
+                      </div>
+                      
+                      {note.comments && (
+                        <div className="note-comments">
+                          {note.comments.fieldChanges && note.comments.fieldChanges.length > 0 && (
+                            <div className="field-changes mb-3">
+                              <div className="text-sm font-medium text-gray-600 mb-1">Field Changes:</div>
+                              <div className="ml-4 space-y-1">
+                                {note.comments.fieldChanges.map((change: any, changeIndex: number) => (
+                                  <div key={changeIndex} className="text-xs text-gray-600">
+                                    <span className="font-medium">{change.fieldName}:</span> {change.beforeValue} → {change.afterValue}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {note.comments.additionalComments && (
+                            <div className="additional-comments">
+                              <div className="text-sm font-medium text-gray-600 mb-1">Additional Comments:</div>
+                              <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
+                                {note.comments.additionalComments}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
