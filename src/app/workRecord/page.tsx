@@ -98,6 +98,23 @@ function Form4868ERSPageContent() {
   
   const ersWorkRecord = ersDto?.workRecord ?? {} as any;
 
+  // Helper function to parse clear codes from comma-separated input
+  const getClearCodesArray = () => {
+    console.log('getting clear codes array from clearCodesInput:', clearCodesInput);
+    
+    if (!clearCodesInput.trim()) {
+      return [];
+    }
+    
+    const result = clearCodesInput
+      .split(',')
+      .map(code => code.trim())
+      .filter(code => code.length > 0);
+    
+    console.log('final clear codes array:', result);
+    return result;
+  };
+
   // Convert ERS reason codes to ErrorItem format for sidebar
   const convertErsErrorsToErrorItems = (): ErrorItem[] => {
     // Try ERA DTO first, then fallback to jsonWorkRecord
@@ -121,9 +138,21 @@ function Form4868ERSPageContent() {
       return [];
     }
     
-    // console.log('Converting errors:', ersReasonCds, 'with map:', errReasonCdsMap);
+    // Get current clear codes to filter out matching errors
+    const currentClearCodes = getClearCodesArray();
     
-    return ersReasonCds.map((code: string, index: number) => ({
+    // Filter out errors that match clear codes
+    const filteredErrors = ersReasonCds.filter((code: string) => {
+      const isCleared = currentClearCodes.includes(code);
+      if (isCleared) {
+        console.log(`Error ${code} is cleared by clear codes, hiding from display`);
+      }
+      return !isCleared;
+    });
+    
+    console.log('Original errors:', ersReasonCds, 'Clear codes:', currentClearCodes, 'Filtered errors:', filteredErrors);
+    
+    return filteredErrors.map((code: string, index: number) => ({
       id: `ers-error-${index}`,
       code: code,
       description: errReasonCdsMap[code] || `Error code: ${code}`,
@@ -461,30 +490,16 @@ function Form4868ERSPageContent() {
 
   const mockNotes: Note[] = [];
 
-  // Get error items
-  const errorItems = convertErsErrorsToErrorItems();
+  // Get error items (reactive to clear codes changes)
+  const errorItems = useMemo(() => {
+    return convertErsErrorsToErrorItems();
+  }, [eraDto, jsonWorkRecord, clearCodesInput]);
 
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string>("");
   const [showInfo, setShowInfo] = useState(false);
 
-  // Helper function to parse clear codes from comma-separated input
-  const getClearCodesArray = () => {
-    console.log('getting clear codes array from clearCodesInput:', clearCodesInput);
-    
-    if (!clearCodesInput.trim()) {
-      return [];
-    }
-    
-    const result = clearCodesInput
-      .split(',')
-      .map(code => code.trim())
-      .filter(code => code.length > 0);
-    
-    console.log('final clear codes array:', result);
-    return result;
-  };
 
   // Helper function to generate notes with field changes
   const generateNotesWithChanges = () => {
@@ -544,11 +559,13 @@ function Form4868ERSPageContent() {
       
       // Add to existing notes (notes are already normalized when loaded)
       const updatedNotes = [...notes, newNote];
-      return JSON.stringify(updatedNotes);
+      // return JSON.stringify(updatedNotes);
+      return updatedNotes;
     }
     
     // Return existing notes as string if no changes (notes are already normalized)
-    return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
+    // return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
+    return notes.length > 0 ? notes : [];
   };
 
   const handleSuspend = async () => {
@@ -1126,33 +1143,32 @@ function Form4868ERSPageContent() {
         </div>
       </div>
 
-      {/* Error Badges Section */}
-      <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
-        <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">Errors</div>
-        <div className="error-badges-container flex flex-wrap gap-2">
-          {errorItems.map((error) => (
-            <div
-              key={error.id}
-              className={`error-badge cursor-pointer transition-all duration-200 px-3.5 py-2 rounded-2xl text-sm font-medium flex items-center gap-2 ${
-                selectedErrorId === error.id
-                  ? 'bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5'
-                  : 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md'
-              }`}
-              onClick={() => handleErrorClick(error)}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-80">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-              {error.code} - {error.description}
-            </div>
-          ))}
-          {errorItems.length === 0 && (
-            <div className="text-gray-500 text-sm italic">No active errors</div>
-          )}
+      {/* Error Badges Section - Only show if there are visible errors */}
+      {errorItems.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
+          <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">Errors</div>
+          <div className="error-badges-container flex flex-wrap gap-2">
+            {errorItems.map((error) => (
+              <div
+                key={error.id}
+                className={`error-badge cursor-pointer transition-all duration-200 px-3.5 py-2 rounded-2xl text-sm font-medium flex items-center gap-2 ${
+                  selectedErrorId === error.id
+                    ? 'bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5'
+                    : 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md'
+                }`}
+                onClick={() => handleErrorClick(error)}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-80">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                {error.code} - {error.description}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content Grid - 60% Form / 40% Notes */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">

@@ -163,11 +163,13 @@ function QRDetailsPageContent() {
       
       // Add to existing notes (parsedNotes are already normalized when loaded)
       const updatedNotes = [...parsedNotes, newNote];
-      return JSON.stringify(updatedNotes);
+      // return JSON.stringify(updatedNotes);
+      return updatedNotes;
     }
     
     // Return existing notes as string if no additional comments (parsedNotes are already normalized)
-    return parsedNotes.length > 0 ? JSON.stringify(parsedNotes) : JSON.stringify([]);
+    // return parsedNotes.length > 0 ? JSON.stringify(parsedNotes) : JSON.stringify([]);
+    return parsedNotes.length > 0 ? parsedNotes : [];
   };
 
   // Helper function to get field label from fieldMappings
