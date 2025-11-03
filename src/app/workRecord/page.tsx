@@ -517,22 +517,36 @@ export default function Form4868ERSPage() {
     
     // Create new note if there are changes or additional notes
     if (fieldChanges.length > 0 || additionalNotes.trim()) {
+      const commentsObj = {
+        ...(fieldChanges.length > 0 && { fieldChanges: fieldChanges }),
+        ...(additionalNotes.trim() && { additionalComments: additionalNotes })
+      };
+      
       const newNote = {
         author: currentSeid,
         createdTime: new Date().toISOString(),
-        comments: {
-          ...(fieldChanges.length > 0 && { fieldChanges: fieldChanges }),
-          ...(additionalNotes.trim() && { additionalComments: additionalNotes })
-        }
+        comments: JSON.stringify(commentsObj)
       };
       
+      // Normalize existing notes to ensure comments are strings
+      const normalizedExistingNotes = notes.map(note => ({
+        ...note,
+        comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+      }));
+      
       // Add to existing notes
-      const updatedNotes = [...notes, newNote];
+      const updatedNotes = [...normalizedExistingNotes, newNote];
       return JSON.stringify(updatedNotes);
     }
     
+    // Normalize existing notes to ensure comments are strings and return
+    const normalizedExistingNotes = notes.map(note => ({
+      ...note,
+      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+    }));
+    
     // Return existing notes as string if no changes
-    return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
+    return normalizedExistingNotes.length > 0 ? JSON.stringify(normalizedExistingNotes) : JSON.stringify([]);
   };
 
   const handleSuspend = async () => {
@@ -1328,31 +1342,43 @@ export default function Form4868ERSPage() {
                       </div>
                     </div>
                     
-                    {note.comments && (
-                      <div className="note-comments">
-                        {note.comments.fieldChanges && note.comments.fieldChanges.length > 0 && (
-                          <div className="field-changes mb-3">
-                            <div className="text-sm font-medium text-gray-600 mb-1">Field Changes:</div>
-                            <div className="ml-4 space-y-1">
-                              {note.comments.fieldChanges.map((change, changeIndex) => (
-                                <div key={changeIndex} className="text-xs text-gray-600">
-                                  <span className="font-medium">{change.fieldName}:</span> {change.beforeValue} → {change.afterValue}
+                    {note.comments && (() => {
+                      try {
+                        const parsedComments = typeof note.comments === 'string' ? JSON.parse(note.comments) : note.comments;
+                        return (
+                          <div className="note-comments">
+                            {parsedComments.fieldChanges && parsedComments.fieldChanges.length > 0 && (
+                              <div className="field-changes mb-3">
+                                <div className="text-sm font-medium text-gray-600 mb-1">Field Changes:</div>
+                                <div className="ml-4 space-y-1">
+                                  {parsedComments.fieldChanges.map((change: any, changeIndex: number) => (
+                                    <div key={changeIndex} className="text-xs text-gray-600">
+                                      <span className="font-medium">{change.fieldName}:</span> {change.beforeValue} → {change.afterValue}
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
+                              </div>
+                            )}
+                            
+                            {parsedComments.additionalComments && (
+                              <div className="additional-comments">
+                                <div className="text-sm font-medium text-gray-600 mb-1">Additional Comments:</div>
+                                <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
+                                  {parsedComments.additionalComments}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        
-                        {note.comments.additionalComments && (
-                          <div className="additional-comments">
-                            <div className="text-sm font-medium text-gray-600 mb-1">Additional Comments:</div>
-                            <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
-                              {note.comments.additionalComments}
-                            </div>
+                        );
+                      } catch (error) {
+                        console.error('Error parsing comments:', error);
+                        return (
+                          <div className="text-xs text-red-500">
+                            Error displaying comments
                           </div>
-                        )}
-                      </div>
-                    )}
+                        );
+                      }
+                    })()}
                   </div>
                 ))
               )}
