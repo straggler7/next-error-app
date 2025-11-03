@@ -52,7 +52,7 @@ export class QRInventoryService {
     page: number = 1,
     pageSize: number = 15,
     seid?: string
-  ): Promise<QRInventoryResponse> {
+  ): Promise<QRInventoryResponse | undefined> {
     try {
       // Build query parameters
       const params = new URLSearchParams({

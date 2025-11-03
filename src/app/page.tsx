@@ -164,7 +164,7 @@ export default function Home() {
           )}
           
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6">
-            <FilterBar filters={filters} onFilterChange={setFilters} />
+            <FilterBar filters={filters} onFiltersChange={setFilters} />
             <ActionDropdown 
               items={actionItems}
               className={selectedRecords.length === 0 ? 'opacity-50 pointer-events-none' : ''}

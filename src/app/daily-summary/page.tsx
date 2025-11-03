@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
@@ -16,7 +16,7 @@ import { User, FilterState, PaginationState, ActionDropdownItem } from '../../ty
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { mockUser } from '../../data/mockData';
 
-export default function DailySummary() {
+function DailySummaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const seid = searchParams.get('seid');
@@ -448,5 +448,13 @@ export default function DailySummary() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DailySummary() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <DailySummaryContent />
+    </Suspense>
   );
 }

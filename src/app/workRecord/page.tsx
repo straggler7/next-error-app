@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
@@ -23,7 +23,7 @@ const toLabel = (key: string) =>
     .trim()
     .replace(/^\w/, (c) => c.toUpperCase());
 
-export default function Form4868ERSPage() {
+function Form4868ERSPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isQrReviewer = searchParams.get('qrReviewer') === 'true';
@@ -1389,5 +1389,13 @@ export default function Form4868ERSPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Form4868ERSPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <Form4868ERSPageContent />
+    </Suspense>
   );
 }

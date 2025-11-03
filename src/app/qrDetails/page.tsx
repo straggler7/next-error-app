@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
@@ -119,7 +119,7 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
   }
 };
 
-export default function QRDetailsPage() {
+function QRDetailsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inventoryId = searchParams.get('inventoryId');
@@ -623,5 +623,13 @@ export default function QRDetailsPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function QRDetailsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <QRDetailsPageContent />
+    </Suspense>
   );
 }
