@@ -312,8 +312,8 @@ function QRDetailsPageContent() {
         body: JSON.stringify({
           inventoryId: inventoryId,
           completedBy: seid || 'u1000',
-          completedAt: new Date().toISOString(),
-          notes: generateNotesWithAdditionalComments()
+          completedAt: new Date().toISOString()
+          // notes: generateNotesWithAdditionalComments()
         })
       });
 
@@ -550,7 +550,7 @@ function QRDetailsPageContent() {
             
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Additional Notes Input */}
-              <div className="additional-notes-input mb-4 flex-shrink-0">
+              <div className="additional-notes-input mb-4 flex-shrink-0" style={{ display: 'none' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Add Additional Notes:
                 </label>

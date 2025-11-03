@@ -1258,3 +1258,424 @@ notes
         "notes": "[{\"author\":\"u1000\",\"createdTime\":\"2025-11-02T01:36:20.967Z\",\"comments\":{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"SEAXYY\"}],\"additionalComments\":[\"foo bar baz \\n\",\"this is another comment\"]}},{\"author\":\"unknown\",\"createdTime\":\"2025-11-02T01:36:20.967Z\",\"comments\":{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"SEAGXXX\"}]}}]"
     }
 }
+
+
+============
+
+{
+    "event": {
+        "eventStatus": "RESOLVED"
+    },
+    "inventoryItem": {
+        "inventoryId": 1,
+        "workRecord": {
+            "type": "F4868WorkRecord",
+            "gmfEventID": "4668992b-4b4e-43b3-89e8-c5441166b0ab",
+            "meFEventID": "3081202",
+            "gmfModUuid": "J081202",
+            "formType": "4868",
+            "primaryNamectrl": "SEAG",
+            "taxYr": null,
+            "dln": "12345678901234",
+            "docCode": null,
+            "source": null,
+            "returnPayload": null,
+            "returnDocSecPayload": null,
+            "recordTypeIdCode": null,
+            "invalidCorrAttemptInd": null,
+            "lastActionCodeUsed": null,
+            "corrLoopCounter": 0,
+            "corrLoopCounterIsSet": false,
+            "corrMatchCounter": 0,
+            "corrMatchCounterIsSet": false,
+            "yrCount_In_reRejectDate": null,
+            "rejJulianDay_In_reRejectDate": null,
+            "errRejPrintStatCode": null,
+            "errRejEntrySourceCode": null,
+            "lastCorrRecBlckCtrlNum": null,
+            "lastCorrRecSerialNum": null,
+            "docValidityResultCode": null,
+            "associatedDataErrorCode": null,
+            "ersActionCd": null,
+            "ersVersusBatchInd": null,
+            "nonBobControlDate": null,
+            "filler 1": null,
+            "processingPeriodInd": null,
+            "docSpecificFormatInd": null,
+            "endofPeriodReformatInd": null,
+            "splitRecCd": null,
+            "masterFileSystemIdCode": 1,
+            "blockHeaderMft": null,
+            "fileLocCd": 12,
+            "fileLocCdIsSet": false,
+            "taxClassCd": 3,
+            "taxClassCdIsSet": false,
+            "docCd In blockDlnWithoutYrCount": 45,
+            "docCd In blockDlnWithoutYrCountIsSet": false,
+            "ctrlDay": 678,
+            "ctrlDayIsSet": false,
+            "blockNum": 901,
+            "blockNumIsSet": false,
+            "serialNum": "2",
+            "serialNumIsSet": false,
+            "yrCount_In_dln": 4,
+            "yrCount In dlnIsSet": false,
+            "reinputSourceCode": null,
+            "batchNumber": null,
+            "scBlockCtr1Num": null,
+            "operatorclass": null,
+            "formatCode": null,
+            "programNum": null,
+            "docCurrentStatusCode": null,
+            "docPriorStatusCode": null,
+            "priorYearCode": null,
+            "NameCtrl": null,
+            "primary": null,
+            "primaryNameCtrlPos4": null,
+            "primaryTinValidityBypassCd": null,
+            "primaryTinType": null,
+            "secondaryTin": null,
+            "TaxPeriodEndDt": "2002-01-16T00:00:00-05:00",
+            "century In_year_In_taxPrd": null,
+            "decadeCount_In_year_In_taxPrd": null,
+            "yrCount In year_In_taxPrd": null,
+            "month In taxPrd": null,
+            "reportPlanNum": null,
+            "transCd": "405",
+            "secondaryTransCd": "405",
+            "tertiaryTransCd": "409",
+            "meFReceiptDate": "2001-12-17",
+            "treasuryReportsDataInd": null,
+            "transSourceCode": null,
+            "unpostableInd": 0,
+            "nccReportTypeOrigTrans": null,
+            "unpostableIndIsSet": false,
+            "unpostableClassificationC": null,
+            "unpostableClassificationCdIsSet": false,
+            "intReductOverpaymentCmptr": 0,
+            "year In_intenestPenaltyDate": null,
+            "month In_interestPenaltyDate": null,
+            "daymonth In nterestPenaltyDate": null,
+            "idrsModuleMemoCode": null,
+            "idrsEmployeeNum": null,
+            "einUndrprtDist": null,
+            "irsInARowInd": null,
+            "filler_4": null,
+            "NameCtrlUndrprt": null,
+            "napAccessInd": "2",
+            "eifAccessInd": "3",
+            "napEifTaxPrdUndrprt": "",
+            "preparerSsn": null,
+            "preparerEin": null,
+            "primaryTinoriginalInpt": null,
+            "filler_5": null,
+            "napTinValCkReqCnt": 0,
+            "napTinValCkReqCntIsSet": false,
+            "napTinValCkRspnsCnt": 0,
+            "napTinValCkRspnsCntIsSet": false,
+            "napTinDupCkReqCnt": 0,
+            "napTinDupCkReqCntIsSet": false,
+            "napTinDupCkRspnsCnt": 0,
+            "napTinDupCkRspnsOntIsSet": false,
+            "ciCartCode": null,
+            "filler_6": null,
+            "priorUpl": null,
+            "originalMfUpReasonCd": 0,
+            "originalMfUpReasonCdIsSet": false,
+            "priorMfSystemIdCode": null,
+            "priginalUpCycle": null,
+            "upSegNumber": null,
+            "upResolutionCd": null,
+            "mfUpReasonCdIsSet": false,
+            "unpostableCd": 0,
+            "tinTypeOriginalTrans": null,
+            "tinoriginalTrans": null,
+            "mftOriginalTrans": null,
+            "rptPlanNumOriginalTrans": null,
+            "upIdrsClassificationCd": null,
+            "century In year In_cycleUnposted": null,
+            "century In year In cycleUnpostedIsset": null,
+            "fi CycleunpostedIsSet": false,
+            "tertiaryTransAmt": 0,
+            "responsibilityUnitcd": null,
+            "spouseInd": null,
+            "filler 9": null,
+            "bypassInd": null,
+            "zipCd": null,
+            "filler 10": null,
+            "xrefTinPos12": null,
+            "xrefTinPos35": null,
+            "xrefTinPos69": null,
+            "xrefFileSourceCd": null,
+            "xrefTinType": null,
+            "xrefMFtCd": null,
+            "xreFReportPlanNum": null,
+            "centuryCount": null,
+            "decadeCount_In_year_In_xrefTaxPrd": null,
+            "yrCount In_year_In_xrefTaxPrd": null,
+            "month In_xrefTaxPrd": null,
+            "designatedPaymentCd": null,
+            "multSplitRmtCd": null,
+            "excessCollInd": 0,
+            "excessCollIndIsSet": false,
+            "requestorSeidNum": null,
+            "approverSeidNum": null,
+            "bodCodeNum": 9,
+            "bodCodeNumIsSet": false,
+            "filler 11": null,
+            "refundScheduleNumber": null,
+            "refundCorrectionIndIsSet": false,
+            "paymentTraceIdNum": null,
+            "paymentTraceIdNumIsSet": false,
+            "SequenceNumIsSet": false,
+            "rdcCd": null,
+            "accountTypeCd": null,
+            "refundInd": null,
+            "fymUnderprint": null,
+            "fillerole": null,
+            "year_In_rearrangeProcessDate": 0,
+            "year_In_rearrangeProcessDateIsSet": false,
+            "month In_rearrangeProcessDate": 0,
+            "month In_rearrangeProcessDateIsSet": false,
+            "dayofMonth_In_rearrangeProcessDate": 0,
+            "dayofMonth_In_rearrangeProcessDateIsSet": false,
+            "year_In_transRecDate": 0,
+            "year_In_transRecDateIsSet": false,
+            "month In_transRecDate": 0,
+            "month_In_transRecDateIsSet": false,
+            "dayOfMonth_In_transRecDate": 0,
+            "dayOfMonth_In_transRecDateIsSet": false,
+            "frmRvrcLoopCnt": 0,
+            "frmRvrcLoopCntIsSet": false,
+            "docCd_In_frmRvrcSect98GenData": 0,
+            "docCd_In_frmRvrcSect98GenDataIsSet": false,
+            "blckHdrTrans840Ind": 0,
+            "blckHdrTrans840IndIsSet": false,
+            "sectionTerminusInd": null,
+            "sectionMssngExtraneousInd": null,
+            "isrpMainlineProblemCode": null,
+            "mixedProblemCode": null,
+            "sectEndProblemCode": null,
+            "fieldLengthProblemCode": null,
+            "txpyrNoticeCdFld": null,
+            "filler_23": null,
+            "primarySSN": "807-26-0001",
+            "nameLine1Txt": "Gilligan",
+            "primaryNameControlTxt": "ASEAG",
+            "taxPrd": "200201",
+            "mftYear": null,
+            "mftMnth": null,
+            "mftDayOfMnth": null,
+            "errorDelayCd": [
+                null,
+                null,
+                null,
+                null
+            ],
+            "year": null,
+            "month": null,
+            "dayInMonth": null,
+            "transDt": "2001-12-17",
+            "transDtAsInt": 20011217,
+            "monthInTaxPd": 1,
+            "yearInTaxPd": 2002,
+            "taxPrdAsInt": 200201,
+            "yearInTransDt": 0,
+            "monthInTransDt": 0,
+            "dayOfMonthInTransDt": 0,
+            "processDateYyyyMmDd": 20250919,
+            "processDateMmDdYyyy": 0,
+            "processDateYyyyDdd": 0,
+            "yearInProcessDate": 2025,
+            "currentProcessingYear": 2025,
+            "month In_processDateYyyyMmDd": 0,
+            "month In processDateYyyyMmDdIsSet": false,
+            "dayofMonth_In_processDateYyyyMmDd": 0,
+            "dayOfMonth_In_processDateYyyyMmDdIsSet": false,
+            "month In processDateMmDdYyyy": 0,
+            "month In_processDateMmDdYyyyIsSet": false,
+            "dayofMonth In_processDateMmDdYyyy": 0,
+            "dayofMonth In_processDateMmDdYyyyIsSet": false,
+            "century In year In processDateMmDdYyyy": 0,
+            "century In year_In_processDateMmDdYyyyIsSet": false,
+            "decadeCount In year In_processDateMmDdYyyy": null,
+            "decadeCount In year In_processDateMmDdYyyyIsSet": false,
+            "yrCount In year In processDateMmDdYyyy": null,
+            "yrCount_In_year_In_processDateMmDdYyyyIsSet": false,
+            "decadeCount In_year decadeCount in year In processDateYyyyDdd": null,
+            "decadeCount In_year decadeCount in year In processDateYyyyDddIsSet": false,
+            "yrCount In_year yrCount in year In processDateYyyyDdd": null,
+            "yrCount In_year yrCount in year In processDateYyyyDddIsSet": false,
+            "yrcount in year in_processpateryyyvaazsset": null,
+            "yrcount in year in_processpateryyyvaazssetIsSet": false,
+            "JulianDay In processDateYyyyDdd": 0,
+            "JulianDay In processDateYyyyDddIsSet": false,
+            "yrCount In processDateYDdd": 0,
+            "yrCount In_processDateYDddIsSet": false,
+            "TulanDay In processDateYDdd": null,
+            "TulanDay In processDateYDddIsSet": false,
+            "julianDay In processDateYDdd": 0,
+            "julianDay_In_processDateYDddIsSet": false,
+            "processingScCode": null,
+            "serviceCenterAbbreviation": null,
+            "p132CurrentYyyyMm": "202509",
+            "currentYyyyAlpha": "2025",
+            "currentYvyy": 2025,
+            "currentYyyy": 2025,
+            "currentMmAlpha": "09",
+            "currentMm": 9,
+            "p132CurrentYyyyMmAsInt": 202509,
+            "yearInProcessDt": null,
+            "ersReasonCds": [
+                "135",
+                "004",
+                "103"
+            ],
+            "errReasonCdsMap": {
+                "103": "Invalid Master File Tax Code",
+                "135": "Extended Due Date",
+                "004": "EIF/NAP Mismatch"
+            },
+            "editableFields": {
+                "TaxPeriodEndDt": "Return/ReturnHeader/TaxPeriodEndDt",
+                "primaryNameControlTxt": "Return/ReturnHeader/Filer/PrimaryNameControlTxt",
+                "nameLine1Txt": "Return/ReturnHeader/Filer/NameLine1Txt",
+                "primarySSN": "Return/ReturnHeader/Filer/PrimarySSN"
+            }
+        },
+        "clearCodes": [
+            "103"
+        ],
+        "notes": [
+            {
+                "author": "u1000",
+                "createdTime": "2025-11-02T01:36:20.967Z",
+                "comments": "{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"SEAXYY\"}],\"additionalComments\":[\"foo bar baz \\n\",\"this is another comment\"]}"
+            },
+            {
+                "author": "unknown",
+                "createdTime": "2025-11-02T01:36:20.967Z",
+                "comments": "{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"SEAGXXX\"}]}"
+            },
+            {
+                "author": "u1000",
+                "createdTime": "2025-11-03T19:39:53.140Z",
+                "comments": "{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"ASEAG\"},{\"fieldName\":\"Clear Codes\",\"beforeValue\":\"\",\"afterValue\":\"103\"},{\"fieldName\":\"Action Code\",\"beforeValue\":\"\",\"afterValue\":\"SC-100\"}]}"
+            }
+        ]
+    }
+}
+
+
+================
+notes
+
+Looking at the code and the cruft file examples, I can explain how the notes system works in this application:
+
+## **Notes System Architecture:**
+
+### **1. Notes Storage Structure:**
+Notes are stored as an array of note objects, where each note has:
+```typescript
+{
+  author: string,           // User who created the note (e.g., "u1000")
+  createdTime: string,      // ISO timestamp
+  comments: string          // Stringified JSON containing the actual note data
+}
+```
+
+### **2. Comments Field Structure:**
+The `comments` field is a stringified JSON that can contain:
+```typescript
+{
+  fieldChanges?: Array<{
+    fieldName: string,
+    beforeValue: string,
+    afterValue: string
+  }>,
+  additionalComments?: string  // User-entered text
+}
+```
+
+### **3. Notes Lifecycle in workRecord:**
+
+**A. Loading Notes:**
+- Notes are loaded from `eraDto.notes` (from session storage or API)
+- They're parsed and normalized to ensure `comments` are always strings
+- Stored in the `notes` state variable
+
+**B. Generating New Notes:**
+The [generateNotesWithChanges()](cci:1://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/app/workRecord/page.tsx:503:2-568:4) function creates new notes when:
+- Form fields are modified (tracked as `fieldChanges`)
+- Clear codes are entered/changed
+- Action codes are entered/changed
+- Additional notes are added by the user
+
+**C. Notes Merging Process:**
+```typescript
+// 1. Detect changes
+const fieldChanges = []; // Form field changes
+// 2. Create new note with changes
+const newNote = {
+  author: currentSeid,
+  createdTime: new Date().toISOString(),
+  comments: JSON.stringify({
+    fieldChanges: fieldChanges,
+    additionalComments: additionalNotes
+  })
+};
+// 3. Merge with existing notes
+const updatedNotes = [...notes, newNote];
+```
+
+### **4. Are Notes from Different EraDtos Merged?**
+
+**No, notes are NOT merged across different EraDtos.** Here's what actually happens:
+
+1. **Per Work Record**: Each `eraDto` has its own notes history
+2. **Session Persistence**: Notes persist within a single work session via sessionStorage
+3. **New Work Record**: When [loadNextWorkRecord()](cci:1://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/app/workRecord/page.tsx:327:2-424:4) is called:
+   ```typescript
+   setAdditionalNotes(''); // Clear user input
+   // New eraDto loaded with its own notes history
+   ```
+
+4. **Notes Accumulation**: Within a single work record session, notes accumulate:
+   - **Existing notes** from the eraDto (from database)
+   - **New notes** generated from user actions (field changes, clear codes, etc.)
+
+### **5. Example from Cruft File:**
+
+Looking at the cruft file, you can see the notes evolution:
+```json
+"notes": [
+  {
+    "author": "u1000",
+    "createdTime": "2025-11-02T01:36:20.967Z",
+    "comments": "{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"SEAXYY\"}],\"additionalComments\":[\"foo bar baz \\n\",\"this is another comment\"]}"
+  },
+  {
+    "author": "unknown", 
+    "createdTime": "2025-11-02T01:36:20.967Z",
+    "comments": "{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"SEAGXXX\"}]}"
+  },
+  {
+    "author": "u1000",
+    "createdTime": "2025-11-03T19:39:53.140Z", // Latest note
+    "comments": "{\"fieldChanges\":[{\"fieldName\":\"Taxpayer Name Control (01NC)\",\"beforeValue\":\"SEAG\",\"afterValue\":\"ASEAG\"},{\"fieldName\":\"Clear Codes\",\"beforeValue\":\"\",\"afterValue\":\"103\"},{\"fieldName\":\"Action Code\",\"beforeValue\":\"\",\"afterValue\":\"SC-100\"}]}"
+  }
+]
+```
+
+### **6. Key Points:**
+
+- **Single Work Record Scope**: Notes belong to one specific work record/eraDto
+- **Chronological History**: Notes accumulate chronologically within that work record
+- **Change Tracking**: Each note captures what changed at that point in time
+- **User Actions**: Field changes, clear codes, and action codes all generate notes
+- **API Submission**: All notes (existing + new) are sent to the API when submitting/suspending/etc.
+
+**Summary**: Notes are NOT merged across different EraDtos. Each work record maintains its own notes history, and within a single work session, new notes are appended to the existing notes for that specific work record.
+
+
+==========

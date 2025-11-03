@@ -712,17 +712,7 @@ function Form4868ERSPageContent() {
           'Content-Type': 'application/json',
           'SEID': selectionData.seid || 'u1000'
         },
-        body: JSON.stringify({
-          "event": {
-            "eventStatus":"CLOSEOUT",
-          },
-          "inventoryItem": {
-            "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getClearCodesArray(),
-            "notes": generateNotesWithChanges()
-          }
-        })
+        body: JSON.stringify({"eventStatus":"CLOSEOUT"})
       });
       
       console.log('Response status:', response.status);
@@ -982,6 +972,29 @@ function Form4868ERSPageContent() {
             const elements = convertEraDtoToFormElements(updatedRecord);
             setFormElements(elements);
             setOriginalFormElements([...elements]);
+            
+            // Parse and update notes from updatedRecord
+            if (updatedRecord.notes) {
+              try {
+                const parsedNotes = typeof updatedRecord.notes === 'string' 
+                  ? JSON.parse(updatedRecord.notes) 
+                  : updatedRecord.notes;
+                // Ensure all notes have stringified comments
+                const normalizedNotes = Array.isArray(parsedNotes) 
+                  ? parsedNotes.map(note => ({
+                      ...note,
+                      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                    }))
+                  : [];
+                setNotes(normalizedNotes);
+                console.log('Notes updated from API response:', normalizedNotes);
+              } catch (error) {
+                console.error('Error parsing notes from updated record:', error);
+                setNotes([]);
+              }
+            } else {
+              setNotes([]);
+            }
             
             // Update sessionStorage
             sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
