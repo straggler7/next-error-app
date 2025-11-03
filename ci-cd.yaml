@@ -1,0 +1,73 @@
+name: Next.js Docker CI/CD
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  IMAGE_NAME: nextjs-frontend-app # Change to your image name
+  REGISTRY: ${{ secrets.REGISTRY_URL }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log into Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build and push the Docker image to the registry
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # Use secrets for any build-time environment variables (NEXT_PUBLIC_...)
+          # secrets: |
+          #   NEXT_PUBLIC_SPRING_API=${{ secrets.NEXT_PUBLIC_SPRING_API }}
+
+  # Deployment job (This step will depend entirely on your container platform setup)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- Option 1: GitOps (Preferred for Enterprise/K8s) ---
+      # If you use ArgoCD or Flux, this step is just updating a tag in a Git repo.
+      - name: Install GitOps CLI (e.g., ArgoCD CLI)
+        run: |
+          # Installation commands for your chosen CLI
+          echo "Installation completed."
+      - name: Update Deployment Tag in GitOps Repository
+        run: |
+          # This command would patch the image tag in your deployment manifest
+          # This triggers the GitOps tool to pull and deploy the new image
+          echo "new_image_tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          # Example using K8s command to update a deployment (less common in pure GitOps)
+          # kubectl set image deployment/nextjs-frontend nextjs-container=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} 
+
+      # --- Option 2: Direct Deployment (Requires K8s credentials) ---
+      # - name: Set up Kubeconfig
+      #   uses: azure/k8s-set-context@v3 # Or a similar action for your cloud/platform
+      #   with:
+      #     method: kubeconfig
+      #     kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
+      # - name: Deploy to Kubernetes
+      #   uses: azure/k8s-deploy@v5 # Or helm/kubectl action
+      #   with:
+      #     manifests: |
+      #       k8s/deployment.yaml
+      #       k8s/service.yaml
+      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
