@@ -149,12 +149,6 @@ export default function QRDetailsPage() {
 
   // Helper function to generate notes with additional comments
   const generateNotesWithAdditionalComments = () => {
-    // Normalize existing notes to ensure comments are strings
-    const normalizedExistingNotes = parsedNotes.map(note => ({
-      ...note,
-      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
-    }));
-    
     // Create new note if there are additional notes
     if (additionalNotes.trim()) {
       const commentsObj = {
@@ -167,13 +161,13 @@ export default function QRDetailsPage() {
         comments: JSON.stringify(commentsObj)
       };
       
-      // Add to existing notes
-      const updatedNotes = [...normalizedExistingNotes, newNote];
+      // Add to existing notes (parsedNotes are already normalized when loaded)
+      const updatedNotes = [...parsedNotes, newNote];
       return JSON.stringify(updatedNotes);
     }
     
-    // Return existing notes as string if no additional comments
-    return normalizedExistingNotes.length > 0 ? JSON.stringify(normalizedExistingNotes) : JSON.stringify([]);
+    // Return existing notes as string if no additional comments (parsedNotes are already normalized)
+    return parsedNotes.length > 0 ? JSON.stringify(parsedNotes) : JSON.stringify([]);
   };
 
   // Helper function to get field label from fieldMappings
@@ -219,7 +213,14 @@ export default function QRDetailsPage() {
           const notesData = typeof data.QR_HOLD.notes === 'string' 
             ? JSON.parse(data.QR_HOLD.notes) 
             : data.QR_HOLD.notes;
-          setParsedNotes(Array.isArray(notesData) ? notesData : []);
+          // Ensure all notes have stringified comments
+          const normalizedNotes = Array.isArray(notesData) 
+            ? notesData.map(note => ({
+                ...note,
+                comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+              }))
+            : [];
+          setParsedNotes(normalizedNotes);
           console.log('Notes parsed from QR_HOLD:', notesData);
         } catch (error) {
           console.error('Error parsing notes from QR_HOLD:', error);

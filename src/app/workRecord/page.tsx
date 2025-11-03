@@ -232,16 +232,23 @@ export default function Form4868ERSPage() {
         setActionCode(eraDtoData.suspendStatusCode);
       }
       
-      // Parse and set notes from stored DTO
+      // Parse and set notes from new DTO
       if (eraDtoData.notes) {
         try {
           const parsedNotes = typeof eraDtoData.notes === 'string' 
             ? JSON.parse(eraDtoData.notes) 
             : eraDtoData.notes;
-          setNotes(Array.isArray(parsedNotes) ? parsedNotes : []);
-          console.log('Notes parsed:', parsedNotes);
+          // Ensure all notes have stringified comments
+          const normalizedNotes = Array.isArray(parsedNotes) 
+            ? parsedNotes.map(note => ({
+                ...note,
+                comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+              }))
+            : [];
+          setNotes(normalizedNotes);
+          console.log('Notes parsed from new record:', parsedNotes);
         } catch (error) {
-          console.error('Error parsing notes:', error);
+          console.error('Error parsing notes from new record:', error);
           setNotes([]);
         }
       } else {
@@ -340,7 +347,14 @@ export default function Form4868ERSPage() {
             const parsedNotes = typeof eraDtoData.notes === 'string' 
               ? JSON.parse(eraDtoData.notes) 
               : eraDtoData.notes;
-            setNotes(Array.isArray(parsedNotes) ? parsedNotes : []);
+            // Ensure all notes have stringified comments
+            const normalizedNotes = Array.isArray(parsedNotes) 
+              ? parsedNotes.map(note => ({
+                  ...note,
+                  comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                }))
+              : [];
+            setNotes(normalizedNotes);
             console.log('Notes parsed from new record:', parsedNotes);
           } catch (error) {
             console.error('Error parsing notes from new record:', error);
@@ -528,25 +542,13 @@ export default function Form4868ERSPage() {
         comments: JSON.stringify(commentsObj)
       };
       
-      // Normalize existing notes to ensure comments are strings
-      const normalizedExistingNotes = notes.map(note => ({
-        ...note,
-        comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
-      }));
-      
-      // Add to existing notes
-      const updatedNotes = [...normalizedExistingNotes, newNote];
+      // Add to existing notes (notes are already normalized when loaded)
+      const updatedNotes = [...notes, newNote];
       return JSON.stringify(updatedNotes);
     }
     
-    // Normalize existing notes to ensure comments are strings and return
-    const normalizedExistingNotes = notes.map(note => ({
-      ...note,
-      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
-    }));
-    
-    // Return existing notes as string if no changes
-    return normalizedExistingNotes.length > 0 ? JSON.stringify(normalizedExistingNotes) : JSON.stringify([]);
+    // Return existing notes as string if no changes (notes are already normalized)
+    return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
   };
 
   const handleSuspend = async () => {
