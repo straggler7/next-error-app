@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 import ErrorAlert from "../../components/ErrorAlert";
-import { mockUser } from "../../data/mockData";
+import DevBanner from "../../components/DevBanner";
+import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
 
 interface SearchFormData {
@@ -24,6 +25,7 @@ interface ProgramFormData {
 
 export default function HomePage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
   
   // Search form state
   const [searchForm, setSearchForm] = useState<SearchFormData>({
@@ -260,9 +262,33 @@ export default function HomePage() {
     }
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated (shouldn't happen due to middleware)
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Authentication required. Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header user={mockUser} />
+      <DevBanner />
+      <Header user={user} />
       
       <div className="main-container flex flex-col p-4">
         <div className="content-layout flex flex-col items-center gap-4">

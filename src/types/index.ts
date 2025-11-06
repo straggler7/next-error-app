@@ -2,6 +2,20 @@ export interface User {
   name: string;
   role: string;
   avatar?: string;
+  seid?: string;
+}
+
+export interface AuthContext {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  seid: string | null;
+  isDevelopmentMode?: boolean;
+}
+
+export interface AuthenticationError {
+  type: 'UNAUTHORIZED' | 'FORBIDDEN' | 'INVALID_SEID';
+  message: string;
 }
 
 export interface ErrorItem {

@@ -10,7 +10,9 @@
     "docker:build": "docker build -t irs-error-resolution .",
     "docker:run": "docker run -p 4003:3000 irs-error-resolution",
     "docker:dev": "docker-compose --profile dev up --build",
-    "docker:prod": "docker-compose up --build"
+    "docker:prod": "docker-compose up --build",
+    "dev:no-auth": "BYPASS_AUTH=true npm run dev",
+    "dev:with-auth": "npm run dev"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
