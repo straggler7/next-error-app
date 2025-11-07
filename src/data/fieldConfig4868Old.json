@@ -1,0 +1,46 @@
+{
+  "primaryNameControlTxt": {
+    "label": "Taxpayer Name Control (01NC)",
+    "editable": true
+  },
+  "nameLine1Txt": {
+    "label": "Name Line 1",
+    "editable": true
+  },
+  "primarySSN": {
+    "label": "Taxpayer Identification Number (01TIN)",
+    "editable": true
+  },
+  "TaxPeriodEndDt": {
+    "label": "Tax Period (01TXP)",
+    "editable": true
+  },
+  "transDt": {
+    "label": "Transaction Date (01TDT)",
+    "editable": true
+  },
+  "napEifTaxPrdUndrprt": {
+    "label": "NAP EIF Response Indicator (01NR1)",
+    "editable": false
+  },
+  "napAccessInd": {
+    "label": "NAP Access Indicator (01NA1)",
+    "editable": false
+  },
+  "masterFileSystemIdCode": {
+    "label": "Master File System ID Code (01MFT)",
+    "editable": false
+  },
+  "transCd": {
+    "label": "Transaction Code (01TC)",
+    "editable": false
+  },
+  "secondaryTransCd": {
+    "label": "Secondary Transaction Code (01STC)",
+    "editable": false
+  },
+  "tertiaryTransCd": {
+    "label": "Tertiary Transaction Code (01TTC)",
+    "editable": false
+  }
+}

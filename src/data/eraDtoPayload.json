@@ -285,7 +285,7 @@
             "primaryNameCtrl": {
                 "ref": "primaryNameCtrl",
                 "editable": true,
-                "hasFieldError": true
+                "hasFieldError": false
             },
             "taxPrd": {
                 "ref": "taxPrd",

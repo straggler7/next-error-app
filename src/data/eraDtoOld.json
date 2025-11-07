@@ -1,14 +1,13 @@
 {
     "meFPayload":"",
     "inventoryId": 1,
-    "notes": [{"author":"u1000","createdTime":"2025-11-02T01:36:20.967Z","comments":{"fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAXYY"}], "additionalComments": ["foo bar baz \n", "this is another comment"]}}, {"author":"unknown","createdTime":"2025-11-02T01:36:20.967Z","comments":{"fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAGXXX"}]}}],
     "workRecord": {
         "type": "F4868WorkRecord",
         "gmfEventID":"4668992b-4b4e-43b3-89e8-c5441166b0ab",
         "meFEventID":"3081202",
         "gmfModUuid": "J081202",
         "formType": "4868",
-        "primaryNameCtrl": "SEAG",
+        "primaryNamectrl": "SEAG",
         "taxYr":null,
         "dln": "12345678901234",
         "docCode":null,
@@ -78,7 +77,7 @@
         "transCd": "405",
         "secondaryTransCd": "405",
         "tertiaryTransCd": "409",
-        "MeFReceiptDate": "2001-12-17",
+        "meFReceiptDate": "2001-12-17",
         "treasuryReportsDataInd":null,
         "transSourceCode":null,
         "unpostableInd":0,
@@ -266,62 +265,11 @@
             "103": "Invalid Master File Tax Code",
             "135": "Extended Due Date"
         },
-        "displayFields": {
-            "SecondaryTransCd": {
-                "ref": "SecondaryTransCd",
-                "editable": false,
-                "hasFieldError": false
-            },
-            "MftCd": {
-                "ref": "MftCd",
-                "editable": false,
-                "hasFieldError": false
-            },
-            "NAPEIFResponseInd": {
-                "ref": "NAPEIFResponseInd",
-                "editable": false,
-                "hasFieldError": false
-            },
-            "primaryNameCtrl": {
-                "ref": "primaryNameCtrl",
-                "editable": true,
-                "hasFieldError": true
-            },
-            "taxPrd": {
-                "ref": "taxPrd",
-                "editable": true,
-                "hasFieldError": false
-            },
-            "PrimaryTransCd": {
-                "ref": "PrimaryTransCd",
-                "editable": false,
-                "hasFieldError": false
-            },
-            "docCode": {
-                "ref": "docCode",
-                "editable": true,
-                "hasFieldError": false
-            },
-            "MeFReceiptDate": {
-                "ref": "MeFReceiptDate",
-                "editable": true,
-                "hasFieldError": false
-            },
-            "NAPAccessInd": {
-                "ref": "NAPAccessInd",
-                "editable": false,
-                "hasFieldError": false
-            },
-            "primarySSN": {
-                "ref": "primarySSN",
-                "editable": true,
-                "hasFieldError": false
-            },
-            "napEifNameCtrlUndrptrt": {
-                "ref": "napEifNameCtrlUndrptrt",
-                "editable": false,
-                "hasFieldError": false
-            }
+        "editableFields": {
+            "TaxPeriodEndDt": "Return/ReturnHeader/TaxPeriodEndDt",
+            "primaryNameControlTxt":"Return/ReturnHeader/Filer/PrimaryNameControlTxt",
+            "nameLine1Txt": "Return/ReturnHeader/Filer/NameLine1Txt",
+            "primarySSN":"Return/ReturnHeader/Filer/PrimarySSN"
         }
     }
 }

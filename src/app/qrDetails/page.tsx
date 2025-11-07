@@ -26,7 +26,6 @@ interface ComparisonFieldProps {
   beforeValue: string;
   afterValue: string;
   isModified: boolean;
-  isEditable: boolean;
 }
 
 const ComparisonField: React.FC<ComparisonFieldProps> = ({
@@ -34,89 +33,48 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
   label,
   beforeValue,
   afterValue,
-  isModified,
-  isEditable
+  isModified
 }) => {
   const displayBeforeValue = beforeValue || 'Not provided';
   const displayAfterValue = afterValue || 'Not provided';
   
-  if (isEditable) {
-    // Show before/after comparison for editable fields
-    return (
-      <div className={`grid grid-cols-2 gap-2 mb-2 p-2 rounded-lg ${
-        isModified ? 'bg-orange-50' : 'bg-gray-50'
-      }`}>
-        <div className="flex-1">
-          <label className="block mb-2 text-sm font-semibold text-gray-700">
-            {label} (Before)
-          </label>
-          <input
-            type="text"
-            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
-              isModified 
-                ? 'border-2 border-red-300 text-gray-900' 
-                : 'border-gray-300 text-gray-900'
-            } ${!beforeValue ? 'italic' : ''}`}
-            value={displayBeforeValue}
-            readOnly
-          />
-        </div>
-        <div className="flex-1">
-          <label className="block mb-2 text-sm font-semibold text-gray-700">
-            {label} (After)
-          </label>
-          <input
-            type="text"
-            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
-              isModified 
-                ? 'border-2 border-green-300 text-gray-900 font-medium' 
-                : 'border-gray-300 text-gray-900'
-            }`}
-            value={displayAfterValue}
-            readOnly
-          />
-        </div>
+  // Simple before/after comparison without editable or error logic
+  return (
+    <div className={`grid grid-cols-2 gap-2 mb-2 p-2 rounded-lg ${
+      isModified ? 'bg-blue-50' : 'bg-gray-50'
+    }`}>
+      <div className="flex-1">
+        <label className="block mb-2 text-sm font-semibold text-gray-700">
+          {label} (Before)
+        </label>
+        <input
+          type="text"
+          className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
+            isModified 
+              ? 'border-2 border-blue-300 text-gray-900' 
+              : 'border-gray-300 text-gray-900'
+          } ${!beforeValue ? 'italic' : ''}`}
+          value={displayBeforeValue}
+          readOnly
+        />
       </div>
-    );
-  } else {
-    // Show before/after comparison for non-editable fields (system information) as well
-    return (
-      <div className={`grid grid-cols-2 gap-2 mb-2 p-2 rounded-lg ${
-        isModified ? 'bg-blue-50' : 'bg-gray-50'
-      }`}>
-        <div className="flex-1">
-          <label className="block mb-2 text-sm font-semibold text-gray-700">
-            {label} (Before)
-          </label>
-          <input
-            type="text"
-            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
-              isModified 
-                ? 'border-2 border-blue-300 text-gray-900' 
-                : 'border-gray-300 text-gray-900'
-            } ${!beforeValue ? 'italic' : ''}`}
-            value={displayBeforeValue}
-            readOnly
-          />
-        </div>
-        <div className="flex-1">
-          <label className="block mb-2 text-sm font-semibold text-gray-700">
-            {label} (After)
-          </label>
-          <input
-            type="text"
-            className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
-              isModified 
-                ? 'border-2 border-blue-300 text-gray-900 font-medium' 
-                : 'border-gray-300 text-gray-900'
-            }`}
-            value={displayAfterValue}
-            readOnly
-          />
-        </div>
+      <div className="flex-1">
+        <label className="block mb-2 text-sm font-semibold text-gray-700">
+          {label} (After)
+        </label>
+        <input
+          type="text"
+          className={`w-full px-3 py-2 text-sm bg-gray-100 border rounded cursor-not-allowed ${
+            isModified 
+              ? 'border-2 border-blue-300 text-gray-900 font-medium' 
+              : 'border-gray-300 text-gray-900'
+          }`}
+          value={displayAfterValue}
+          readOnly
+        />
       </div>
-    );
-  }
+    </div>
+  );
 };
 
 function QRDetailsPageContent() {
@@ -178,11 +136,6 @@ function QRDetailsPageContent() {
     return fieldConfig?.label || toLabel(fieldKey);
   };
 
-  // Helper function to check if field is editable
-  const isFieldEditable = (fieldKey: string): boolean => {
-    const fieldConfig = (fieldMappings as any)[fieldKey];
-    return fieldConfig?.editable || false;
-  };
 
   // Load QR details data
   const loadQRDetails = useCallback(async () => {
@@ -272,14 +225,14 @@ function QRDetailsPageContent() {
     return beforeValue !== afterValue;
   };
 
-  // Get comparison fields from fieldMappings
+  // Get comparison fields - simple before/after comparison
   const getComparisonFields = () => {
     if (!qrData) return [];
 
+    // Use fieldMappings for consistent field list
     return Object.keys(fieldMappings).map(fieldKey => {
       const beforeValue = getFieldValue(qrData.NEW, fieldKey);
       const afterValue = getFieldValue(qrData.QR_HOLD, fieldKey);
-      const isEditable = isFieldEditable(fieldKey);
       const isModified = isFieldModified(beforeValue, afterValue);
 
       return {
@@ -287,8 +240,7 @@ function QRDetailsPageContent() {
         label: getFieldLabel(fieldKey),
         beforeValue,
         afterValue,
-        isModified,
-        isEditable
+        isModified
       };
     });
   };
@@ -481,40 +433,18 @@ function QRDetailsPageContent() {
                 </span>
               </div>
               
-              {/* Editable Fields - Show Before/After Comparison */}
+              {/* All Fields - Show Before/After Comparison */}
               <div className="grid grid-cols-1 gap-2">
-                {comparisonFields
-                  .filter(field => field.isEditable)
-                  .map((field) => (
-                    <ComparisonField
-                      key={field.fieldKey}
-                      fieldKey={field.fieldKey}
-                      label={field.label}
-                      beforeValue={field.beforeValue}
-                      afterValue={field.afterValue}
-                      isModified={field.isModified}
-                      isEditable={field.isEditable}
-                    />
-                  ))}
-              </div>
-
-              {/* Non-Editable Fields - System Information */}
-              <div>
-                <div className="grid grid-cols-1 gap-2">
-                  {comparisonFields
-                    .filter(field => !field.isEditable)
-                    .map((field) => (
-                      <ComparisonField
-                        key={field.fieldKey}
-                        fieldKey={field.fieldKey}
-                        label={field.label}
-                        beforeValue={field.beforeValue}
-                        afterValue={field.afterValue}
-                        isModified={field.isModified}
-                        isEditable={field.isEditable}
-                      />
-                    ))}
-                </div>
+                {comparisonFields.map((field) => (
+                  <ComparisonField
+                    key={field.fieldKey}
+                    fieldKey={field.fieldKey}
+                    label={field.label}
+                    beforeValue={field.beforeValue}
+                    afterValue={field.afterValue}
+                    isModified={field.isModified}
+                  />
+                ))}
               </div>
             </div>
             

@@ -1,46 +1,35 @@
 {
-  "primaryNameControlTxt": {
-    "label": "Taxpayer Name Control (01NC)",
-    "editable": true
-  },
-  "nameLine1Txt": {
-    "label": "Name Line 1",
-    "editable": true
+  "primaryNameCtrl": {
+    "label": "Taxpayer Name Control (01NC)"
   },
   "primarySSN": {
-    "label": "Taxpayer Identification Number (01TIN)",
-    "editable": true
+    "label": "Taxpayer Identification Number (01TIN)"
   },
-  "TaxPeriodEndDt": {
-    "label": "Tax Period (01TXP)",
-    "editable": true
+  "taxPrd": {
+    "label": "Tax Period (01TXP)"
   },
-  "transDt": {
-    "label": "Transaction Date (01TDT)",
-    "editable": true
+  "MeFReceiptDate": {
+    "label": "Transaction Date (01TDT)"
   },
-  "napEifTaxPrdUndrprt": {
-    "label": "NAP EIF Response Indicator (01NR1)",
-    "editable": false
+  "napEifNameCtrlUndrptrt": {
+    "label": "Name Control (01NC_)"
   },
-  "napAccessInd": {
-    "label": "NAP Access Indicator (01NA1)",
-    "editable": false
+  "NAPEIFResponseInd": {
+    "label": "NAP EIF Response Indicator (01NR1)"
   },
-  "masterFileSystemIdCode": {
-    "label": "Master File System ID Code (01MFT)",
-    "editable": false
+  "NAPAccessInd": {
+    "label": "NAP Access Indicator (01NA1)"
   },
-  "transCd": {
-    "label": "Transaction Code (01TC)",
-    "editable": false
+  "MftCd": {
+    "label": "Master File System ID Code (01MFT)"
   },
-  "secondaryTransCd": {
-    "label": "Secondary Transaction Code (01STC)",
-    "editable": false
+  "PrimaryTransCd": {
+    "label": "Primary Transaction Code (01TC)"
   },
-  "tertiaryTransCd": {
-    "label": "Tertiary Transaction Code (01TTC)",
-    "editable": false
+  "SecondaryTransCd": {
+    "label": "Secondary Transaction Code (01STC)"
+  },
+  "docCode": {
+    "label": "Document Code (01DC)"
   }
 }

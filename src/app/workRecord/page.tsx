@@ -55,17 +55,51 @@ function Form4868ERSPageContent() {
     }));
   };
 
-  // Convert ERA DTO to form elements using fieldMappings
+  // Convert ERA DTO to form elements using displayFields structure
   const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
     if (!eraData) return [];
     
     // Get the data source (workRecord or root)
     const dataSource = eraData?.workRecord || eraData;
     
-    // Create form elements based on fieldMappings
-    const formElements: FormElement[] = [];
+    // Use displayFields if available, otherwise fallback to fieldMappings
+    const displayFields = eraData?.displayFields || eraData?.workRecord?.displayFields;
+    if (displayFields) {
+      // Create form elements based on displayFields structure
+      const formElements: FormElement[] = [];
+      
+      // Separate editable and non-editable fields
+      const editableFields: FormElement[] = [];
+      const nonEditableFields: FormElement[] = [];
+      
+      Object.entries(displayFields).forEach(([fieldKey, fieldConfig]: [string, any]) => {
+        const fieldValue = dataSource[fieldKey] || '';
+        const fieldLabel = (fieldMappings as any)[fieldKey]?.label || toLabel(fieldKey);
+        
+        const formElement: FormElement = {
+          id: fieldKey,
+          name: fieldKey,
+          label: fieldLabel,
+          value: fieldValue,
+          type: 'text',
+          ERSEditable: fieldConfig.editable,
+          xpath: fieldConfig.ref || `/${fieldKey}`,
+          hasFieldError: fieldConfig.hasFieldError || false
+        };
+        
+        if (fieldConfig.editable) {
+          editableFields.push(formElement);
+        } else {
+          nonEditableFields.push(formElement);
+        }
+      });
+      
+      // Return editable fields first, then non-editable fields
+      return [...editableFields, ...nonEditableFields];
+    }
     
-    // Separate editable and non-editable fields
+    // Fallback to original fieldMappings approach
+    const formElements: FormElement[] = [];
     const editableFields: FormElement[] = [];
     const nonEditableFields: FormElement[] = [];
     
@@ -177,7 +211,15 @@ function Form4868ERSPageContent() {
       return formElements.filter(el => el.ERSEditable).map(el => el.name);
     }
     
-    // Fallback to ersDto structure
+    // Check for displayFields structure first
+    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    if (displayFields) {
+      return Object.entries(displayFields)
+        .filter(([_, fieldConfig]: [string, any]) => fieldConfig.editable)
+        .map(([fieldKey, _]) => fieldKey);
+    }
+    
+    // Fallback to old editableFields structure
     const editableFields = eraDto?.workRecord?.editableFields || eraDto?.editableFields || ersWorkRecord?.editableFields;
     if (editableFields) {
       return Object.keys(editableFields);
@@ -199,8 +241,17 @@ function Form4868ERSPageContent() {
     if (formElements.length > 0) {
       return formElements.filter(el => !el.ERSEditable).map(el => el.name);
     }
+    
+    // Check for displayFields structure
+    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    if (displayFields) {
+      return Object.entries(displayFields)
+        .filter(([_, fieldConfig]: [string, any]) => !fieldConfig.editable)
+        .map(([fieldKey, _]) => fieldKey);
+    }
+    
     return [];
-  }, [formElements]);
+  }, [formElements, eraDto]);
 
   // Map DTO keys to actual WorkRecord property names (handle typos/mismatches)
   const dtoToRecordKey: Record<string, string> = {
@@ -295,8 +346,8 @@ function Form4868ERSPageContent() {
       console.log('Clear codes populated:', eraDtoData.clearCodes);
       console.log('Action code populated:', eraDtoData.suspendStatusCode);
     } else {
-      // Fallback: Load from eraDto.json for development/testing
-      import('../../data/eraDto.json').then((eraData) => {
+      // Fallback: Load from eraDtoPayload.json for development/testing
+      import('../../data/eraDtoPayload.json').then((eraData) => {
         setEraDto(eraData.default);
         setInventoryId(String(eraData.default.inventoryId));
         
@@ -486,6 +537,15 @@ function Form4868ERSPageContent() {
       return element?.value || '';
     }
     return originalValues[name] || '';
+  };
+
+  // Helper function to check if field has error
+  const getFieldHasError = (name: string): boolean => {
+    if (formElements.length > 0) {
+      const element = workAssignmentService.getFormElementByName(formElements, name);
+      return Boolean(element?.hasFieldError) || false;
+    }
+    return false;
   };
 
   const mockNotes: Note[] = [];
@@ -1224,6 +1284,7 @@ function Form4868ERSPageContent() {
                             onChange={(v) => handleInputChange(key, v)}
                             placeholder={`Enter ${getFormElementLabel(key)}`}
                             onBlur={() => clearFieldHighlight()}
+                            error={getFieldHasError(key)}
                           />
                         </FormField>
                       ))}
@@ -1245,6 +1306,7 @@ function Form4868ERSPageContent() {
                                 value={getFormElementValue(key)}
                                 disabled={true}
                                 placeholder="N/A"
+                                error={getFieldHasError(key)}
                               />
                             </FormField>
                           ))}

@@ -475,6 +475,9 @@ git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs
 git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs-notes
 (11/01/2025)
 
+git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs-notes-sso
+(11/06/2025)
+
 {
   "inventoryId": 14,
   "status": "RESOLVED",
@@ -1679,3 +1682,134 @@ Looking at the cruft file, you can see the notes evolution:
 
 
 ==========
+
+sso
+
+==========
+
+
+
+The interception of requests in an SSO setup is primarily achieved using application-layer mechanisms (HTTP redirects, proxies, agents), not "DNS magic" in the way one might think of re-routing all traffic at the network level. DNS's role is foundational (translating domain names to IP addresses), but the logic of authentication interception happens at the HTTP layer. 
+How SSO Interception is Achieved
+The core mechanisms for interception rely on managing the HTTP request/response flow:
+Proxies and Gateways (Recommended Approach):
+A dedicated proxy server sits in front of the application server.
+All user requests go to the proxy first.
+The proxy inspects the request. If the user is unauthenticated, the proxy issues an HTTP 302 Redirect to the SSO server's login URL.
+After successful authentication at the SSO server, the user's browser is redirected back to the proxy with an authentication token (e.g., SAML assertion, OIDC token).
+The proxy validates the token, establishes a session, and forwards the original request to the internal application, potentially adding necessary HTTP headers with user identity information.
+Web Agents/Filters (In-Application Approach):
+A software module (agent) is installed directly within the web application server (e.g., an Apache module or Java Servlet filter).
+This agent intercepts requests at the application level.
+Similar to the proxy, it checks for a valid session and redirects the browser to the SSO server if the user is unauthenticated.
+Application-Initiated Redirection:
+The target application itself is designed to check for an authentication cookie or header on every page load.
+If a session is absent, the application code itself triggers a redirect to the SSO Identity Provider (IdP) login page. 
+
+
+
+
+undefined
+undefined
+undefined
+7 sites
+How Does Single Sign-On (SSO) Work? | OneLogin
+A user browses to the application or website they want access to, aka, the Service Provider. The Service Provider sends a token th...
+favicon
+OneLogin
+
+The Magic of Single Sign-On - Caktus Group
+Jan 28, 2021 — Redirects. When you type an address into your browser's address bar — say https://cnn.com/politics/ — your browser wil...
+favicon
+Caktus Group
+
+Header-based single sign-on (SSO) for on-premises apps with ...
+Apr 30, 2025 — Application proxy handles SSO integration with Microsoft Entra ID and then passes identity or other application data a...
+favicon
+Microsoft Learn
+
+Show all
+if using proxies and gateways, does every request to the domain go through them
+Yes, if using an authentication proxy or gateway for an application domain, every request intended for that protected domain is engineered to go through the proxy. The proxy acts as the single entry point for all traffic, allowing it to inspect, enforce policy, and route requests. 
+How this is Achieved (and the "DNS Magic")
+The key to forcing all traffic through the proxy lies primarily in network configuration and DNS manipulation (the "DNS magic" you referenced).
+1. DNS Configuration
+The fundamental "trick" involves how the domain name is resolved: 
+Internal DNS Resolution: Within the network where the SSO is enforced, the DNS record for the target application URL (e.g., app.example.com) is modified to point to the IP address of the proxy/gateway, not the backend application server itself.
+The Deception: When a user's browser attempts to access app.example.com, it performs a DNS lookup. The internal DNS server returns the proxy's IP. The browser, unaware of this redirection, sends all its requests directly to the proxy server as if it were the final destination. 
+2. Network Traffic Flow
+Once the request reaches the proxy:
+The proxy intercepts and analyzes the request, applying the configured SSO policies.
+If the user is unauthenticated, the proxy redirects the browser to the central SSO server (Identity Provider) for login.
+After successful authentication, the user is redirected back to the proxy with a token or session cookie.
+The proxy validates the token, establishes a local session, and then makes its own independent, direct request to the actual, internal IP address of the backend application server.
+The proxy receives the application's response and forwards it back to the user's browser.
+The actual application server is often hidden in a private network, configured with firewall rules to only accept traffic from the proxy, further enforcing the interception. 
+3. Scope of Interception
+By configuring the DNS entry to the proxy's IP, all traffic for that domain goes through it. However, the proxy is intelligent enough to apply granular policies:
+Protected URLs: Requests matching specific sensitive URL patterns (e.g., /admin, /profile) trigger the authentication flow.
+Public URLs: Requests to public areas (e.g., /about, /contact) can be allowed to pass through to the backend without requiring authentication. 
+In essence, the "magic" is a straightforward but critical DNS change that makes the proxy the mandatory middleman for all communication with the domain.
+
+
+
+displayFields: {
+  "SecondaryTransCd": {
+    "ref": "SecondaryTransCd",
+    "editable": false,
+    "hasFieldError": false
+  },
+  "MftCd": {
+    "ref": "MftCd",
+    "editable": false,
+    "hasFieldError": false
+  },
+  "NAPEIFResponseInd": {
+    "ref": "NAPEIFResponseInd",
+    "editable": false,
+    "hasFieldError": false
+  },
+  "primaryNameCtrl": {
+    "ref": "primaryNameCtrl",
+    "editable": true,
+    "hasFieldError": false
+  },
+  "taxPrd": {
+    "ref": "taxPrd",
+    "editable": true,
+    "hasFieldError": false
+  },
+  "PrimaryTransCd": {
+    "ref": "PrimaryTransCd",
+    "editable": false,
+    "hasFieldError": false
+  },
+  "docCode": {
+    "ref": "docCode",
+    "editable": true,
+    "hasFieldError": false
+  },
+  "MeFReceiptDate": {
+    "ref": "MeFReceiptDate",
+    "editable": true,
+    "hasFieldError": false
+  },
+  "NAPAccessInd": {
+    "ref": "NAPAccessInd",
+    "editable": false,
+    "hasFieldError": false
+  },
+  "primarySSN": {
+    "ref": "primarySSN",
+    "editable": true,
+    "hasFieldError": false
+  },
+  "napEifNameCtrlUndrptrt": {
+    "ref": "napEifNameCtrlUndrptrt",
+    "editable": false,
+    "hasFieldError": false
+  }
+}
+
+
+['SecondaryTransCd', 'MftCd', 'NAPEIFResponseInd', 'primaryNameCtrl', 'taxPrd', 'PrimaryTransCd', 'docCode', 'MeFReceiptDate', 'NAPAccessInd', 'primarySSN', 'napEifNameCtrlUndrptrt']
