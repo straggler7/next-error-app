@@ -1753,7 +1753,7 @@ In essence, the "magic" is a straightforward but critical DNS change that makes 
 
 
 
-displayFields: {
+"displayFields": {
   "SecondaryTransCd": {
     "ref": "SecondaryTransCd",
     "editable": false,

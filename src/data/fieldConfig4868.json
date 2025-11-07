@@ -1,12 +1,47 @@
 {
   "primaryNameCtrl": {
-    "label": "Taxpayer Name Control (01NC)"
+    "label": "Taxpayer Name Control (01NC)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4,
+      "pattern": "^[A-Z]{1,4}$",
+      "messages": {
+        "required": "Name Control is required",
+        "minLength": "Name Control must be at least 1 character",
+        "maxLength": "Name Control cannot exceed 4 characters",
+        "pattern": "Name Control must contain only uppercase letters (A-Z)"
+      }
+    }
   },
   "primarySSN": {
-    "label": "Taxpayer Identification Number (01TIN)"
+    "label": "Taxpayer Identification Number (01TIN)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "pattern": "^\\d{3}-\\d{2}-\\d{4}$",
+      "messages": {
+        "required": "Social Security Number is required",
+        "pattern": "SSN must be in format XXX-XX-XXXX (e.g., 123-45-6789)"
+      }
+    }
   },
   "taxPrd": {
-    "label": "Tax Period (01TXP)"
+    "label": "Tax Period (01TXP)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "pattern": "^\\d{4}(0[1-9]|1[0-2])$",
+      "minLength": 6,
+      "maxLength": 6,
+      "messages": {
+        "required": "Tax Period is required",
+        "pattern": "Tax Period must be in YYYYMM format (e.g., 202301 for January 2023)",
+        "minLength": "Tax Period must be exactly 6 digits",
+        "maxLength": "Tax Period must be exactly 6 digits"
+      }
+    }
   },
   "MeFReceiptDate": {
     "label": "Transaction Date (01TDT)"

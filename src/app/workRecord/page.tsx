@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { z } from "zod";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
 import InfoAlert from "../../components/InfoAlert";
@@ -23,6 +24,46 @@ const toLabel = (key: string) =>
     .trim()
     .replace(/^\w/, (c) => c.toUpperCase());
 
+// Create Zod schema from field configuration
+const createZodSchema = (fieldKey: string) => {
+  const config = (fieldMappings as any)[fieldKey]?.validation;
+  if (!config) return z.string().optional();
+  
+  let schema = z.string();
+  
+  if (config.required) {
+    schema = schema.min(1, config.messages.required);
+  }
+  
+  if (config.minLength) {
+    schema = schema.min(config.minLength, config.messages.minLength);
+  }
+  
+  if (config.maxLength) {
+    schema = schema.max(config.maxLength, config.messages.maxLength);
+  }
+  
+  if (config.pattern) {
+    schema = schema.regex(new RegExp(config.pattern), config.messages.pattern);
+  }
+  
+  return schema;
+};
+
+// Validate a single field
+const validateField = (fieldKey: string, value: string): string | null => {
+  try {
+    const schema = createZodSchema(fieldKey);
+    schema.parse(value);
+    return null; // No error
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return error.issues[0]?.message || 'Invalid value';
+    }
+    return 'Invalid value';
+  }
+};
+
 function Form4868ERSPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,6 +77,9 @@ function Form4868ERSPageContent() {
   const [originalFormElements, setOriginalFormElements] = useState<FormElement[]>([]);
   const [landingSearchData, setLandingSearchData] = useState<any>(null);
   const [landingSelectionData, setLandingSelectionData] = useState<any>(null);
+  
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Convert JSON work record to form elements based on editableFields
   const convertJsonWorkRecordToFormElements = (jsonRecord: any): FormElement[] => {
@@ -480,6 +524,22 @@ function Form4868ERSPageContent() {
   const handleInputChange = (fieldKey: string, val: string) => {
     console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
     
+    // Validate the field value
+    const validationError = validateField(fieldKey, val);
+    console.log(`Validation result for ${fieldKey}:`, validationError || 'Valid');
+    
+    // Update validation errors state
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      if (validationError) {
+        newErrors[fieldKey] = validationError;
+      } else {
+        delete newErrors[fieldKey];
+      }
+      console.log('Updated validation errors:', newErrors);
+      return newErrors;
+    });
+    
     if (formElements.length > 0) {
       // Update form elements if using API data
       setFormElements(prev => {
@@ -539,13 +599,39 @@ function Form4868ERSPageContent() {
     return originalValues[name] || '';
   };
 
-  // Helper function to check if field has error
+  // Helper function to check if field has error (includes validation errors)
   const getFieldHasError = (name: string): boolean => {
+    // Check for validation errors first
+    if (validationErrors[name]) {
+      return true;
+    }
+    
+    // Check for existing field errors from data
     if (formElements.length > 0) {
       const element = workAssignmentService.getFormElementByName(formElements, name);
       return Boolean(element?.hasFieldError) || false;
     }
     return false;
+  };
+
+  // Helper function to get validation error message
+  const getValidationError = (name: string): string | undefined => {
+    return validationErrors[name];
+  };
+
+  // Helper function to validate all editable fields
+  const validateAllFields = (): boolean => {
+    const errors: Record<string, string> = {};
+    editableFieldKeys.forEach(fieldKey => {
+      const value = getFormElementValue(fieldKey);
+      const error = validateField(fieldKey, value);
+      if (error) {
+        errors[fieldKey] = error;
+      }
+    });
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const mockNotes: Note[] = [];
@@ -633,6 +719,14 @@ function Form4868ERSPageContent() {
       setFlashMessage("Action Code is required for Suspend.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Validate all editable fields before suspending
+    if (!validateAllFields()) {
+      setFlashMessage("Please fix validation errors before suspending.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 5000);
       return;
     }
 
@@ -738,6 +832,14 @@ function Form4868ERSPageContent() {
       setFlashMessage("No inventory ID available. Please return to home page.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Validate all editable fields before closing out
+    if (!validateAllFields()) {
+      setFlashMessage("Please fix validation errors before closing out.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 5000);
       return;
     }
 
@@ -926,6 +1028,25 @@ function Form4868ERSPageContent() {
       setFlashMessage("No inventory ID available. Please return to home page.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Validate all editable fields before submission
+    const validationErrors: Record<string, string> = {};
+    editableFieldKeys.forEach(fieldKey => {
+      const value = getFormElementValue(fieldKey);
+      const error = validateField(fieldKey, value);
+      if (error) {
+        validationErrors[fieldKey] = error;
+      }
+    });
+
+    // If there are validation errors, prevent submission and show errors
+    if (Object.keys(validationErrors).length > 0) {
+      setValidationErrors(validationErrors);
+      setFlashMessage("Please fix validation errors before submitting.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 5000);
       return;
     }
 
@@ -1277,6 +1398,7 @@ function Form4868ERSPageContent() {
                           currentValue={getFormElementValue(key)}
                           showChangeIndicator={true}
                           isHighlighted={highlightedFields.includes(key)}
+                          error={getValidationError(key)}
                         >
                           <FormInput
                             id={key}
@@ -1300,6 +1422,7 @@ function Form4868ERSPageContent() {
                             <FormField
                               key={key}
                               label={getFormElementLabel(key)}
+                              error={getValidationError(key)}
                             >
                               <FormInput
                                 id={key}
