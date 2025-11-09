@@ -1,0 +1,36 @@
+
+{
+    "004": {
+        "description": "EIF/NAP Mismatch"
+    },
+    "103": {
+        "description": "Invalid Master File Tax Code"
+    },
+    "135": {
+        "description": "Extended Due Date"
+    },
+    "01TIN": {
+        "description": "Taxpayer Identification Number",
+        "fieldMappings": [
+            "primarySSN"
+        ]
+    },
+    "01NC": {
+        "description": "Taxpayer Name Control",
+        "fieldMappings": [
+            "primaryNameCtrl"
+        ]
+    },
+    "01TXP": {
+        "description": "Tax Period",
+        "fieldMappings": [
+            "taxPrd"
+        ]
+    },
+    "01TDT": {
+        "description": "Transaction Date",
+        "fieldMappings": [
+            "MeFReceiptDate"
+        ]
+    }
+}
