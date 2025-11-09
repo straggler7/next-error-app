@@ -4,7 +4,9 @@ import { User } from '../types';
  * Extract SEID from various possible header formats
  */
 export function extractSeidFromHeaders(headers: Headers): string | null {
+  console.log('Extracting SEID from headers: ', headers);
   return headers.get('seid') || 
+         headers.get('uid') || 
          headers.get('x-seid') || 
          headers.get('X-SEID') || 
          headers.get('x-user-seid') ||
@@ -18,7 +20,7 @@ export function validateSeid(seid: string | null): boolean {
   if (!seid) return false;
   
   // Basic validation - adjust according to your SSO server's SEID format
-  if (seid.length < 3 || seid.length > 50) return false;
+  if (seid.length !== 5) return false;
   
   // Example: SEID should be alphanumeric
   const seidPattern = /^[a-zA-Z0-9]+$/;
@@ -40,26 +42,26 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       'user123': {
         name: 'Sarah Thompson',
         role: 'Tax Examiner',
-        seid: 'user123'
+        seid: 'U1234'
       },
       'admin456': {
         name: 'John Administrator',
-        role: 'System Administrator',
-        seid: 'admin456'
+        role: 'Manager',
+        seid: 'A1234'
       },
       'examiner789': {
         name: 'Mike Examiner',
-        role: 'Senior Tax Examiner',
-        seid: 'examiner789'
+        role: 'Manager',
+        seid: 'X1234'
       },
       'dev-user-123': {
         name: 'Dev User',
-        role: 'Developer (Test Mode)',
-        seid: 'dev-user-123'
+        role: 'Tax Examiner',
+        seid: 'D1234'
       },
       'U1000': {
         name: 'Test User U1000',
-        role: 'Tax Examiner (Dev Mode)',
+        role: 'Tax Examiner',
         seid: 'U1000'
       }
     };
