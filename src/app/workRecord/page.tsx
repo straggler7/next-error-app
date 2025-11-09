@@ -14,6 +14,7 @@ import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord,
 import { landingSearchService } from "../../services/landingSearchService";
 import ersDto from "../../data/ersDto.json";
 import fieldMappings from "../../data/fieldConfig4868.json";
+import errorConfig from "../../data/errorConfig4868.json";
 
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
 const toLabel = (key: string) =>
@@ -198,17 +199,14 @@ function Form4868ERSPageContent() {
     // Try ERA DTO first, then fallback to jsonWorkRecord
     let errorSource = null;
     let ersReasonCds: string[] = [];
-    let errReasonCdsMap: Record<string, string> = {};
     
     if (eraDto) {
       // For ERA DTO, check both root level and workRecord level
       errorSource = eraDto.workRecord || eraDto;
       ersReasonCds = errorSource.ersReasonCds || [];
-      errReasonCdsMap = errorSource.errReasonCdsMap || {};
     } else if (jsonWorkRecord?.workRecord) {
       errorSource = jsonWorkRecord.workRecord;
       ersReasonCds = errorSource.ersReasonCds || [];
-      errReasonCdsMap = errorSource.errReasonCdsMap || {};
     }
     
     if (!errorSource || ersReasonCds.length === 0) {
@@ -230,23 +228,30 @@ function Form4868ERSPageContent() {
     
     console.log('Original errors:', ersReasonCds, 'Clear codes:', currentClearCodes, 'Filtered errors:', filteredErrors);
     
-    return filteredErrors.map((code: string, index: number) => ({
-      id: `ers-error-${index}`,
-      code: code,
-      description: errReasonCdsMap[code] || `Error code: ${code}`,
-      type: 'Error' as const,
-      status: 'active' as const,
-      errorFields: [],
-      irm: {
-        title: `IRM 3.12.${180 + index} - Error Resolution`,
-        content: `Resolve the following error: ${errReasonCdsMap[code] || `Error code: ${code}`}`,
-        steps: [
-          'Review the error description',
-          'Correct the identified issue in the highlighted fields',
-          'Validate the correction'
-        ]
-      }
-    }));
+    return filteredErrors.map((code: string, index: number) => {
+      // Look up error configuration
+      const errorConfigItem = (errorConfig as any)[code];
+      const description = errorConfigItem?.description || `Error code: ${code}`;
+      const fieldMappings = errorConfigItem?.fieldMappings || [];
+      
+      return {
+        id: `ers-error-${index}`,
+        code: code,
+        description: description,
+        type: 'Error' as const,
+        status: 'active' as const,
+        errorFields: fieldMappings, // Use fieldMappings from error config
+        irm: {
+          title: `IRM 3.12.${180 + index} - Error Resolution`,
+          content: `Resolve the following error: ${description}`,
+          steps: [
+            'Review the error description',
+            'Correct the identified issue in the highlighted fields',
+            'Validate the correction'
+          ]
+        }
+      };
+    });
   };
 
   const editableFieldKeys: string[] = useMemo(() => {
@@ -566,6 +571,18 @@ function Form4868ERSPageContent() {
     } else {
       setHighlightedFields(error.errorFields || []);
       setSelectedErrorId(error.id);
+      
+      // If there are field mappings, focus on the first field
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstFieldId = error.errorFields[0];
+        setTimeout(() => {
+          const fieldElement = document.getElementById(firstFieldId);
+          if (fieldElement) {
+            fieldElement.focus();
+            fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100); // Small delay to ensure DOM is updated
+      }
     }
   };
 
