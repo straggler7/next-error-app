@@ -601,14 +601,23 @@ function Form4868ERSPageContent() {
 
   // Helper function to check if field has error (includes validation errors)
   const getFieldHasError = (name: string): boolean => {
-    // Check for validation errors first
+    // Check for validation errors first (these always show)
     if (validationErrors[name]) {
       return true;
     }
     
-    // Check for existing field errors from data
+    // Check for existing field errors from data, but only if value hasn't changed
     if (formElements.length > 0) {
       const element = workAssignmentService.getFormElementByName(formElements, name);
+      const currentValue = getFormElementValue(name);
+      const originalValue = getOriginalValue(name);
+      
+      // If the field has an error flag but the value has changed from original, 
+      // don't show the error (user is addressing it)
+      if (element?.hasFieldError && currentValue !== originalValue) {
+        return false;
+      }
+      
       return Boolean(element?.hasFieldError) || false;
     }
     return false;
@@ -616,7 +625,27 @@ function Form4868ERSPageContent() {
 
   // Helper function to get validation error message
   const getValidationError = (name: string): string | undefined => {
-    return validationErrors[name];
+    // Always show validation errors
+    if (validationErrors[name]) {
+      return validationErrors[name];
+    }
+    
+    // For original field errors, only show if value hasn't changed
+    if (formElements.length > 0) {
+      const element = workAssignmentService.getFormElementByName(formElements, name);
+      const currentValue = getFormElementValue(name);
+      const originalValue = getOriginalValue(name);
+      
+      // If field has error but value changed, don't show original error message
+      if (element?.hasFieldError && currentValue !== originalValue) {
+        return undefined;
+      }
+      
+      // You could return a generic message for original field errors if needed
+      // For now, returning undefined since we don't have specific error messages in the data
+    }
+    
+    return undefined;
   };
 
   // Helper function to validate all editable fields

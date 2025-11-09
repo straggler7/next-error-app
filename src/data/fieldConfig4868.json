@@ -44,7 +44,20 @@
     }
   },
   "MeFReceiptDate": {
-    "label": "Transaction Date (01TDT)"
+    "label": "Transaction Date (01TDT)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+      "minLength": 10,
+      "maxLength": 10,
+      "messages": {
+        "required": "Transaction Date is required",
+        "pattern": "Transaction Date must be in YYYY-MM-DD format (e.g., 2023-01-15)",
+        "minLength": "Transaction Date must be exactly 10 characters",
+        "maxLength": "Transaction Date must be exactly 10 characters"
+      }
+    }
   },
   "napEifNameCtrlUndrptrt": {
     "label": "Name Control (01NC_)"
