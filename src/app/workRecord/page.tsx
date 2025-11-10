@@ -680,6 +680,28 @@ function Form4868ERSPageContent() {
     return Object.keys(errors).length === 0;
   };
 
+  // Helper function to check if there are any field errors (validation or original)
+  const hasAnyFieldErrors = (): boolean => {
+    // Check for validation errors
+    if (Object.keys(validationErrors).length > 0) {
+      return true;
+    }
+    
+    // Check for original field errors that haven't been addressed
+    const allFieldKeys = [...editableFieldKeys, ...nonEditableFieldKeys];
+    return allFieldKeys.some(fieldKey => {
+      if (formElements.length > 0) {
+        const element = workAssignmentService.getFormElementByName(formElements, fieldKey);
+        const currentValue = getFormElementValue(fieldKey);
+        const originalValue = getOriginalValue(fieldKey);
+        
+        // If field has error and value hasn't changed, it's still an error
+        return element?.hasFieldError && currentValue === originalValue;
+      }
+      return false;
+    });
+  };
+
   const mockNotes: Note[] = [];
 
   // Get error items (reactive to clear codes changes)
@@ -768,8 +790,8 @@ function Form4868ERSPageContent() {
       return;
     }
 
-    // Validate all editable fields before suspending
-    if (!validateAllFields()) {
+    // Check for validation errors before suspending
+    if (Object.keys(validationErrors).length > 0) {
       setFlashMessage("Please fix validation errors before suspending.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -1507,19 +1529,23 @@ function Form4868ERSPageContent() {
             <div className="flex gap-4">
               <button
                 type="button"
-                className="px-6 py-2 bg-[#0f507e] text-white font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                  submitting || hasAnyFieldErrors()
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                }`}
                 onClick={() => {
                   clearFieldHighlight();
                   handleSubmit();
                 }}
-                disabled={submitting}
+                disabled={submitting || hasAnyFieldErrors()}
               >
                 {submitting ? "Submitting..." : "Submit"}
               </button>
               <button
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  !actionCode.trim() || suspending
+                  !actionCode.trim() || suspending || Object.keys(validationErrors).length > 0
                     ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                     : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
                 }`}
@@ -1527,7 +1553,7 @@ function Form4868ERSPageContent() {
                   clearFieldHighlight();
                   handleSuspend();
                 }}
-                disabled={!actionCode.trim() || suspending}
+                disabled={!actionCode.trim() || suspending || Object.keys(validationErrors).length > 0}
               >
                 {suspending ? "Suspending..." : "Suspend"}
               </button>
@@ -1566,6 +1592,15 @@ function Form4868ERSPageContent() {
               </button>
             </div>
           </div>
+          
+          {/* Field Error Warning Message */}
+          {hasAnyFieldErrors() && (
+            <div className="mt-3 text-left">
+              <p className="text-sm text-red-600 font-medium">
+                Field errors need to be fixed for submission
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Notes Section (Right 40%) */}
