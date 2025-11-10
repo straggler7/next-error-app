@@ -288,7 +288,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <DevBanner />
-      <Header user={user} />
+      <Header />
       
       <div className="main-container flex flex-col p-4">
         <div className="content-layout flex flex-col items-center gap-4">

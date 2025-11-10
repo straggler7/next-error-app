@@ -27,10 +27,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Try to get SEID from various sources
         let userSeid: string | null = null;
 
-        // First, try to get from meta tag (set by server)
-        const seidMeta = document.querySelector('meta[name="user-seid"]');
-        if (seidMeta) {
-          userSeid = seidMeta.getAttribute('content');
+        // First, check for dev selected user in localStorage (development only)
+        const devSelectedUser = localStorage.getItem('dev-selected-user');
+        if (devSelectedUser) {
+          try {
+            const parsedUser = JSON.parse(devSelectedUser);
+            if (parsedUser.seid) {
+              userSeid = parsedUser.seid;
+              console.log('🔍 AuthContext: Using dev selected user:', parsedUser);
+            }
+          } catch (error) {
+            console.warn('Failed to parse dev selected user:', error);
+          }
+        }
+
+        // If not found, try to get from meta tag (set by server)
+        if (!userSeid) {
+          const seidMeta = document.querySelector('meta[name="user-seid"]');
+          if (seidMeta) {
+            userSeid = seidMeta.getAttribute('content');
+          }
         }
 
         // If not found, try to get from API endpoint

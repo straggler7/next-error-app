@@ -1,8 +1,9 @@
 export interface User {
   name: string;
   role: string;
+  group: 'tax_examiners' | 'managers';
   avatar?: string;
-  seid?: string;
+  seid: string;
 }
 
 export interface AuthContext {

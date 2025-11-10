@@ -349,7 +349,7 @@ function QRDetailsPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header user={mockUser} />
+        <Header />
         <div className="flex items-center justify-center h-96">
           <div className="text-lg">Loading QR details...</div>
         </div>
@@ -360,7 +360,7 @@ function QRDetailsPageContent() {
   if (error && !qrData) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header user={mockUser} />
+        <Header />
         <div className="flex items-center justify-center h-96">
           <div className="text-red-600">Error: {error}</div>
         </div>
@@ -373,7 +373,7 @@ function QRDetailsPageContent() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* <Header user={mockUser} showBackButton backHref="/qrInventory" /> */}
-      <Header user={mockUser} />
+      <Header />
       
       {/* Breadcrumbs */}
       <div className="px-4 pt-4 pb-2">

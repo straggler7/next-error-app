@@ -246,7 +246,7 @@ function QRInventoryContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header user={mockUser} />
+      <Header />
       
       {/* Breadcrumbs */}
       <div className="px-4 pt-4 pb-2">

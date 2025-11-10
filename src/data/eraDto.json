@@ -267,23 +267,23 @@
             "135": "Extended Due Date"
         },
         "displayFields": {
-            "SecondaryTransCd": {
+            "secondaryTransCd": {
                 "ref": "SecondaryTransCd",
                 "editable": false,
                 "hasFieldError": false
             },
-            "MftCd": {
+            "mftCd": {
                 "ref": "MftCd",
                 "editable": false,
                 "hasFieldError": false
             },
-            "NAPEIFResponseInd": {
+            "napEifResponseInd": {
                 "ref": "NAPEIFResponseInd",
                 "editable": false,
                 "hasFieldError": false
             },
             "primaryNameCtrl": {
-                "ref": "primaryNameCtrl",
+                "ref": "PrimaryNameCtrlTxt",
                 "editable": true,
                 "hasFieldError": true
             },
@@ -292,7 +292,7 @@
                 "editable": true,
                 "hasFieldError": false
             },
-            "PrimaryTransCd": {
+            "primaryTransCd": {
                 "ref": "PrimaryTransCd",
                 "editable": false,
                 "hasFieldError": false
@@ -302,13 +302,13 @@
                 "editable": true,
                 "hasFieldError": false
             },
-            "MeFReceiptDate": {
-                "ref": "MeFReceiptDate",
+            "meFReceiptDate": {
+                "ref": "meFReceiptDate",
                 "editable": true,
                 "hasFieldError": false
             },
-            "NAPAccessInd": {
-                "ref": "NAPAccessInd",
+            "napAccessInd": {
+                "ref": "napAccessInd",
                 "editable": false,
                 "hasFieldError": false
             },

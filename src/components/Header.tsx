@@ -5,16 +5,22 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User } from '../types';
 import { ChevronDown, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
-  user: User;
   showBackButton?: boolean;
   backHref?: string;
 }
 
-export default function Header({ user, showBackButton = false, backHref = '/' }: HeaderProps) {
+export default function Header({ showBackButton = false, backHref = '/' }: HeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+
+  // Don't render if not authenticated or no user
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   return (
     <div className="bg-color-irs-blue bg-gradient-to-r from-[#00599c] to-[#00599c] text-white px-4 sm:px-8 py-4 shadow-md">
@@ -41,7 +47,7 @@ export default function Header({ user, showBackButton = false, backHref = '/' }:
           </div>
           <div className="flex flex-col items-end">
             <div className="text-sm font-semibold leading-tight">{user.name}</div>
-            <div className="text-xs opacity-80 leading-tight">{user.role}</div>
+            <div className="text-xs opacity-80 leading-tight">{user.role} • {user.group}</div>
           </div>
           <div className="relative">
             <button

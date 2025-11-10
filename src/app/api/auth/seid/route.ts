@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractSeidFromHeaders } from '../../../../lib/auth';
+import { extractSeidFromHeaders, extractGroupFromHeaders } from '../../../../lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,10 +19,14 @@ export async function GET(request: NextRequest) {
     // If bypassing auth, return mock SEID
     if ((isDevelopment && bypassAuth) || forceBypass) {
       console.log('🔓 API: Returning mock SEID for development');
-      return NextResponse.json({ seid: 'U1000' });
+      return NextResponse.json({ 
+        seid: 'U1000',
+        group: 'tax_examiners'
+      });
     }
     
     const seid = extractSeidFromHeaders(request.headers);
+    const group = extractGroupFromHeaders(request.headers);
     
     if (!seid) {
       return NextResponse.json(
@@ -31,7 +35,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ seid });
+    return NextResponse.json({ 
+      seid,
+      group: group || 'tax_examiners' // Default to tax_examiners if no group found
+    });
   } catch (error) {
     console.error('Error extracting SEID:', error);
     return NextResponse.json(

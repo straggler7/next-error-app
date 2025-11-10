@@ -14,6 +14,22 @@ export function extractSeidFromHeaders(headers: Headers): string | null {
 }
 
 /**
+ * Extract group information from headers
+ */
+export function extractGroupFromHeaders(headers: Headers): 'tax_examiners' | 'managers' | null {
+  const group = headers.get('x-user-group') || 
+                headers.get('user-group') || 
+                headers.get('group') ||
+                null;
+  
+  if (group === 'tax_examiners' || group === 'managers') {
+    return group;
+  }
+  
+  return null;
+}
+
+/**
  * Validate SEID format
  */
 export function validateSeid(seid: string | null): boolean {
@@ -39,29 +55,34 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     
     // Mock user data based on SEID
     const mockUsers: Record<string, User> = {
-      'user123': {
+      'U1234': {
         name: 'Sarah Thompson',
         role: 'Tax Examiner',
+        group: 'tax_examiners',
         seid: 'U1234'
       },
-      'admin456': {
+      'A1234': {
         name: 'John Administrator',
         role: 'Manager',
+        group: 'managers',
         seid: 'A1234'
       },
-      'examiner789': {
+      'X1234': {
         name: 'Mike Examiner',
         role: 'Manager',
+        group: 'managers',
         seid: 'X1234'
       },
-      'dev-user-123': {
+      'D1234': {
         name: 'Dev User',
         role: 'Tax Examiner',
+        group: 'tax_examiners',
         seid: 'D1234'
       },
       'U1000': {
         name: 'Test User U1000',
         role: 'Tax Examiner',
+        group: 'tax_examiners',
         seid: 'U1000'
       }
     };
@@ -69,6 +90,7 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     return mockUsers[seid] || {
       name: 'Unknown User',
       role: 'Tax Examiner',
+      group: 'tax_examiners',
       seid: seid
     };
   } catch (error) {
