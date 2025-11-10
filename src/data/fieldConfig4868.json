@@ -43,7 +43,7 @@
       }
     }
   },
-  "MeFReceiptDate": {
+  "meFReceiptDate": {
     "label": "Transaction Date (01TDT)",
     "validation": {
       "required": true,
@@ -62,19 +62,19 @@
   "napEifNameCtrlUndrptrt": {
     "label": "Name Control (01NC_)"
   },
-  "NAPEIFResponseInd": {
+  "napEifResponseInd": {
     "label": "NAP EIF Response Indicator (01NR1)"
   },
-  "NAPAccessInd": {
+  "napAccessInd": {
     "label": "NAP Access Indicator (01NA1)"
   },
-  "MftCd": {
+  "mftCd": {
     "label": "Master File System ID Code (01MFT)"
   },
-  "PrimaryTransCd": {
+  "primaryTransCd": {
     "label": "Primary Transaction Code (01TC)"
   },
-  "SecondaryTransCd": {
+  "secondaryTransCd": {
     "label": "Secondary Transaction Code (01STC)"
   },
   "docCode": {

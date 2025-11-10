@@ -8,12 +8,13 @@ import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
 import InfoAlert from "../../components/InfoAlert";
 import FormSection, { FormField, FormInput } from "../../components/FormSection";
 import NotesSection from "../../components/NotesSection";
-import { mockUser } from "../../data/mockData";
 import { ErrorItem, Note } from "../../types";
 import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from "../../services/workAssignmentService";
 import { landingSearchService } from "../../services/landingSearchService";
-import ersDto from "../../data/ersDto.json";
-import fieldMappings from "../../data/fieldConfig4868.json";
+import { useAuth } from "../../contexts/AuthContext";
+import { useSeid, useUserGroup } from "../../hooks/useSeid";
+import DevBanner from "../../components/DevBanner";
+import fieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
 
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
@@ -27,7 +28,7 @@ const toLabel = (key: string) =>
 
 // Create Zod schema from field configuration
 const createZodSchema = (fieldKey: string) => {
-  const config = (fieldMappings as any)[fieldKey]?.validation;
+  const config = (fieldConfig as any)[fieldKey]?.validation;
   if (!config) return z.string().optional();
   
   let schema = z.string();
@@ -68,6 +69,9 @@ const validateField = (fieldKey: string, value: string): string | null => {
 function Form4868ERSPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const currentSeid = useSeid();
+  const userGroup = useUserGroup();
   const isQrReviewer = searchParams.get('qrReviewer') === 'true';
   const isReopen = searchParams.get('reopen') === 'true';
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
@@ -95,8 +99,8 @@ function Form4868ERSPageContent() {
       label: toLabel(fieldKey),
       value: workRecord[fieldKey] || '',
       type: 'text',
-      ERSEditable: true,
-      xpath: editableFields[fieldKey]
+      editable: true,
+      hasFieldError: false
     }));
   };
 
@@ -107,7 +111,7 @@ function Form4868ERSPageContent() {
     // Get the data source (workRecord or root)
     const dataSource = eraData?.workRecord || eraData;
     
-    // Use displayFields if available, otherwise fallback to fieldMappings
+    // Use displayFields structure from eraDto
     const displayFields = eraData?.displayFields || eraData?.workRecord?.displayFields;
     if (displayFields) {
       // Create form elements based on displayFields structure
@@ -117,9 +121,10 @@ function Form4868ERSPageContent() {
       const editableFields: FormElement[] = [];
       const nonEditableFields: FormElement[] = [];
       
-      Object.entries(displayFields).forEach(([fieldKey, fieldConfig]: [string, any]) => {
+      Object.entries(displayFields).forEach(([fieldKey, displayFieldConfig]: [string, any]) => {
         const fieldValue = dataSource[fieldKey] || '';
-        const fieldLabel = (fieldMappings as any)[fieldKey]?.label || toLabel(fieldKey);
+        // Get label from fieldConfig4868.json first, then fallback
+        const fieldLabel = (fieldConfig as any)[fieldKey]?.label || toLabel(fieldKey);
         
         const formElement: FormElement = {
           id: fieldKey,
@@ -127,12 +132,11 @@ function Form4868ERSPageContent() {
           label: fieldLabel,
           value: fieldValue,
           type: 'text',
-          ERSEditable: fieldConfig.editable,
-          xpath: fieldConfig.ref || `/${fieldKey}`,
-          hasFieldError: fieldConfig.hasFieldError || false
+          editable: displayFieldConfig.editable,
+          hasFieldError: displayFieldConfig.hasFieldError || false
         };
         
-        if (fieldConfig.editable) {
+        if (displayFieldConfig.editable) {
           editableFields.push(formElement);
         } else {
           nonEditableFields.push(formElement);
@@ -143,12 +147,12 @@ function Form4868ERSPageContent() {
       return [...editableFields, ...nonEditableFields];
     }
     
-    // Fallback to original fieldMappings approach
+    // Fallback to fieldConfig approach
     const formElements: FormElement[] = [];
     const editableFields: FormElement[] = [];
     const nonEditableFields: FormElement[] = [];
     
-    Object.entries(fieldMappings).forEach(([fieldKey, config]: [string, any], index) => {
+    Object.entries(fieldConfig).forEach(([fieldKey, config]: [string, any], index) => {
       const fieldValue = dataSource[fieldKey] || '';
       
       const formElement: FormElement = {
@@ -157,8 +161,8 @@ function Form4868ERSPageContent() {
         label: config.label,
         value: fieldValue,
         type: 'text',
-        ERSEditable: config.editable,
-        xpath: `/${fieldKey}` // Default xpath, can be customized if needed
+        editable: config.editable || false,
+        hasFieldError: false
       };
       
       if (config.editable) {
@@ -174,8 +178,6 @@ function Form4868ERSPageContent() {
   const [loading, setLoading] = useState(true);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>('');
-  
-  const ersWorkRecord = ersDto?.workRecord ?? {} as any;
 
   // Helper function to parse clear codes from comma-separated input
   const getClearCodesArray = () => {
@@ -257,10 +259,10 @@ function Form4868ERSPageContent() {
   const editableFieldKeys: string[] = useMemo(() => {
     if (formElements.length > 0) {
       // Use actual form elements from API
-      return formElements.filter(el => el.ERSEditable).map(el => el.name);
+      return formElements.filter(el => el.editable).map(el => el.name);
     }
     
-    // Check for displayFields structure first
+    // Check for displayFields structure from eraDto
     const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
       return Object.entries(displayFields)
@@ -268,27 +270,14 @@ function Form4868ERSPageContent() {
         .map(([fieldKey, _]) => fieldKey);
     }
     
-    // Fallback to old editableFields structure
-    const editableFields = eraDto?.workRecord?.editableFields || eraDto?.editableFields || ersWorkRecord?.editableFields;
-    if (editableFields) {
-      return Object.keys(editableFields);
-    }
-    
-    // Default fallback
-    return [
-      'primarySSN',
-      'nameLine1Txt',
-      'primaryNameControlTxt',
-      'taxPeriodEndDt',
-      'transactionDate',
-      'irsSubmissionDate'
-    ];
-  }, [formElements, eraDto, ersWorkRecord]);
+    // Default fallback - return empty array if no structure found
+    return [];
+  }, [formElements, eraDto]);
 
   // Non-editable fields list from formElements
   const nonEditableFieldKeys: string[] = useMemo(() => {
     if (formElements.length > 0) {
-      return formElements.filter(el => !el.ERSEditable).map(el => el.name);
+      return formElements.filter(el => !el.editable).map(el => el.name);
     }
     
     // Check for displayFields structure
@@ -302,11 +291,9 @@ function Form4868ERSPageContent() {
     return [];
   }, [formElements, eraDto]);
 
-  // Map DTO keys to actual WorkRecord property names (handle typos/mismatches)
+  // Map DTO keys to actual WorkRecord property names (simplified)
   const dtoToRecordKey: Record<string, string> = {
-    TaxPeriodEndDt: ("taxPeriodEndDt" in ersWorkRecord)
-      ? "taxPeriodEndDt"
-      : ("TaxPeriodEndDt" in ersWorkRecord ? "TaxPeriodEndDt" : "taxPeriodEndDt"),
+    TaxPeriodEndDt: "taxPeriodEndDt",
     primaryNameControlTxt: "primaryNameControlTxt",
     nameLine1Txt: "nameLine1Txt",
     primarySSN: "primarySSN",
@@ -321,14 +308,19 @@ function Form4868ERSPageContent() {
         const element = workAssignmentService.getFormElementByName(formElements, key);
         values[key] = element?.value || "";
       } else {
-        // Fallback to ersDto
-        const recordKey = dtoToRecordKey[key] || key;
-        const v = (ersWorkRecord as any)?.[recordKey];
-        values[key] = v ?? "";
+        // Fallback to eraDto workRecord
+        const workRecord = eraDto?.workRecord;
+        if (workRecord) {
+          const recordKey = dtoToRecordKey[key] || key;
+          const v = (workRecord as any)?.[recordKey];
+          values[key] = v ?? "";
+        } else {
+          values[key] = "";
+        }
       }
     }
     return values;
-  }, [editableFieldKeys, formElements, ersWorkRecord]);
+  }, [editableFieldKeys, formElements, eraDto]);
 
   const [values, setValues] = useState<Record<string, string>>({});
   const [originalValues, setOriginalValues] = useState<Record<string, string>>({});
@@ -524,7 +516,7 @@ function Form4868ERSPageContent() {
     }
   };
 
-  const getDLN = () => eraDto?.dln || jsonWorkRecord?.workRecord?.dln || ersWorkRecord?.dln || "N/A";
+  const getDLN = () => eraDto?.dln || jsonWorkRecord?.workRecord?.dln || "N/A";
 
   const handleInputChange = (fieldKey: string, val: string) => {
     console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
@@ -597,14 +589,22 @@ function Form4868ERSPageContent() {
 
   // Helper function to get form element label by name
   const getFormElementLabel = (name: string): string => {
-    if (formElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(formElements, name);
-      return String(element?.label || toLabel(name));
+    // Always prioritize fieldConfig4868.json for labels
+    const fieldConfigItem = (fieldConfig as any)[name];
+    if (fieldConfigItem?.label) {
+      return fieldConfigItem.label;
     }
     
-    // Fallback to fieldMappings or toLabel
-    const fieldConfig = (fieldMappings as any)[name];
-    return fieldConfig?.label || toLabel(name);
+    // Fallback to form element label if fieldConfig doesn't have it
+    if (formElements.length > 0) {
+      const element = workAssignmentService.getFormElementByName(formElements, name);
+      if (element?.label) {
+        return String(element.label);
+      }
+    }
+    
+    // Final fallback to generated label
+    return toLabel(name);
   };
 
   // Helper function to get original value
@@ -720,7 +720,7 @@ function Form4868ERSPageContent() {
     const fieldChanges: any[] = [];
     const storedSelectionData = sessionStorage.getItem('selectionData');
     const selectionData = JSON.parse(storedSelectionData || '{}');
-    const currentSeid = selectionData.seid || 'unknown';
+    const noteSeid = currentSeid || selectionData.seid || 'unknown';
     
     // Check for form field changes
     formElements.forEach(element => {
@@ -766,7 +766,7 @@ function Form4868ERSPageContent() {
       };
       
       const newNote = {
-        author: currentSeid,
+        author: noteSeid,
         createdTime: new Date().toISOString(),
         comments: JSON.stringify(commentsObj)
       };
@@ -1308,7 +1308,7 @@ function Form4868ERSPageContent() {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
-        <Header user={mockUser} />
+        <Header />
         
         {/* Breadcrumbs */}
         <div className="px-4 pt-4 pb-2">
@@ -1327,7 +1327,7 @@ function Form4868ERSPageContent() {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
-        <Header user={mockUser} />
+        <Header />
         
         {/* Breadcrumbs */}
         <div className="px-4 pt-4 pb-2">
@@ -1349,10 +1349,33 @@ function Form4868ERSPageContent() {
     );
   }
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Authentication required. Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
-      <Header user={mockUser} />
-      {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
+      <DevBanner />
+      <Header />
 
       {/* Breadcrumbs */}
       <div className="px-4 pt-4 pb-2">
@@ -1441,8 +1464,8 @@ function Form4868ERSPageContent() {
               <FormSection 
                 title="Form 4868 - Application for Automatic Extension"
                 metadata={{
-                  receivedDate: eraDto?.transDt ? new Date(eraDto.transDt).toLocaleDateString() : (jsonWorkRecord?.workRecord?.transDt ? new Date(jsonWorkRecord.workRecord.transDt).toLocaleDateString() : (ersWorkRecord?.transDt ? new Date(ersWorkRecord.transDt).toLocaleDateString() : undefined)),
-                  taxPeriod: eraDto?.taxPrd || ersWorkRecord?.taxPrd,
+                  receivedDate: eraDto?.transDt ? new Date(eraDto.transDt).toLocaleDateString() : (jsonWorkRecord?.workRecord?.transDt ? new Date(jsonWorkRecord.workRecord.transDt).toLocaleDateString() : undefined),
+                  taxPeriod: eraDto?.taxPrd || jsonWorkRecord?.workRecord?.taxPrd,
                 }}
               >
                 <div className="space-y-8 px-1">

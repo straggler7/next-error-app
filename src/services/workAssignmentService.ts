@@ -17,11 +17,14 @@ export interface AssignedWorkResponse {
 }
 
 export interface FormElement {
+  id: string;
   name: string;
+  label: string;
   value: string;
-  ERSEditable: boolean;
-  xpath: string;
-  [key: string]: string | number | boolean;
+  type: string;
+  editable: boolean;
+  hasFieldError: boolean;
+  ref?: string;
 }
 
 export interface GMFError {
@@ -70,28 +73,28 @@ class WorkAssignmentService {
     taxPeriod: "2025"
   };
 
-  // Mock GMF augmented XML data
+  // Mock GMF augmented data
   private mockGMFData: GMFAugmentedData = {
     FormElements: [
       // Identification Section
-      { name: "form_id", value: "4868", ERSEditable: false, xpath: "/Form4868/form_id" },
-      { name: "tax_year", value: "2024", ERSEditable: false, xpath: "/Form4868/tax_year" },
-      { name: "first_name", value: "John", ERSEditable: true, xpath: "/Form4868/identification/first_name" },
-      { name: "last_name", value: "Doe", ERSEditable: true, xpath: "/Form4868/identification/last_name" },
-      { name: "ssn", value: "123-45-6789", ERSEditable: true, xpath: "/Form4868/identification/ssn" },
-      { name: "street", value: "123 Main Street", ERSEditable: true, xpath: "/Form4868/identification/address/street" },
-      { name: "city", value: "Anytown", ERSEditable: true, xpath: "/Form4868/identification/address/city" },
-      { name: "state", value: "CA", ERSEditable: true, xpath: "/Form4868/identification/address/state" },
-      { name: "zip_code", value: "90210", ERSEditable: true, xpath: "/Form4868/identification/address/zip_code" },
+      { id: "form_id", name: "form_id", label: "Form ID", value: "4868", type: "text", editable: false, hasFieldError: false },
+      { id: "tax_year", name: "tax_year", label: "Tax Year", value: "2024", type: "text", editable: false, hasFieldError: false },
+      { id: "first_name", name: "first_name", label: "First Name", value: "John", type: "text", editable: true, hasFieldError: false },
+      { id: "last_name", name: "last_name", label: "Last Name", value: "Doe", type: "text", editable: true, hasFieldError: false },
+      { id: "ssn", name: "ssn", label: "SSN", value: "123-45-6789", type: "text", editable: true, hasFieldError: false },
+      { id: "street", name: "street", label: "Street", value: "123 Main Street", type: "text", editable: true, hasFieldError: false },
+      { id: "city", name: "city", label: "City", value: "Anytown", type: "text", editable: true, hasFieldError: false },
+      { id: "state", name: "state", label: "State", value: "CA", type: "text", editable: true, hasFieldError: false },
+      { id: "zip_code", name: "zip_code", label: "Zip Code", value: "90210", type: "text", editable: true, hasFieldError: false },
       
       // Income Tax Information
-      { name: "total_tax_liability", value: "7500.00", ERSEditable: true, xpath: "/Form4868/income_tax_information/total_tax_liability" },
-      { name: "total_payments", value: "6500.00", ERSEditable: true, xpath: "/Form4868/income_tax_information/total_payments" },
-      { name: "balance_due", value: "1000.00", ERSEditable: true, xpath: "/Form4868/income_tax_information/balance_due" },
-      { name: "amount_paid_with_extension", value: "1000.00", ERSEditable: true, xpath: "/Form4868/income_tax_information/amount_paid_with_extension" },
+      { id: "total_tax_liability", name: "total_tax_liability", label: "Total Tax Liability", value: "7500.00", type: "text", editable: true, hasFieldError: false },
+      { id: "total_payments", name: "total_payments", label: "Total Payments", value: "6500.00", type: "text", editable: true, hasFieldError: false },
+      { id: "balance_due", name: "balance_due", label: "Balance Due", value: "1000.00", type: "text", editable: true, hasFieldError: false },
+      { id: "amount_paid_with_extension", name: "amount_paid_with_extension", label: "Amount Paid with Extension", value: "1000.00", type: "text", editable: true, hasFieldError: false },
       
       // Filing Status
-      { name: "is_out_of_country", value: "false", ERSEditable: true, xpath: "/Form4868/filing_status/is_out_of_country" }
+      { id: "is_out_of_country", name: "is_out_of_country", label: "Out of Country", value: "false", type: "text", editable: true, hasFieldError: false }
     ],
     GMFErrors: [
       { 
@@ -222,10 +225,14 @@ class WorkAssignmentService {
     for (let i = 0; i < formElementNodes.length; i++) {
       const element = formElementNodes[i];
       formElements.push({
+        id: element.getAttribute('id') || element.getAttribute('name') || '',
         name: element.getAttribute('name') || '',
+        label: element.getAttribute('label') || '',
         value: element.getAttribute('value') || '',
-        ERSEditable: element.getAttribute('ERSEditable') === 'true',
-        xpath: element.getAttribute('xpath') || ''
+        type: element.getAttribute('type') || 'text',
+        editable: element.getAttribute('editable') === 'true',
+        hasFieldError: element.getAttribute('hasFieldError') === 'true',
+        ref: element.getAttribute('ref') || ''
       });
     }
     
@@ -302,7 +309,7 @@ class WorkAssignmentService {
     // Add form elements
     formElements.forEach(element => {
       xmlParts.push(
-        `      <FormElement name="${element.name}" value="${element.value}" ERSEditable="${element.ERSEditable}" xpath="${element.xpath}" />`
+        `      <FormElement id="${element.id}" name="${element.name}" label="${element.label}" value="${element.value}" editable="${element.editable}" hasFieldError="${element.hasFieldError}" />`
       );
     });
 
@@ -390,13 +397,18 @@ class WorkAssignmentService {
 
   // Get form elements by section for easier form rendering
   getFormElementsBySection(formElements: FormElement[]) {
+    // Group elements by common naming patterns instead of xpath
+    const identificationFields = ['first_name', 'last_name', 'ssn', 'street', 'city', 'state', 'zip_code'];
+    const incomeTaxFields = ['total_tax_liability', 'total_payments', 'balance_due', 'amount_paid_with_extension'];
+    const filingStatusFields = ['is_out_of_country'];
+    
     const sections = {
-      identification: formElements.filter(el => el.xpath.includes('/identification/')),
-      incomeTax: formElements.filter(el => el.xpath.includes('/income_tax_information/')),
-      filingStatus: formElements.filter(el => el.xpath.includes('/filing_status/')),
-      metadata: formElements.filter(el => !el.xpath.includes('/identification/') && 
-                                          !el.xpath.includes('/income_tax_information/') && 
-                                          !el.xpath.includes('/filing_status/'))
+      identification: formElements.filter(el => identificationFields.includes(el.name)),
+      incomeTax: formElements.filter(el => incomeTaxFields.includes(el.name)),
+      filingStatus: formElements.filter(el => filingStatusFields.includes(el.name)),
+      metadata: formElements.filter(el => !identificationFields.includes(el.name) && 
+                                          !incomeTaxFields.includes(el.name) && 
+                                          !filingStatusFields.includes(el.name))
     };
     
     return sections;
