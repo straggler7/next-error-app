@@ -38,7 +38,7 @@ const mockUsers: User[] = [
 ];
 
 export default function DevBanner() {
-  const { isDevelopmentMode, user } = useAuth();
+  const { isDevelopmentMode, user, refreshAuth } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Only show in development mode
@@ -46,11 +46,19 @@ export default function DevBanner() {
     return null;
   }
 
-  const handleUserSelect = (selectedUser: User) => {
+  const handleUserSelect = async (selectedUser: User) => {
     // Store selected user in localStorage to persist across page reloads
     localStorage.setItem('dev-selected-user', JSON.stringify(selectedUser));
-    // Reload page to trigger auth context refresh
-    window.location.reload();
+    
+    // Refresh auth context without page reload
+    if (refreshAuth) {
+      await refreshAuth();
+    } else {
+      // Fallback to page reload if refreshAuth is not available
+      window.location.reload();
+    }
+    
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -79,9 +87,8 @@ export default function DevBanner() {
                 {mockUsers.map((mockUser) => (
                   <button
                     key={mockUser.seid}
-                    onClick={() => {
-                      handleUserSelect(mockUser);
-                      setIsDropdownOpen(false);
+                    onClick={async () => {
+                      await handleUserSelect(mockUser);
                     }}
                     className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
                       user?.seid === mockUser.seid ? 'bg-blue-50 text-blue-700' : 'text-gray-700'

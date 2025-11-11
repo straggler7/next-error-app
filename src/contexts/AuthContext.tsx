@@ -35,6 +35,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (parsedUser.seid) {
               userSeid = parsedUser.seid;
               console.log('🔍 AuthContext: Using dev selected user:', parsedUser);
+              // Set user data immediately for dev selected user
+              setUser(parsedUser);
             }
           } catch (error) {
             console.warn('Failed to parse dev selected user:', error);
@@ -96,12 +98,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth();
   }, []);
 
+  // Function to refresh auth context (useful for dev user selection)
+  const refreshAuth = async () => {
+    setIsLoading(true);
+    const devSelectedUser = localStorage.getItem('dev-selected-user');
+    if (devSelectedUser) {
+      try {
+        const parsedUser = JSON.parse(devSelectedUser);
+        if (parsedUser.seid) {
+          setSeid(parsedUser.seid);
+          setUser(parsedUser);
+          console.log('🔄 AuthContext: Refreshed with dev selected user:', parsedUser);
+        }
+      } catch (error) {
+        console.warn('Failed to parse dev selected user during refresh:', error);
+      }
+    }
+    setIsLoading(false);
+  };
+
   const contextValue: AuthContextType = {
     user,
     isAuthenticated: !!user && !!seid,
     isLoading,
     seid,
-    isDevelopmentMode: process.env.NODE_ENV === 'development'
+    isDevelopmentMode: process.env.NODE_ENV === 'development',
+    refreshAuth
   };
 
   return (

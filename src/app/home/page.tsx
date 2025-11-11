@@ -7,6 +7,7 @@ import ErrorAlert from "../../components/ErrorAlert";
 import DevBanner from "../../components/DevBanner";
 import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
+import { useSeid } from "../../hooks/useSeid";
 
 interface SearchFormData {
   dln: string;
@@ -50,6 +51,8 @@ export default function HomePage() {
   const [serviceCenterError, setServiceCenterError] = useState("");
   const [isSearchButtonEnabled, setIsSearchButtonEnabled] = useState(false);
   const [isSubmitButtonEnabled, setIsSubmitButtonEnabled] = useState(false);
+
+  const currentUserSeid = useSeid();
 
   // Validation functions
   const validateDLN = (dln: string): boolean => {
@@ -226,7 +229,7 @@ export default function HomePage() {
           'Content-Type': 'application/json',
           'SERVICE_CENTER': programForm.serviceCenter.toUpperCase(),
           'PROGRAM_CODE': programForm.program || programForm.statusCode,
-          'SEID': programForm.seid || 'u1000'
+          'SEID': currentUserSeid || 'u1000'
         }
       });
 
@@ -287,7 +290,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DevBanner />
+      {/* <DevBanner /> */}
       <Header />
       
       <div className="main-container flex flex-col p-4">

@@ -15,11 +15,13 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { mockUser } from '../../data/mockData';
+import { useSeid } from '../../hooks/useSeid';
 
 function DailySummaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const seid = searchParams.get('seid');
+  const currentUserSeid = useSeid();
 
   const [filters, setFilters] = useState<FilterState>({
     searchAll: '',
@@ -77,7 +79,8 @@ function DailySummaryContent() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': parsedSelectionData.seid || 'u1000'
+          // 'SEID': parsedSelectionData.seid || 'u1000'
+          'SEID': currentUserSeid || ''
         },
         body: JSON.stringify({
           // seid: parsedSelectionData.seid,

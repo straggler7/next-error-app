@@ -12,6 +12,7 @@ export interface AuthContext {
   isLoading: boolean;
   seid: string | null;
   isDevelopmentMode?: boolean;
+  refreshAuth?: () => Promise<void>;
 }
 
 export interface AuthenticationError {

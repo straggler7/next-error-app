@@ -9,6 +9,7 @@ import { mockUser } from "../../data/mockData";
 import fieldMappings from "../../data/fieldConfig4868.json";
 import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
 import { QRInventoryRecord } from "../../services/qrInventoryService";
+import { useSeid } from "@/hooks/useSeid";
 
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
 const toLabel = (key: string) =>
@@ -84,6 +85,7 @@ function QRDetailsPageContent() {
   const dln = searchParams.get('dln');
   const serviceCenter = searchParams.get('serviceCenter');
   const seid = searchParams.get('seid');
+  const currentUserSeid = useSeid();
   
   const [qrData, setQRData] = useState<QRDetailsData | null>(null);
   const [inventoryRecord, setInventoryRecord] = useState<QRInventoryRecord | null>(null);
@@ -158,7 +160,7 @@ function QRDetailsPageContent() {
       setLoading(true);
       setError(null);
 
-      const data = await QRDetailsService.getQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
+      const data = await QRDetailsService.getQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, currentUserSeid || undefined);
       console.log('API response data:', data);
       setQRData(data);
       
@@ -196,7 +198,7 @@ function QRDetailsPageContent() {
       setLoading(false);
       isLoadingRef.current = false;
     }
-  }, [inventoryId, dln, serviceCenter, seid]); // Add dependencies for useCallback
+  }, [inventoryId, dln, serviceCenter, currentUserSeid]); // Add dependencies for useCallback
 
   // Load inventory record from sessionStorage
   useEffect(() => {

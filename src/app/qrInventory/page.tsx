@@ -15,11 +15,24 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { mockUser } from '../../data/mockData';
+import { useSeid } from '../../hooks/useSeid';
+import { useAuth } from '../../contexts/AuthContext';
 
 function QRInventoryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const seid = searchParams.get('seid');
+  const seidFromUrl = searchParams.get('seid');
+  const currentUserSeid = useSeid();
+  const { user, isAuthenticated, isLoading, seid: authSeid } = useAuth();
+  
+  console.log('QR Inventory: Auth Debug:', {
+    currentUserSeid,
+    authSeid,
+    seidFromUrl,
+    user,
+    isAuthenticated,
+    isLoading
+  });
 
   const [filters, setFilters] = useState<FilterState>({
     searchAll: '',
@@ -72,10 +85,12 @@ function QRInventoryContent() {
         serviceCenter: parsedSelectionData.serviceCenter
       };
 
+      console.log('QR Inventory: currentUserSeid before call:', currentUserSeid);
       const response = await QRInventoryService.getQRRecords(
         qrFilters,
         pagination.currentPage,
-        pagination.pageSize
+        pagination.pageSize,
+        currentUserSeid || undefined
       );
 
       setQRRecords(response?.records || []);
@@ -273,8 +288,8 @@ function QRInventoryContent() {
                   QR Review Inventory
                 </h2>
                 <div className="text-sm text-gray-600 mt-1 space-y-1">
-                  {seid && (
-                    <p>SEID: {seid}</p>
+                  {authSeid && (
+                    <p>SEID: {authSeid}</p>
                   )}
                   {(() => {
                     if (typeof window !== 'undefined') {
@@ -329,7 +344,7 @@ function QRInventoryContent() {
                   </svg>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Records for QR</h3>
                   <p className="text-sm text-gray-500 mb-4">
-                    {seid ? `No QR review records found for SEID: ${seid}` : 'No QR review records found matching your criteria.'}
+                    {authSeid ? `No QR review records found for SEID: ${authSeid}` : 'No QR review records found matching your criteria.'}
                   </p>
                   <button
                     onClick={loadQRRecords}

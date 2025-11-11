@@ -8,6 +8,13 @@ import { useAuth } from '../contexts/AuthContext';
  */
 export function useSeid(): string | null {
   const { seid } = useAuth();
+  console.log('SEID in useAuth: ', seid);
+  // Development fallback - return mock SEID if auth SEID is null
+  if (!seid && process.env.NODE_ENV === 'development') {
+    console.log('🔧 useSeid: Using development fallback SEID');
+    return 'U1000';
+  }
+  
   return seid;
 }
 

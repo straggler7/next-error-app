@@ -29,8 +29,9 @@ const toLabel = (key: string) =>
 // Create Zod schema from field configuration
 const createZodSchema = (fieldKey: string) => {
   const config = (fieldConfig as any)[fieldKey]?.validation;
-  if (!config) return z.string().optional();
-  
+  // if (!config) return z.string().optional();
+  if (!config) return z.union([z.string(), z.number()]).optional();
+
   let schema = z.string();
   
   if (config.required) {
@@ -70,7 +71,7 @@ function Form4868ERSPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const currentSeid = useSeid();
+  const currentUserSeid = useSeid();
   const userGroup = useUserGroup();
   const isQrReviewer = searchParams.get('qrReviewer') === 'true';
   const isReopen = searchParams.get('reopen') === 'true';
@@ -443,7 +444,7 @@ function Form4868ERSPageContent() {
           'Content-Type': 'application/json',
           'SERVICE_CENTER': selectionData.serviceCenter.toUpperCase(),
           'PROGRAM_CODE': selectionData.program || selectionData.statusCode,
-          'SEID': selectionData.seid || 'u1000'
+          'SEID': currentUserSeid || 'X1000'
         }
       });
 
@@ -516,7 +517,7 @@ function Form4868ERSPageContent() {
     }
   };
 
-  const getDLN = () => eraDto?.dln || jsonWorkRecord?.workRecord?.dln || "N/A";
+  const getDLN = () => eraDto?.workRecord?.dln || jsonWorkRecord?.workRecord?.dln || "N/A";
 
   const handleInputChange = (fieldKey: string, val: string) => {
     console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
@@ -720,7 +721,7 @@ function Form4868ERSPageContent() {
     const fieldChanges: any[] = [];
     const storedSelectionData = sessionStorage.getItem('selectionData');
     const selectionData = JSON.parse(storedSelectionData || '{}');
-    const noteSeid = currentSeid || selectionData.seid || 'unknown';
+    const noteSeid = currentUserSeid || selectionData.seid || 'unknown';
     
     // Check for form field changes
     formElements.forEach(element => {
@@ -823,7 +824,7 @@ function Form4868ERSPageContent() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.seid || 'u1000'
+          'SEID': currentUserSeid || 'X1000'
         },
         body: JSON.stringify({
           "event": {
@@ -940,7 +941,7 @@ function Form4868ERSPageContent() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.seid || 'u1000'
+          'SEID': currentUserSeid || 'u1000'
         },
         body: JSON.stringify({"eventStatus":"CLOSEOUT"})
       });
@@ -1023,7 +1024,7 @@ function Form4868ERSPageContent() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.seid || 'u1000'
+          'SEID': currentUserSeid || 'u1000'
         },
         body: JSON.stringify({
           "event": {
@@ -1159,7 +1160,7 @@ function Form4868ERSPageContent() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': selectionData.seid || 'u1000'
+          'SEID': currentUserSeid || 'u1000'
         },
         body: JSON.stringify({
           "event": {
@@ -1374,7 +1375,7 @@ function Form4868ERSPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
-      <DevBanner />
+      {/* <DevBanner /> */}
       <Header />
 
       {/* Breadcrumbs */}
@@ -1404,6 +1405,9 @@ function Form4868ERSPageContent() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
               DLN: {getDLN()}
+            </span>
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+              Inventory ID: {inventoryId}
             </span>
             {landingSearchData && (
               <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">

@@ -51,7 +51,7 @@ export class QRInventoryService {
     filters: QRInventoryFilters = {},
     page: number = 1,
     pageSize: number = 15,
-    seid?: string
+    currentUserSeid?: string
   ): Promise<QRInventoryResponse | undefined> {
     try {
       // Build query parameters
@@ -62,8 +62,8 @@ export class QRInventoryService {
       });
 
       // Add optional filters
-      if (seid) {
-        params.append('seid', seid);
+      if (filters.seid) {
+        params.append('seid', filters.seid);
       }
       if (filters.program) {
         params.append('program', filters.program);
@@ -87,7 +87,7 @@ export class QRInventoryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': filters.seid || 'u1000'
+          'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({
           // status: 'QR_HOLD',

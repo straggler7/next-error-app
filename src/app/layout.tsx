@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { AuthProvider } from "../contexts/AuthContext";
+import DevBanner from "../components/DevBanner";
 
 export const metadata: Metadata = {
   title: "IRS Error Resolution Application",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ErrorBoundary>
           <AuthProvider>
+            <DevBanner />
             {children}
           </AuthProvider>
         </ErrorBoundary>

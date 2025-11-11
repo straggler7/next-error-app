@@ -78,7 +78,7 @@
         "transCd": "405",
         "secondaryTransCd": "405",
         "tertiaryTransCd": "409",
-        "MeFReceiptDate": "2001-12-17",
+        "meFReceiptDate": "2001-12-17",
         "treasuryReportsDataInd":null,
         "transSourceCode":null,
         "unpostableInd":0,
