@@ -261,11 +261,11 @@ function QRDetailsPageContent() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': seid || 'U1000'
+          'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({
           inventoryId: inventoryId,
-          completedBy: seid || 'u1000',
+          completedBy: `${currentUserSeid}`,
           completedAt: new Date().toISOString()
           // notes: generateNotesWithAdditionalComments()
         })
@@ -311,7 +311,7 @@ function QRDetailsPageContent() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': seid || 'U1000'
+          'SEID': `${currentUserSeid}`
         }
       });
 
