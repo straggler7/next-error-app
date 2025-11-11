@@ -80,7 +80,7 @@ function DailySummaryContent() {
         headers: {
           'Content-Type': 'application/json',
           // 'SEID': parsedSelectionData.seid || 'u1000'
-          'SEID': currentUserSeid || ''
+          'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({
           // seid: parsedSelectionData.seid,
@@ -158,7 +158,7 @@ function DailySummaryContent() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': record.seid || 'U1000'
+          'SEID': `${currentUserSeid}`
         }
       });
 
