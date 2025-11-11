@@ -12,7 +12,6 @@ export function useSeid(): string | null {
   // Development fallback - return mock SEID if auth SEID is null
   if (!seid && process.env.NODE_ENV === 'development') {
     console.log('🔧 useSeid: Using development fallback SEID');
-    alert('foobar here');
     return 'U1000';
   }
   

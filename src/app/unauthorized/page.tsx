@@ -33,13 +33,13 @@ export default function UnauthorizedPage() {
             Try Again
           </button>
           
-          <Link
+          {/* <Link
             href="/"
             className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
           >
             <Home className="w-4 h-4" />
             Go to Home
-          </Link>
+          </Link> */}
         </div>
 
         <div className="mt-8 pt-6 border-t border-gray-200">
