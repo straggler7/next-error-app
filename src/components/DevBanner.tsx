@@ -30,10 +30,16 @@ const mockUsers: User[] = [
     seid: 'D1234'
   },
   {
-    name: 'Test User U1000',
+    name: 'Test User u1000',
     role: 'Tax Examiner',
     group: 'tax_examiners',
-    seid: 'U1000'
+    seid: 'u1000'
+  },
+  {
+    name: 'Test User u2000',
+    role: 'Tax Examiner',
+    group: 'tax_examiners',
+    seid: 'u2000'
   }
 ];
 

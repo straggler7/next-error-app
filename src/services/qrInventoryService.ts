@@ -94,9 +94,9 @@ export class QRInventoryService {
           // page: page.toString(),
           // pageSize: pageSize.toString(),
           seid: filters.seid,
-          programCode: filters.program,
-          statusCode: filters.statusCode,
-          serviceCenter: filters.serviceCenter
+          programCode: filters.program
+          // statusCode: filters.statusCode,
+          // serviceCenter: filters.serviceCenter
         })
       });
 

@@ -88,22 +88,22 @@ function Form4868ERSPageContent() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Convert JSON work record to form elements based on editableFields
-  const convertJsonWorkRecordToFormElements = (jsonRecord: any): FormElement[] => {
-    if (!jsonRecord?.workRecord?.editableFields) return [];
+  // const convertJsonWorkRecordToFormElements = (jsonRecord: any): FormElement[] => {
+  //   if (!jsonRecord?.workRecord?.editableFields) return [];
     
-    const editableFields = jsonRecord.workRecord.editableFields;
-    const workRecord = jsonRecord.workRecord;
+  //   const editableFields = jsonRecord.workRecord.editableFields;
+  //   const workRecord = jsonRecord.workRecord;
     
-    return Object.keys(editableFields).map((fieldKey, index) => ({
-      id: fieldKey,
-      name: fieldKey,
-      label: toLabel(fieldKey),
-      value: workRecord[fieldKey] || '',
-      type: 'text',
-      editable: true,
-      hasFieldError: false
-    }));
-  };
+  //   return Object.keys(editableFields).map((fieldKey, index) => ({
+  //     id: fieldKey,
+  //     name: fieldKey,
+  //     label: toLabel(fieldKey),
+  //     value: workRecord[fieldKey] || '',
+  //     type: 'text',
+  //     editable: true,
+  //     hasFieldError: false
+  //   }));
+  // };
 
   // Convert ERA DTO to form elements using displayFields structure
   const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
@@ -905,12 +905,12 @@ function Form4868ERSPageContent() {
     }
 
     // Validate all editable fields before closing out
-    if (!validateAllFields()) {
-      setFlashMessage("Please fix validation errors before closing out.");
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 5000);
-      return;
-    }
+    // if (!validateAllFields()) {
+    //   setFlashMessage("Please fix validation errors before closing out.");
+    //   setShowFlash(true);
+    //   setTimeout(() => setShowFlash(false), 5000);
+    //   return;
+    // }
 
     // Clear any highlighted fields on closeout
     setHighlightedFields([]);

@@ -79,11 +79,11 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
         group: 'tax_examiners',
         seid: 'D1234'
       },
-      'U1000': {
-        name: 'Test User U1000',
+      'u1000': {
+        name: 'Test User u1000',
         role: 'Tax Examiner',
         group: 'tax_examiners',
-        seid: 'U1000'
+        seid: 'u1000'
       }
     };
 
