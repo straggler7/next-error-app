@@ -10,9 +10,10 @@ import { useAuth } from '../contexts/AuthContext';
 interface HeaderProps {
   showBackButton?: boolean;
   backHref?: string;
+  disableDailySummary?: boolean;
 }
 
-export default function Header({ showBackButton = false, backHref = '/' }: HeaderProps) {
+export default function Header({ showBackButton = false, backHref = '/', disableDailySummary = false }: HeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -72,10 +73,17 @@ export default function Header({ showBackButton = false, backHref = '/' }: Heade
                   </a> */}
                   <button 
                     onClick={() => {
-                      setIsUserMenuOpen(false);
-                      router.push('/daily-summary');
+                      if (!disableDailySummary) {
+                        setIsUserMenuOpen(false);
+                        router.push('/daily-summary');
+                      }
                     }}
-                    className="block w-full text-left px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:text-blue-900 transition-colors"
+                    disabled={disableDailySummary}
+                    className={`block w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
+                      disableDailySummary 
+                        ? 'text-gray-400 cursor-not-allowed' 
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-blue-900'
+                    }`}
                   >
                     Daily Summary
                   </button>

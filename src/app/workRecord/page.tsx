@@ -1376,11 +1376,14 @@ function Form4868ERSPageContent() {
   return (
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
       {/* <DevBanner /> */}
-      <Header />
+      <Header disableDailySummary={true} />
 
       {/* Breadcrumbs */}
       <div className="px-4 pt-4 pb-2">
-        <Breadcrumbs items={createBreadcrumbs.workRecord()} />
+        <Breadcrumbs items={[
+          { label: 'Home' }, // No href = disabled
+          { label: 'Work Record', isActive: true }
+        ]} />
       </div>
 
       {/* Info Alert */}
