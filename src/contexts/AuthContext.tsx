@@ -24,24 +24,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
+        // Clear localStorage user on initialization (server restart/browser refresh)
+        console.log('🧹 AuthContext: Clearing localStorage user on initialization');
+        localStorage.removeItem('dev-selected-user');
+
         // Try to get SEID from various sources
         let userSeid: string | null = null;
 
-        // First, check for dev selected user in localStorage (development only)
-        const devSelectedUser = localStorage.getItem('dev-selected-user');
-        if (devSelectedUser) {
-          try {
-            const parsedUser = JSON.parse(devSelectedUser);
-            if (parsedUser.seid) {
-              userSeid = parsedUser.seid;
-              console.log('🔍 AuthContext: Using dev selected user:', parsedUser);
-              // Set user data immediately for dev selected user
-              setUser(parsedUser);
-            }
-          } catch (error) {
-            console.warn('Failed to parse dev selected user:', error);
-          }
-        }
+        // Skip localStorage check since we just cleared it
+        // Dev selected user will be null after clearing localStorage
 
         // If not found, try to get from meta tag (set by server)
         if (!userSeid) {
@@ -76,6 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('🔍 AuthContext: Final SEID check:', { userSeid, isValid: userSeid && validateSeid(userSeid) });
         
         if (userSeid && validateSeid(userSeid)) {
+          console.log('SETTING SEID: ', userSeid);
           setSeid(userSeid);
           const userData = await getUserFromSeid(userSeid);
           console.log('🔍 AuthContext: User data:', userData);

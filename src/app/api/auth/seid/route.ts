@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     
     // If bypassing auth, return mock SEID
     if ((isDevelopment && bypassAuth) || forceBypass) {
-      console.log('🔓 API: Returning mock SEID for development');
+      console.log('🔓 API: Returning mock SEID for development', 'u1000');
       return NextResponse.json({ 
-        seid: 'U1000',
+        seid: 'u1000',
         group: 'tax_examiners'
       });
     }

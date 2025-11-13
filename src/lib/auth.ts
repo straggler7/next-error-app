@@ -87,11 +87,12 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       }
     };
 
+    console.log('foo bar seid: ', seid);
     return mockUsers[seid] || {
       name: 'Unknown User',
       role: 'Tax Examiner',
       group: 'tax_examiners',
-      seid: seid
+      seid: 'u1000'
     };
   } catch (error) {
     console.error('Error fetching user from SEID:', error);

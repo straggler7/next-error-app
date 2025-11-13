@@ -30,7 +30,7 @@ export function middleware(request: NextRequest) {
     console.log('🔓 Development mode: Authentication bypassed for', pathname);
     const response = NextResponse.next();
     // Set a mock SEID for development
-    response.headers.set('x-user-seid', 'U1000');
+    response.headers.set('x-user-seid', 'u1000');
     return response;
   }
   
