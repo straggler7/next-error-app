@@ -18,9 +18,6 @@ export default function Header({ showBackButton = false, backHref = '/', disable
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
-  
-  // Check if we're on the home page
-  const isHomePage = pathname === '/home' || pathname === '/';
 
   // Don't render if not authenticated or no user
   if (!isAuthenticated || !user) {
@@ -111,29 +108,43 @@ export default function Header({ showBackButton = false, backHref = '/', disable
       <nav className="bg-[#003d6b] text-white shadow-sm h-[50px]">
         <div className="px-2 h-full">
           <div className="flex items-center space-x-0 h-full">
-            {!isHomePage && (
-              <Link 
-                href="/home"
-                className="px-6 h-full flex items-center text-sm font-medium hover:bg-white/10 transition-colors duration-200 border-r border-white/20"
-              >
-                Home
-              </Link>
-            )}
+            <Link 
+              href="/home"
+              className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 border-r border-white/20 hover:bg-white/10 ${
+                pathname === '/home' || pathname === '/'
+                  ? 'bg-[#00599c] text-white'
+                  : ''
+              }`}
+            >
+              Home
+            </Link>
             <Link 
               href="/daily-summary"
-              className="px-6 h-full flex items-center text-sm font-medium hover:bg-white/10 transition-colors duration-200 border-r border-white/20"
+              className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 border-r border-white/20 hover:bg-white/10 ${
+                pathname.startsWith('/daily-summary')
+                  ? 'bg-[#00599c] text-white'
+                  : ''
+              }`}
             >
               Daily Summary
             </Link>
             <Link 
               href="/reports"
-              className="px-6 h-full flex items-center text-sm font-medium hover:bg-white/10 transition-colors duration-200 border-r border-white/20"
+              className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 border-r border-white/20 hover:bg-white/10 ${
+                pathname.startsWith('/reports')
+                  ? 'bg-[#00599c] text-white'
+                  : ''
+              }`}
             >
               Reports
             </Link>
             <Link 
               href="/manage-profiles"
-              className="px-6 h-full flex items-center text-sm font-medium hover:bg-white/10 transition-colors duration-200"
+              className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 hover:bg-white/10 ${
+                pathname.startsWith('/manage-profiles')
+                  ? 'bg-[#00599c] text-white'
+                  : ''
+              }`}
             >
               Manage Profiles
             </Link>
