@@ -24,15 +24,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
-        // Clear localStorage user on initialization (server restart/browser refresh)
-        console.log('🧹 AuthContext: Clearing localStorage user on initialization');
-        localStorage.removeItem('dev-selected-user');
+        // Clear localStorage user only on actual page refresh/reload (not on component re-renders)
+        // Check if this is a page refresh by looking for a session flag
+        const isPageRefresh = !sessionStorage.getItem('auth-initialized');
+        if (isPageRefresh) {
+          console.log('🧹 AuthContext: Clearing localStorage user on page refresh');
+          localStorage.removeItem('dev-selected-user');
+          sessionStorage.setItem('auth-initialized', 'true');
+        }
 
         // Try to get SEID from various sources
         let userSeid: string | null = null;
 
-        // Skip localStorage check since we just cleared it
-        // Dev selected user will be null after clearing localStorage
+        // First, check for dev selected user in localStorage (development only)
+        const devSelectedUser = localStorage.getItem('dev-selected-user');
+        if (devSelectedUser) {
+          try {
+            const parsedUser = JSON.parse(devSelectedUser);
+            if (parsedUser.seid) {
+              userSeid = parsedUser.seid;
+              console.log('🔍 AuthContext: Using dev selected user:', parsedUser);
+              // Set user data immediately for dev selected user
+              setUser(parsedUser);
+            }
+          } catch (error) {
+            console.warn('Failed to parse dev selected user:', error);
+          }
+        }
 
         // If not found, try to get from meta tag (set by server)
         if (!userSeid) {

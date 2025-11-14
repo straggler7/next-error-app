@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const PUBLIC_ROUTES = ['/unauthorized', '/forbidden', '/api/health'];
 
 // Routes that require authentication
-const PROTECTED_ROUTES = ['/home', '/workRecord', '/qrInventory', '/qrDetails', '/daily-summary', '/details', '/form4868', '/form4868-ers', '/profile'];
+const PROTECTED_ROUTES = ['/home', '/workRecord', '/qrInventory', '/qrDetails', '/daily-summary', '/details', '/form4868', '/form4868-ers', '/profile', '/role-assignment'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

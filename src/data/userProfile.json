@@ -1,0 +1,27 @@
+{
+    "userId": "101",
+    "seid": "u1000",
+    "userName": "John Doe",
+    "designation": "Manager",
+    "serviceCenterId": "101",
+    "teamCode": "Team-Alpha",
+    "activeStatus": true,
+    "profile": {
+        "44720": {
+            "dlnSearch": true,
+            "deleteEnabled": true,
+            "qualityReviewEnabled": true,
+            "leadRoleEnabled": true,
+            "rejectsEnabled": true,
+            "suspendStatusCodes": ["SC-1", "SC-2", "SC-3", "SC-4", "SC-5"]
+        },
+        "44730": {
+            "dlnSearch": true,
+            "deleteEnabled": true,
+            "qualityReviewEnabled": true,
+            "leadRoleEnabled": true,
+            "rejectsEnabled": true,
+            "suspendStatusCodes": ["SC-1", "SC-2", "SC-3", "SC-4", "SC-5"]
+        }
+    }
+}
