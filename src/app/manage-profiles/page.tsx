@@ -33,22 +33,11 @@ interface UserProfile {
   };
 }
 
-// Mock data for tax examiners
-const mockExaminers: ComboBoxOption[] = [
-  { value: 'examiner1', label: 'Sarah Thompson', seid: 'u1000' },
-  { value: 'examiner2', label: 'James Wilson', seid: 'u1000' },
-  { value: 'examiner3', label: 'Maria Garcia', seid: 'u1000' },
-  { value: 'examiner4', label: 'Kevin Brown', seid: 'u1000' },
-  { value: 'examiner5', label: 'Ashley Davis', seid: 'u1000' },
-];
-
-// Mock data for managers (proxy selection)
-const mockManagers = [
-  { value: 'manager1', label: 'Jennifer Smith - Team Alpha' },
-  { value: 'manager2', label: 'David Johnson - Team Beta' },
-  { value: 'manager3', label: 'Lisa Chen - Team Gamma' },
-  { value: 'manager4', label: 'Robert Williams - Team Delta' },
-];
+// Options for proxy manager select (populated from API)
+interface ManagerOption {
+  value: string;
+  label: string;
+}
 
 // Mock programs data - matching userProfile.json structure
 const mockPrograms: Program[] = [
@@ -100,8 +89,12 @@ export default function RoleAssignmentPage() {
   const [roleAssignments, setRoleAssignments] = useState<RoleAssignment[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [managerOptions, setManagerOptions] = useState<ManagerOption[]>([]);
+  const [examinerOptions, setExaminerOptions] = useState<ComboBoxOption[]>([]);
+  const [isLoadingManagers, setIsLoadingManagers] = useState(false);
+  const [isLoadingExaminers, setIsLoadingExaminers] = useState(false);
 
-  // Function to fetch user profile data
+  // Function to fetch user profile data for a specific SEID
   const fetchUserProfile = useCallback(async (selectedSeid: string) => {
     setIsLoadingProfile(true);
     try {
@@ -151,7 +144,7 @@ export default function RoleAssignmentPage() {
       setSelectedExaminer(prev => prev ? {
         ...prev,
         name: profileData.userName,
-        team: profileData.teamCode
+        teamCode: profileData.teamCode
       } : null);
 
     } catch (error) {
@@ -162,6 +155,79 @@ export default function RoleAssignmentPage() {
     }
   }, []);
 
+  // Fetch list of managers for proxy dropdown
+  useEffect(() => {
+    if (!currentUserSeid) return;
+
+    const fetchManagers = async () => {
+      setIsLoadingManagers(true);
+      try {
+        const response = await fetch('/api/v1/era/users/getManagers', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'SEID': currentUserSeid,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const managers: UserProfile[] = await response.json();
+        const options: ManagerOption[] = managers.map((manager) => ({
+          value: manager.seid,
+          label: `${manager.userName} - ${manager.seid}`,
+        }));
+        setManagerOptions(options);
+      } catch (error) {
+        console.error('Error fetching managers:', error);
+      } finally {
+        setIsLoadingManagers(false);
+      }
+    };
+
+    fetchManagers();
+  }, [currentUserSeid]);
+
+  // Fetch team tax examiners for the active manager (current or proxy)
+  useEffect(() => {
+    if (!currentUserSeid) return;
+
+    const managerSeid = selectedProxy || currentUserSeid;
+
+    const fetchTaxExaminers = async () => {
+      setIsLoadingExaminers(true);
+      try {
+        const response = await fetch(`/api/v1/era/users/${managerSeid}/getTaxExaminers`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'SEID': currentUserSeid,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const examiners: UserProfile[] = await response.json();
+        const options: ComboBoxOption[] = examiners.map((examiner) => ({
+          value: examiner.seid,
+          label: `${examiner.userName} - ${examiner.seid}`,
+          seid: examiner.seid,
+        }));
+        setExaminerOptions(options);
+      } catch (error) {
+        console.error('Error fetching tax examiners:', error);
+      } finally {
+        setIsLoadingExaminers(false);
+      }
+    };
+
+    fetchTaxExaminers();
+  }, [currentUserSeid, selectedProxy]);
+
   // All hooks must be called before any conditional returns
   const handleExaminerSelect = useCallback((option: ComboBoxOption | null) => {
     if (option) {
@@ -169,7 +235,7 @@ export default function RoleAssignmentPage() {
       const examinerData: ExaminerData = {
         name: option.label,
         seid: option.seid,
-        team: 'Team Alpha', // Default team, will be updated by API
+        teamCode: 'Team Alpha', // Default team, will be updated by API
         avatar: option.label.split(' ').map(n => n[0]).join('').toUpperCase(),
       };
       setSelectedExaminer(examinerData);
@@ -220,7 +286,14 @@ export default function RoleAssignmentPage() {
   }
 
   const handleProxyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProxy(e.target.value);
+    const newProxy = e.target.value;
+    setSelectedProxy(newProxy);
+
+    // Clear current examiner selection and assignments when switching proxy context
+    setSelectedExaminer(null);
+    setUserProfile(null);
+    setRoleAssignments([]);
+    setExaminerOptions([]);
   };
 
   const handleTeamChange = (newTeam: string) => {
@@ -360,10 +433,13 @@ export default function RoleAssignmentPage() {
             <select
               value={selectedProxy}
               onChange={handleProxyChange}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-sm hover:border-gray-400"
+              disabled={isLoadingManagers}
+              className="w-full px-4 py-3 border-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:bg-white focus:shadow-sm
+                disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
+                border-gray-300 bg-gray-50 text-gray-700 hover:border-gray-400 focus:border-blue-600"
             >
               <option value="">Select Manager (Optional)</option>
-              {mockManagers.map((manager) => (
+              {managerOptions.map((manager) => (
                 <option key={manager.value} value={manager.value}>
                   {manager.label}
                 </option>
@@ -374,12 +450,13 @@ export default function RoleAssignmentPage() {
           {/* Tax Examiner Selection */}
           <div className="form-group">
             <label className="block text-base font-semibold text-gray-900 mb-2">
-              Enter SEID or Select from Team
+              Tax Examiner
             </label>
             <ComboBox
-              options={mockExaminers}
+              options={examinerOptions}
               onSelect={handleExaminerSelect}
-              placeholder="Enter SEID or select from dropdown..."
+              placeholder={isLoadingExaminers ? 'Loading tax examiners...' : 'Enter SEID or select from dropdown...'}
+              disabled={isLoadingExaminers}
             />
           </div>
         </div>

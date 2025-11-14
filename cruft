@@ -2030,3 +2030,15 @@ From the response,
         }
     }
 }
+
+i want to make the call to the actual back end api that provides user info based on the seid in the header
+const response = await fetch('/api/v1/era/users/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': selectedSeid
+        }
+      });
+once the request with arrives, with SEID in the header, extract that header and make call the above api.
+The response returned will be like @userProfile.json 
+From the response, 

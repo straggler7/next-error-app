@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
 
 export interface ExaminerData {
   name: string;
   seid: string;
-  team: string;
+  teamCode: string;
   avatar: string;
 }
 
@@ -17,7 +17,11 @@ interface ExaminerCardProps {
 }
 
 export default function ExaminerCard({ examiner, onTeamChange, children }: ExaminerCardProps) {
-  const [teamAssignment, setTeamAssignment] = useState(examiner?.team || '');
+  const [teamAssignment, setTeamAssignment] = useState(examiner?.teamCode || '');
+
+  useEffect(() => {
+    setTeamAssignment(examiner?.teamCode || '');
+  }, [examiner?.teamCode]);
 
   if (!examiner) {
     return (

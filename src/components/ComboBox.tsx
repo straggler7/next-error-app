@@ -15,6 +15,7 @@ interface ComboBoxProps {
   onSelect: (option: ComboBoxOption | null) => void;
   value?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function ComboBox({ 
@@ -22,7 +23,8 @@ export default function ComboBox({
   placeholder = "Enter SEID or select from dropdown...", 
   onSelect, 
   value = "",
-  className = "" 
+  className = "",
+  disabled = false,
 }: ComboBoxProps) {
   const [inputValue, setInputValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
@@ -61,11 +63,13 @@ export default function ComboBox({
   }, [inputValue, options]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     setInputValue(e.target.value);
     setIsOpen(true);
   };
 
   const handleInputFocus = () => {
+    if (disabled) return;
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -131,7 +135,12 @@ export default function ComboBox({
           onBlur={handleInputBlur}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full px-4 pr-10 py-3 border-2 border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-sm hover:border-gray-400"
+          disabled={disabled}
+          className={`w-full px-4 pr-10 py-3 border-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:bg-white focus:shadow-sm
+            ${disabled
+              ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'border-gray-300 bg-gray-50 text-gray-700 hover:border-gray-400 focus:border-blue-600'
+            }`}
         />
         <ChevronDown 
           className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" 
