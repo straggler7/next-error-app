@@ -1989,3 +1989,44 @@ max-width: 1200
          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
            <h2 className="text-lg font-semibold text-blue-800 mb-6 pb-3 border-b-2 border-gray-200">
 
+
+i want to make the call to the actual back end api that provides user info based on the seid in the header
+const response = await fetch('/api/v1/era/users/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': selectedSeid
+        }
+      });
+once the request with arrives, with SEID in the header, extract that header and make call the above api.
+The response returned will be like @userProfile.json 
+From the response, 
+
+
+{
+    "userId": "101",
+    "seid": "u1000",
+    "userName": "John Doe",
+    "designation": "Manager",
+    "serviceCenterId": "101",
+    "teamCode": "Team-Alpha",
+    "activeStatus": true,
+    "profile": {
+        "44720": {
+            "dlnSearch": true,
+            "deleteEnabled": true,
+            "qualityReviewEnabled": true,
+            "leadRoleEnabled": true,
+            "rejectsEnabled": true,
+            "suspendStatusCodes": ["SC-1", "SC-2", "SC-3", "SC-4", "SC-5"]
+        },
+        "44730": {
+            "dlnSearch": true,
+            "deleteEnabled": true,
+            "qualityReviewEnabled": true,
+            "leadRoleEnabled": true,
+            "rejectsEnabled": true,
+            "suspendStatusCodes": ["SC-1", "SC-2", "SC-3", "SC-4", "SC-5"]
+        }
+    }
+}

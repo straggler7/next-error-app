@@ -20,24 +20,26 @@ interface UserProfile {
   teamCode: string;
   activeStatus: boolean;
   profile: {
-    [programCode: string]: {
-      dlnSearch: boolean;
-      deleteEnabled: boolean;
-      qualityReviewEnabled: boolean;
-      leadRoleEnabled: boolean;
-      rejectsEnabled: boolean;
-      suspendStatusCodes: string[];
+    profiles: {
+      [programCode: string]: {
+        dlnSearch: boolean;
+        deleteEnabled: boolean;
+        qualityReviewEnabled: boolean;
+        leadRoleEnabled: boolean;
+        rejectsEnabled: boolean;
+        suspendStatusCodes: string[];
+      };
     };
   };
 }
 
 // Mock data for tax examiners
 const mockExaminers: ComboBoxOption[] = [
-  { value: 'examiner1', label: 'Sarah Thompson', seid: '12345' },
-  { value: 'examiner2', label: 'James Wilson', seid: '12346' },
-  { value: 'examiner3', label: 'Maria Garcia', seid: '12347' },
-  { value: 'examiner4', label: 'Kevin Brown', seid: '12348' },
-  { value: 'examiner5', label: 'Ashley Davis', seid: '12349' },
+  { value: 'examiner1', label: 'Sarah Thompson', seid: 'u1000' },
+  { value: 'examiner2', label: 'James Wilson', seid: 'u1000' },
+  { value: 'examiner3', label: 'Maria Garcia', seid: 'u1000' },
+  { value: 'examiner4', label: 'Kevin Brown', seid: 'u1000' },
+  { value: 'examiner5', label: 'Ashley Davis', seid: 'u1000' },
 ];
 
 // Mock data for managers (proxy selection)
@@ -120,7 +122,8 @@ export default function RoleAssignmentPage() {
       
       // Parse profile data and populate role assignments
       const assignments: RoleAssignment[] = [];
-      Object.entries(profileData.profile).forEach(([programId, programData]) => {
+      const programProfiles = profileData.profile?.profiles ?? {};
+      Object.entries(programProfiles).forEach(([programId, programData]) => {
         const roles: string[] = [];
         const statusCodes: string[] = [];
 
@@ -268,12 +271,14 @@ export default function RoleAssignmentPage() {
       const updatedProfile: UserProfile = {
         ...userProfile,
         teamCode: selectedExaminer.team,
-        profile: {}
+        profile: {
+          profiles: {}
+        }
       };
 
-      // Convert role assignments back to profile structure
+      // Convert role assignments back to profile.profiles structure
       roleAssignments.forEach(assignment => {
-        updatedProfile.profile[assignment.programId] = {
+        updatedProfile.profile.profiles[assignment.programId] = {
           dlnSearch: assignment.roles.includes('dln-search'),
           deleteEnabled: assignment.roles.includes('delete'),
           qualityReviewEnabled: assignment.roles.includes('qr-review'),
