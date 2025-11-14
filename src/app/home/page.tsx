@@ -294,11 +294,11 @@ export default function HomePage() {
       <Header />
       
       <div className="main-container flex flex-col p-4">
-        <div className="content-layout flex flex-col items-center gap-4">
+        <div className="content-layout flex flex-col items-center gap-2">
           
           {/* Welcome Section */}
-          <div className="welcome-section text-center mb-8 w-full max-w-6xl">
-            <h1 className="welcome-title text-3xl font-semibold text-[#003d6b] mb-2">
+          <div className="welcome-section text-center mb-2 w-full max-w-6xl">
+            <h1 className="welcome-title text-2xl font-semibold text-[#003d6b] mb-2">
               Welcome to ERA
             </h1>
             <p className="welcome-subtitle text-base text-gray-500 mb-4 leading-relaxed hidden">
@@ -357,7 +357,7 @@ export default function HomePage() {
                     checked={programForm.qualityReview}
                     onChange={(e) => setProgramForm(prev => ({ ...prev, qualityReview: e.target.checked }))}
                   />
-                  <label className="checkbox-label font-semibold text-gray-800 text-base cursor-pointer" htmlFor="qualityReviewCheckbox">
+                  <label className="checkbox-label font-semibold text-gray-800 text-sm cursor-pointer" htmlFor="qualityReviewCheckbox">
                     Work on Quality Review
                   </label>
                 </div>
@@ -365,7 +365,7 @@ export default function HomePage() {
                 {/* SEID Field - shown when quality review is checked */}
                 {/* {programForm.qualityReview && ( */}
                   <div className="form-group">
-                    <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="seidInput">
+                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="seidInput">
                       SEID
                     </label>
                     <input 
@@ -375,7 +375,7 @@ export default function HomePage() {
                         padding: '0.875rem 1.125rem',
                         border: '1px solid #e5e7eb',
                         borderRadius: '8px',
-                        fontSize: '0.95rem',
+                        fontSize: '0.875rem',
                         lineHeight: '1.4',
                         background: '#fafafa',
                         color: '#374151'
@@ -391,7 +391,7 @@ export default function HomePage() {
                 {/* )} */}
 
                 <div className="form-group">
-                  <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="programSelect">
+                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="programSelect">
                     Program Selection
                   </label>
                   <select 
@@ -400,7 +400,7 @@ export default function HomePage() {
                       padding: '0.875rem 1.125rem',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      fontSize: '0.95rem',
+                      fontSize: '0.875rem',
                       lineHeight: '1.4',
                       background: '#fafafa',
                       color: '#374151'
@@ -417,7 +417,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
+                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
                     Status Code
                   </label>
                   <select 
@@ -426,7 +426,7 @@ export default function HomePage() {
                       padding: '0.875rem 1.125rem',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      fontSize: '0.95rem',
+                      fontSize: '0.875rem',
                       lineHeight: '1.4',
                       background: '#fafafa',
                       color: '#374151'
@@ -444,7 +444,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
+                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
                     Service Center
                   </label>
                   <select 
@@ -453,7 +453,7 @@ export default function HomePage() {
                       padding: '0.875rem 1.125rem',
                       border: '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      fontSize: '0.95rem',
+                      fontSize: '0.875rem',
                       lineHeight: '1.4',
                       background: '#fafafa',
                       color: '#374151'
@@ -525,7 +525,7 @@ export default function HomePage() {
                 <form className="search-form w-full flex flex-col gap-4" onSubmit={handleSearchSubmit}>
                   <div className="search-fields-grid flex flex-col gap-4 w-full">
                     <div className="form-group">
-                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="dlnInput">
+                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="dlnInput">
                         DLN Number
                       </label>
                       <input
@@ -535,7 +535,7 @@ export default function HomePage() {
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',
                           borderRadius: '8px',
-                          fontSize: '0.95rem',
+                          fontSize: '0.875rem',
                           lineHeight: '1.4',
                           background: '#fafafa',
                           color: '#374151'
@@ -549,7 +549,7 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="nameControlInput">
+                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="nameControlInput">
                         Name Control
                       </label>
                       <input
@@ -559,7 +559,7 @@ export default function HomePage() {
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',
                           borderRadius: '8px',
-                          fontSize: '0.95rem',
+                          fontSize: '0.875rem',
                           lineHeight: '1.4',
                           background: '#fafafa',
                           color: '#374151'
@@ -573,7 +573,7 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="tinInput">
+                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="tinInput">
                         TIN
                       </label>
                       <input
@@ -583,7 +583,7 @@ export default function HomePage() {
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',
                           borderRadius: '8px',
-                          fontSize: '0.95rem',
+                          fontSize: '0.875rem',
                           lineHeight: '1.4',
                           background: '#fafafa',
                           color: '#374151'
@@ -597,7 +597,7 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label block text-base font-semibold text-gray-800 mb-2" htmlFor="taxpayerNameInput">
+                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="taxpayerNameInput">
                         Taxpayer Name
                       </label>
                       <input
@@ -607,7 +607,7 @@ export default function HomePage() {
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',
                           borderRadius: '8px',
-                          fontSize: '0.95rem',
+                          fontSize: '0.875rem',
                           lineHeight: '1.4',
                           background: '#fafafa',
                           color: '#374151'

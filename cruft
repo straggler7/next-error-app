@@ -481,6 +481,9 @@ git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs
 git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs-notes-sso
 (11/06/2025)
 
+git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs-notes-sso-profile
+(11/13/2025)
+
 {
   "inventoryId": 14,
   "status": "RESOLVED",
@@ -1915,3 +1918,74 @@ In essence, the "magic" is a straightforward but critical DNS change that makes 
     "label": "Document Code (01DC)"
   }
 }
+
+
+{
+    "userId": "101",
+    "seid": "u1000",
+    "userName": "John Doe",
+    "designation": "Manager",
+    "serviceCenterId": "101",
+    "teamCode": "Team-Alpha",
+    "activeStatus": true,
+    "profile": {
+        "44720": {
+            "dlnSearch": false,
+            "deleteEnabled": true,
+            "qualityReviewEnabled": true,
+            "leadRoleEnabled": true,
+            "rejectsEnabled": true,
+            "suspendStatusCodes": [
+                "SC-1",
+                "SC-2",
+                "SC-3",
+                "SC-4",
+                "SC-5"
+            ]
+        },
+        "44730": {
+            "dlnSearch": true,
+            "deleteEnabled": false,
+            "qualityReviewEnabled": true,
+            "leadRoleEnabled": true,
+            "rejectsEnabled": true,
+            "suspendStatusCodes": [
+                "SC-1",
+                "SC-2",
+                "SC-3",
+                "SC-4",
+                "SC-5"
+            ]
+        }
+    }
+}
+
+max-width: 1200
+
+       
+       {/* Breadcrumbs */}
+-      <div className="px-4 pt-4 pb-2">
++      <div className="mx-auto max-w-[1200px] px-4 pt-4 pb-2">
+         <Breadcrumbs items={[
+           createBreadcrumbs.home(),
+-          { label: 'Role Assignment', isActive: true }
++          { label: 'Manage Profiles', isActive: true }
+         ]} />
+       </div>
+       
+       {/* Top Toolbar */}
+-      <div className="mx-4 mb-6">
++      <div className="mx-4 mb-6" style={{ display: 'none' }}>
+         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 flex items-center justify-between">
+           <div className="toolbar-left">
+             <button
+@@ -340,7 +340,7 @@ export default function RoleAssignmentPage() {
+       </div>
+ 
+       {/* Main Content Layout */}
+-      <div className="mx-4 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
++      <div className="mx-auto max-w-[1200px] px-4 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+         {/* Left Panel: Search and Selection */}
+         <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+           <h2 className="text-lg font-semibold text-blue-800 mb-6 pb-3 border-b-2 border-gray-200">
+
