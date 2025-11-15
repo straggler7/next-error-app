@@ -87,8 +87,8 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       },
       'u2000': {
         name: 'Test User u2000',
-        role: 'Tax Examiner',
-        group: 'tax_examiners',
+        role: 'Manager',
+        group: 'managers',
         seid: 'u2000'
       }
     };

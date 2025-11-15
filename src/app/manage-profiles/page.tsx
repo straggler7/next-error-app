@@ -180,6 +180,14 @@ export default function RoleAssignmentPage() {
           label: `${manager.userName} - ${manager.seid}`,
         }));
         setManagerOptions(options);
+
+        // Default selected manager to current user SEID if present and none selected yet
+        if (!selectedProxy && currentUserSeid) {
+          const hasCurrentManager = options.some(opt => opt.value === currentUserSeid);
+          if (hasCurrentManager) {
+            setSelectedProxy(currentUserSeid);
+          }
+        }
       } catch (error) {
         console.error('Error fetching managers:', error);
       } finally {
@@ -188,7 +196,7 @@ export default function RoleAssignmentPage() {
     };
 
     fetchManagers();
-  }, [currentUserSeid]);
+  }, [currentUserSeid, selectedProxy]);
 
   // Fetch team tax examiners for the active manager (current or proxy)
   useEffect(() => {
@@ -343,7 +351,7 @@ export default function RoleAssignmentPage() {
       // Build the payload in the same structure as userProfile.json
       const updatedProfile: UserProfile = {
         ...userProfile,
-        teamCode: selectedExaminer.team,
+        teamCode: selectedExaminer.teamCode,
         profile: {
           profiles: {}
         }
@@ -388,7 +396,7 @@ export default function RoleAssignmentPage() {
       <Header />
       
       {/* Breadcrumbs */}
-      <div className="mx-auto max-w-[1200px] px-4 pt-4 pb-2">
+      <div className="mx-auto max-w-[1600px] px-4 pt-4 pb-2">
         <Breadcrumbs items={[
           createBreadcrumbs.home(),
           { label: 'Manage Profiles', isActive: true }
@@ -418,7 +426,7 @@ export default function RoleAssignmentPage() {
       </div>
 
       {/* Main Content Layout */}
-      <div className="mx-auto max-w-[1200px] px-4 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="mx-auto max-w-[1600px] px-4 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Panel: Search and Selection */}
         <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
           <h2 className="text-lg font-semibold text-blue-800 mb-6 pb-3 border-b-2 border-gray-200">
@@ -428,7 +436,7 @@ export default function RoleAssignmentPage() {
           {/* Proxy Manager Section */}
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
             <label className="block text-sm font-semibold text-orange-800 mb-2">
-              Acting as Proxy Manager?
+              Manager
             </label>
             <select
               value={selectedProxy}
@@ -438,7 +446,7 @@ export default function RoleAssignmentPage() {
                 disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
                 border-gray-300 bg-gray-50 text-gray-700 hover:border-gray-400 focus:border-blue-600"
             >
-              <option value="">Select Manager (Optional)</option>
+              <option value="">Select Manager</option>
               {managerOptions.map((manager) => (
                 <option key={manager.value} value={manager.value}>
                   {manager.label}

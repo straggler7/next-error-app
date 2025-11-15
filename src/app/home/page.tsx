@@ -256,8 +256,9 @@ export default function HomePage() {
         // }
       } else {
         const errorText = await response.text();
-        setProgramStatusError(`Work record already assigned. ${errorText}`);
-        console.error('Program selection error:', errorText);
+        const error = JSON.parse(errorText);
+        setProgramStatusError(`Error: ${error.message}`);
+        console.error('Work record assignment error:', errorText);
       }
     } catch (error) {
       console.error('Program selection error:', error);

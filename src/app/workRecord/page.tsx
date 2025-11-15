@@ -7,13 +7,13 @@ import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
 import InfoAlert from "../../components/InfoAlert";
 import FormSection, { FormField, FormInput } from "../../components/FormSection";
-import NotesSection from "../../components/NotesSection";
+// import NotesSection from "../../components/NotesSection";
 import { ErrorItem, Note } from "../../types";
 import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from "../../services/workAssignmentService";
-import { landingSearchService } from "../../services/landingSearchService";
+// import { landingSearchService } from "../../services/landingSearchService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
-import DevBanner from "../../components/DevBanner";
+// import DevBanner from "../../components/DevBanner";
 import fieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
 
@@ -1309,7 +1309,7 @@ function Form4868ERSPageContent() {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
-        <Header />
+        <Header hideNav={true}/>
         
         {/* Breadcrumbs */}
         <div className="px-4 pt-4 pb-2">
@@ -1328,7 +1328,7 @@ function Form4868ERSPageContent() {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
-        <Header />
+        <Header hideNav={true} />
         
         {/* Breadcrumbs */}
         <div className="px-4 pt-4 pb-2">
@@ -1376,7 +1376,7 @@ function Form4868ERSPageContent() {
   return (
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
       {/* <DevBanner /> */}
-      <Header disableDailySummary={true} />
+      <Header disableDailySummary={true} hideNav={true}/>
 
       {/* Breadcrumbs */}
       <div className="px-4 pt-4 pb-2">

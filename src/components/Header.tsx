@@ -11,9 +11,10 @@ interface HeaderProps {
   showBackButton?: boolean;
   backHref?: string;
   disableDailySummary?: boolean;
+  hideNav?: boolean;
 }
 
-export default function Header({ showBackButton = false, backHref = '/', disableDailySummary = false }: HeaderProps) {
+export default function Header({ showBackButton = false, backHref = '/', disableDailySummary = false, hideNav = false }: HeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -105,7 +106,8 @@ export default function Header({ showBackButton = false, backHref = '/', disable
       </div>
       
       {/* Navigation Bar */}
-      <nav className="bg-[#003d6b] text-white shadow-sm h-[50px]">
+      {!hideNav && (
+      <nav className="bg-[#003d6b] text-white shadow-sm h-[40px]">
         <div className="px-2 h-full">
           <div className="flex items-center space-x-0 h-full">
             <Link 
@@ -151,6 +153,7 @@ export default function Header({ showBackButton = false, backHref = '/', disable
           </div>
         </div>
       </nav>
+      )}
     </>
   );
 }
