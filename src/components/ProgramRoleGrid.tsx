@@ -108,7 +108,7 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
 
   const toggleStatusCode = (programId: string, statusCode: string) => {
     const newAssignments = [...assignments];
-    let assignment = newAssignments.find(a => a.programId === programId);
+    const assignment = newAssignments.find(a => a.programId === programId);
     
     if (!assignment) return;
     

@@ -9,6 +9,7 @@ import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import ComboBox, { ComboBoxOption } from '../../components/ComboBox';
 import ExaminerCard, { ExaminerData } from '../../components/ExaminerCard';
 import ProgramRoleGrid, { Program, RoleAssignment } from '../../components/ProgramRoleGrid';
+import { SuspenseCodesService } from '../../services/suspenseCodesService';
 
 // Interface for user profile API response
 interface UserProfile {
@@ -39,45 +40,36 @@ interface ManagerOption {
   label: string;
 }
 
-// Mock programs data - matching userProfile.json structure
-const mockPrograms: Program[] = [
-  {
-    id: '44720',
-    name: 'Program 44720',
-    roles: [
-      { id: 'lead', name: 'lead', label: 'Lead' },
-      { id: 'reject', name: 'reject', label: 'Reject' },
-      { id: 'qr-review', name: 'qr-review', label: 'QR Review' },
-      { id: 'delete', name: 'delete', label: 'Delete' },
-      { id: 'dln-search', name: 'dln-search', label: 'DLN Search' },
-    ],
-    statusCodes: [
-      { code: 'SC-1', name: 'Status Code SC-1' },
-      { code: 'SC-2', name: 'Status Code SC-2' },
-      { code: 'SC-3', name: 'Status Code SC-3' },
-      { code: 'SC-4', name: 'Status Code SC-4' },
-      { code: 'SC-5', name: 'Status Code SC-5' },
-    ],
-  },
-  {
-    id: '44730',
-    name: 'Program 44730',
-    roles: [
-      { id: 'lead', name: 'lead', label: 'Lead' },
-      { id: 'reject', name: 'reject', label: 'Reject' },
-      { id: 'qr-review', name: 'qr-review', label: 'QR Review' },
-      { id: 'delete', name: 'delete', label: 'Delete' },
-      { id: 'dln-search', name: 'dln-search', label: 'DLN Search' },
-    ],
-    statusCodes: [
-      { code: 'SC-1', name: 'Status Code SC-1' },
-      { code: 'SC-2', name: 'Status Code SC-2' },
-      { code: 'SC-3', name: 'Status Code SC-3' },
-      { code: 'SC-4', name: 'Status Code SC-4' },
-      { code: 'SC-5', name: 'Status Code SC-5' },
-    ],
-  },
-];
+// Function to create programs dynamically with status codes
+const createPrograms = (statusCodes: string[] = []): Program[] => {
+  const standardRoles = [
+    { id: 'lead', name: 'lead', label: 'Lead' },
+    { id: 'reject', name: 'reject', label: 'Reject' },
+    { id: 'qr-review', name: 'qr-review', label: 'QR Review' },
+    { id: 'delete', name: 'delete', label: 'Delete' },
+    { id: 'dln-search', name: 'dln-search', label: 'DLN Search' },
+  ];
+
+  const formattedStatusCodes = statusCodes.map(code => ({
+    code: code,
+    name: `${code}`
+  }));
+
+  return [
+    {
+      id: '44720',
+      name: 'Program 44720',
+      roles: standardRoles,
+      statusCodes: formattedStatusCodes,
+    },
+    {
+      id: '44730',
+      name: 'Program 44730',
+      roles: standardRoles,
+      statusCodes: formattedStatusCodes,
+    },
+  ];
+};
 
 export default function RoleAssignmentPage() {
   const router = useRouter();
@@ -93,6 +85,9 @@ export default function RoleAssignmentPage() {
   const [examinerOptions, setExaminerOptions] = useState<ComboBoxOption[]>([]);
   const [isLoadingManagers, setIsLoadingManagers] = useState(false);
   const [isLoadingExaminers, setIsLoadingExaminers] = useState(false);
+  const [statusCodes, setStatusCodes] = useState<string[]>([]);
+  const [isLoadingStatusCodes, setIsLoadingStatusCodes] = useState(false);
+  const [programs, setPrograms] = useState<Program[]>(createPrograms());
 
   // Function to fetch user profile data for a specific SEID
   const fetchUserProfile = useCallback(async (selectedSeid: string) => {
@@ -154,6 +149,32 @@ export default function RoleAssignmentPage() {
       setIsLoadingProfile(false);
     }
   }, []);
+
+  // Fetch status codes on component mount
+  useEffect(() => {
+    const fetchStatusCodes = async () => {
+      if (!currentUserSeid) return;
+      
+      setIsLoadingStatusCodes(true);
+      try {
+        const codes = await SuspenseCodesService.getSuspenseCodes(currentUserSeid);
+        setStatusCodes(codes);
+        
+        // Update programs with fetched status codes
+        const updatedPrograms = createPrograms(codes);
+        setPrograms(updatedPrograms);
+      } catch (error) {
+        console.error('Error fetching status codes:', error);
+        // Fallback to empty data if fetch fails
+        setStatusCodes([]);
+        setPrograms(createPrograms());
+      } finally {
+        setIsLoadingStatusCodes(false);
+      }
+    };
+
+    fetchStatusCodes();
+  }, [currentUserSeid]);
 
   // Fetch list of managers for proxy dropdown
   useEffect(() => {
@@ -308,7 +329,7 @@ export default function RoleAssignmentPage() {
     if (selectedExaminer) {
       setSelectedExaminer({
         ...selectedExaminer,
-        team: newTeam,
+        teamCode: newTeam,
       });
     }
   };
@@ -333,7 +354,7 @@ export default function RoleAssignmentPage() {
     // Build confirmation message
     let message = `Assign the following roles to ${selectedExaminer.name}?\n\n`;
     roleAssignments.forEach(assignment => {
-      const program = mockPrograms.find(p => p.id === assignment.programId);
+      const program = programs.find(p => p.id === assignment.programId);
       if (program) {
         message += `${program.name}: ${assignment.roles.join(', ')}`;
         if (assignment.statusCodes.length > 0) {
@@ -359,13 +380,16 @@ export default function RoleAssignmentPage() {
 
       // Convert role assignments back to profile.profiles structure
       roleAssignments.forEach(assignment => {
+        // Only include selected status codes (assignment.statusCodes contains only user-selected codes)
+        const selectedStatusCodes = assignment.statusCodes || [];
+        
         updatedProfile.profile.profiles[assignment.programId] = {
           dlnSearch: assignment.roles.includes('dln-search'),
           deleteEnabled: assignment.roles.includes('delete'),
           qualityReviewEnabled: assignment.roles.includes('qr-review'),
           leadRoleEnabled: assignment.roles.includes('lead'),
           rejectsEnabled: assignment.roles.includes('reject'),
-          suspendStatusCodes: assignment.statusCodes
+          suspendStatusCodes: selectedStatusCodes
         };
       });
 
@@ -481,14 +505,16 @@ export default function RoleAssignmentPage() {
           >
             {selectedExaminer && (
               <>
-                {isLoadingProfile ? (
+                {(isLoadingProfile || isLoadingStatusCodes) ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading user profile...</p>
+                    <p className="mt-4 text-gray-600">
+                      {isLoadingProfile ? 'Loading user profile...' : 'Loading status codes...'}
+                    </p>
                   </div>
                 ) : (
                   <ProgramRoleGrid
-                    programs={mockPrograms}
+                    programs={programs}
                     assignments={roleAssignments}
                     onAssignmentChange={setRoleAssignments}
                   />
@@ -502,14 +528,14 @@ export default function RoleAssignmentPage() {
             <div className="flex gap-4 mt-8 justify-end">
               <button
                 onClick={handleClearSelection}
-                disabled={isLoadingProfile}
+                disabled={isLoadingProfile || isLoadingStatusCodes}
                 className="px-6 py-3 border-2 border-gray-400 text-gray-700 rounded-lg bg-white hover:bg-gray-50 hover:border-gray-500 transition-all duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Clear
               </button>
               <button
                 onClick={handleSaveAssignments}
-                disabled={isLoadingProfile || !userProfile}
+                disabled={isLoadingProfile || isLoadingStatusCodes || !userProfile}
                 className="px-7 py-3 bg-blue-600 text-white border-2 border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-all duration-200 text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save Assignments
