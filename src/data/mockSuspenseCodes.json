@@ -1,0 +1,27 @@
+{
+    "490": {
+        "code": "490",
+        "description": "Invalid SSN",
+        "daysSuspended": 1
+    },
+    "360": {
+        "code": "360",
+        "description": "Invalid Name Control",
+        "daysSuspended": 5
+    },
+    "125": {
+        "code": "125",
+        "description": "Missing Tax Period",
+        "daysSuspended": 3
+    },
+    "200": {
+        "code": "200",
+        "description": "Document Code Error",
+        "daysSuspended": 2
+    },
+    "310": {
+        "code": "310",
+        "description": "Receipt Date Issue",
+        "daysSuspended": 7
+    }
+}

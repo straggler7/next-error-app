@@ -189,16 +189,16 @@ export default function RoleAssignmentPage() {
       
       setIsLoadingStatusCodes(true);
       try {
-        const codes = await SuspenseCodesService.getSuspenseCodes(currentUserSeid);
-        setStatusCodes(codes);
+        const codesArray = await SuspenseCodesService.getSuspenseCodesArray(currentUserSeid);
+        setStatusCodes(codesArray);
         
         // Update programs with fetched status codes
-        const updatedPrograms = createPrograms(codes);
+        const updatedPrograms = createPrograms(codesArray);
         setPrograms(updatedPrograms);
         
         // Show success notification for status codes
-        if (codes.length > 0) {
-          // addNotification('info', `Loaded ${codes.length} status codes successfully`, 'Status Codes Loaded');
+        if (codesArray.length > 0) {
+          // addNotification('info', `Loaded ${codesArray.length} status codes successfully`, 'Status Codes Loaded');
         }
       } catch (error) {
         console.error('Error fetching status codes:', error);

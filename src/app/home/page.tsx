@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 import ErrorAlert from "../../components/ErrorAlert";
-import DevBanner from "../../components/DevBanner";
 import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
 import { useSeid } from "../../hooks/useSeid";

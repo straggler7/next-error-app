@@ -11,7 +11,7 @@ import FormSection, { FormField, FormInput } from "../../components/FormSection"
 import { ErrorItem, Note } from "../../types";
 import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from "../../services/workAssignmentService";
 // import { landingSearchService } from "../../services/landingSearchService";
-import { SuspenseCodesService } from "../../services/suspenseCodesService";
+import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
 // import DevBanner from "../../components/DevBanner";
@@ -331,7 +331,7 @@ function Form4868ERSPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [clearCodesInput, setClearCodesInput] = useState<string>('');
   const [actionCode, setActionCode] = useState<string>('');
-  const [suspenseCodes, setSuspenseCodes] = useState<string[]>([]);
+  const [suspenseCodes, setSuspenseCodes] = useState<SuspenseCode[]>([]);
   const [loadingSuspenseCodes, setLoadingSuspenseCodes] = useState(false);
   const [suspending, setSuspending] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -346,8 +346,8 @@ function Form4868ERSPageContent() {
       
       setLoadingSuspenseCodes(true);
       try {
-        const codes = await SuspenseCodesService.getSuspenseCodes(currentUserSeid);
-        setSuspenseCodes(codes);
+        const codesWithDetails = await SuspenseCodesService.getSuspenseCodesWithDetails(currentUserSeid);
+        setSuspenseCodes(codesWithDetails);
       } catch (error) {
         console.error('Error fetching suspense codes:', error);
         // Fallback to empty array if fetch fails
@@ -1577,9 +1577,9 @@ function Form4868ERSPageContent() {
                       <option value="">
                         {loadingSuspenseCodes ? 'Loading suspense codes...' : 'Select action code'}
                       </option>
-                      {suspenseCodes.map((code) => (
-                        <option key={code} value={code}>
-                          {code}
+                      {suspenseCodes.map((suspenseCode) => (
+                        <option key={suspenseCode.code} value={suspenseCode.code}>
+                          {suspenseCode.code} - {suspenseCode.description} ({suspenseCode.daysSuspended} days)
                         </option>
                       ))}
                     </select>

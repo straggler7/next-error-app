@@ -1,6 +1,7 @@
 {
     "meFPayload":"",
     "inventoryId": 1,
+    "suspendStatusCode": "SC-123",
     "notes": [{"author":"u1000","createdTime":"2025-11-02T01:36:20.967Z","comments":{"fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAXYY"}], "additionalComments": ["foo bar baz \n", "this is another comment"]}}, {"author":"unknown","createdTime":"2025-11-02T01:36:20.967Z","comments":{"fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAGXXX"}]}}],
     "workRecord": {
         "type": "F4868WorkRecord",
