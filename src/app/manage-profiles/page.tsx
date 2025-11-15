@@ -10,6 +10,7 @@ import ComboBox, { ComboBoxOption } from '../../components/ComboBox';
 import ExaminerCard, { ExaminerData } from '../../components/ExaminerCard';
 import ProgramRoleGrid, { Program, RoleAssignment } from '../../components/ProgramRoleGrid';
 import { SuspenseCodesService } from '../../services/suspenseCodesService';
+import ErrorAlert from '../../components/ErrorAlert';
 
 // Interface for user profile API response
 interface UserProfile {
@@ -38,6 +39,14 @@ interface UserProfile {
 interface ManagerOption {
   value: string;
   label: string;
+}
+
+// Notification interface
+interface Notification {
+  id: string;
+  type: 'error' | 'success' | 'info' | 'warning';
+  title?: string;
+  message: string;
 }
 
 // Function to create programs dynamically with status codes
@@ -88,6 +97,26 @@ export default function RoleAssignmentPage() {
   const [statusCodes, setStatusCodes] = useState<string[]>([]);
   const [isLoadingStatusCodes, setIsLoadingStatusCodes] = useState(false);
   const [programs, setPrograms] = useState<Program[]>(createPrograms());
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Helper function to add notifications
+  const addNotification = useCallback((type: Notification['type'], message: string, title?: string) => {
+    const id = Date.now().toString();
+    const notification: Notification = { id, type, message, title };
+    setNotifications(prev => [...prev, notification]);
+    
+    // Auto-remove success and info notifications after 5 seconds
+    if (type === 'success' || type === 'info') {
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+      }, 5000);
+    }
+  }, []);
+
+  // Helper function to remove notifications
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
 
   // Function to fetch user profile data for a specific SEID
   const fetchUserProfile = useCallback(async (selectedSeid: string) => {
@@ -141,14 +170,17 @@ export default function RoleAssignmentPage() {
         name: profileData.userName,
         teamCode: profileData.teamCode
       } : null);
+      
+      // Show success notification
+      // addNotification('info', `Profile loaded for ${profileData.userName}`, 'Profile Loaded');
 
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      alert('Failed to fetch user profile. Please try again.');
+      addNotification('error', 'Failed to fetch user profile. Please try again.', 'Profile Load Error');
     } finally {
       setIsLoadingProfile(false);
     }
-  }, []);
+  }, [addNotification]);
 
   // Fetch status codes on component mount
   useEffect(() => {
@@ -163,8 +195,14 @@ export default function RoleAssignmentPage() {
         // Update programs with fetched status codes
         const updatedPrograms = createPrograms(codes);
         setPrograms(updatedPrograms);
+        
+        // Show success notification for status codes
+        if (codes.length > 0) {
+          // addNotification('info', `Loaded ${codes.length} status codes successfully`, 'Status Codes Loaded');
+        }
       } catch (error) {
         console.error('Error fetching status codes:', error);
+        // addNotification('warning', 'Failed to load status codes. Using default configuration.', 'Status Codes Warning');
         // Fallback to empty data if fetch fails
         setStatusCodes([]);
         setPrograms(createPrograms());
@@ -174,7 +212,7 @@ export default function RoleAssignmentPage() {
     };
 
     fetchStatusCodes();
-  }, [currentUserSeid]);
+  }, [currentUserSeid, addNotification]);
 
   // Fetch list of managers for proxy dropdown
   useEffect(() => {
@@ -342,12 +380,12 @@ export default function RoleAssignmentPage() {
 
   const handleSaveAssignments = async () => {
     if (!selectedExaminer || !userProfile || !currentUserSeid) {
-      alert('Please select a tax examiner first.');
+      addNotification('warning', 'Please select a tax examiner first.', 'Selection Required');
       return;
     }
 
     if (roleAssignments.length === 0) {
-      alert('Please select at least one program to assign.');
+      addNotification('warning', 'Please select at least one program to assign.', 'Assignment Required');
       return;
     }
 
@@ -364,9 +402,9 @@ export default function RoleAssignmentPage() {
       }
     });
 
-    if (!confirm(message)) {
-      return;
-    }
+    // if (!confirm(message)) {
+    //   return;
+    // }
 
     try {
       // Build the payload in the same structure as userProfile.json
@@ -406,12 +444,12 @@ export default function RoleAssignmentPage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      alert('Role assignments saved successfully!');
+      addNotification('success', 'Role assignments have been saved successfully!', 'Save Complete');
       console.log('Saved assignments:', updatedProfile);
       
     } catch (error) {
       console.error('Error saving assignments:', error);
-      alert('Failed to save role assignments. Please try again.');
+      addNotification('error', 'Failed to save role assignments. Please try again.', 'Save Error');
     }
   };
 
@@ -426,6 +464,23 @@ export default function RoleAssignmentPage() {
           { label: 'Manage Profiles', isActive: true }
         ]} />
       </div>
+      
+      {/* Notifications */}
+      {notifications.length > 0 && (
+        <div className="mx-auto max-w-[1600px] px-4 pb-4">
+          <div className="space-y-3">
+            {notifications.map((notification) => (
+              <ErrorAlert
+                key={notification.id}
+                type={notification.type}
+                title={notification.title}
+                message={notification.message}
+                onClose={() => removeNotification(notification.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Top Toolbar */}
       <div className="mx-4 mb-6" style={{ display: 'none' }}>
