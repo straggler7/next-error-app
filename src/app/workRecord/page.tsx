@@ -11,6 +11,7 @@ import FormSection, { FormField, FormInput } from "../../components/FormSection"
 import { ErrorItem, Note } from "../../types";
 import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from "../../services/workAssignmentService";
 // import { landingSearchService } from "../../services/landingSearchService";
+import { SuspenseCodesService } from "../../services/suspenseCodesService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
 // import DevBanner from "../../components/DevBanner";
@@ -330,11 +331,34 @@ function Form4868ERSPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [clearCodesInput, setClearCodesInput] = useState<string>('');
   const [actionCode, setActionCode] = useState<string>('');
+  const [suspenseCodes, setSuspenseCodes] = useState<string[]>([]);
+  const [loadingSuspenseCodes, setLoadingSuspenseCodes] = useState(false);
   const [suspending, setSuspending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [closingOut, setClosingOut] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState<string>('');
+
+  // Fetch suspense codes on component mount
+  useEffect(() => {
+    const fetchSuspenseCodes = async () => {
+      if (!currentUserSeid) return;
+      
+      setLoadingSuspenseCodes(true);
+      try {
+        const codes = await SuspenseCodesService.getSuspenseCodes(currentUserSeid);
+        setSuspenseCodes(codes);
+      } catch (error) {
+        console.error('Error fetching suspense codes:', error);
+        // Fallback to empty array if fetch fails
+        setSuspenseCodes([]);
+      } finally {
+        setLoadingSuspenseCodes(false);
+      }
+    };
+
+    fetchSuspenseCodes();
+  }, [currentUserSeid]);
 
   useEffect(() => {
     // Load ERA DTO from sessionStorage
@@ -1540,14 +1564,25 @@ function Form4868ERSPageContent() {
               <FormSection title="">
                 <div>
                   <FormField label="Action Code" required>
-                    <FormInput
+                    <select
                       value={actionCode}
-                      onChange={(value) => {
+                      onChange={(e) => {
+                        const value = e.target.value;
                         setActionCode(value);
                         handleInputChange('suspendStatusCode', value);
                       }}
-                      placeholder="Enter action code for suspension"
-                    />
+                      disabled={loadingSuspenseCodes}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-sm hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {loadingSuspenseCodes ? 'Loading suspense codes...' : 'Select action code'}
+                      </option>
+                      {suspenseCodes.map((code) => (
+                        <option key={code} value={code}>
+                          {code}
+                        </option>
+                      ))}
+                    </select>
                   </FormField>
                 </div>
               </FormSection>

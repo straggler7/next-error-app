@@ -2042,3 +2042,83 @@ const response = await fetch('/api/v1/era/users/profile', {
 once the request with arrives, with SEID in the header, extract that header and make call the above api.
 The response returned will be like @userProfile.json 
 From the response, 
+
+
+
+I'll analyze the IRS Error Resolution application to create comprehensive resume bullet points. Let me first examine the codebase to understand the full scope of your work.
+
+
+
+Based on my analysis of the IRS Error Resolution application codebase and the retrieved memories, here are comprehensive resume bullet points organized by key areas:
+
+## **Frontend Development & Architecture**
+
+• **Developed enterprise-grade IRS Error Resolution web application** using Next.js 15, React 19, and TypeScript, implementing modern App Router architecture with server-side rendering and client-side hydration
+
+• **Built 20+ reusable React components** including complex data tables (TanStack Table), form controls (ComboBox with search), navigation (Breadcrumbs), and UI elements (StatusBadge, LoadingSpinner, Pagination) using TypeScript and Tailwind CSS
+
+• **Implemented responsive component library** with consistent design patterns including ActionDropdown, FilterBar, FormSection, and specialized components like ProgramRoleGrid for hierarchical role management
+
+• **Created advanced data visualization components** including InventoryTable, QRInventoryTable with sorting, filtering, and pagination capabilities for managing large datasets
+
+## **Authentication & Security (SSO Integration)**
+
+• **Architected comprehensive SSO authentication system** integrating with internal IRS SSO server using SEID (Session ID) header-based authentication with middleware-level request interception
+
+• **Implemented multi-layered security architecture** including Next.js middleware for route protection, server-side authentication helpers, and client-side AuthContext for state management
+
+• **Developed role-based access control (RBAC)** with manager-only routes, proxy manager functionality, and granular permission systems for different user groups and program access
+
+• **Built authentication utilities** supporting multiple SEID header formats, validation patterns, and automatic redirect handling for unauthorized/forbidden access attempts
+
+## **API Integration & Data Management**
+
+• **Integrated RESTful API endpoints** for user profile management with full CRUD operations including GET `/api/v1/era/users/profile` and PUT `/api/v1/era/users/{userId}` with proper error handling
+
+• **Implemented complex data transformation logic** converting between UI state and API payload formats for role assignments, status codes, and program configurations
+
+• **Developed API client architecture** with proper TypeScript interfaces, Zod schema validation, and comprehensive error handling for network requests and data validation
+
+• **Created mock data systems** and JSON fixtures for development and testing, including user profiles, program definitions, and role assignment structures
+
+## **DevOps & Deployment**
+
+• **Containerized application using Docker** with multi-stage builds, development and production Dockerfiles, and Docker Compose orchestration for local development
+
+• **Implemented CI/CD pipeline configuration** with environment-specific builds, port management (dev: 4003, prod: 3000), and deployment automation
+
+• **Configured development tooling** including ESLint, TypeScript compiler, Turbopack for fast builds, and hot module replacement for efficient development workflow
+
+• **Set up environment management** with authentication bypass modes, development/production configurations, and proper environment variable handling
+
+## **UI/UX & Design Implementation**
+
+• **Translated wireframes into production-ready interfaces** maintaining exact design specifications with Tailwind CSS, implementing blue gradient headers, rounded corners, and professional IRS styling
+
+• **Built complex form interfaces** including role assignment pages with expandable sections, nested tables, checkbox hierarchies, and real-time search functionality
+
+• **Implemented comprehensive navigation system** with breadcrumbs, header navigation, and contextual routing that maintains user flow across multiple application sections
+
+• **Created responsive design patterns** ensuring cross-device compatibility with grid layouts, mobile-first approach, and adaptive component behavior
+
+## **State Management & Performance**
+
+• **Architected React Context-based state management** for authentication, user profiles, and application-wide state with proper loading states and error boundaries
+
+• **Implemented performance optimizations** including lazy loading, component memoization, and efficient re-rendering patterns for large data sets
+
+• **Built error handling systems** with ErrorBoundary components, user-friendly error messages, and graceful fallback UI states
+
+• **Developed loading state management** with spinners, skeleton screens, and progressive data loading for improved user experience
+
+## **Technical Leadership & Documentation**
+
+• **Created comprehensive technical documentation** including authentication implementation guides, API integration patterns, and deployment procedures
+
+• **Established development best practices** including TypeScript strict mode, component architecture patterns, and code organization standards
+
+• **Implemented testing strategies** with mock data systems, development authentication bypass, and component isolation for reliable testing
+
+• **Mentored development workflow** through detailed README files, Docker setup guides, and configuration documentation for team onboarding
+
+This application demonstrates full-stack development capabilities with enterprise-level security, modern React patterns, and production-ready deployment infrastructure suitable for government/IRS applications.
