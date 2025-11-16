@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, AuthContext as AuthContextType } from '../types';
+import { User, AuthContext as AuthContextType, UserProfile } from '../types';
 import { extractSeidFromHeaders, getUserFromSeid, validateSeid } from '../lib/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,6 +14,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [seid, setSeid] = useState<string | null>(null);
+
+  // Function to fetch detailed user profile
+  const fetchUserProfile = async (userSeid: string): Promise<UserProfile | null> => {
+    try {
+      const response = await fetch('/api/v1/era/users/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': userSeid
+        }
+      });
+
+      if (!response.ok) {
+        console.warn(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
+        return null;
+      }
+
+      const userProfile: UserProfile = await response.json();
+      console.log('🔍 AuthContext: Fetched user profile:', userProfile);
+      return userProfile;
+    } catch (error) {
+      console.warn('Error fetching user profile:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     async function initializeAuth() {
@@ -89,6 +114,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSeid(userSeid);
           const userData = await getUserFromSeid(userSeid);
           console.log('🔍 AuthContext: User data:', userData);
+          
+          // Fetch detailed profile data
+          if (userData) {
+            const profileData = await fetchUserProfile(userSeid);
+            userData.profile = profileData;
+            console.log('🔍 AuthContext: User data with profile:', userData);
+          }
+          
           setUser(userData);
         } else {
           // No valid SEID found - user should be redirected by middleware

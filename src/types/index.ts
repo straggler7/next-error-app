@@ -1,9 +1,30 @@
+export interface UserProfile {
+  userId: string;
+  seid: string;
+  userName: string;
+  designation: string;
+  serviceCenterId: string;
+  teamCode: string;
+  activeStatus: boolean;
+  profile: {
+    profiles: Record<string, {
+      dlnSearch: boolean;
+      deleteEnabled: boolean;
+      qualityReviewEnabled: boolean;
+      leadRoleEnabled: boolean;
+      rejectsEnabled: boolean;
+      suspendStatusCodes: string[];
+    }>;
+  };
+}
+
 export interface User {
   name: string;
   role: string;
   group: 'tax_examiners' | 'managers';
   avatar?: string;
   seid: string;
+  profile?: UserProfile | null;
 }
 
 export interface AuthContext {

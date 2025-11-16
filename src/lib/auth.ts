@@ -44,66 +44,136 @@ export function validateSeid(seid: string | null): boolean {
 }
 
 /**
- * Mock function to get user details from SEID
- * In a real implementation, this would call your user service/API
+ * Interface for user profile API response
+ */
+interface UserProfileResponse {
+  userId: string;
+  seid: string;
+  userName: string;
+  designation: string;
+  serviceCenterId: string;
+  teamCode: string;
+  activeStatus: boolean;
+  profile: {
+    profiles: Record<string, {
+      dlnSearch: boolean;
+      deleteEnabled: boolean;
+      qualityReviewEnabled: boolean;
+      leadRoleEnabled: boolean;
+      rejectsEnabled: boolean;
+      suspendStatusCodes: string[];
+    }>;
+  };
+}
+
+/**
+ * Get user details from SEID by calling the user profile API
  */
 export async function getUserFromSeid(seid: string): Promise<User | null> {
   try {
-    // This is a mock implementation
-    // In production, you would call your user service API with the SEID
-    // Example: const response = await fetch(`/api/users/${seid}`);
+    console.log('Fetching user profile for SEID:', seid);
     
-    // Mock user data based on SEID
-    const mockUsers: Record<string, User> = {
-      'U1234': {
-        name: 'Sarah Thompson',
-        role: 'Tax Examiner',
-        group: 'tax_examiners',
-        seid: 'U1234'
-      },
-      'A1234': {
-        name: 'John Administrator',
-        role: 'Manager',
-        group: 'managers',
-        seid: 'A1234'
-      },
-      'X1234': {
-        name: 'Mike Examiner',
-        role: 'Manager',
-        group: 'managers',
-        seid: 'X1234'
-      },
-      'D1234': {
-        name: 'Dev User',
-        role: 'Tax Examiner',
-        group: 'tax_examiners',
-        seid: 'D1234'
-      },
-      'u1000': {
-        name: 'Test User u1000',
-        role: 'Tax Examiner',
-        group: 'tax_examiners',
-        seid: 'u1000'
-      },
-      'u2000': {
-        name: 'Test User u2000',
-        role: 'Manager',
-        group: 'managers',
-        seid: 'u2000'
+    const response = await fetch('/api/v1/era/users/profile', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'SEID': seid
       }
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
+      
+      // Fallback to mock data for development/testing
+      return getFallbackUser(seid);
+    }
+
+    const userProfile: UserProfileResponse = await response.json();
+    
+    // Map the API response to the User interface
+    const user: User = {
+      name: userProfile.userName,
+      role: userProfile.designation,
+      group: mapDesignationToGroup(userProfile.designation),
+      seid: userProfile.seid
     };
 
-    console.log('foo bar seid: ', seid);
-    return mockUsers[seid] || {
-      name: 'Unknown User',
+    console.log('Successfully fetched user profile:', user);
+    return user;
+    
+  } catch (error) {
+    console.error('Error fetching user from SEID:', error);
+    
+    // Fallback to mock data for development/testing
+    return getFallbackUser(seid);
+  }
+}
+
+/**
+ * Map designation from API to user group
+ */
+function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers' {
+  const lowerDesignation = designation.toLowerCase();
+  
+  if (lowerDesignation.includes('manager') || 
+      lowerDesignation.includes('supervisor') || 
+      lowerDesignation.includes('lead')) {
+    return 'managers';
+  }
+  
+  return 'tax_examiners';
+}
+
+/**
+ * Fallback function for development/testing when API is not available
+ */
+function getFallbackUser(seid: string): User | null {
+  const mockUsers: Record<string, User> = {
+    'U1234': {
+      name: 'Sarah Thompson',
+      role: 'Tax Examiner',
+      group: 'tax_examiners',
+      seid: 'U1234'
+    },
+    'A1234': {
+      name: 'John Administrator',
+      role: 'Manager',
+      group: 'managers',
+      seid: 'A1234'
+    },
+    'X1234': {
+      name: 'Mike Examiner',
+      role: 'Manager',
+      group: 'managers',
+      seid: 'X1234'
+    },
+    'D1234': {
+      name: 'Dev User',
+      role: 'Tax Examiner',
+      group: 'tax_examiners',
+      seid: 'D1234'
+    },
+    'u1000': {
+      name: 'Test User u1000',
       role: 'Tax Examiner',
       group: 'tax_examiners',
       seid: 'u1000'
-    };
-  } catch (error) {
-    console.error('Error fetching user from SEID:', error);
-    return null;
-  }
+    },
+    'u2000': {
+      name: 'Test User u2000',
+      role: 'Manager',
+      group: 'managers',
+      seid: 'u2000'
+    }
+  };
+
+  console.log('Using fallback user data for SEID:', seid);
+  return mockUsers[seid] || {
+    name: 'Unknown User',
+    role: 'Tax Examiner',
+    group: 'tax_examiners',
+    seid: seid
+  };
 }
 
 /**

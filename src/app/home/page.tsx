@@ -26,6 +26,28 @@ interface ProgramFormData {
 export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
+
+  // Helper functions to check user permissions for selected program
+  const hasQualityReviewEnabled = () => {
+    if (!user?.profile?.profile?.profiles) return false;
+    
+    // If a program is selected, check that specific program
+    if (programForm.program) {
+      const selectedProgramProfile = user.profile.profile.profiles[programForm.program];
+      return selectedProgramProfile?.qualityReviewEnabled || false;
+    }
+    
+    // If no program selected, show if ANY program has quality review enabled
+    return Object.values(user.profile.profile.profiles).some(profile => profile.qualityReviewEnabled);
+  };
+
+  const hasDlnSearchEnabled = () => {
+    if (!user?.profile?.profile?.profiles || !programForm.program) return false;
+    
+    // Only show search records if a program is selected AND that program has dlnSearch enabled
+    const selectedProgramProfile = user.profile.profile.profiles[programForm.program];
+    return selectedProgramProfile?.dlnSearch || false;
+  };
   
   // Search form state
   const [searchForm, setSearchForm] = useState<SearchFormData>({
@@ -335,7 +357,9 @@ export default function HomePage() {
           </div>
 
           {/* Two-Card Layout */}
-          <div className="cards-container grid grid-cols-1 lg:grid-cols-2 gap-4 w-full max-w-6xl">
+          <div className={`cards-container grid grid-cols-1 gap-4 w-full max-w-6xl ${
+            hasDlnSearchEnabled() ? 'lg:grid-cols-2' : 'lg:grid-cols-1 lg:max-w-2xl lg:mx-auto'
+          }`}>
             
             {/* Left Card: Program & Status Code Selection */}
             <div className="card bg-white rounded-xl p-8 border" style={{ 
@@ -348,48 +372,7 @@ export default function HomePage() {
               </h2>
               
               <form className="selection-form flex flex-col gap-4" onSubmit={handleProgramSubmit}>
-                {/* Quality Review Section */}
-                <div className="checkbox-container flex items-center gap-2 mb-2">
-                  <input 
-                    type="checkbox" 
-                    id="qualityReviewCheckbox" 
-                    className="w-5 h-5 accent-blue-600"
-                    checked={programForm.qualityReview}
-                    onChange={(e) => setProgramForm(prev => ({ ...prev, qualityReview: e.target.checked }))}
-                  />
-                  <label className="checkbox-label font-semibold text-gray-800 text-sm cursor-pointer" htmlFor="qualityReviewCheckbox">
-                    Work on Quality Review
-                  </label>
-                </div>
-
-                {/* SEID Field - shown when quality review is checked */}
-                {/* {programForm.qualityReview && ( */}
-                  <div className="form-group">
-                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="seidInput">
-                      SEID
-                    </label>
-                    <input 
-                      type="text" 
-                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
-                      style={{
-                        padding: '0.875rem 1.125rem',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        fontSize: '0.875rem',
-                        lineHeight: '1.4',
-                        background: '#fafafa',
-                        color: '#374151'
-                      }}
-                      id="seidInput" 
-                      name="seid" 
-                      placeholder="Enter SEID"
-                      maxLength={20}
-                      value={programForm.seid}
-                      onChange={(e) => handleProgramInputChange('seid', e.target.value)}
-                    />
-                  </div>
-                {/* )} */}
-
+                {/* 1. Program Selection */}
                 <div className="form-group">
                   <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="programSelect">
                     Program Selection
@@ -416,33 +399,7 @@ export default function HomePage() {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
-                    Status Code
-                  </label>
-                  <select 
-                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
-                    style={{
-                      padding: '0.875rem 1.125rem',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '0.875rem',
-                      lineHeight: '1.4',
-                      background: '#fafafa',
-                      color: '#374151'
-                    }}
-                    id="statusCodeSelect" 
-                    name="statusCode"
-                    value={programForm.statusCode}
-                    onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
-                  >
-                    <option value="">Select a status code...</option>
-                    <option value="224">Status Code 224</option>
-                    <option value="225">Status Code 225</option>
-                    <option value="226">Status Code 226</option>
-                  </select>
-                </div>
-
+                {/* 2. Service Center */}
                 <div className="form-group">
                   <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
                     Service Center
@@ -468,14 +425,89 @@ export default function HomePage() {
                     <option value="andover">Andover</option>
                     <option value="austin">Austin</option>
                     <option value="ogden">Ogden</option>
-                    <option value="charlotte">Charlotte</option>
+                    <option value="fresno">Fresno</option>
+                    <option value="kansas-city">Kansas City</option>
                   </select>
                 </div>
 
-                <div className="action-section">
+                {/* 3. Work on Quality Review Checkbox - Only show if user has qualityReviewEnabled */}
+                {hasQualityReviewEnabled() && (
+                  <div className="checkbox-container flex items-center gap-2 mb-2">
+                    <input 
+                      type="checkbox" 
+                      id="qualityReviewCheckbox" 
+                      className="w-5 h-5 accent-blue-600"
+                      checked={programForm.qualityReview}
+                      onChange={(e) => setProgramForm(prev => ({ ...prev, qualityReview: e.target.checked }))}
+                    />
+                    <label className="checkbox-label font-semibold text-gray-800 text-sm cursor-pointer" htmlFor="qualityReviewCheckbox">
+                      Work on Quality Review
+                    </label>
+                  </div>
+                )}
+
+                {/* 4. SEID Field - Only show if user has qualityReviewEnabled and quality review is checked */}
+                {hasQualityReviewEnabled() && programForm.qualityReview && (
+                  <div className="form-group">
+                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="seidInput">
+                      SEID
+                    </label>
+                    <input 
+                      type="text" 
+                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                      style={{
+                        padding: '0.875rem 1.125rem',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.4',
+                        background: '#fafafa',
+                        color: '#374151'
+                      }}
+                      id="seidInput" 
+                      name="seid" 
+                      placeholder="Enter SEID"
+                      maxLength={20}
+                      value={programForm.seid}
+                      onChange={(e) => handleProgramInputChange('seid', e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* 5. Status Code Field - Only show if user has qualityReviewEnabled and quality review is checked */}
+                {hasQualityReviewEnabled() && programForm.qualityReview && (
+                  <div className="form-group">
+                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
+                      Status Code
+                    </label>
+                    <select 
+                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                      style={{
+                        padding: '0.875rem 1.125rem',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.4',
+                        background: '#fafafa',
+                        color: '#374151'
+                      }}
+                      id="statusCodeSelect" 
+                      name="statusCode" 
+                      value={programForm.statusCode}
+                      onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
+                    >
+                      <option value="">Select a status code...</option>
+                      <option value="224">Status Code 224</option>
+                      <option value="225">Status Code 225</option>
+                      <option value="226">Status Code 226</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className="action-section flex justify-center">
                   <button 
                     type="submit" 
-                    className="btn btn-primary w-full font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                    className="btn btn-primary w-64 mt-2 font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
                     style={{
                       padding: '0.75rem 1.5rem',
                       border: '1px solid #0066cc',
@@ -511,12 +543,13 @@ export default function HomePage() {
               </form>
             </div>
 
-            {/* Right Card: Search Records */}
-            <div className="card bg-white rounded-xl p-8 border" style={{ 
-              borderRadius: '12px', 
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
-              borderColor: '#f1f3f4' 
-            }}>
+            {/* Right Card: Search Records - Only show if user has dlnSearch enabled */}
+            {hasDlnSearchEnabled() && (
+              <div className="card bg-white rounded-xl p-8 border" style={{ 
+                borderRadius: '12px', 
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
+                borderColor: '#f1f3f4' 
+              }}>
               <h2 className="card-title text-xl font-semibold text-[#003d6b] mb-6 pb-3" style={{ borderBottom: '2px solid #e9ecef' }}>
                 Search Records
               </h2>
@@ -620,10 +653,10 @@ export default function HomePage() {
                         onChange={(e) => handleSearchInputChange('taxpayerName', e.target.value)}
                       />
                     </div>
-                    <div className="search-input-group">
+                    <div className="search-input-group flex justify-center">
                       <button
                         type="submit"
-                        className="btn btn-primary search-btn w-full font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                        className="btn btn-primary search-btn w-64 mt-2 font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
                         style={{
                           padding: '0.75rem 1.5rem',
                           border: '1px solid #0066cc',
@@ -660,6 +693,7 @@ export default function HomePage() {
                 </form>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
