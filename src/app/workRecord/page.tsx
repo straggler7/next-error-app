@@ -1336,9 +1336,9 @@ function Form4868ERSPageContent() {
         <Header hideNav={true}/>
         
         {/* Breadcrumbs */}
-        <div className="px-4 pt-4 pb-2">
+        {/* <div className="px-4 pt-4 pb-2">
           <Breadcrumbs items={createBreadcrumbs.workRecord()} />
-        </div>
+        </div> */}
         
         <div className="p-8 text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
@@ -1355,9 +1355,9 @@ function Form4868ERSPageContent() {
         <Header hideNav={true} />
         
         {/* Breadcrumbs */}
-        <div className="px-4 pt-4 pb-2">
+        {/* <div className="px-4 pt-4 pb-2">
           <Breadcrumbs items={createBreadcrumbs.workRecord()} />
-        </div>
+        </div> */}
         
         <div className="p-8 text-center">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
@@ -1403,12 +1403,12 @@ function Form4868ERSPageContent() {
       <Header disableDailySummary={true} hideNav={true}/>
 
       {/* Breadcrumbs */}
-      <div className="px-4 pt-4 pb-2">
+      {/* <div className="px-4 pt-4 pb-2">
         <Breadcrumbs items={[
           { label: 'Home' }, // No href = disabled
           { label: 'Work Record', isActive: true }
         ]} />
-      </div>
+      </div> */}
 
       {/* Info Alert */}
       {showInfo && (

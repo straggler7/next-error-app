@@ -105,12 +105,10 @@ export default function RoleAssignmentPage() {
     const notification: Notification = { id, type, message, title };
     setNotifications(prev => [...prev, notification]);
     
-    // Auto-remove success and info notifications after 5 seconds
-    if (type === 'success' || type === 'info') {
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
-      }, 5000);
-    }
+    // Auto-remove all notifications after 20 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 10000);
   }, []);
 
   // Helper function to remove notifications
@@ -152,14 +150,22 @@ export default function RoleAssignmentPage() {
         if (programData.qualityReviewEnabled) roles.push('qr-review');
         if (programData.deleteEnabled) roles.push('delete');
         if (programData.dlnSearch) roles.push('dln-search');
+        
+        // if (roles.length > 0) {
+        //   assignments.push({
+        //     programId,
+        //     roles,
+        //     statusCodes
+        //   });
+        // }
 
-        if (roles.length > 0) {
-          assignments.push({
-            programId,
-            roles,
-            statusCodes
-          });
-        }
+        assignments.push({
+          programId,
+          roles,
+          statusCodes
+        });
+
+
       });
 
       setRoleAssignments(assignments);
@@ -447,9 +453,15 @@ export default function RoleAssignmentPage() {
       addNotification('success', 'Role assignments have been saved successfully!', 'Save Complete');
       console.log('Saved assignments:', updatedProfile);
       
+      // Scroll to top to show the notification
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
     } catch (error) {
       console.error('Error saving assignments:', error);
-      addNotification('error', 'Failed to save role assignments. Please try again.', 'Save Error');
+      addNotification('error', `Failed to save role assignments. ${error}`, 'Error');
+      
+      // Scroll to top to show the error notification
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -468,17 +480,16 @@ export default function RoleAssignmentPage() {
       {/* Notifications */}
       {notifications.length > 0 && (
         <div className="mx-auto max-w-[1600px] px-4 pb-4">
-          <div className="space-y-3">
-            {notifications.map((notification) => (
-              <ErrorAlert
-                key={notification.id}
-                type={notification.type}
-                title={notification.title}
-                message={notification.message}
-                onClose={() => removeNotification(notification.id)}
-              />
-            ))}
-          </div>
+          {notifications.map((notification) => (
+            <ErrorAlert
+              key={notification.id}
+              type={notification.type}
+              title={notification.title}
+              message={notification.message}
+              onClose={() => removeNotification(notification.id)}
+              className="mb-4"
+            />
+          ))}
         </div>
       )}
       
