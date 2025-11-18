@@ -192,8 +192,8 @@ export default function RoleAssignmentPage() {
   useEffect(() => {
     const fetchStatusCodes = async () => {
       if (!currentUserSeid) return;
-      
-      setIsLoadingStatusCodes(true);
+
+     setIsLoadingStatusCodes(true);
       try {
         const codesArray = await SuspenseCodesService.getSuspenseCodesArray(currentUserSeid);
         setStatusCodes(codesArray);

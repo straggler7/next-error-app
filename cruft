@@ -2147,3 +2147,31 @@ npx tsc --noEmit src/lib/auth.ts --jsx react-jsx
 }
 
 
+// next.config.ts
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  output: 'standalone',
+  reactStrictMode: false,
+};
+
+export default nextConfig;
+
+// api by separate back end
+const nextConfig: NextConfig = {
+  output: 'export',
+  reactStrictMode: false,
+  env: {
+    API_BASE_URL: 'https://your-api-server.com'
+  }
+};
+
+
+in auth.ts
+    const user: User = {
+      name: userProfile.userName,
+      role: userProfile.designation,
+      group: mapDesignationToGroup(userProfile.designation),
+      seid: userProfile.seid
+    };

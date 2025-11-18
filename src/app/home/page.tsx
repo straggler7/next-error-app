@@ -26,7 +26,7 @@ interface ProgramFormData {
 export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
-
+  console.log("user in home", user)
   // Helper functions to check user permissions for selected program
   const hasQualityReviewEnabled = () => {
     if (!user?.profile?.profile?.profiles) return false;
@@ -223,7 +223,7 @@ export default function HomePage() {
     console.log('programForm.qualityReview:', programForm.qualityReview);
     console.log('programForm:', programForm);
     
-    if (programForm.qualityReview) {
+    if (hasQualityReviewEnabled() && programForm.qualityReview) {
       const selectionData = {
         program: programForm.program,
         statusCode: programForm.statusCode,
@@ -537,7 +537,7 @@ export default function HomePage() {
                     }}
                     disabled={!isSubmitButtonEnabled}
                   >
-                    {programForm.qualityReview ? 'Continue to QR' : 'Continue to Details'}
+                    {hasQualityReviewEnabled() && programForm.qualityReview ? 'Continue to QR' : 'Continue to Details'}
                   </button>
                 </div>
               </form>

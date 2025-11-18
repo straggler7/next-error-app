@@ -116,11 +116,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.log('🔍 AuthContext: User data:', userData);
           
           // Fetch detailed profile data
-          if (userData) {
-            const profileData = await fetchUserProfile(userSeid);
-            userData.profile = profileData;
-            console.log('🔍 AuthContext: User data with profile:', userData);
-          }
+          // if (userData) {
+          //   const profileData = await fetchUserProfile(userSeid);
+          //   userData.profile = profileData;
+          //   console.log('🔍 AuthContext: User data with profile:', userData);
+          // }
           
           setUser(userData);
         } else {

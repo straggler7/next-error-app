@@ -95,7 +95,8 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       name: userProfile.userName,
       role: userProfile.designation,
       group: mapDesignationToGroup(userProfile.designation),
-      seid: userProfile.seid
+      seid: userProfile.seid,
+      profile: userProfile // Include the entire user profile
     };
 
     console.log('Successfully fetched user profile:', user);
@@ -105,7 +106,7 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     console.error('Error fetching user from SEID:', error);
     
     // Fallback to mock data for development/testing
-    return getFallbackUser(seid);
+    // return getFallbackUser(seid);
   }
 }
 
