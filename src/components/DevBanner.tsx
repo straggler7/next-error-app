@@ -6,40 +6,16 @@ import { User } from '../types';
 
 const mockUsers: User[] = [
   {
-    name: 'Sarah Thompson',
-    role: 'Tax Examiner',
-    group: 'tax_examiners',
-    seid: 'U1234'
-  },
-  {
-    name: 'John Administrator',
-    role: 'Manager',
-    group: 'managers',
-    seid: 'A1234'
-  },
-  {
-    name: 'Mike Examiner',
-    role: 'Manager',
-    group: 'managers',
-    seid: 'X1234'
-  },
-  {
-    name: 'Dev User',
-    role: 'Tax Examiner',
-    group: 'tax_examiners',
-    seid: 'D1234'
-  },
-  {
     name: 'Test User u1000',
     role: 'Tax Examiner',
     group: 'tax_examiners',
     seid: 'u1000'
   },
   {
-    name: 'Test User u2000',
+    name: 'Test User f3wpb',
     role: 'Manager',
     group: 'managers',
-    seid: 'u2000'
+    seid: 'f3wpb'
   }
 ];
 
@@ -69,12 +45,12 @@ export default function DevBanner() {
 
   return (
     <div className="bg-yellow-500 text-black px-4 py-2 text-sm font-medium">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <div className="flex items-center justify-center max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <span>🔓 Development Mode: Authentication Bypassed</span>
           {user && (
             <span className="text-xs bg-yellow-600 px-2 py-1 rounded">
-              {user.name} ({user.group}) - SEID: {user.seid}
+              SEID: {user.seid}
             </span>
           )}
         </div>

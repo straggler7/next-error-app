@@ -9,7 +9,7 @@ import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import ComboBox, { ComboBoxOption } from '../../components/ComboBox';
 import ExaminerCard, { ExaminerData } from '../../components/ExaminerCard';
 import ProgramRoleGrid, { Program, RoleAssignment } from '../../components/ProgramRoleGrid';
-import { SuspenseCodesService } from '../../services/suspenseCodesService';
+import { SuspenseCodesService, SuspenseCode } from '../../services/suspenseCodesService';
 import ErrorAlert from '../../components/ErrorAlert';
 
 // Interface for user profile API response
@@ -50,7 +50,7 @@ interface Notification {
 }
 
 // Function to create programs dynamically with status codes
-const createPrograms = (statusCodes: string[] = []): Program[] => {
+const createPrograms = (statusCodes: SuspenseCode[] = []): Program[] => {
   const standardRoles = [
     { id: 'lead', name: 'lead', label: 'Lead' },
     { id: 'reject', name: 'reject', label: 'Reject' },
@@ -59,21 +59,19 @@ const createPrograms = (statusCodes: string[] = []): Program[] => {
     { id: 'dln-search', name: 'dln-search', label: 'DLN Search' },
   ];
 
-  const formattedStatusCodes = statusCodes.map(code => ({
-    code: code,
-    name: `${code}`
-  }));
+  // Use the real status code objects directly
+  const formattedStatusCodes = statusCodes;
 
   return [
     {
       id: '44720',
-      name: 'Program 44720',
+      name: '44720',
       roles: standardRoles,
       statusCodes: formattedStatusCodes,
     },
     {
       id: '44730',
-      name: 'Program 44730',
+      name: '44730',
       roles: standardRoles,
       statusCodes: formattedStatusCodes,
     },
@@ -94,7 +92,7 @@ export default function RoleAssignmentPage() {
   const [examinerOptions, setExaminerOptions] = useState<ComboBoxOption[]>([]);
   const [isLoadingManagers, setIsLoadingManagers] = useState(false);
   const [isLoadingExaminers, setIsLoadingExaminers] = useState(false);
-  const [statusCodes, setStatusCodes] = useState<string[]>([]);
+  const [statusCodes, setStatusCodes] = useState<SuspenseCode[]>([]);
   const [isLoadingStatusCodes, setIsLoadingStatusCodes] = useState(false);
   const [programs, setPrograms] = useState<Program[]>(createPrograms());
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -195,16 +193,16 @@ export default function RoleAssignmentPage() {
 
      setIsLoadingStatusCodes(true);
       try {
-        const codesArray = await SuspenseCodesService.getSuspenseCodesArray(currentUserSeid);
-        setStatusCodes(codesArray);
+        const codesWithDetails = await SuspenseCodesService.getSuspenseCodesWithDetails(currentUserSeid);
+        setStatusCodes(codesWithDetails);
         
         // Update programs with fetched status codes
-        const updatedPrograms = createPrograms(codesArray);
+        const updatedPrograms = createPrograms(codesWithDetails);
         setPrograms(updatedPrograms);
         
         // Show success notification for status codes
-        if (codesArray.length > 0) {
-          // addNotification('info', `Loaded ${codesArray.length} status codes successfully`, 'Status Codes Loaded');
+        if (codesWithDetails.length > 0) {
+          // addNotification('info', `Loaded ${codesWithDetails.length} status codes successfully`, 'Status Codes Loaded');
         }
       } catch (error) {
         console.error('Error fetching status codes:', error);

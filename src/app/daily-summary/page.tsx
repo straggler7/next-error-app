@@ -14,7 +14,6 @@ import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinn
 import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
-import { mockUser } from '../../data/mockData';
 import { useSeid } from '../../hooks/useSeid';
 
 function DailySummaryContent() {
@@ -336,7 +335,7 @@ function DailySummaryContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header user={mockUser} />
+      <Header />
       
       {/* Breadcrumbs */}
       <div className="px-4 pt-4 pb-2">

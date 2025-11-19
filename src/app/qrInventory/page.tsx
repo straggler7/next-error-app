@@ -14,7 +14,6 @@ import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinn
 import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
-import { mockUser } from '../../data/mockData';
 import { useSeid } from '../../hooks/useSeid';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -232,12 +231,43 @@ function QRInventoryContent() {
     }),
     columnHelper.accessor('updatedDate', {
       header: 'Updated Date',
-      size: 120,
+      cell: ({ getValue }) => {
+        const dateValue = getValue();
+        if (!dateValue) return 'N/A';
+        
+        try {
+          const date = new Date(dateValue);
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const year = date.getFullYear();
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          const seconds = String(date.getSeconds()).padStart(2, '0');
+          
+          return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+        } catch (error) {
+          return dateValue; // Return original value if parsing fails
+        }
+      },
+      size: 140,
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <button
+          onClick={() => handleReviewClick(row.original)}
+          className="inline-flex items-center px-3 py-1 border border-blue-600 rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 cursor-pointer"
+        >
+          Review
+        </button>
+      ),
+      size: 100,
     }),
   ], []);
 
-  // Handle row click to navigate to QR details
-  const handleRowClick = (record: QRInventoryRecord) => {
+  // Handle Review button click to navigate to QR details
+  const handleReviewClick = (record: QRInventoryRecord) => {
     const serviceCenterMap: { [key: number]: string } = {
       16: 'Austin',
       17: 'Ogden',
@@ -288,9 +318,9 @@ function QRInventoryContent() {
                   QR Review Inventory
                 </h2>
                 <div className="text-sm text-gray-600 mt-1 space-y-1">
-                  {authSeid && (
+                  {/* {authSeid && (
                     <p>SEID: {authSeid}</p>
-                  )}
+                  )} */}
                   {(() => {
                     if (typeof window !== 'undefined') {
                       const selectionData = sessionStorage.getItem('selectionData');
@@ -359,7 +389,6 @@ function QRInventoryContent() {
                 records={filteredRecords}
                 selectedRecords={[]}
                 onSelectionChange={() => {}}
-                onRowClick={handleRowClick}
                 columns={qrColumns}
                 getRecordId={(record) => record.inventoryId.toString()}
               />

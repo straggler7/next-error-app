@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
-import { mockUser } from "../../data/mockData";
 import fieldMappings from "../../data/fieldConfig4868.json";
 import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
 import { QRInventoryRecord } from "../../services/qrInventoryService";

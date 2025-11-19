@@ -170,9 +170,9 @@ export default function TanStackInventoryTable<T = SubmissionRecord>({
               key={row.id}
               onClick={() => onRowClick?.(row.original)}
               className={`
-                cursor-pointer transition-colors duration-200 border-b border-gray-200
+                ${onRowClick ? 'cursor-pointer' : ''} transition-colors duration-200 border-b border-gray-200
                 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                hover:bg-blue-50
+                ${onRowClick ? 'hover:bg-blue-50' : ''}
                 ${selectedRecords.includes(getRecordId(row.original)) ? 'bg-blue-100' : ''}
               `}
             >

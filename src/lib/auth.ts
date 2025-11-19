@@ -85,7 +85,7 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
       
       // Fallback to mock data for development/testing
-      return getFallbackUser(seid);
+      // return getFallbackUser(seid);
     }
 
     const userProfile: UserProfileResponse = await response.json();
@@ -130,41 +130,17 @@ function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers
  */
 function getFallbackUser(seid: string): User | null {
   const mockUsers: Record<string, User> = {
-    'U1234': {
-      name: 'Sarah Thompson',
-      role: 'Tax Examiner',
-      group: 'tax_examiners',
-      seid: 'U1234'
-    },
-    'A1234': {
-      name: 'John Administrator',
-      role: 'Manager',
-      group: 'managers',
-      seid: 'A1234'
-    },
-    'X1234': {
-      name: 'Mike Examiner',
-      role: 'Manager',
-      group: 'managers',
-      seid: 'X1234'
-    },
-    'D1234': {
-      name: 'Dev User',
-      role: 'Tax Examiner',
-      group: 'tax_examiners',
-      seid: 'D1234'
-    },
     'u1000': {
       name: 'Test User u1000',
       role: 'Tax Examiner',
       group: 'tax_examiners',
       seid: 'u1000'
     },
-    'u2000': {
-      name: 'Test User u2000',
+    'f3wpb': {
+      name: 'Test User f3wpb',
       role: 'Manager',
       group: 'managers',
-      seid: 'u2000'
+      seid: 'f3wpb'
     }
   };
 

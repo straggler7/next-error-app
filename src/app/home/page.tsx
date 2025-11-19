@@ -7,6 +7,7 @@ import ErrorAlert from "../../components/ErrorAlert";
 import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
 import { useSeid } from "../../hooks/useSeid";
+import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
 
 interface SearchFormData {
   dln: string;
@@ -38,7 +39,8 @@ export default function HomePage() {
     }
     
     // If no program selected, show if ANY program has quality review enabled
-    return Object.values(user.profile.profile.profiles).some(profile => profile.qualityReviewEnabled);
+    // return Object.values(user.profile.profile.profiles).some(profile => profile.qualityReviewEnabled);
+    return false;
   };
 
   const hasDlnSearchEnabled = () => {
@@ -72,6 +74,8 @@ export default function HomePage() {
   const [serviceCenterError, setServiceCenterError] = useState("");
   const [isSearchButtonEnabled, setIsSearchButtonEnabled] = useState(false);
   const [isSubmitButtonEnabled, setIsSubmitButtonEnabled] = useState(false);
+  const [statusCodes, setStatusCodes] = useState<SuspenseCode[]>([]);
+  const [loadingStatusCodes, setLoadingStatusCodes] = useState(false);
 
   const currentUserSeid = useSeid();
 
@@ -124,7 +128,7 @@ export default function HomePage() {
 
   // Effect to validate program form
   useEffect(() => {
-    const hasProgram = programForm.program || programForm.statusCode;
+    const hasProgram = programForm.program;
     const hasServiceCenter = programForm.serviceCenter;
     
     // setProgramStatusError(hasProgram ? "" : "Please select a program or status code.");
@@ -132,6 +136,27 @@ export default function HomePage() {
     
     setIsSubmitButtonEnabled(Boolean(hasProgram && hasServiceCenter));
   }, [programForm]);
+
+  // Fetch status codes on component mount
+  useEffect(() => {
+    const fetchStatusCodes = async () => {
+      if (!currentUserSeid) return;
+      
+      setLoadingStatusCodes(true);
+      try {
+        const codesWithDetails = await SuspenseCodesService.getSuspenseCodesWithDetails(currentUserSeid);
+        setStatusCodes(codesWithDetails);
+      } catch (error) {
+        console.error('Error fetching status codes:', error);
+        // Fallback to empty array if fetch fails
+        setStatusCodes([]);
+      } finally {
+        setLoadingStatusCodes(false);
+      }
+    };
+
+    fetchStatusCodes();
+  }, [currentUserSeid]);
 
   // Handle search form input changes
   const handleSearchInputChange = (field: keyof SearchFormData, value: string) => {
@@ -375,7 +400,7 @@ export default function HomePage() {
                 {/* 1. Program Selection */}
                 <div className="form-group">
                   <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="programSelect">
-                    Program Selection
+                    Program Selection <span className="text-red-500">*</span>
                   </label>
                   <select 
                     className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
@@ -390,6 +415,7 @@ export default function HomePage() {
                     }}
                     id="programSelect" 
                     name="program"
+                    required
                     value={programForm.program}
                     onChange={(e) => handleProgramInputChange('program', e.target.value)}
                   >
@@ -402,7 +428,7 @@ export default function HomePage() {
                 {/* 2. Service Center */}
                 <div className="form-group">
                   <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
-                    Service Center
+                    Service Center <span className="text-red-500">*</span>
                   </label>
                   <select 
                     className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
@@ -497,9 +523,15 @@ export default function HomePage() {
                       onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
                     >
                       <option value="">Select a status code...</option>
-                      <option value="224">Status Code 224</option>
-                      <option value="225">Status Code 225</option>
-                      <option value="226">Status Code 226</option>
+                      {loadingStatusCodes ? (
+                        <option disabled>Loading status codes...</option>
+                      ) : (
+                        statusCodes.map((statusCode) => (
+                          <option key={statusCode.code} value={statusCode.code}>
+                            {statusCode.code} - {statusCode.description}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </div>
                 )}

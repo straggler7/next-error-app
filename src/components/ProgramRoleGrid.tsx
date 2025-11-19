@@ -4,7 +4,8 @@ import { useState } from 'react';
 
 export interface StatusCode {
   code: string;
-  name: string;
+  description: string;
+  daysSuspended: number;
 }
 
 export interface ProgramRole {
@@ -125,7 +126,7 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
   const getFilteredStatusCodes = (program: Program) => {
     const searchTerm = statusSearchTerms[program.id] || '';
     return program.statusCodes.filter(sc =>
-      sc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sc.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
@@ -133,13 +134,13 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
       {/* Search Header */}
-      <div className="bg-gray-50 px-4 py-3 border-b border-gray-300">
+      <div className="bg-gray-50 px-2 py-2 border-b border-gray-300">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search programs..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:shadow-sm"
+          className="w-full px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-600 focus:shadow-sm"
         />
       </div>
 
@@ -148,8 +149,8 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
         {filteredPrograms.map((program) => (
           <div key={program.id} className="border-b border-gray-100 last:border-b-0">
             {/* Program Header */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-4 border-b-2 border-gray-300">
-              <label className="flex items-center gap-3 cursor-pointer">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-3 py-3 border-b-1 border-gray-300">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isProgramSelected(program.id)}
@@ -164,11 +165,11 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
 
             {/* Program Permissions */}
             {isProgramSelected(program.id) && (
-              <div className="px-4 py-4 bg-white">
+              <div className="px-2 py-2 bg-white">
                 {program.roles.map((role) => (
                   <div key={role.id}>
                     {/* Role Checkbox */}
-                    <div className="flex items-center gap-3 mb-4 p-3 bg-white border border-gray-300 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    <div className="flex items-center gap-2 mb-2 p-2 bg-white border border-gray-300 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-all duration-200">
                       <input
                         type="checkbox"
                         id={`${program.id}-${role.id}`}
@@ -186,7 +187,7 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
 
                     {/* Status Codes Section for Reject Role */}
                     {role.id === 'reject' && isRejectRoleSelected(program.id) && (
-                      <div className="bg-white border border-gray-300 rounded-lg p-5 mt-4 mb-4 ml-8 max-w-md">
+                      <div className="bg-white border border-gray-300 rounded-lg p-3 mt-2 mb-2 ml-4 max-w-md">
                         <div className="text-sm font-semibold text-gray-700 mb-4">
                           Rejects Role Configuration
                         </div>
@@ -223,8 +224,7 @@ export default function ProgramRoleGrid({ programs, assignments, onAssignmentCha
                               {getFilteredStatusCodes(program).map((statusCode) => (
                                 <tr key={statusCode.code} className="hover:bg-blue-50">
                                   <td className="px-3 py-3 border-b border-gray-100 text-sm">
-                                    {statusCode.name}
-                                  </td>
+                                    {statusCode.code} - {statusCode.description} ({statusCode.daysSuspended} days)                                 </td>
                                   <td className="px-3 py-3 border-b border-gray-100 text-center">
                                     <input
                                       type="checkbox"
