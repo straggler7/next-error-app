@@ -307,7 +307,7 @@ export default function BaseReport({
         </div>
 
         {/* Filters */}
-        <div className={`grid gap-4 mb-6 ${reportType === '1341' ? 'grid-cols-4' : 'grid-cols-5'}`}>
+        <div className={`grid gap-4 mb-6 ${reportType === '1341' ? 'grid-cols-4' : 'grid-cols-5'} items-end`}>
           {/* DLN Search - Hidden for 1341 report */}
           {reportType !== '1341' && (
             <div className="relative">
