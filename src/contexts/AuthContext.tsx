@@ -64,6 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // First, check for dev selected user in localStorage (development only)
         const devSelectedUser = localStorage.getItem('dev-selected-user');
         if (devSelectedUser) {
+          console.log('🔍 AuthContext: Found dev selected user:', devSelectedUser);
           try {
             const parsedUser = JSON.parse(devSelectedUser);
             if (parsedUser.seid) {

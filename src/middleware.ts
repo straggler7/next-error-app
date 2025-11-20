@@ -26,11 +26,14 @@ export function middleware(request: NextRequest) {
   });
   
   // Development bypass - skip authentication entirely
-  if ((isDevelopment && bypassAuth) || forceBypass) {
-    console.log('🔓 Development mode: Authentication bypassed for', pathname);
+  // if ((isDevelopment && bypassAuth) || forceBypass) {
+  if (forceBypass) {
+    console.log('Middleware - Development mode: Authentication bypassed for ', pathname);
     const response = NextResponse.next();
     // Set a mock SEID for development
-    response.headers.set('x-user-seid', 'u1000');
+    // response.headers.set('x-user-seid', 'u1000');
+    // response.headers.set('seid', 'u1000');
+    console.log('SEID in middleware: ', response.headers.get('seid'));
     return response;
   }
   
@@ -46,6 +49,7 @@ export function middleware(request: NextRequest) {
   if (PROTECTED_ROUTES.some(route => pathname.startsWith(route)) || pathname === '/') {
     if (!seid) {
       // No SEID header found - redirect to unauthorized page
+      console.log('Middleware - No SEID header found - redirecting to unauthorized page');
       const url = request.nextUrl.clone();
       url.pathname = '/unauthorized';
       return NextResponse.redirect(url);

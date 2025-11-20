@@ -107,6 +107,7 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     
     // Fallback to mock data for development/testing
     // return getFallbackUser(seid);
+    return null;
   }
 }
 
