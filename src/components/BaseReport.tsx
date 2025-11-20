@@ -36,6 +36,16 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 }
     ];
   }
+
+  if (reportType === '1341') {
+    return [
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'source', label: 'Source', visible: true, width: 120 },
+      { key: 'totalVolume', label: 'Total Volume', visible: true, width: 120 },
+      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
+    ];
+  }
   
   if (reportType === '1342') {
     return [
@@ -149,11 +159,14 @@ export default function BaseReport({
     }));
   }, [filteredData.length, pagination.pageSize]);
 
-  // Paginated data
+  // Paginate the filtered data and add index-based IDs
   const paginatedData = useMemo(() => {
     const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
     const endIndex = startIndex + pagination.pageSize;
-    return filteredData.slice(startIndex, endIndex);
+    return filteredData.slice(startIndex, endIndex).map((record, index) => ({
+      ...record,
+      _uniqueId: `record-${startIndex + index}-${record.dln || 'no-dln'}`
+    }));
   }, [filteredData, pagination.currentPage, pagination.pageSize]);
 
   // Visible columns
@@ -234,8 +247,8 @@ export default function BaseReport({
       startDateStr: selectedDate,
     };
 
-    // Add optional filter parameters if they have values
-    if (searchTerm.trim()) {
+    // Add optional filter parameters if they have values (exclude DLN for 1341 report)
+    if (searchTerm.trim() && reportType !== '1341') {
       payload.dln = searchTerm.trim();
     }
 
@@ -288,14 +301,15 @@ export default function BaseReport({
                   <Download size={16} className="mr-2" />
                   Export
                 </button>
-              )}
-              <ColumnSelector columns={columns} onColumnsChange={setColumns} />
-            </div>
+            )}
+            <ColumnSelector columns={columns} onColumnsChange={setColumns} />
           </div>
+        </div>
 
-          {/* Search and Filters */}
-          <div className="mb-4 grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
-            {/* DLN Search */}
+        {/* Filters */}
+        <div className={`grid gap-4 mb-6 ${reportType === '1341' ? 'grid-cols-4' : 'grid-cols-5'}`}>
+          {/* DLN Search - Hidden for 1341 report */}
+          {reportType !== '1341' && (
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
@@ -309,16 +323,17 @@ export default function BaseReport({
                 className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
+          )}
 
-            {/* Date Picker */}
-            <div>
-              <DatePicker
-                value={selectedDate}
-                onChange={setSelectedDate}
-                label="Start Date"
-                placeholder="Select start date..."
-              />
-            </div>
+          {/* Date Picker */}
+          <div>
+            <DatePicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              label="Start Date"
+              placeholder="Select start date..."
+            />
+          </div>
 
             {/* Service Center Filter */}
             <div>
@@ -407,7 +422,7 @@ export default function BaseReport({
                 selectedRecords={[]}
                 onSelectionChange={() => {}}
                 columns={tableColumns}
-                getRecordId={(record) => record.dln}
+                getRecordId={(record) => record._uniqueId || `fallback-${record.dln || 'unknown'}`}
               />
             )}
           </div>

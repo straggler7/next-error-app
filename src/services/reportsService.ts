@@ -24,6 +24,11 @@ export interface ReportRecord {
   controlDay: string;
   serviceCenterId: number;
   daysInSuspense?: number; // Optional field for report 1342
+  programId?: string; // Program ID field
+  source?: string; // Source field
+  totalVolume?: number; // Total volume field for report 1341
+  daysInErs?: number; // Days in ERS field for report 1341
+  _uniqueId?: string; // Generated unique ID for table rows
 }
 
 /**
