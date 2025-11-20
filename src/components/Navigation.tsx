@@ -32,67 +32,34 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
 
   const navSections = [
     {
-      title: 'Submissions',
+      title: 'Reports',
       items: [
         { 
-          id: 'all', 
-          label: 'All Records', 
-          href: '/', 
-          filter: { type: 'view', value: 'all' }
+          id: 'report1340', 
+          label: '1340', 
+          href: '/reports/1340', 
+          filter: { type: 'navigate', value: 'report1340' }
         },
         { 
-          id: 'my', 
-          label: 'My Records', 
-          href: '/?filter=my', 
-          filter: { type: 'assignee', value: 'Thompson, Sarah' }
-        }
-      ]
-    },
-    {
-      title: 'Forms',
-      items: [
-        { 
-          id: 'form4868', 
-          label: 'Form 4868 Processing', 
-          href: '/form4868', 
-          filter: { type: 'navigate', value: 'form4868' }
-        }
-      ]
-    },
-    {
-      title: 'Quick Filters',
-      items: [
-        { 
-          id: 'new', 
-          label: 'New', 
-          href: '/?status=new', 
-          filter: { type: 'status', value: 'New' }
+          id: 'report1341', 
+          label: '1341', 
+          href: '/reports/1341', 
+          filter: { type: 'navigate', value: 'report1341' }
         },
         { 
-          id: 'assigned', 
-          label: 'Assigned', 
-          href: '/?status=assigned', 
-          filter: { type: 'status', value: 'Assigned' }
-        },
-        { 
-          id: 'qr_review', 
-          label: 'QR Review', 
-          href: '/?status=qr_review', 
-          filter: { type: 'status', value: 'QR Review' }
-        },
-        { 
-          id: 'suspended', 
-          label: 'Suspended', 
-          href: '/?status=suspended', 
-          filter: { type: 'status', value: 'Suspended' }
+          id: 'report1342', 
+          label: '1342', 
+          href: '/reports/1342', 
+          filter: { type: 'navigate', value: 'report1342' }
         }
       ]
     }
   ];
 
   const isActive = (itemId: string) => {
-    if (pathname === '/' && itemId === 'all') return true;
-    if (pathname === '/form4868' && itemId === 'form4868') return true;
+    if (pathname === '/reports/1340' && itemId === 'report1340') return true;
+    if (pathname === '/reports/1341' && itemId === 'report1341') return true;
+    if (pathname === '/reports/1342' && itemId === 'report1342') return true;
     return activeFilter === itemId;
   };
 
