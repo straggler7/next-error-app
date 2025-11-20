@@ -267,16 +267,22 @@ export default function HomePage() {
       return;
     }
     
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'SERVICE_CENTER': programForm.serviceCenter.toUpperCase(),
+      'PROGRAM_CODE': programForm.program || programForm.statusCode,
+      'SEID': `${currentUserSeid}`
+    }
+
+    if (programForm.statusCode) {
+      headers['SUSPEND_STATUS_CODE'] = programForm.statusCode;
+    }
+
     try {
       // Make GET request to auto-assign endpoint with headers
       const response = await fetch('/api/v1/era/inventories/auto-assign', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'SERVICE_CENTER': programForm.serviceCenter.toUpperCase(),
-          'PROGRAM_CODE': programForm.program || programForm.statusCode,
-          'SEID': currentUserSeid || 'u1000'
-        }
+        headers
       });
 
       if (response.ok) {
@@ -455,6 +461,39 @@ export default function HomePage() {
                     <option value="kansas-city">Kansas City</option>
                   </select>
                 </div>
+                
+                <div className="form-group">
+                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
+                    Status Code
+                  </label>
+                  <select 
+                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                    style={{
+                      padding: '0.875rem 1.125rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      lineHeight: '1.4',
+                      background: '#fafafa',
+                      color: '#374151'
+                    }}
+                    id="statusCodeSelect" 
+                    name="statusCode" 
+                    value={programForm.statusCode}
+                    onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
+                  >
+                    <option value="">Select a status code (optional)</option>
+                    {loadingStatusCodes ? (
+                      <option disabled>Loading status codes...</option>
+                    ) : (
+                      statusCodes.map((statusCode) => (
+                        <option key={statusCode.code} value={statusCode.code}>
+                          {statusCode.code} - {statusCode.description}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
 
                 {/* 3. Work on Quality Review Checkbox - Only show if user has qualityReviewEnabled */}
                 {hasQualityReviewEnabled() && (
@@ -500,41 +539,6 @@ export default function HomePage() {
                   </div>
                 )}
 
-                {/* 5. Status Code Field - Only show if user has qualityReviewEnabled and quality review is checked */}
-                {hasQualityReviewEnabled() && programForm.qualityReview && (
-                  <div className="form-group">
-                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
-                      Status Code
-                    </label>
-                    <select 
-                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
-                      style={{
-                        padding: '0.875rem 1.125rem',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        fontSize: '0.875rem',
-                        lineHeight: '1.4',
-                        background: '#fafafa',
-                        color: '#374151'
-                      }}
-                      id="statusCodeSelect" 
-                      name="statusCode" 
-                      value={programForm.statusCode}
-                      onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
-                    >
-                      <option value="">Select a status code...</option>
-                      {loadingStatusCodes ? (
-                        <option disabled>Loading status codes...</option>
-                      ) : (
-                        statusCodes.map((statusCode) => (
-                          <option key={statusCode.code} value={statusCode.code}>
-                            {statusCode.code} - {statusCode.description}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-                )}
 
                 <div className="action-section flex justify-center">
                   <button 
