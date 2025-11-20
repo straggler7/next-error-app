@@ -45,13 +45,13 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
       { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
       { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 },
-      { key: 'daysInSuspense', label: 'Days in Suspense', visible: true, width: 130 }
+      { key: 'daysInSuspense', label: 'Days in Suspense', visible: true, width: 130 },
+      { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 130 }
     ];
   }
   
   // Default columns for other reports
   return [
-    { key: 'inventoryId', label: 'Inventory ID', visible: true, width: 120 },
     { key: 'dln', label: 'DLN', visible: true, width: 150 },
     { key: 'status', label: 'Status', visible: true, width: 120 },
     { key: 'seid', label: 'SEID', visible: true, width: 100 },
@@ -70,7 +70,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
     { key: 'payloadId', label: 'Payload ID', visible: false, width: 100 },
     { key: 'ageFromDate', label: 'Age From Date', visible: false, width: 120 },
     { key: 'suspendedExpirationDate', label: 'Suspended Expiration', visible: false, width: 150 },
-    { key: 'suspendedStatusCode', label: 'Suspended Status', visible: false, width: 120 },
+    { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: false, width: 120 },
     { key: 'clearCodes', label: 'Clear Codes', visible: false, width: 120 },
     { key: 'daysInSuspense', label: 'Days in Suspense', visible: false, width: 130 }
   ];
@@ -200,6 +200,18 @@ export default function BaseReport({
     if (key === 'daysInSuspense') {
       return value !== null && value !== undefined ? value.toString() : '0';
     }
+
+    if (key === 'submissionNames' || key === 'submissionTins') {
+      if (!value || value === 'null' || value.trim() === '') {
+        return '-';
+      }
+      // Filter out null values if it's a comma-separated list
+      if (value.includes(',')) {
+        const values = value.split(',').map((v: string) => v.trim()).filter((v: string) => v && v !== 'null');
+        return values.length > 0 ? values.join(', ') : '-';
+      }
+      return value.toString();
+    }
     
     return value.toString();
   };
@@ -288,7 +300,7 @@ export default function BaseReport({
                 placeholder="Enter DLN"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
 
@@ -389,7 +401,7 @@ export default function BaseReport({
                 selectedRecords={[]}
                 onSelectionChange={() => {}}
                 columns={tableColumns}
-                getRecordId={(record) => record.inventoryId.toString()}
+                getRecordId={(record) => record.dln}
               />
             )}
           </div>
