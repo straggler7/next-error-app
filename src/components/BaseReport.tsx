@@ -13,7 +13,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 
 interface BaseReportProps {
   title: string;
-  reportType: '1340' | '1341' | '1342' | '7740' | '7741';
+  reportType: '1340' | '1341' | '1342' | '7740' | '7741' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
@@ -64,6 +64,37 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   }
 
   if (reportType === '7741') {
+    return [
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
+      { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
+      { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
+      { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
+      { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
+      { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
+    ];
+  }
+
+  if (reportType === '7746') {
+    return [
+      { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
+      { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
+      { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
+      { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
+      { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
+      { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
+    ];
+  }
+
+  if (reportType === '7747') {
     return [
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
