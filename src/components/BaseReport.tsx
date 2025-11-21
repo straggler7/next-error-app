@@ -54,13 +54,12 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 130 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
       { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
     ];
   }
 
@@ -70,13 +69,12 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 130 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
       { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
     ];
   }
   
