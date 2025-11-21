@@ -155,11 +155,12 @@ export class ReportsService {
   static async get7740Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
       const response = await fetch('/api2/v1/era/reports/get-summary-report', {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -183,11 +184,12 @@ export class ReportsService {
   static async get7741Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
       const response = await fetch('/api2/v1/era/reports/get-summary-report', {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
