@@ -51,6 +51,18 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
           label: '1342', 
           href: '/reports/1342', 
           filter: { type: 'navigate', value: 'report1342' }
+        },
+        { 
+          id: 'report7740', 
+          label: '7740', 
+          href: '/reports/7740', 
+          filter: { type: 'navigate', value: 'report7740' }
+        },
+        { 
+          id: 'report7741', 
+          label: '7741', 
+          href: '/reports/7741', 
+          filter: { type: 'navigate', value: 'report7741' }
         }
       ]
     }
@@ -60,6 +72,8 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     if (pathname === '/reports/1340' && itemId === 'report1340') return true;
     if (pathname === '/reports/1341' && itemId === 'report1341') return true;
     if (pathname === '/reports/1342' && itemId === 'report1342') return true;
+    if (pathname === '/reports/7740' && itemId === 'report7740') return true;
+    if (pathname === '/reports/7741' && itemId === 'report7741') return true;
     return activeFilter === itemId;
   };
 

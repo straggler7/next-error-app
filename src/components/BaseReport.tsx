@@ -13,7 +13,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 
 interface BaseReportProps {
   title: string;
-  reportType: '1340' | '1341' | '1342';
+  reportType: '1340' | '1341' | '1342' | '7740' | '7741';
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
@@ -44,6 +44,39 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'source', label: 'Source', visible: true, width: 120 },
       { key: 'totalVolume', label: 'Total Volume', visible: true, width: 120 },
       { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
+    ];
+  }
+
+  if (reportType === '7740') {
+    return [
+      { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
+      { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 130 },
+      { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
+      { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
+      { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
+      { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
+    ];
+  }
+
+  if (reportType === '7741') {
+    return [
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
+      { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 130 },
+      { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
+      { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
+      { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
+      { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
     ];
   }
   
@@ -247,12 +280,13 @@ export default function BaseReport({
       startDateStr: selectedDate,
     };
 
-    // Add optional filter parameters if they have values (exclude DLN for 1341 report)
-    if (searchTerm.trim() && reportType !== '1341') {
+    // Add optional filter parameters if they have values (exclude DLN for 1341, 7740, 7741 reports)
+    if (searchTerm.trim() && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
       payload.dln = searchTerm.trim();
     }
 
-    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers') {
+    // Add service center only for reports that support it (exclude 7740, 7741)
+    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '7740' && reportType !== '7741') {
       const centerNumber = selectedServiceCenter.match(/\((\d+)\)/)?.[1];
       if (centerNumber) {
         payload.serviceCenter = centerNumber;
@@ -307,9 +341,9 @@ export default function BaseReport({
         </div>
 
         {/* Filters */}
-        <div className={`grid gap-4 mb-6 ${reportType === '1341' ? 'grid-cols-4' : 'grid-cols-5'} items-end`}>
-          {/* DLN Search - Hidden for 1341 report */}
-          {reportType !== '1341' && (
+        <div className={`grid gap-4 mb-6 ${reportType === '1341' || reportType === '7740' || reportType === '7741' ? 'grid-cols-3' : 'grid-cols-5'} items-end`}>
+          {/* DLN Search - Hidden for 1341, 7740, and 7741 reports */}
+          {reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && (
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
@@ -335,23 +369,25 @@ export default function BaseReport({
             />
           </div>
 
-            {/* Service Center Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Service Center
-              </label>
-              <select
-                value={selectedServiceCenter}
-                onChange={(e) => setSelectedServiceCenter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-              >
-                {serviceCenterOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Service Center Filter - Hidden for 7740 and 7741 reports */}
+            {reportType !== '7740' && reportType !== '7741' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Service Center
+                </label>
+                <select
+                  value={selectedServiceCenter}
+                  onChange={(e) => setSelectedServiceCenter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                >
+                  {serviceCenterOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Program Code Filter */}
             <div>

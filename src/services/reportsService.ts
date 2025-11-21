@@ -28,6 +28,13 @@ export interface ReportRecord {
   source?: string; // Source field
   totalVolume?: number; // Total volume field for report 1341
   daysInErs?: number; // Days in ERS field for report 1341
+  totalTimeSpentStr?: string; // Total hours worked for reports 7740/7741
+  volumePerHr?: number; // Volume per hour for reports 7740/7741
+  resolvedQty?: number; // Resolved quantity for reports 7740/7741
+  deletedQty?: number; // Deleted quantity for reports 7740/7741
+  suspendedQty?: number; // Suspended quantity for reports 7740/7741
+  reWorkedQty?: number; // ReWorked quantity for reports 7740/7741
+  rateOfProductionStr?: string; // Rate of production for reports 7740/7741
   _uniqueId?: string; // Generated unique ID for table rows
 }
 
@@ -135,6 +142,62 @@ export class ReportsService {
       return reportData;
     } catch (error) {
       console.error('Error fetching 1342 report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch 7740 report data (summary report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get7740Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 7740 report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch 7741 report data (summary report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get7741Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 7741 report:', error);
       throw error;
     }
   }
