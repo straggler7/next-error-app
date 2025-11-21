@@ -25,6 +25,21 @@ export default function Report7740() {
     }
   };
 
+  const handleExport = async (payload: ReportPayload) => {
+    if (!seid) return;
+    
+    try {
+      // Make API call with export flag
+      const exportData = await ReportsService.get7740Report(seid, payload);
+      
+      // Download as CSV
+      ReportsService.downloadCSV(exportData, '7740');
+    } catch (error) {
+      console.error('Error exporting 7740 report:', error);
+      alert('Failed to export report. Please try again.');
+    }
+  };
+
   // Initial load with default payload
   useEffect(() => {
     if (seid) {
@@ -49,6 +64,7 @@ export default function Report7740() {
       data={data}
       loading={loading}
       onRefresh={handleRefresh}
+      onExport={handleExport}
     />
   );
 }

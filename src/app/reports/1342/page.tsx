@@ -43,29 +43,19 @@ export default function Report1342Page() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid]);
 
-  const handleExport = () => {
-    // Convert data to CSV format
-    if (data.length === 0) return;
+  const handleExport = async (payload: ReportPayload) => {
+    if (!currentUserSeid) return;
     
-    const headers = Object.keys(data[0]).join(',');
-    const csvContent = [
-      headers,
-      ...data.map(row => 
-        Object.values(row).map(value => 
-          typeof value === 'string' && value.includes(',') 
-            ? `"${value}"` 
-            : value
-        ).join(',')
-      )
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `report-1342-${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+    try {
+      // Make API call with export flag
+      const exportData = await ReportsService.get1342Report(currentUserSeid, payload);
+      
+      // Download as CSV
+      ReportsService.downloadCSV(exportData, '1342');
+    } catch (error) {
+      console.error('Error exporting 1342 report:', error);
+      alert('Failed to export report. Please try again.');
+    }
   };
 
   return (

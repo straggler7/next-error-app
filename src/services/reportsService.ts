@@ -50,6 +50,7 @@ export interface ReportPayload {
   dln?: string;
   serviceCenter?: string;
   programCode?: string;
+  export?: boolean; // For export functionality
 }
 
 /**
@@ -202,6 +203,50 @@ export class ReportsService {
       console.error('Error fetching 7741 report:', error);
       throw error;
     }
+  }
+  /**
+   * Download CSV file from report data
+   * @param data - Report data array
+   * @param reportType - Type of report for filename
+   */
+  static downloadCSV(data: ReportRecord[], reportType: string): void {
+    if (data.length === 0) {
+      console.warn('No data to export');
+      return;
+    }
+    
+    // Get headers from the first record
+    const headers = Object.keys(data[0]).join(',');
+    
+    // Convert data to CSV format
+    const csvContent = [
+      headers,
+      ...data.map(row => 
+        Object.values(row).map(value => {
+          // Handle null/undefined values
+          if (value === null || value === undefined) return '';
+          
+          // Convert to string and escape commas and quotes
+          const stringValue = value.toString();
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        }).join(',')
+      )
+    ].join('\n');
+    
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `report-${reportType}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 }
 

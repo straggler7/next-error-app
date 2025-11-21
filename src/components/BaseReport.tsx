@@ -17,7 +17,7 @@ interface BaseReportProps {
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
-  onExport?: () => void;
+  onExport?: (payload: ReportPayload) => void;
 }
 
 // Column configurations by report type
@@ -304,6 +304,42 @@ export default function BaseReport({
     handleSubmit(); // Use the same logic as submit
   };
 
+  const handleExport = () => {
+    if (!onExport) return;
+    
+    const payload: ReportPayload = {
+      pageNumber: 1,
+      pageSize: pagination.pageSize,
+      reportId: reportType,
+      startDateStr: selectedDate,
+      export: true, // Add export flag
+    };
+
+    // Add optional filter parameters if they have values (exclude DLN for 1341, 7740, 7741 reports)
+    if (searchTerm.trim() && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
+      payload.dln = searchTerm.trim();
+    }
+
+    // Add service center only for reports that support it (exclude 7740, 7741)
+    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '7740' && reportType !== '7741') {
+      const centerNumber = selectedServiceCenter.match(/\((\d+)\)/)?.[1];
+      if (centerNumber) {
+        payload.serviceCenter = centerNumber;
+      }
+    }
+
+    if (selectedProgramCode && selectedProgramCode !== 'All Program Codes') {
+      payload.programCode = selectedProgramCode;
+    }
+
+    // Add status for 1340 report
+    if (reportType === '1340') {
+      payload.status = 'NEW';
+    }
+
+    onExport(payload);
+  };
+
   return (
     <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
           {/* Header */}
@@ -327,7 +363,7 @@ export default function BaseReport({
               </button>
               {onExport && (
                 <button
-                  onClick={onExport}
+                  onClick={handleExport}
                   className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5"
                 >
                   <Download size={16} className="mr-2" />
