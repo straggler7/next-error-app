@@ -87,6 +87,9 @@ function Form4868ERSPageContent() {
   
   // Validation state
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  
+  // Track fields that have been edited
+  const [fieldWithErrors, setFieldWithErrors] = useState<string[]>([]);
 
   // Convert JSON work record to form elements based on editableFields
   // const convertJsonWorkRecordToFormElements = (jsonRecord: any): FormElement[] => {
@@ -435,6 +438,9 @@ function Form4868ERSPageContent() {
     }
     
     setLoading(false);
+    
+    // Reset fieldWithErrors when component initializes
+    setFieldWithErrors([]);
   }, []);
 
   useEffect(() => {
@@ -449,6 +455,7 @@ function Form4868ERSPageContent() {
       setActionCode('');
       setClearCodesInput('');
       setAdditionalNotes('');
+      setFieldWithErrors([]);
       
       // Get selection data from sessionStorage
       const storedSelectionData = sessionStorage.getItem('selectionData');
@@ -545,6 +552,16 @@ function Form4868ERSPageContent() {
 
   const handleInputChange = (fieldKey: string, val: string) => {
     console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
+    
+    // Track that this field has been edited
+    setFieldWithErrors(prev => {
+      if (!prev.includes(fieldKey)) {
+        const updated = [...prev, fieldKey];
+        console.log('Updated fieldWithErrors:', updated);
+        return updated;
+      }
+      return prev;
+    });
     
     // Validate the field value
     const validationError = validateField(fieldKey, val);
@@ -859,7 +876,8 @@ function Form4868ERSPageContent() {
             "workRecord": updatedEraDto.workRecord,
             "suspendStatusCode": actionCode,
             "clearCodes": getClearCodesArray(),
-            "notes": generateNotesWithChanges()
+            "notes": generateNotesWithChanges(),
+            "fieldWithErrors": fieldWithErrors
           }
         })
       });
@@ -1058,7 +1076,8 @@ function Form4868ERSPageContent() {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
             "clearCodes": getClearCodesArray(),
-            "notes": generateNotesWithChanges()
+            "notes": generateNotesWithChanges(),
+            "fieldWithErrors": fieldWithErrors
           }
         })
       });
@@ -1194,7 +1213,8 @@ function Form4868ERSPageContent() {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
             "clearCodes": getClearCodesArray(),
-            "notes": generateNotesWithChanges()
+            "notes": generateNotesWithChanges(),
+            "fieldWithErrors": fieldWithErrors
           }
         })
       });

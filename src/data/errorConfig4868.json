@@ -3,8 +3,20 @@
     "004": {
         "description": "EIF/NAP Mismatch"
     },
+    "005": {
+        "description": "Name Control Mismatch NAP/EIF"
+    },
+    "011": {
+        "description": "NAP Linkage Down"
+    },
     "103": {
         "description": "Invalid Master File Tax Code"
+    },
+    "107": {
+        "description": "Tax Period later than the Current Year"
+    },
+    "113": {
+        "description": "Transaction Date"
     },
     "135": {
         "description": "Extended Due Date"
