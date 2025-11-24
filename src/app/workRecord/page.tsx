@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import Header from "../../components/Header";
@@ -475,7 +475,7 @@ function Form4868ERSPageContent() {
           'Content-Type': 'application/json',
           'SERVICE_CENTER': selectionData.serviceCenter.toUpperCase(),
           'PROGRAM_CODE': selectionData.program || selectionData.statusCode,
-          'SEID': currentUserSeid || 'X1000'
+          'SEID': `${currentUserSeid}`
         }
       });
 
@@ -755,7 +755,19 @@ function Form4868ERSPageContent() {
   const [showFlash, setShowFlash] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string>("");
   const [showInfo, setShowInfo] = useState(false);
+  
+  // Ref for InfoAlert to focus on it when shown
+  const infoAlertRef = useRef<HTMLDivElement>(null);
 
+  // Focus on InfoAlert when it's shown
+  useEffect(() => {
+    if (showInfo && infoAlertRef.current) {
+      // Small delay to ensure the component is rendered
+      setTimeout(() => {
+        infoAlertRef.current?.focus();
+      }, 100);
+    }
+  }, [showInfo]);
 
   // Helper function to generate notes with field changes
   const generateNotesWithChanges = () => {
@@ -914,11 +926,57 @@ function Form4868ERSPageContent() {
             }
           }
         } else {
-          setFlashMessage('Record suspended successfully');
+          // Assignment not complete - update current record with workRecord from inventoryItem
+          const updatedRecord = result.inventoryItem;
+          
+          if (updatedRecord) {
+            setEraDto(updatedRecord);
+            setInventoryId(result.inventoryId || updatedRecord.inventoryId || updatedRecord.id);
+            
+            // Convert to form elements
+            const elements = convertEraDtoToFormElements(updatedRecord);
+            setFormElements(elements);
+            setOriginalFormElements([...elements]);
+            
+            // Parse and update notes from updatedRecord
+            if (updatedRecord.notes) {
+              try {
+                const parsedNotes = typeof updatedRecord.notes === 'string' 
+                  ? JSON.parse(updatedRecord.notes) 
+                  : updatedRecord.notes;
+                // Ensure all notes have stringified comments
+                const normalizedNotes = Array.isArray(parsedNotes) 
+                  ? parsedNotes.map(note => ({
+                      ...note,
+                      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                    }))
+                  : [];
+                setNotes(normalizedNotes);
+                console.log('Notes updated from API response:', normalizedNotes);
+              } catch (error) {
+                console.error('Error parsing notes from updated record:', error);
+                setNotes([]);
+              }
+            } else {
+              setNotes([]);
+            }
+            
+            // Update sessionStorage
+            sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
+            
+            // Show info alert for additional error correction needed
+            setInfoMessage('Requires additional error correction');
+            setShowInfo(true);
+            setTimeout(() => setShowInfo(false), 10000);
+            
+            setFlashMessage('Record suspended and submitted for validation. Record updated');
+          } else {
+            setFlashMessage('Record suspended and submitted for validation');
+          }
+          
           setShowFlash(true);
+          setTimeout(() => setShowFlash(false), 4000);
         }
-        
-        setTimeout(() => setShowFlash(false), 4000);
         
       } else {
         const errorText = await response.text();
@@ -1293,9 +1351,14 @@ function Form4868ERSPageContent() {
             // Update sessionStorage
             sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
             
-            setFlashMessage('Form submitted successfully and record updated');
+            // Show info alert for additional error correction needed
+            setInfoMessage('Requires additional error correction');
+            setShowInfo(true);
+            setTimeout(() => setShowInfo(false), 10000);
+            
+            setFlashMessage('Form submitted for validation. Record updated');
           } else {
-            setFlashMessage('Form submitted successfully');
+            setFlashMessage('Form submitted for validation');
           }
           
           setShowFlash(true);
@@ -1432,8 +1495,9 @@ function Form4868ERSPageContent() {
 
       {/* Info Alert */}
       {showInfo && (
-        <div className="px-4 pb-2">
+        <div className="px-4 pt-6 pb-2">
           <InfoAlert 
+            ref={infoAlertRef}
             message={infoMessage}
             onClose={() => setShowInfo(false)}
           />

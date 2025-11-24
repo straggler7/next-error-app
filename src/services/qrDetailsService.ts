@@ -21,9 +21,11 @@ export class QRDetailsService {
         // 'inventoryId': `${inventoryId}`
       };
       
-      if (dln) headers['dln'] = dln;
-      if (serviceCenter) headers['serviceCenter'] = serviceCenter;
+      // if (dln) headers['dln'] = dln;
+      // if (serviceCenter) headers['serviceCenter'] = serviceCenter;
       if (seid) headers['seid'] = seid;
+
+      console.log('QRDetailsService#getQRDetails headers:', headers);
       
       // const response = await fetch(`/api/v1/era/qr-details.json`, {
       const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/review`, {

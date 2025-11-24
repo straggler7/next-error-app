@@ -1,4 +1,5 @@
 import { Info, X } from 'lucide-react';
+import { forwardRef } from 'react';
 
 interface InfoAlertProps {
   message: string;
@@ -6,13 +7,16 @@ interface InfoAlertProps {
   className?: string;
 }
 
-export default function InfoAlert({ 
+const InfoAlert = forwardRef<HTMLDivElement, InfoAlertProps>(({ 
   message, 
   onClose, 
   className = '' 
-}: InfoAlertProps) {
+}, ref) => {
   return (
-    <div className={`border rounded-lg p-4 bg-blue-50 border-blue-200 text-blue-800 ${className}`}>
+    <div 
+      ref={ref}
+      tabIndex={-1}
+      className={`border rounded-lg p-4 bg-blue-50 border-blue-200 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${className}`}>
       <div className="flex items-start gap-3">
         <Info size={20} className="text-blue-500" />
         <div className="flex-1 min-w-0">
@@ -31,4 +35,8 @@ export default function InfoAlert({
       </div>
     </div>
   );
-}
+});
+
+InfoAlert.displayName = 'InfoAlert';
+
+export default InfoAlert;

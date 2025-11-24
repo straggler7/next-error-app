@@ -2181,3 +2181,14 @@ in auth.ts
 
 
       <div className="main-container p-4 max-w-[1900px] mx-auto h-[calc(100vh-80px)]">
+
+        body: JSON.stringify({
+          // status: 'QR_HOLD',
+          // page: page.toString(),
+          // pageSize: pageSize.toString(),
+          ...(filters.seid && { seid: filters.seid }),
+          programCode: filters.program,
+          statuses: ['QR_HOLD', 'SUSPENDED_HOLD'],
+          // statusCode: filters.statusCode,
+          // serviceCenter: filters.serviceCenter
+        })

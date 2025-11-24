@@ -93,7 +93,7 @@ export class QRInventoryService {
           // status: 'QR_HOLD',
           // page: page.toString(),
           // pageSize: pageSize.toString(),
-          seid: filters.seid,
+          ...(filters.seid && { seid: filters.seid }),
           programCode: filters.program,
           statuses: ['QR_HOLD', 'SUSPENDED_HOLD'],
           // statusCode: filters.statusCode,
