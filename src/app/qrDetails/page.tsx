@@ -512,6 +512,19 @@ function QRDetailsPageContent() {
                       {note.comments && (() => {
                         try {
                           const parsedComments = typeof note.comments === 'string' ? JSON.parse(note.comments) : note.comments;
+                          
+                          // Handle case where parsedComments is a plain string
+                          if (typeof parsedComments === 'string') {
+                            return (
+                              <div className="note-comments">
+                                <div className="text-sm text-gray-700 whitespace-pre-line">
+                                  {parsedComments}
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Handle case where parsedComments is an object with properties
                           return (
                             <div className="note-comments">
                               {parsedComments.fieldChanges && parsedComments.fieldChanges.length > 0 && (
