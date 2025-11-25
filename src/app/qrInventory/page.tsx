@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
@@ -53,7 +53,7 @@ function QRInventoryContent() {
 
 
   // Load QR records
-  const loadQRRecords = async () => {
+  const loadQRRecords = useCallback(async () => {
     // Prevent duplicate calls if already loading
     if (loading) {
       console.log('QR Inventory: Already loading, skipping duplicate call');
@@ -105,7 +105,7 @@ function QRInventoryContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.status, pagination.currentPage, pagination.pageSize, currentUserSeid]);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -121,7 +121,7 @@ function QRInventoryContent() {
         loadQRRecords();
       }
     }
-  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize]); // Use specific filter properties instead of entire object
+  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize, loadQRRecords]); // Use specific filter properties instead of entire object
 
   // Filter the records based on current filters
   const filteredRecords = qrRecords;
@@ -138,6 +138,29 @@ function QRInventoryContent() {
   };
 
   const columnHelper = createColumnHelper<QRInventoryRecord>();
+
+  // Handle Review button click to navigate to QR details
+  const handleReviewClick = useCallback((record: QRInventoryRecord) => {
+    const serviceCenterMap: { [key: number]: string } = {
+      16: 'Austin',
+      17: 'Ogden',
+      18: 'Kansas City',
+      19: 'Fresno',
+      20: 'Andover',
+      21: 'Charlotte'
+    };
+    const serviceCenter = serviceCenterMap[record.serviceCenterId] || 'Unknown';
+    
+    // Store the full record in sessionStorage for access on QR Details page (client-side only)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedQRRecord', JSON.stringify({
+        ...record,
+        serviceCenter // Add the mapped service center name
+      }));
+    }
+    
+    router.push(`/qrDetails?inventoryId=${record.inventoryId}&dln=${record.dln}&serviceCenter=${encodeURIComponent(serviceCenter)}&seid=${record.seid}`);
+  }, [router]);
 
   // QR-specific columns - only the required fields
   const qrColumns = useMemo<ColumnDef<QRInventoryRecord, any>[]>(() => [
@@ -264,30 +287,7 @@ function QRInventoryContent() {
       ),
       size: 100,
     }),
-  ], []);
-
-  // Handle Review button click to navigate to QR details
-  const handleReviewClick = (record: QRInventoryRecord) => {
-    const serviceCenterMap: { [key: number]: string } = {
-      16: 'Austin',
-      17: 'Ogden',
-      18: 'Kansas City',
-      19: 'Fresno',
-      20: 'Andover',
-      21: 'Charlotte'
-    };
-    const serviceCenter = serviceCenterMap[record.serviceCenterId] || 'Unknown';
-    
-    // Store the full record in sessionStorage for access on QR Details page (client-side only)
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('selectedQRRecord', JSON.stringify({
-        ...record,
-        serviceCenter // Add the mapped service center name
-      }));
-    }
-    
-    router.push(`/qrDetails?inventoryId=${record.inventoryId}&dln=${record.dln}&serviceCenter=${encodeURIComponent(serviceCenter)}&seid=${record.seid}`);
-  };
+  ], [columnHelper, handleReviewClick]);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense, useRef } from "react";
+import { useEffect, useMemo, useState, Suspense, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import Header from "../../components/Header";
@@ -184,8 +184,91 @@ function Form4868ERSPageContent() {
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>('');
 
+
+
+  const editableFieldKeys: string[] = useMemo(() => {
+    if (formElements.length > 0) {
+      // Use actual form elements from API
+      return formElements.filter(el => el.editable).map(el => el.name);
+    }
+    
+    // Check for displayFields structure from eraDto
+    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    if (displayFields) {
+      return Object.entries(displayFields)
+        .filter(([_, fieldConfig]: [string, any]) => fieldConfig.editable)
+        .map(([fieldKey, _]) => fieldKey);
+    }
+    
+    // Default fallback - return empty array if no structure found
+    return [];
+  }, [formElements, eraDto]);
+
+  // Non-editable fields list from formElements
+  const nonEditableFieldKeys: string[] = useMemo(() => {
+    if (formElements.length > 0) {
+      return formElements.filter(el => !el.editable).map(el => el.name);
+    }
+    
+    // Check for displayFields structure
+    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    if (displayFields) {
+      return Object.entries(displayFields)
+        .filter(([_, fieldConfig]: [string, any]) => !fieldConfig.editable)
+        .map(([fieldKey, _]) => fieldKey);
+    }
+    
+    return [];
+  }, [formElements, eraDto]);
+
+  // Map DTO keys to actual WorkRecord property names (simplified)
+  const dtoToRecordKey = useMemo((): Record<string, string> => ({
+    TaxPeriodEndDt: "taxPeriodEndDt",
+    primaryNameControlTxt: "primaryNameControlTxt",
+    nameLine1Txt: "nameLine1Txt",
+    primarySSN: "primarySSN",
+  }), []);
+
+  // Build initial values and original snapshot
+  const initialValues = useMemo(() => {
+    const values: Record<string, string> = {};
+    for (const key of editableFieldKeys) {
+      if (formElements.length > 0) {
+        // Use actual form elements from API
+        const element = workAssignmentService.getFormElementByName(formElements, key);
+        values[key] = element?.value || "";
+      } else {
+        // Fallback to eraDto workRecord
+        const workRecord = eraDto?.workRecord;
+        if (workRecord) {
+          const recordKey = dtoToRecordKey[key] || key;
+          const v = (workRecord as any)?.[recordKey];
+          values[key] = v ?? "";
+        } else {
+          values[key] = "";
+        }
+      }
+    }
+    return values;
+  }, [editableFieldKeys, formElements, eraDto, dtoToRecordKey]);
+
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [originalValues, setOriginalValues] = useState<Record<string, string>>({});
+  const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
+  const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [clearCodesInput, setClearCodesInput] = useState<string>('');
+  const [actionCode, setActionCode] = useState<string>('');
+  const [suspenseCodes, setSuspenseCodes] = useState<SuspenseCode[]>([]);
+  const [loadingSuspenseCodes, setLoadingSuspenseCodes] = useState(false);
+  const [suspending, setSuspending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [closingOut, setClosingOut] = useState(false);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [additionalNotes, setAdditionalNotes] = useState<string>('');
+
   // Helper function to parse clear codes from comma-separated input
-  const getClearCodesArray = () => {
+  const getClearCodesArray = useCallback(() => {
     console.log('getting clear codes array from clearCodesInput:', clearCodesInput);
     
     if (!clearCodesInput.trim()) {
@@ -199,10 +282,10 @@ function Form4868ERSPageContent() {
     
     console.log('final clear codes array:', result);
     return result;
-  };
+  }, [clearCodesInput]);
 
   // Convert ERS reason codes to ErrorItem format for sidebar
-  const convertErsErrorsToErrorItems = (): ErrorItem[] => {
+  const convertErsErrorsToErrorItems = useCallback((): ErrorItem[] => {
     // Try ERA DTO first, then fallback to jsonWorkRecord
     let errorSource = null;
     let ersReasonCds: string[] = [];
@@ -259,88 +342,7 @@ function Form4868ERSPageContent() {
         }
       };
     });
-  };
-
-  const editableFieldKeys: string[] = useMemo(() => {
-    if (formElements.length > 0) {
-      // Use actual form elements from API
-      return formElements.filter(el => el.editable).map(el => el.name);
-    }
-    
-    // Check for displayFields structure from eraDto
-    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
-    if (displayFields) {
-      return Object.entries(displayFields)
-        .filter(([_, fieldConfig]: [string, any]) => fieldConfig.editable)
-        .map(([fieldKey, _]) => fieldKey);
-    }
-    
-    // Default fallback - return empty array if no structure found
-    return [];
-  }, [formElements, eraDto]);
-
-  // Non-editable fields list from formElements
-  const nonEditableFieldKeys: string[] = useMemo(() => {
-    if (formElements.length > 0) {
-      return formElements.filter(el => !el.editable).map(el => el.name);
-    }
-    
-    // Check for displayFields structure
-    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
-    if (displayFields) {
-      return Object.entries(displayFields)
-        .filter(([_, fieldConfig]: [string, any]) => !fieldConfig.editable)
-        .map(([fieldKey, _]) => fieldKey);
-    }
-    
-    return [];
-  }, [formElements, eraDto]);
-
-  // Map DTO keys to actual WorkRecord property names (simplified)
-  const dtoToRecordKey: Record<string, string> = {
-    TaxPeriodEndDt: "taxPeriodEndDt",
-    primaryNameControlTxt: "primaryNameControlTxt",
-    nameLine1Txt: "nameLine1Txt",
-    primarySSN: "primarySSN",
-  };
-
-  // Build initial values and original snapshot
-  const initialValues = useMemo(() => {
-    const values: Record<string, string> = {};
-    for (const key of editableFieldKeys) {
-      if (formElements.length > 0) {
-        // Use actual form elements from API
-        const element = workAssignmentService.getFormElementByName(formElements, key);
-        values[key] = element?.value || "";
-      } else {
-        // Fallback to eraDto workRecord
-        const workRecord = eraDto?.workRecord;
-        if (workRecord) {
-          const recordKey = dtoToRecordKey[key] || key;
-          const v = (workRecord as any)?.[recordKey];
-          values[key] = v ?? "";
-        } else {
-          values[key] = "";
-        }
-      }
-    }
-    return values;
-  }, [editableFieldKeys, formElements, eraDto]);
-
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [originalValues, setOriginalValues] = useState<Record<string, string>>({});
-  const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
-  const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [clearCodesInput, setClearCodesInput] = useState<string>('');
-  const [actionCode, setActionCode] = useState<string>('');
-  const [suspenseCodes, setSuspenseCodes] = useState<SuspenseCode[]>([]);
-  const [loadingSuspenseCodes, setLoadingSuspenseCodes] = useState(false);
-  const [suspending, setSuspending] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [closingOut, setClosingOut] = useState(false);
-  const [notes, setNotes] = useState<any[]>([]);
-  const [additionalNotes, setAdditionalNotes] = useState<string>('');
+  }, [eraDto, jsonWorkRecord, getClearCodesArray]);
 
   // Fetch suspense codes on component mount
   useEffect(() => {
@@ -749,7 +751,7 @@ function Form4868ERSPageContent() {
   // Get error items (reactive to clear codes changes)
   const errorItems = useMemo(() => {
     return convertErsErrorsToErrorItems();
-  }, [eraDto, jsonWorkRecord, clearCodesInput]);
+  }, [convertErsErrorsToErrorItems]);
 
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
