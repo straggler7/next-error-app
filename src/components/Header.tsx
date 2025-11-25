@@ -130,26 +130,31 @@ export default function Header({ showBackButton = false, backHref = '/', disable
             >
               Daily Summary
             </Link>
-            <Link 
-              href="/reports"
-              className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 border-r border-white/20 hover:bg-white/10 ${
-                pathname.startsWith('/reports')
-                  ? 'bg-[#00599c] text-white'
-                  : ''
-              }`}
-            >
-              Reports
-            </Link>
-            <Link 
-              href="/manage-profiles"
-              className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 hover:bg-white/10 ${
-                pathname.startsWith('/manage-profiles')
-                  ? 'bg-[#00599c] text-white'
-                  : ''
-              }`}
-            >
-              Manage Profiles
-            </Link>
+            {/* Only show Reports and Manage Profiles for managers */}
+            {user.group === 'managers' && (
+              <>
+                <Link 
+                  href="/reports"
+                  className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 border-r border-white/20 hover:bg-white/10 ${
+                    pathname.startsWith('/reports')
+                      ? 'bg-[#00599c] text-white'
+                      : ''
+                  }`}
+                >
+                  Reports
+                </Link>
+                <Link 
+                  href="/manage-profiles"
+                  className={`px-6 h-full flex items-center text-sm font-medium transition-colors duration-200 hover:bg-white/10 ${
+                    pathname.startsWith('/manage-profiles')
+                      ? 'bg-[#00599c] text-white'
+                      : ''
+                  }`}
+                >
+                  Manage Profiles
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

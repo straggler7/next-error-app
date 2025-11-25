@@ -78,7 +78,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('🔍 AuthContext: Final SEID check:', { userSeid, isValid: userSeid && validateSeid(userSeid) });
         
         if (userSeid && validateSeid(userSeid)) {
-          console.log('SETTING SEID ------- XXX yyy ---------------: ', userSeid);
           setSeid(userSeid);
           const userData = await getUserFromSeid(userSeid);
           console.log('🔍 AuthContext: User data with profile:', userData);
