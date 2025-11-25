@@ -60,7 +60,7 @@ export default function ComboBox({
         onSelect(null);
       }
     }
-  }, [inputValue, options]);
+  }, [inputValue, options, onSelect]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;

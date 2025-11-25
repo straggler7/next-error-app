@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
@@ -43,7 +43,7 @@ function DailySummaryContent() {
   const [showFlash, setShowFlash] = useState(false);
 
   // Load daily summary records
-  const loadDailySummaryRecords = async () => {
+  const loadDailySummaryRecords = useCallback(async () => {
     // Prevent duplicate calls if already loading
     if (loading) {
       console.log('Daily Summary: Already loading, skipping duplicate call');
@@ -109,7 +109,7 @@ function DailySummaryContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.status, currentUserSeid, pagination.pageSize]);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -125,7 +125,7 @@ function DailySummaryContent() {
         loadDailySummaryRecords();
       }
     }
-  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize]);
+  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize, loadDailySummaryRecords]);
 
   // Filter the records based on current filters
   const filteredRecords = records;
@@ -142,7 +142,7 @@ function DailySummaryContent() {
   };
 
   // Handle reopen functionality - similar to QR Details page
-  const handleReopen = async (record: QRInventoryRecord) => {
+  const handleReopen = useCallback(async (record: QRInventoryRecord) => {
     const inventoryId = record.inventoryId;
     
     if (!inventoryId) {
@@ -193,7 +193,7 @@ function DailySummaryContent() {
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     }
-  };
+  }, [currentUserSeid, router, setFlashMessage, setShowFlash]);
 
   const columnHelper = createColumnHelper<QRInventoryRecord>();
 
@@ -308,7 +308,7 @@ function DailySummaryContent() {
       ),
       size: 100,
     }),
-  ], []);
+  ], [columnHelper, handleReopen]);
 
   // Handle row click to navigate to QR details (optional, keeping same behavior as QR inventory)
   const handleRowClick = (record: QRInventoryRecord) => {

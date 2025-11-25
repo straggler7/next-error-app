@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import BaseReport from '../../../components/BaseReport';
 import { ReportRecord, ReportPayload, ReportsService } from '../../../services/reportsService';
 import { useSeid } from '../../../hooks/useSeid';
@@ -10,7 +10,7 @@ export default function Report7747() {
   const [loading, setLoading] = useState(false);
   const seid = useSeid();
 
-  const handleRefresh = async (payload: ReportPayload) => {
+  const handleRefresh = useCallback(async (payload: ReportPayload) => {
     if (!seid) return;
     
     setLoading(true);
@@ -23,7 +23,7 @@ export default function Report7747() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [seid]);
 
   const handleExport = async (payload: ReportPayload) => {
     if (!seid) return;
@@ -55,7 +55,7 @@ export default function Report7747() {
       };
       handleRefresh(defaultPayload);
     }
-  }, [seid]);
+  }, [seid, handleRefresh]);
 
   return (
     <BaseReport

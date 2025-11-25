@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ReportsService, ReportRecord, ReportPayload } from '../../../services/reportsService';
 import BaseReport from '../../../components/BaseReport';
 import { useSeid } from '../../../hooks/useSeid';
@@ -10,7 +10,7 @@ export default function Report1341Page() {
   const [loading, setLoading] = useState(false);
   const currentUserSeid = useSeid();
 
-  const fetchReportData = async (payload: ReportPayload) => {
+  const fetchReportData = useCallback(async (payload: ReportPayload) => {
     if (!currentUserSeid) return;
     
     setLoading(true);
@@ -23,7 +23,7 @@ export default function Report1341Page() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUserSeid]);
 
   useEffect(() => {
     // Initial load with default payload
@@ -41,7 +41,7 @@ export default function Report1341Page() {
     };
     
     fetchReportData(defaultPayload);
-  }, [currentUserSeid]);
+  }, [currentUserSeid, fetchReportData]);
 
   const handleExport = async (payload: ReportPayload) => {
     if (!currentUserSeid) return;

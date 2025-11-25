@@ -218,7 +218,7 @@ function QRDetailsPageContent() {
     if (inventoryId) {
       loadQRDetails();
     }
-  }, [inventoryId, loadQRDetails]); // Include loadQRDetails since it's now memoized
+  }, [inventoryId, dln, serviceCenter, seid, loadQRDetails]); // Include all variables used in the effect
 
 
   // Compare before and after values to determine if field is modified
