@@ -15,12 +15,24 @@ export default function DatePicker({
   label = 'Date', 
   placeholder = 'Select date...' 
 }: DatePickerProps) {
+  // const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const selectedDate = e.target.value;
+  //   if (selectedDate) {
+  //     // Convert from YYYY-MM-DD to MM/DD/YYYY format
+  //     const date = new Date(selectedDate);
+  //     const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+  //     onChange(formattedDate);
+  //   } else {
+  //     onChange('');
+  //   }
+  // };
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
     if (selectedDate) {
-      // Convert from YYYY-MM-DD to MM/DD/YYYY format
-      const date = new Date(selectedDate);
-      const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+      // Fix: Parse date components directly instead of using Date constructor
+      const [year, month, day] = selectedDate.split('-');
+      const formattedDate = `${month}/${day}/${year}`;
       onChange(formattedDate);
     } else {
       onChange('');
