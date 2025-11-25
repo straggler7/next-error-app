@@ -41,7 +41,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
     return [
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
-      { key: 'source', label: 'Source', visible: true, width: 120 },
       { key: 'totalVolume', label: 'Total Volume', visible: true, width: 120 },
       { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
     ];

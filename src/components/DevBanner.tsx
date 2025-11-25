@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 // import { User } from '../types';
 
 const mockUsers: string[] = [
-  'u1000',
+  '1pzwb',
   'f3wpb'
 ];
 

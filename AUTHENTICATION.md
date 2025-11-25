@@ -292,3 +292,190 @@ Result: You can’t hit any main app page without a valid SEID.
    - Components (like [Header](cci:1://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/components/Header.tsx:15:0-155:1)) render based on that context.
 
 If you want, I can walk through a specific request (e.g. hitting `/manage-profiles` as a non-manager) and trace exactly what happens step by step in the code.
+
+
+## 8. Dev banner user selection
+I'll explain how the dev banner user selection flow works by tracing through the code and the authentication process.
+
+## 🔄 Dev Banner User Selection Flow
+
+### **1. Initial Setup**
+
+#### **DevBanner Component:**
+```typescript
+const mockUsers: string[] = ['u1000', 'f3wpb'];
+const { isDevelopmentMode, user, refreshAuth } = useAuth();
+```
+- **Mock users**: Simple array of SEID strings
+- **Auth context**: Gets current user state and refresh function
+- **Development mode**: Only shows in `NODE_ENV === 'development'`
+
+### **2. User Selection Process**
+
+#### **Step 1: User Clicks SEID**
+```typescript
+const handleUserSelect = async (selectedSeid: string) => {
+  console.log('🔄 DevBanner: User selected:', selectedSeid);
+  
+  // Store selected SEID in localStorage
+  localStorage.setItem('dev-selected-seid', selectedSeid);
+  
+  // Trigger auth refresh
+  if (refreshAuth) {
+    await refreshAuth();
+  }
+}
+```
+
+#### **Step 2: SEID Storage**
+- **localStorage**: `dev-selected-seid` = `"u1000"` or `"f3wpb"`
+- **Persistence**: Survives page reloads and navigation
+- **Immediate**: Stored before calling refresh
+
+### **3. Authentication Refresh Flow**
+
+#### **Step 3: refreshAuth() in AuthContext**
+```typescript
+const refreshAuth = async () => {
+  setIsLoading(true);
+  
+  const devSelectedSeid = localStorage.getItem('dev-selected-seid');
+  if (devSelectedSeid && validateSeid(devSelectedSeid)) {
+    setSeid(devSelectedSeid);
+    const userData = await getUserFromSeid(devSelectedSeid);
+    setUser(userData);
+  }
+  
+  setIsLoading(false);
+};
+```
+
+#### **Step 4: Profile API Call**
+```typescript
+// In auth.ts - getUserFromSeid()
+const response = await fetch('/api/v1/era/users/profile', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+    'SEID': seid  // The selected SEID
+  }
+});
+```
+
+### **4. Profile Data Processing**
+
+#### **Step 5: API Response Mapping**
+```typescript
+const userProfile: UserProfileResponse = await response.json();
+
+// Map API response to User interface
+const user: User = {
+  name: userProfile.userName,
+  role: userProfile.designation,
+  group: mapDesignationToGroup(userProfile.designation), // 'managers' or 'tax_examiners'
+  seid: userProfile.seid,
+  profile: userProfile // Complete profile data
+};
+```
+
+#### **Step 6: Role Determination**
+```typescript
+function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers' {
+  const lowerDesignation = designation.toLowerCase();
+  
+  if (lowerDesignation.includes('manager') || 
+      lowerDesignation.includes('supervisor') || 
+      lowerDesignation.includes('lead')) {
+    return 'managers';
+  }
+  
+  return 'tax_examiners';
+}
+```
+
+### **5. UI Updates**
+
+#### **Step 7: Banner Display Update**
+```typescript
+// DevBanner shows current SEID
+const currentSeid = user?.seid || localStorage.getItem('dev-selected-seid') || 'none';
+
+// Display in yellow badge
+<span className="text-xs bg-yellow-600 px-2 py-1 rounded">
+  SEID: {currentSeid}
+</span>
+```
+
+#### **Step 8: Navigation Updates**
+```typescript
+// Header.tsx - Role-based navigation
+{user.group === 'managers' && (
+  <>
+    <Link href="/reports">Reports</Link>
+    <Link href="/manage-profiles">Manage Profiles</Link>
+  </>
+)}
+```
+
+### **6. Complete Flow Diagram**
+
+```
+1. User clicks SEID in dropdown
+   ↓
+2. localStorage.setItem('dev-selected-seid', seid)
+   ↓
+3. refreshAuth() called
+   ↓
+4. localStorage.getItem('dev-selected-seid')
+   ↓
+5. validateSeid(seid) - checks format
+   ↓
+6. getUserFromSeid(seid) - API call
+   ↓
+7. fetch('/api/v1/era/users/profile', { headers: { SEID: seid }})
+   ↓
+8. API returns user profile data
+   ↓
+9. mapDesignationToGroup() - determines role
+   ↓
+10. setUser(userData) - updates context
+   ↓
+11. UI re-renders with new user data
+   ↓
+12. Banner shows new SEID
+13. Navigation shows/hides based on role
+```
+
+### **7. Key Features**
+
+#### **Persistence:**
+- **Page reloads**: SEID persists via localStorage
+- **Navigation**: Maintains selection across routes
+- **Session**: Clears on actual page refresh (not component re-render)
+
+#### **Fallback Display:**
+```typescript
+const currentSeid = user?.seid || localStorage.getItem('dev-selected-seid') || 'none';
+```
+- **Primary**: Shows `user.seid` from API response
+- **Fallback**: Shows localStorage value if user not loaded yet
+- **Default**: Shows 'none' if nothing available
+
+#### **Error Handling:**
+- **Validation**: SEID format validation before API call
+- **API errors**: Graceful fallback to null user
+- **Loading states**: Shows loading indicator during refresh
+
+### **8. Production vs Development**
+
+#### **Development Mode:**
+- **SEID source**: localStorage (`dev-selected-seid`)
+- **Selection**: Manual via DevBanner dropdown
+- **Profile call**: Same API endpoint with selected SEID
+
+#### **Production Mode:**
+- **SEID source**: HTTP headers from SSO/middleware
+- **Selection**: Automatic from authentication system
+- **Profile call**: Same API endpoint with header SEID
+
+The flow ensures consistent authentication behavior between development and production, with the only difference being the SEID source (manual selection vs. SSO headers).

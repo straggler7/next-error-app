@@ -1041,7 +1041,7 @@ function Form4868ERSPageContent() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': currentUserSeid || 'u1000'
+          'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({"eventStatus":"CLOSEOUT"})
       });
@@ -1124,7 +1124,7 @@ function Form4868ERSPageContent() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': currentUserSeid || 'u1000'
+          'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({
           "event": {
@@ -1261,7 +1261,7 @@ function Form4868ERSPageContent() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': currentUserSeid || 'u1000'
+          'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({
           "event": {

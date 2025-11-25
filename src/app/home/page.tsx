@@ -253,7 +253,7 @@ export default function HomePage() {
         program: programForm.program,
         statusCode: programForm.statusCode,
         serviceCenter: programForm.serviceCenter,
-        seid: programForm.seid || 'u1000'
+        seid: programForm.seid
       };
       
       console.log('Storing selectionData:', selectionData);
@@ -294,7 +294,7 @@ export default function HomePage() {
           program: programForm.program,
           statusCode: programForm.statusCode,
           serviceCenter: programForm.serviceCenter,
-          seid: programForm.seid || 'u1000'
+          seid: programForm.seid
         }));
 
         router.push('/workRecord');
