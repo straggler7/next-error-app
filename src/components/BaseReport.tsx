@@ -53,7 +53,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -68,7 +67,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -84,7 +82,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -407,7 +404,7 @@ export default function BaseReport({
         {/* Filters */}
         <div className={`grid gap-4 mb-6 ${reportType === '1341' || reportType === '7740' || reportType === '7741' ? 'grid-cols-3' : 'grid-cols-5'} items-end`}>
           {/* DLN Search - Hidden for 1341, 7740, and 7741 reports */}
-          {reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && (
+          {reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7746' && reportType !== '7747' && (
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
