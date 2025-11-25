@@ -490,6 +490,9 @@ git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs
 git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs-notes-sso-profile-user-reports
 (11/20/2025)
 
+git branch: mvp-november
+(11/24/2025)
+
 {
   "inventoryId": 14,
   "status": "RESOLVED",

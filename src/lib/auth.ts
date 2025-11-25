@@ -129,30 +129,30 @@ function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers
 /**
  * Fallback function for development/testing when API is not available
  */
-function getFallbackUser(seid: string): User | null {
-  const mockUsers: Record<string, User> = {
-    'u1000': {
-      name: 'Test User u1000',
-      role: 'Tax Examiner',
-      group: 'tax_examiners',
-      seid: 'u1000'
-    },
-    'f3wpb': {
-      name: 'Test User f3wpb',
-      role: 'Manager',
-      group: 'managers',
-      seid: 'f3wpb'
-    }
-  };
+// function getFallbackUser(seid: string): User | null {
+//   const mockUsers: Record<string, User> = {
+//     'u1000': {
+//       name: 'Test User u1000',
+//       role: 'Tax Examiner',
+//       group: 'tax_examiners',
+//       seid: 'u1000'
+//     },
+//     'f3wpb': {
+//       name: 'Test User f3wpb',
+//       role: 'Manager',
+//       group: 'managers',
+//       seid: 'f3wpb'
+//     }
+//   };
 
-  console.log('Using fallback user data for SEID:', seid);
-  return mockUsers[seid] || {
-    name: 'Unknown User',
-    role: 'Tax Examiner',
-    group: 'tax_examiners',
-    seid: seid
-  };
-}
+//   console.log('Using fallback user data for SEID:', seid);
+//   return mockUsers[seid] || {
+//     name: 'Unknown User',
+//     role: 'Tax Examiner',
+//     group: 'tax_examiners',
+//     seid: seid
+//   };
+// }
 
 /**
  * Check if user is authenticated based on SEID

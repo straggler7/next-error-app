@@ -2,21 +2,11 @@
 
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { User } from '../types';
+// import { User } from '../types';
 
-const mockUsers: User[] = [
-  {
-    name: 'Test User u1000',
-    role: 'Tax Examiner',
-    group: 'tax_examiners',
-    seid: 'u1000'
-  },
-  {
-    name: 'Test User f3wpb',
-    role: 'Manager',
-    group: 'managers',
-    seid: 'f3wpb'
-  }
+const mockUsers: string[] = [
+  'u1000',
+  'f3wpb'
 ];
 
 export default function DevBanner() {
@@ -28,14 +18,20 @@ export default function DevBanner() {
     return null;
   }
 
-  const handleUserSelect = async (selectedUser: User) => {
-    // Store selected user in localStorage to persist across page reloads
-    localStorage.setItem('dev-selected-user', JSON.stringify(selectedUser));
+  const handleUserSelect = async (selectedSeid: string) => {
+    console.log('🔄 DevBanner: User selected:', selectedSeid);
+    
+    // Store selected SEID in localStorage to persist across page reloads
+    localStorage.setItem('dev-selected-seid', selectedSeid);
+    console.log('🔄 DevBanner: Stored SEID in localStorage');
     
     // Refresh auth context without page reload
     if (refreshAuth) {
+      console.log('🔄 DevBanner: Calling refreshAuth');
       await refreshAuth();
+      console.log('🔄 DevBanner: refreshAuth completed');
     } else {
+      console.log('🔄 DevBanner: refreshAuth not available, reloading page');
       // Fallback to page reload if refreshAuth is not available
       window.location.reload();
     }
@@ -66,19 +62,18 @@ export default function DevBanner() {
           {isDropdownOpen && (
             <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-64">
               <div className="py-1">
-                {mockUsers.map((mockUser) => (
+                {mockUsers.map((seid) => (
                   <button
-                    key={mockUser.seid}
+                    key={seid}
                     onClick={async () => {
-                      await handleUserSelect(mockUser);
+                      await handleUserSelect(seid);
                     }}
                     className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                      user?.seid === mockUser.seid ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                      user?.seid === seid ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                     }`}
                   >
-                    <div className="font-medium">{mockUser.name}</div>
                     <div className="text-xs text-gray-500">
-                      {mockUser.role} • {mockUser.group} • {mockUser.seid}
+                      {seid}
                     </div>
                   </button>
                 ))}

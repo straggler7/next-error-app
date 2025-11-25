@@ -15,30 +15,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [seid, setSeid] = useState<string | null>(null);
 
-  // Function to fetch detailed user profile
-  const fetchUserProfile = async (userSeid: string): Promise<UserProfile | null> => {
-    try {
-      const response = await fetch('/api/v1/era/users/profile', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'SEID': userSeid
-        }
-      });
-
-      if (!response.ok) {
-        console.warn(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
-        return null;
-      }
-
-      const userProfile: UserProfile = await response.json();
-      console.log('🔍 AuthContext: Fetched user profile:', userProfile);
-      return userProfile;
-    } catch (error) {
-      console.warn('Error fetching user profile:', error);
-      return null;
-    }
-  };
 
   useEffect(() => {
     async function initializeAuth() {
@@ -54,28 +30,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const isPageRefresh = !sessionStorage.getItem('auth-initialized');
         if (isPageRefresh) {
           console.log('🧹 AuthContext: Clearing localStorage user on page refresh');
-          localStorage.removeItem('dev-selected-user');
+          localStorage.removeItem('dev-selected-user'); // Legacy cleanup
+          localStorage.removeItem('dev-selected-seid');
           sessionStorage.setItem('auth-initialized', 'true');
         }
 
         // Try to get SEID from various sources
         let userSeid: string | null = null;
 
-        // First, check for dev selected user in localStorage (development only)
-        const devSelectedUser = localStorage.getItem('dev-selected-user');
-        if (devSelectedUser) {
-          console.log('🔍 AuthContext: Found dev selected user:', devSelectedUser);
-          try {
-            const parsedUser = JSON.parse(devSelectedUser);
-            if (parsedUser.seid) {
-              userSeid = parsedUser.seid;
-              console.log('🔍 AuthContext: Using dev selected user:', parsedUser);
-              // Set user data immediately for dev selected user
-              setUser(parsedUser);
-            }
-          } catch (error) {
-            console.warn('Failed to parse dev selected user:', error);
-          }
+        // First, check for dev selected SEID in localStorage (development only)
+        const devSelectedSeid = localStorage.getItem('dev-selected-seid');
+        if (devSelectedSeid) {
+          console.log('🔍 AuthContext: Found dev selected SEID:', devSelectedSeid);
+          userSeid = devSelectedSeid;
         }
 
         // If not found, try to get from meta tag (set by server)
@@ -111,17 +78,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('🔍 AuthContext: Final SEID check:', { userSeid, isValid: userSeid && validateSeid(userSeid) });
         
         if (userSeid && validateSeid(userSeid)) {
-          console.log('SETTING SEID: ', userSeid);
+          console.log('SETTING SEID ------- XXX yyy ---------------: ', userSeid);
           setSeid(userSeid);
           const userData = await getUserFromSeid(userSeid);
-          console.log('🔍 AuthContext: User data:', userData);
-          
-          // Fetch detailed profile data
-          // if (userData) {
-          //   const profileData = await fetchUserProfile(userSeid);
-          //   userData.profile = profileData;
-          //   console.log('🔍 AuthContext: User data with profile:', userData);
-          // }
+          console.log('🔍 AuthContext: User data with profile:', userData);
           
           setUser(userData);
         } else {
@@ -145,18 +105,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Function to refresh auth context (useful for dev user selection)
   const refreshAuth = async () => {
     setIsLoading(true);
-    const devSelectedUser = localStorage.getItem('dev-selected-user');
-    if (devSelectedUser) {
-      try {
-        const parsedUser = JSON.parse(devSelectedUser);
-        if (parsedUser.seid) {
-          setSeid(parsedUser.seid);
-          setUser(parsedUser);
-          console.log('🔄 AuthContext: Refreshed with dev selected user:', parsedUser);
-        }
-      } catch (error) {
-        console.warn('Failed to parse dev selected user during refresh:', error);
+    try {
+      const devSelectedSeid = localStorage.getItem('dev-selected-seid');
+      if (devSelectedSeid && validateSeid(devSelectedSeid)) {
+        console.log('🔄 AuthContext: Refreshing with dev selected SEID:', devSelectedSeid);
+        setSeid(devSelectedSeid);
+        const userData = await getUserFromSeid(devSelectedSeid);
+        console.log('🔄 AuthContext: Refreshed user data:', userData);
+        setUser(userData);
+      } else {
+        console.log('🔄 AuthContext: No valid dev SEID found during refresh');
+        setSeid(null);
+        setUser(null);
       }
+    } catch (error) {
+      console.error('Error during auth refresh:', error);
+      setSeid(null);
+      setUser(null);
     }
     setIsLoading(false);
   };
