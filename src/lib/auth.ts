@@ -67,6 +67,58 @@ interface UserProfileResponse {
 }
 
 /**
+ * Create a development user based on DEV_ROLE environment variable
+ */
+function createDevUser(seid: string): User | null {
+  const devRole = process.env.NEXT_PUBLIC_DEV_ROLE;
+  
+  if (!devRole || (devRole !== 'managers' && devRole !== 'tax_examiners')) {
+    console.log('🔧 DEV_ROLE not set or invalid:', devRole);
+    return null;
+  }
+  
+  console.log('🔧 Creating dev user with role:', devRole, 'for SEID:', seid);
+  
+  const user: User = {
+    name: `Dev User (${seid})`,
+    role: devRole === 'managers' ? 'Manager' : 'Tax Examiner',
+    group: devRole,
+    seid: seid,
+    profile: {
+      userId: seid,
+      seid: seid,
+      userName: `Dev User (${seid})`,
+      designation: devRole === 'managers' ? 'Manager' : 'Tax Examiner',
+      teamCode: 'DEV-TEAM',
+      serviceCenterId: '16', // Default to Austin
+      activeStatus: true,
+      profile: {
+        profiles: {
+          '44720': {
+            dlnSearch: true,
+            deleteEnabled: devRole === 'managers',
+            qualityReviewEnabled: true,
+            leadRoleEnabled: devRole === 'managers',
+            rejectsEnabled: true,
+            suspendStatusCodes: ['SC-1', 'SC-2', 'SC-3', 'SC-4', 'SC-5']
+          },
+          '44730': {
+            dlnSearch: true,
+            deleteEnabled: devRole === 'managers',
+            qualityReviewEnabled: true,
+            leadRoleEnabled: devRole === 'managers',
+            rejectsEnabled: true,
+            suspendStatusCodes: ['SC-1', 'SC-2', 'SC-3', 'SC-4', 'SC-5']
+          }
+        }
+      }
+    }
+  };
+  
+  return user;
+}
+
+/**
  * Get user details from SEID by calling the user profile API
  */
 export async function getUserFromSeid(seid: string): Promise<User | null> {
@@ -84,8 +136,14 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     if (!response.ok) {
       console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
       
-      // Fallback to mock data for development/testing
-      // return getFallbackUser(seid);
+      // Check if DEV_ROLE is set and return dev user
+      const devUser = createDevUser(seid);
+      if (devUser) {
+        console.log('🔧 Using dev user due to API failure:', devUser);
+        return devUser;
+      }
+      
+      return null;
     }
 
     const userProfile: UserProfileResponse = await response.json();
@@ -105,8 +163,13 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
   } catch (error) {
     console.error('Error fetching user from SEID:', error);
     
-    // Fallback to mock data for development/testing
-    // return getFallbackUser(seid);
+    // Check if DEV_ROLE is set and return dev user
+    const devUser = createDevUser(seid);
+    if (devUser) {
+      console.log('🔧 Using dev user due to API error:', devUser);
+      return devUser;
+    }
+    
     return null;
   }
 }

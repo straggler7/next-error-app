@@ -11,13 +11,34 @@ Create a `.env.local` file in the project root:
 ```bash
 # .env.local
 BYPASS_AUTH=true
+NEXT_PUBLIC_DEV_ROLE=managers
 ```
 
 This will:
 - Skip all authentication checks in middleware
 - Automatically set a mock SEID header (`dev-user-123`)
-- Use the "Dev User" with role "Developer (Test Mode)"
+- Use the "Dev User" with the specified role
 - Log bypass activity to console with 🔓 emoji
+
+### DEV_ROLE Environment Variable
+
+The `NEXT_PUBLIC_DEV_ROLE` environment variable allows you to specify what role the development user should have:
+
+```bash
+# For manager role (full access to all features)
+NEXT_PUBLIC_DEV_ROLE=managers
+
+# For tax examiner role (limited access)
+NEXT_PUBLIC_DEV_ROLE=tax_examiners
+```
+
+**Key Features:**
+- **API Error Bypass**: When the `/api/v1/era/users/profile` call fails, the system will automatically create a mock user with the specified role
+- **Role-based Access**: The mock user will have appropriate permissions based on the role:
+  - `managers`: Full access including role assignment page, delete permissions, lead role
+  - `tax_examiners`: Standard access without management features
+- **SEID Selection**: Uses the SEID selected in the development banner
+- **Automatic Fallback**: Only activates when the real API fails, allowing you to test both real and mock scenarios
 
 ### Option 2: Manual SEID Header Injection
 
@@ -72,6 +93,8 @@ Add these to your `package.json` scripts:
 {
   "scripts": {
     "dev:no-auth": "BYPASS_AUTH=true npm run dev",
+    "dev:manager": "BYPASS_AUTH=true NEXT_PUBLIC_DEV_ROLE=managers npm run dev",
+    "dev:examiner": "BYPASS_AUTH=true NEXT_PUBLIC_DEV_ROLE=tax_examiners npm run dev",
     "dev:with-auth": "npm run dev"
   }
 }
@@ -79,8 +102,14 @@ Add these to your `package.json` scripts:
 
 Usage:
 ```bash
-# Development with authentication bypassed
+# Development with authentication bypassed (no role specified)
 npm run dev:no-auth
+
+# Development as manager (full access)
+npm run dev:manager
+
+# Development as tax examiner (limited access)
+npm run dev:examiner
 
 # Development with authentication enabled (for testing)
 npm run dev:with-auth
