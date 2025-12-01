@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering for this page since it requires authentication
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useMemo, useState, Suspense, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";

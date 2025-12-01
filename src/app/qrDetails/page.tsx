@@ -430,7 +430,7 @@ function QRDetailsPageContent() {
               <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-6 flex items-center gap-2 text-sm text-gray-700">
                 <User className="w-4 h-4 text-gray-500" />
                 <span>
-                  <strong>Last modified by:</strong> {inventoryRecord?.seid || seid || 'Unknown'} at {inventoryRecord?.updatedDate || qrData?.metadata.lastModifiedDate}
+                  {/* <strong>Last modified by:</strong> {inventoryRecord?.seid || seid || 'Unknown'} at {inventoryRecord?.updatedDate || qrData?.metadata.lastModifiedDate} */}
                 </span>
               </div>
               

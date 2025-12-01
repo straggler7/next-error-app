@@ -19,8 +19,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     async function initializeAuth() {
       try {
-        // Check if we're in the browser
+        // Check if we're in the browser or during build
         if (typeof window === 'undefined') {
+          console.log('🔍 AuthContext: Server-side or build environment detected, skipping auth initialization');
+          setIsLoading(false);
+          return;
+        }
+
+        // Additional check for build environment
+        if (process.env.NODE_ENV === 'production' && !window.location) {
+          console.log('🔍 AuthContext: Build environment detected, skipping auth initialization');
           setIsLoading(false);
           return;
         }
@@ -53,15 +61,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         }
 
-        // If not found, try to get from API endpoint
-        if (!userSeid) {
+        // If not found, try to get from API endpoint (only in browser environment)
+        if (!userSeid && typeof window !== 'undefined') {
           try {
             console.log('🔍 AuthContext: Fetching SEID from API...');
+            
+            // Add timeout to prevent hanging during builds
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            
             const response = await fetch('/api/auth/seid', {
               method: 'GET',
-              cache: 'no-cache'
+              cache: 'no-cache',
+              signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
             console.log('🔍 AuthContext: API response status:', response.status);
+            
             if (response.ok) {
               const data = await response.json();
               console.log('🔍 AuthContext: API response data:', data);
@@ -71,7 +88,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
               console.log('🔍 AuthContext: API error:', errorData);
             }
           } catch (error) {
-            console.warn('Could not fetch SEID from API:', error);
+            if (error instanceof Error && error.name === 'AbortError') {
+              console.warn('AuthContext: API request timed out');
+            } else {
+              console.warn('Could not fetch SEID from API:', error);
+            }
           }
         }
 

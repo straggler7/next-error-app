@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering for this page since it requires authentication
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
