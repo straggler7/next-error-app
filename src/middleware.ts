@@ -53,7 +53,9 @@ export function middleware(request: NextRequest) {
   }
 
   // Check for SEID header from SSO server
-  const seid = request.headers.get('seid') || request.headers.get('x-seid') || request.headers.get('X-SEID');
+  // const seid = request.headers.get('seid') || request.headers.get('x-seid') || request.headers.get('X-SEID');
+  const seid = request.headers.get('REMOTE_USER') || request.headers.get('employeeId');
+  console.log('SEID in middleware, from headers: ', seid);
   
   // If accessing protected routes
   if (PROTECTED_ROUTES.some(route => pathname.startsWith(route)) || pathname === '/') {
@@ -75,6 +77,8 @@ export function middleware(request: NextRequest) {
     // Add SEID to response headers for client-side access
     const response = NextResponse.next();
     response.headers.set('x-user-seid', seid);
+    response.headers.set('seid', seid);
+    console.log('SEID in middleware, from headers: ', seid);
     return response;
   }
 

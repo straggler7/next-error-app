@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
     }
     
     const seid = extractSeidFromHeaders(request.headers);
+    console.log('in api/auth/seid: ', seid);
     const group = extractGroupFromHeaders(request.headers);
     
     if (!seid) {
