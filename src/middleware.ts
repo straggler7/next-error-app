@@ -9,6 +9,16 @@ const PROTECTED_ROUTES = ['/home', '/workRecord', '/qrInventory', '/qrDetails', 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  // Log the specific headers you mentioned
+  console.log('🔍 Middleware Headers Debug:', {
+    pathname,
+    displayName: request.headers.get('displayName'),
+    mail: request.headers.get('mail'),
+    memberof: request.headers.get('memberof'),
+    employeeId: request.headers.get('employeeId'),
+    REMOTE_USER: request.headers.get('REMOTE_USER')
+  });
+  
   // Development bypass - check environment variables at runtime
   const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;
   const bypassAuth = process.env.BYPASS_AUTH === 'true';

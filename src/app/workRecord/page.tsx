@@ -419,21 +419,6 @@ function Form4868ERSPageContent() {
       console.log('ERA DTO workRecord:', eraDtoData.workRecord);
       console.log('Clear codes populated:', eraDtoData.clearCodes);
       console.log('Action code populated:', eraDtoData.suspendStatusCode);
-    } else {
-      // Fallback: Load from eraDtoPayload.json for development/testing
-      import('../../data/eraDtoPayload.json').then((eraData) => {
-        setEraDto(eraData.default);
-        setInventoryId(String(eraData.default.inventoryId));
-        
-        // Convert ERA DTO to form elements
-        const elements = convertEraDtoToFormElements(eraData.default);
-        setFormElements(elements);
-        setOriginalFormElements([...elements]);
-        
-        console.log('ERA DTO loaded from fallback file:', eraData.default);
-        console.log('Form elements created:', elements);
-        console.log('ERA DTO workRecord:', eraData.default.workRecord);
-      });
     }
     
     if (storedSelectionData) {

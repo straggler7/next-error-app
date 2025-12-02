@@ -3,13 +3,20 @@ import { User } from '../types';
 /**
  * Extract SEID from various possible header formats
  */
+// export function extractSeidFromHeaders(headers: Headers): string | null {
+//   console.log('Extracting SEID from headers: ', headers);
+//   return headers.get('seid') || 
+//          headers.get('uid') || 
+//          headers.get('x-seid') || 
+//          headers.get('X-SEID') || 
+//          headers.get('x-user-seid') ||
+//          null;
+// }
+
 export function extractSeidFromHeaders(headers: Headers): string | null {
   console.log('Extracting SEID from headers: ', headers);
-  return headers.get('seid') || 
-         headers.get('uid') || 
-         headers.get('x-seid') || 
-         headers.get('X-SEID') || 
-         headers.get('x-user-seid') ||
+  return headers.get('employeeId') || 
+         headers.get('REMOTE_USER') || 
          null;
 }
 
