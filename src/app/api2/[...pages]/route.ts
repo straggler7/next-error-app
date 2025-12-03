@@ -4,18 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Backend URL configurations
-const BACKEND_URLS = {
-  // Reports API (api2 prefix)
-  reports: process.env.REPORTS_API_URL || 'http://localhost:8081',
-  // Inventory/ERA API (api prefix)  
-  inventory: process.env.INVENTORY_API_URL || 'http://localhost:8081',
-  // Default fallback
-  default: process.env.BACKEND_URL || 'http://localhost:8081'
-};
+// Backend URL for reports
+const REPORTS_BACKEND_URL = process.env.REPORTS_API_URL || 'http://localhost:8081';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
-  console.log('GET request received');
+  console.log('API2 GET request received');
   const resolvedParams = await params;
   return handleRequest(request, resolvedParams, 'GET');
 }
@@ -40,25 +33,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   return handleRequest(request, resolvedParams, 'PATCH');
 }
 
-function getBackendUrl(path: string[], originalUrl: string): string {
-    console.log('Path segments ------------- :', path);
-    console.log('Original URL ------------- :', originalUrl);
-  
-  // Check the original URL to determine routing
-  // Since we're in /api/[...pages], we need to check what came before
-  if (originalUrl.startsWith('/api2/')) {
-    return BACKEND_URLS.reports;
-  }
-  
-  // Default to inventory backend for /api/ paths
-  if (originalUrl.startsWith('/api/')) {
-    return BACKEND_URLS.inventory;
-  }
-  
-  // Default backend for other paths
-  return BACKEND_URLS.default;
-}
-
 async function handleRequest(
   request: NextRequest, 
   params: { pages: string[] }, 
@@ -68,25 +42,19 @@ async function handleRequest(
     // Build the backend URL from the dynamic route segments
     const path = params.pages;
     const originalUrl = request.nextUrl.pathname;
-    const backendBaseUrl = getBackendUrl(path, originalUrl);
     
-    // Reconstruct the full path including the api/api2 prefix
-    let apiPath;
-    if (originalUrl.startsWith('/api2/')) {
-      apiPath = `api2/${path.join('/')}`;
-    } else if (originalUrl.startsWith('/api/')) {
-      apiPath = `api/${path.join('/')}`;
-    } else {
-      apiPath = path.join('/');
-    }
+    console.log('API2 Path segments ------------- :', path);
+    console.log('API2 Original URL ------------- :', originalUrl);
     
-    const url = `${backendBaseUrl}/${apiPath}`;
+    // Reconstruct the full path with api2 prefix
+    const apiPath = `api2/${path.join('/')}`;
+    const url = `${REPORTS_BACKEND_URL}/${apiPath}`;
     
     // Get search params from the original request
     const searchParams = request.nextUrl.searchParams.toString();
     const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
-    console.log(`🔄 Proxying ${method} request to: ${fullUrl}`);
+    console.log(`🔄 API2 Proxying ${method} request to: ${fullUrl}`);
 
     // Prepare headers - forward important ones and exclude problematic ones
     const forwardHeaders = new Headers();
@@ -127,7 +95,7 @@ async function handleRequest(
       signal: AbortSignal.timeout(30000) // 30 second timeout
     });
 
-    console.log(`✅ Backend responded with status: ${response.status}`);
+    console.log(`✅ API2 Backend responded with status: ${response.status}`);
 
     // Handle different response types
     const contentType = response.headers.get('content-type') || '';
@@ -163,7 +131,7 @@ async function handleRequest(
     }
 
   } catch (error) {
-    console.error('❌ Proxy error:', error);
+    console.error('❌ API2 Proxy error:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(
