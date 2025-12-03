@@ -4,6 +4,10 @@ import { useEffect } from 'react';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 import Link from 'next/link';
 
+// Force all pages to be dynamic (no static generation)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function Error({
   error,
   reset,

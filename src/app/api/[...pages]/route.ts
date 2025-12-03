@@ -1,0 +1,170 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+// Force this API route to be dynamic
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// Backend URL configurations
+const BACKEND_URLS = {
+  // Reports API (api2 prefix)
+  reports: process.env.REPORTS_API_URL || 'http://localhost:8081',
+  // Inventory/ERA API (api prefix)  
+  inventory: process.env.INVENTORY_API_URL || 'http://localhost:8081',
+  // Default fallback
+  default: process.env.BACKEND_URL || 'http://localhost:8081'
+};
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
+  console.log('GET request received');
+  const resolvedParams = await params;
+  return handleRequest(request, resolvedParams, 'GET');
+}
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
+  const resolvedParams = await params;
+  return handleRequest(request, resolvedParams, 'POST');
+}
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
+  const resolvedParams = await params;
+  return handleRequest(request, resolvedParams, 'PUT');
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
+  const resolvedParams = await params;
+  return handleRequest(request, resolvedParams, 'DELETE');
+}
+
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
+  const resolvedParams = await params;
+  return handleRequest(request, resolvedParams, 'PATCH');
+}
+
+function getBackendUrl(path: string[]): string {
+  const fullPath = path.join('/');
+  
+  // Route to reports backend for api2 paths
+  if (fullPath.startsWith('api2/')) {
+    return BACKEND_URLS.reports;
+  }
+  
+  // Route to inventory backend for api paths
+  if (fullPath.startsWith('api/')) {
+    return BACKEND_URLS.inventory;
+  }
+  
+  // Default backend for other paths
+  return BACKEND_URLS.default;
+}
+
+async function handleRequest(
+  request: NextRequest, 
+  params: { pages: string[] }, 
+  method: string
+) {
+  try {
+    // Build the backend URL from the dynamic route segments
+    const path = params.pages;
+    const backendBaseUrl = getBackendUrl(path);
+    
+    // Keep the path intact - just join the segments
+    const apiPath = path.join('/');
+    
+    const url = `${backendBaseUrl}/${apiPath}`;
+    
+    // Get search params from the original request
+    const searchParams = request.nextUrl.searchParams.toString();
+    const fullUrl = searchParams ? `${url}?${searchParams}` : url;
+
+    console.log(`🔄 Proxying ${method} request to: ${fullUrl}`);
+
+    // Prepare headers - forward important ones and exclude problematic ones
+    const forwardHeaders = new Headers();
+    
+    // Forward all headers except problematic ones
+    const excludeHeaders = ['host', 'connection', 'content-length', 'transfer-encoding'];
+    
+    request.headers.forEach((value, key) => {
+      if (!excludeHeaders.includes(key.toLowerCase())) {
+        forwardHeaders.set(key, value);
+      }
+    });
+
+    // Ensure content-type is set for requests with body
+    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+      if (!forwardHeaders.has('content-type')) {
+        forwardHeaders.set('content-type', 'application/json');
+      }
+    }
+
+    // Prepare request body for methods that support it
+    let body: string | undefined;
+    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+      try {
+        const requestBody = await request.text();
+        body = requestBody || undefined;
+      } catch (error) {
+        console.warn('Could not read request body:', error);
+      }
+    }
+
+    // Make the request to backend
+    const response = await fetch(fullUrl, {
+      method,
+      headers: forwardHeaders,
+      body,
+      // Add timeout to prevent hanging
+      signal: AbortSignal.timeout(30000) // 30 second timeout
+    });
+
+    console.log(`✅ Backend responded with status: ${response.status}`);
+
+    // Handle different response types
+    const contentType = response.headers.get('content-type') || '';
+    
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return NextResponse.json(data, { 
+        status: response.status,
+        headers: {
+          // Forward relevant response headers
+          'content-type': response.headers.get('content-type') || 'application/json',
+          'cache-control': response.headers.get('cache-control') || 'no-cache',
+        }
+      });
+    } else if (contentType.includes('text/')) {
+      const text = await response.text();
+      return new NextResponse(text, {
+        status: response.status,
+        headers: {
+          'content-type': response.headers.get('content-type') || 'text/plain',
+        }
+      });
+    } else {
+      // Handle binary responses (files, images, etc.)
+      const buffer = await response.arrayBuffer();
+      return new NextResponse(buffer, {
+        status: response.status,
+        headers: {
+          'content-type': response.headers.get('content-type') || 'application/octet-stream',
+          'content-length': response.headers.get('content-length') || buffer.byteLength.toString(),
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Proxy error:', error);
+    
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json(
+        { error: 'Backend request timeout' },
+        { status: 504 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Backend service unavailable', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 502 }
+    );
+  }
+}

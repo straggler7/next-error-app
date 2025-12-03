@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
+  console.log('🚀 API /auth/seid - Request received from:', request.headers.get('user-agent') || 'Unknown client');
+  
   try {
     // Development bypass - same logic as middleware
     const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;

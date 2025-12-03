@@ -26,8 +26,8 @@ interface ProgramFormData {
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuth();
-  console.log("user in home", user)
+  const { user, isAuthenticated, isLoading, seid } = useAuth();
+  console.log("user in home", user, seid)
   // Helper functions to check user permissions for selected program
   const hasQualityReviewEnabled = () => {
     if (!user?.profile?.profile?.profiles) return false;

@@ -493,6 +493,9 @@ git branch: json-form-and-landing-page-api-changes-qr-pages-new-apis-breadcrumbs
 git branch: mvp-november
 (11/24/2025)
 
+git branch: mvp-november-bypass-auth-no-static
+(12/03/2025)
+
 {
   "inventoryId": 14,
   "status": "RESOLVED",
@@ -2302,3 +2305,18 @@ The build should now complete successfully without hanging on static page genera
 I have these headers
 displayName, mail, memberof, employeeId
 REMOTE_USER
+
+
+npm why @typescript-eslint/parser
+
+
+./test-headers.sh
+
+# Or individual test:
+curl -X GET "http://localhost:3000/api/auth/seid" \
+  -H "employeeId: u12345" \
+  -H "REMOTE_USER: u67890" \
+  -v
+
+
+mvp-november-bypass-auth-no-static
