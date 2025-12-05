@@ -82,8 +82,9 @@ export class QRInventoryService {
       // }
 
       // const response = await fetch(`/api/era/inventory?${params.toString()}`, {
-        // const response = await fetch(`/api/inventories.json`, {
-      const response = await fetch(`/api/v1/era/inventories/inventory-search`, {
+      // const response = await fetch(`/api/inventories.json`, {
+      // const response = await fetch(`/api/v1/era/inventories/inventory-search`, {
+      const response = await fetch(`/api/v1/era/inventories/quality-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
