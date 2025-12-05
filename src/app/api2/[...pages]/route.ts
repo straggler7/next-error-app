@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Force this API route to be dynamic
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// export const revalidate = 0;
 
 // Backend URL for reports
 const REPORTS_BACKEND_URL = process.env.REPORTS_API_URL || 'http://localhost:8081';

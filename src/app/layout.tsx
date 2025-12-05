@@ -6,7 +6,7 @@ import DevBanner from "../components/DevBanner";
 
 // Force all pages to be dynamic (no static generation)
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "IRS Error Resolution Application",

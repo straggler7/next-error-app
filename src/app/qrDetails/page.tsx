@@ -511,7 +511,18 @@ function QRDetailsPageContent() {
                       
                       {note.comments && (() => {
                         try {
-                          const parsedComments = typeof note.comments === 'string' ? JSON.parse(note.comments) : note.comments;
+                          // Handle different comment formats
+                          let parsedComments = note.comments;
+                          
+                          // If comments is a string, try to parse it as JSON first
+                          if (typeof note.comments === 'string') {
+                            try {
+                              parsedComments = JSON.parse(note.comments);
+                            } catch {
+                              // If JSON parsing fails, treat it as a plain string
+                              parsedComments = note.comments;
+                            }
+                          }
                           
                           // Handle case where parsedComments is a plain string
                           if (typeof parsedComments === 'string') {
