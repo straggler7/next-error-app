@@ -50,8 +50,8 @@ export default function Header({ showBackButton = false, backHref = '/', disable
               <UserIcon size={20} />
             </div>
             <div className="flex flex-col items-end">
-              <div className="text-sm font-semibold leading-tight">{user.name}</div>
-              <div className="text-xs opacity-80 leading-tight">{user.role} • {user.group}</div>
+              <div className="text-sm font-semibold leading-tight">{user.name} ({user.role})</div>
+              {/* <div className="text-xs opacity-80 leading-tight">{user.role} • {user.group}</div> */}
             </div>
             <div className="relative">
               <button
