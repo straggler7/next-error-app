@@ -289,6 +289,9 @@ function Form4868ERSPageContent() {
 
   // Convert ERS reason codes to ErrorItem format for sidebar
   const convertErsErrorsToErrorItems = useCallback((): ErrorItem[] => {
+    const errorItems: ErrorItem[] = [];
+    let errorIndex = 0;
+    
     // Try ERA DTO first, then fallback to jsonWorkRecord
     let errorSource = null;
     let ersReasonCds: string[] = [];
@@ -302,49 +305,106 @@ function Form4868ERSPageContent() {
       ersReasonCds = errorSource.ersReasonCds || [];
     }
     
-    if (!errorSource || ersReasonCds.length === 0) {
-      console.log('No errors found. ErrorSource:', errorSource, 'ersReasonCds:', ersReasonCds);
-      return [];
-    }
-    
     // Get current clear codes to filter out matching errors
     const currentClearCodes = getClearCodesArray();
     
-    // Filter out errors that match clear codes
-    const filteredErrors = ersReasonCds.filter((code: string) => {
-      const isCleared = currentClearCodes.includes(code);
-      if (isCleared) {
-        console.log(`Error ${code} is cleared by clear codes, hiding from display`);
-      }
-      return !isCleared;
-    });
-    
-    console.log('Original errors:', ersReasonCds, 'Clear codes:', currentClearCodes, 'Filtered errors:', filteredErrors);
-    
-    return filteredErrors.map((code: string, index: number) => {
-      // Look up error configuration
-      const errorConfigItem = (errorConfig as any)[code];
-      const description = errorConfigItem?.description || `Error code: ${code}`;
-      const fieldMappings = errorConfigItem?.fieldMappings || [];
-      
-      return {
-        id: `ers-error-${index}`,
-        code: code,
-        description: description,
-        type: 'Error' as const,
-        status: 'active' as const,
-        errorFields: fieldMappings, // Use fieldMappings from error config
-        irm: {
-          title: `IRM 3.12.${180 + index} - Error Resolution`,
-          content: `Resolve the following error: ${description}`,
-          steps: [
-            'Review the error description',
-            'Correct the identified issue in the highlighted fields',
-            'Validate the correction'
-          ]
+    // Process ERS reason codes
+    if (errorSource && ersReasonCds.length > 0) {
+      // Filter out errors that match clear codes
+      const filteredErrors = ersReasonCds.filter((code: string) => {
+        const isCleared = currentClearCodes.includes(code);
+        if (isCleared) {
+          console.log(`Error ${code} is cleared by clear codes, hiding from display`);
         }
-      };
-    });
+        return !isCleared;
+      });
+      
+      console.log('Original errors:', ersReasonCds, 'Clear codes:', currentClearCodes, 'Filtered errors:', filteredErrors);
+      
+      filteredErrors.forEach((code: string) => {
+        // Look up error configuration
+        const errorConfigItem = (errorConfig as any)[code];
+        const description = errorConfigItem?.description || `Error code: ${code}`;
+        const fieldMappings = errorConfigItem?.fieldMappings || [];
+        const isFieldError = fieldMappings.length > 0;
+        
+        errorItems.push({
+          id: `ers-error-${errorIndex}`,
+          code: code,
+          description: description,
+          type: 'Error' as const,
+          status: 'active' as const,
+          errorFields: fieldMappings, // Use fieldMappings from error config
+          errorConfigKey: isFieldError ? code : undefined, // Add error config key for field errors only
+          isFieldError: isFieldError, // Flag to identify field errors
+          irm: {
+            title: `IRM 3.12.${180 + errorIndex} - Error Resolution`,
+            content: `Resolve the following error: ${description}`,
+            steps: [
+              'Review the error description',
+              'Correct the identified issue in the highlighted fields',
+              'Validate the correction'
+            ]
+          }
+        });
+        errorIndex++;
+      });
+    }
+    
+    // Process displayFields with hasFieldError: true
+    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    if (displayFields) {
+      Object.entries(displayFields).forEach(([fieldKey, fieldConfig]: [string, any]) => {
+        if (fieldConfig.hasFieldError === true) {
+          // Find corresponding error config key for this field
+          let errorConfigKey: string | undefined;
+          let description = `Field error: ${fieldKey}`;
+          
+          // Look for error config entries that map to this field
+          Object.entries(errorConfig).forEach(([errorCode, errorConfigItem]: [string, any]) => {
+            if (errorConfigItem.fieldMappings && errorConfigItem.fieldMappings.includes(fieldKey)) {
+              errorConfigKey = errorCode;
+              description = errorConfigItem.description || description;
+            }
+          });
+          
+          // If no specific error config found, use field config for description
+          if (!errorConfigKey) {
+            const fieldConfigItem = (fieldConfig as any)[fieldKey];
+            if (fieldConfigItem?.label) {
+              description = `Field error: ${fieldConfigItem.label}`;
+            }
+          }
+          
+          errorItems.push({
+            id: `field-error-${errorIndex}`,
+            code: errorConfigKey || fieldKey,
+            description: description,
+            type: 'Error' as const,
+            status: 'active' as const,
+            errorFields: [fieldKey], // The field itself
+            errorConfigKey: errorConfigKey, // Error config key if found
+            isFieldError: true, // Always true for displayField errors
+            irm: {
+              title: `IRM 3.12.${180 + errorIndex} - Field Error Resolution`,
+              content: `Resolve the following field error: ${description}`,
+              steps: [
+                'Review the field error',
+                'Correct the value in the highlighted field',
+                'Validate the correction'
+              ]
+            }
+          });
+          errorIndex++;
+        }
+      });
+    }
+    
+    if (errorItems.length === 0) {
+      console.log('No errors found. ErrorSource:', errorSource, 'ersReasonCds:', ersReasonCds, 'displayFields:', displayFields);
+    }
+    
+    return errorItems;
   }, [eraDto, jsonWorkRecord, getClearCodesArray]);
 
   // Fetch suspense codes on component mount
@@ -596,8 +656,8 @@ function Form4868ERSPageContent() {
       setHighlightedFields(error.errorFields || []);
       setSelectedErrorId(error.id);
       
-      // If there are field mappings, focus on the first field
-      if (error.errorFields && error.errorFields.length > 0) {
+      // Only focus on fields for field errors, not other errors
+      if (error.isFieldError && error.errorFields && error.errorFields.length > 0) {
         const firstFieldId = error.errorFields[0];
         setTimeout(() => {
           const fieldElement = document.getElementById(firstFieldId);

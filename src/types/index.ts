@@ -48,6 +48,8 @@ export interface ErrorItem {
   description: string;
   status: 'active' | 'updated' | 'resolved';
   errorFields?: string[];
+  errorConfigKey?: string; // Key from errorConfig4868 for field errors
+  isFieldError?: boolean; // Flag to identify field errors
   irm?: {
     title: string;
     content: string;

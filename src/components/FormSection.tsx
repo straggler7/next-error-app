@@ -57,7 +57,7 @@ export function FormField({
   const hasChanged = showChangeIndicator && originalValue && currentValue && originalValue !== currentValue;
   
   return (
-    <div className={`mb-2 ${className} ${isHighlighted ? 'ring-2 ring-red-500 ring-opacity-50 rounded-md p-2 bg-red-50' : ''}`}>
+    <div className={`mb-2 ${className} ${isHighlighted ? 'ring-1 ring-red-200 ring-opacity-50 rounded-md p-2 bg-red-50' : ''}`}>
       <label className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
         {label}
         {required && <span className="text-red-600 ml-1">*</span>}
