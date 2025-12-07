@@ -44,11 +44,12 @@ export default function HomePage() {
   };
 
   const hasDlnSearchEnabled = () => {
-    if (!user?.profile?.profile?.profiles || !programForm.program) return false;
+    return false;
+    // if (!user?.profile?.profile?.profiles || !programForm.program) return false;
     
-    // Only show search records if a program is selected AND that program has dlnSearch enabled
-    const selectedProgramProfile = user.profile.profile.profiles[programForm.program];
-    return selectedProgramProfile?.dlnSearch || false;
+    // // Only show search records if a program is selected AND that program has dlnSearch enabled
+    // const selectedProgramProfile = user.profile.profile.profiles[programForm.program];
+    // return selectedProgramProfile?.dlnSearch || false;
   };
   
   // Search form state
@@ -580,7 +581,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Card: Search Records - Only show if user has dlnSearch enabled */}
-            {false && hasDlnSearchEnabled() && (
+            {hasDlnSearchEnabled() && (
               <div className="card bg-white rounded-xl p-8 border" style={{ 
                 borderRadius: '12px', 
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
