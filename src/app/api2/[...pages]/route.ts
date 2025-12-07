@@ -47,7 +47,7 @@ async function handleRequest(
     console.log('API2 Original URL ------------- :', originalUrl);
     
     // Reconstruct the full path with api2 prefix
-    const apiPath = `api2/${path.join('/')}`;
+    const apiPath = `api/${path.join('/')}`;
     const url = `${REPORTS_BACKEND_URL}/${apiPath}`;
     
     // Get search params from the original request

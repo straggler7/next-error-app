@@ -3,7 +3,7 @@ import { extractSeidFromHeaders, extractGroupFromHeaders } from '../../../../lib
 
 // Force this API route to be dynamic (non-static)
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   console.log('🚀 API /auth/seid - Request received from:', request.headers.get('user-agent') || 'Unknown client');
@@ -12,18 +12,18 @@ export async function GET(request: NextRequest) {
     // Development bypass - same logic as middleware
     const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;
     const bypassAuth = process.env.BYPASS_AUTH === 'true';
-    const forceBypass = true; // TEMPORARY: Remove when env vars work
+    // const forceBypass = true; // TEMPORARY: Remove when env vars work
     
     console.log('🔍 API SEID Debug:', {
       NODE_ENV: process.env.NODE_ENV,
       BYPASS_AUTH: process.env.BYPASS_AUTH,
       isDevelopment,
       bypassAuth,
-      shouldBypass: (isDevelopment && bypassAuth) || forceBypass
+      shouldBypass: (isDevelopment && bypassAuth)
     });
     
     // If bypassing auth, return mock SEID
-    if ((isDevelopment && bypassAuth) || forceBypass) {
+    if ((isDevelopment && bypassAuth)) {
       console.log('🔓 API: Returning mock SEID for development');
       return NextResponse.json({ 
         seid: 'u1000',

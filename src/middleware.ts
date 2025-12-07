@@ -22,9 +22,11 @@ export function middleware(request: NextRequest) {
   // Development bypass - check environment variables at runtime
   const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;
   const bypassAuth = process.env.BYPASS_AUTH === 'true';
+  console.log('Bypass auth middleware: ', bypassAuth);
+  console.log('isDevelopment: ', isDevelopment);
   
   // TEMPORARY: Force bypass for development (remove this line when env vars work)
-  const forceBypass = true; // Set to false to disable
+  // const forceBypass = true; // Set to false to disable
   
   console.log('🔍 Middleware Debug:', {
     pathname,
@@ -37,7 +39,7 @@ export function middleware(request: NextRequest) {
   
   // Development bypass - skip authentication entirely
   // if ((isDevelopment && bypassAuth) || forceBypass) {
-  if (forceBypass) {
+  if (isDevelopment && bypassAuth) {
     console.log('Middleware - Development mode: Authentication bypassed for ', pathname);
     const response = NextResponse.next();
     // Set a mock SEID for development

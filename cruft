@@ -2320,3 +2320,20 @@ curl -X GET "http://localhost:3000/api/auth/seid" \
 
 
 mvp-november-bypass-auth-no-static
+
+
+notes": [{"author":"u1000","createdTime":"2025-11-02T01:36:20.967Z","comments": "string comment"}, {"author":"u1000","createdTime":"2025-11-02T01:36:20.967Z","comments":{"fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAXYY"}], "additionalComments": ["foo bar baz \n", "this is another comment"]}}, {"author":"unknown","createdTime":"2025-11-02T01:36:20.967Z","comments":{"fieldChanges":[{"fieldName":"Taxpayer Name Control (01NC)","beforeValue":"SEAG","afterValue":"SEAGXXX"}]}}],
+ 
+// next.config.ts
+async rewrites() {
+  return[
+    {
+      source: '/api/:path*',
+      destination: 'http://localhost:8081/api/:path*',
+    },
+    {
+      source: '/api2/:path*',
+      destination: 'http://localhost:8082/api/:path*',
+    },
+  ];
+}

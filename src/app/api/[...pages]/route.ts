@@ -73,7 +73,7 @@ async function handleRequest(
     // Reconstruct the full path including the api/api2 prefix
     let apiPath;
     if (originalUrl.startsWith('/api2/')) {
-      apiPath = `api2/${path.join('/')}`;
+      apiPath = `api/${path.join('/')}`;
     } else if (originalUrl.startsWith('/api/')) {
       apiPath = `api/${path.join('/')}`;
     } else {
