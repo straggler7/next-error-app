@@ -580,7 +580,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Card: Search Records - Only show if user has dlnSearch enabled */}
-            {hasDlnSearchEnabled() && (
+            {false && hasDlnSearchEnabled() && (
               <div className="card bg-white rounded-xl p-8 border" style={{ 
                 borderRadius: '12px', 
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
