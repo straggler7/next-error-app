@@ -333,10 +333,10 @@ function Form4868ERSPageContent() {
         }
         
         // For non-field errors, check if clear code is entered and error is clearable
-        if (clearCodeEntered && errorConfigItem?.clearable === true) {
-          console.log(`Non-field error ${code} is cleared by clear code 'C'`);
-          return false; // Hide this error
-        }
+        // if (clearCodeEntered && errorConfigItem?.clearable === true) {
+        //   console.log(`Non-field error ${code} is cleared by clear code 'C'`);
+        //   return false; // Hide this error
+        // }
         
         // Legacy support: also check old clear codes array
         const isCleared = currentClearCodes.includes(code);
@@ -1767,7 +1767,13 @@ function Form4868ERSPageContent() {
                       >
                         <FormInput
                           value={clearCodesInput}
-                          onChange={(value) => setClearCodesInput(value)}
+                          onChange={(value) => {
+                            // Only allow 'C' or 'c' characters
+                            const filteredValue = value.replace(/[^Cc]/g, '');
+                            // Limit to single character
+                            const singleChar = filteredValue.slice(0, 1);
+                            setClearCodesInput(singleChar);
+                          }}
                           placeholder={hasFieldErrors ? "Disabled - resolve field errors first" : (isCurrentErrorClearable ? "Enter 'C' to clear error" : "Current error not clearable")}
                           disabled={hasFieldErrors || !isCurrentErrorClearable}
                         />
