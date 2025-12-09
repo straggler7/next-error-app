@@ -20,6 +20,28 @@ export default function Header({ showBackButton = false, backHref = '/', disable
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
 
+  const handleLogout = async () => {
+    try {
+      // Close the dropdown menu
+      setIsUserMenuOpen(false);
+      
+      // Make API call to logout endpoint
+      await fetch('/api/v1/era/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      // Redirect to logout page regardless of API response
+      router.push('/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect to logout page even if API call fails
+      router.push('/logout');
+    }
+  };
+
   // Don't render if not authenticated or no user
   if (!isAuthenticated || !user) {
     return null;
@@ -91,12 +113,12 @@ export default function Header({ showBackButton = false, backHref = '/', disable
                       Daily Summary
                     </button>
                     <hr className="my-2 border-gray-200" />
-                    <a 
-                      href="#" 
-                      className="block px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:text-blue-900 transition-colors"
+                    <button 
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:text-blue-900 transition-colors"
                     >
                       Logout
-                    </a>
+                    </button>
                   </div>
                 </>
               )}
