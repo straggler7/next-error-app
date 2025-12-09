@@ -496,6 +496,9 @@ git branch: mvp-november
 git branch: mvp-november-bypass-auth-no-static
 (12/03/2025)
 
+git branch: mvp-december
+(12/09/2025)
+
 {
   "inventoryId": 14,
   "status": "RESOLVED",
@@ -2337,3 +2340,5 @@ async rewrites() {
     },
   ];
 }
+
+        "ersReasonCds": ["135", "004", "103", "01TIN", "01NC"],

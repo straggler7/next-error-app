@@ -1,10 +1,12 @@
 
 {
     "004": {
-        "description": "EIF/NAP Mismatch"
+        "description": "EIF/NAP Mismatch",
+        "canClear": true
     },
     "005": {
-        "description": "Name Control Mismatch NAP/EIF"
+        "description": "Name Control Mismatch NAP/EIF",
+        "canClear": true
     },
     "011": {
         "description": "NAP Linkage Down"
@@ -14,6 +16,10 @@
     },
     "107": {
         "description": "Tax Period later than the Current Year"
+    },
+    "111": {
+        "description": "Tax Period/Transaction Date",
+        "canClear": true
     },
     "113": {
         "description": "Transaction Date"

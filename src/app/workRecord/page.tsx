@@ -289,7 +289,8 @@ function Form4868ERSPageContent() {
 
   // Convert ERS reason codes to ErrorItem format for sidebar
   const convertErsErrorsToErrorItems = useCallback((): ErrorItem[] => {
-    const errorItems: ErrorItem[] = [];
+    const fieldErrors: ErrorItem[] = [];
+    const nonFieldErrors: ErrorItem[] = [];
     let errorIndex = 0;
     
     // Try ERA DTO first, then fallback to jsonWorkRecord
@@ -328,7 +329,7 @@ function Form4868ERSPageContent() {
         const fieldMappings = errorConfigItem?.fieldMappings || [];
         const isFieldError = fieldMappings.length > 0;
         
-        errorItems.push({
+        const errorItem = {
           id: `ers-error-${errorIndex}`,
           code: code,
           description: description,
@@ -346,7 +347,14 @@ function Form4868ERSPageContent() {
               'Validate the correction'
             ]
           }
-        });
+        };
+        
+        // Separate field errors from non-field errors
+        if (isFieldError) {
+          fieldErrors.push(errorItem);
+        } else {
+          nonFieldErrors.push(errorItem);
+        }
         errorIndex++;
       });
     }
@@ -376,7 +384,7 @@ function Form4868ERSPageContent() {
             }
           }
           
-          errorItems.push({
+          fieldErrors.push({
             id: `field-error-${errorIndex}`,
             code: errorConfigKey || fieldKey,
             description: description,
@@ -400,11 +408,24 @@ function Form4868ERSPageContent() {
       });
     }
     
-    if (errorItems.length === 0) {
+    // Apply the new logic: show field errors first, or if none exist, show only the first non-field error
+    let finalErrorItems: ErrorItem[] = [];
+    
+    if (fieldErrors.length > 0) {
+      // Show all field errors
+      finalErrorItems = fieldErrors;
+      console.log(`Showing ${fieldErrors.length} field errors`);
+    } else if (nonFieldErrors.length > 0) {
+      // Show only the first non-field error from ersReasonCds
+      finalErrorItems = [nonFieldErrors[0]];
+      console.log(`No field errors found, showing first non-field error: ${nonFieldErrors[0].code}`);
+    }
+    
+    if (finalErrorItems.length === 0) {
       console.log('No errors found. ErrorSource:', errorSource, 'ersReasonCds:', ersReasonCds, 'displayFields:', displayFields);
     }
     
-    return errorItems;
+    return finalErrorItems;
   }, [eraDto, jsonWorkRecord, getClearCodesArray]);
 
   // Fetch suspense codes on component mount
