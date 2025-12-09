@@ -30,6 +30,7 @@ export default function Header({ showBackButton = false, backHref = '/', disable
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'SEID': `${user?.seid}`
         },
       });
       
