@@ -332,6 +332,13 @@ function Form4868ERSPageContent() {
           return true;
         }
         
+        // Check if error is already cleared in the loaded eraDto.clearCodes
+        const eraDtoClearCodes = eraDto?.clearCodes || [];
+        if (eraDtoClearCodes.includes(code)) {
+          console.log(`Error ${code} is already cleared in eraDto.clearCodes, hiding from display`);
+          return false;
+        }
+        
         // For non-field errors, check if clear code is entered and error is clearable
         // if (clearCodeEntered && errorConfigItem?.clearable === true) {
         //   console.log(`Non-field error ${code} is cleared by clear code 'C'`);
@@ -487,10 +494,10 @@ function Form4868ERSPageContent() {
       setEraDto(eraDtoData);
       setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
       
-      // Populate clear codes and action code from stored DTO
-      if (eraDtoData.clearCodes && Array.isArray(eraDtoData.clearCodes)) {
-        setClearCodesInput(eraDtoData.clearCodes.join(', '));
-      }
+      // Populate action code from stored DTO
+      // Note: clearCodesInput is separate from eraDtoData.clearCodes
+      // eraDtoData.clearCodes contains actual error codes like ["111", "103"]
+      // clearCodesInput only accepts 'C' or 'c' for UI input
       if (eraDtoData.suspendStatusCode) {
         setActionCode(eraDtoData.suspendStatusCode);
       }
@@ -585,10 +592,10 @@ function Form4868ERSPageContent() {
         setEraDto(eraDtoData);
         setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
         
-        // Populate clear codes and action code from new DTO
-        if (eraDtoData.clearCodes && Array.isArray(eraDtoData.clearCodes)) {
-          setClearCodesInput(eraDtoData.clearCodes.join(', '));
-        }
+        // Populate action code from new DTO
+        // Note: clearCodesInput is separate from eraDtoData.clearCodes
+        // eraDtoData.clearCodes contains actual error codes like ["111", "103"]
+        // clearCodesInput only accepts 'C' or 'c' for UI input
         if (eraDtoData.suspendStatusCode) {
           setActionCode(eraDtoData.suspendStatusCode);
         }
@@ -1777,9 +1784,9 @@ function Form4868ERSPageContent() {
                           placeholder={hasFieldErrors ? "Disabled - resolve field errors first" : (isCurrentErrorClearable ? "Enter 'C' to clear error" : "Current error not clearable")}
                           disabled={hasFieldErrors || !isCurrentErrorClearable}
                         />
-                        <div className="mt-1 text-xs text-gray-600">
+                        {/* <div className="mt-1 text-xs text-gray-600">
                           {hasFieldErrors ? "Clear codes disabled when field errors are present" : (isCurrentErrorClearable ? "Enter 'C' to clear the current error" : "Current error is not clearable")}
-                        </div>
+                        </div> */}
                       </FormField>
                     </div>
 
