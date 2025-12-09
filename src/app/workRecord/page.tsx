@@ -270,7 +270,13 @@ function Form4868ERSPageContent() {
   const [notes, setNotes] = useState<any[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
-  // Helper function to parse clear codes from comma-separated input
+  // Helper function to check if clear code is entered (C or c)
+  const hasClearCode = useCallback(() => {
+    const trimmed = clearCodesInput.trim().toLowerCase();
+    return trimmed === 'c';
+  }, [clearCodesInput]);
+
+  // Helper function to parse clear codes from comma-separated input (for error filtering)
   const getClearCodesArray = useCallback(() => {
     console.log('getting clear codes array from clearCodesInput:', clearCodesInput);
     
@@ -278,6 +284,7 @@ function Form4868ERSPageContent() {
       return [];
     }
     
+    // Legacy support: parse comma-separated codes
     const result = clearCodesInput
       .split(',')
       .map(code => code.trim())
@@ -311,13 +318,34 @@ function Form4868ERSPageContent() {
     
     // Process ERS reason codes
     if (errorSource && ersReasonCds.length > 0) {
-      // Filter out errors that match clear codes
+      // For new clear code system: filter out non-field errors if 'C' is entered and error is clearable
+      const clearCodeEntered = hasClearCode();
+      
       const filteredErrors = ersReasonCds.filter((code: string) => {
+        // Check if this is a field error
+        const errorConfigItem = (errorConfig as any)[code];
+        const fieldMappings = errorConfigItem?.fieldMappings || [];
+        const isFieldError = fieldMappings.length > 0;
+        
+        // Field errors are never cleared by clear codes
+        if (isFieldError) {
+          return true;
+        }
+        
+        // For non-field errors, check if clear code is entered and error is clearable
+        if (clearCodeEntered && errorConfigItem?.clearable === true) {
+          console.log(`Non-field error ${code} is cleared by clear code 'C'`);
+          return false; // Hide this error
+        }
+        
+        // Legacy support: also check old clear codes array
         const isCleared = currentClearCodes.includes(code);
         if (isCleared) {
           console.log(`Error ${code} is cleared by clear codes, hiding from display`);
+          return false;
         }
-        return !isCleared;
+        
+        return true; // Show this error
       });
       
       console.log('Original errors:', ersReasonCds, 'Clear codes:', currentClearCodes, 'Filtered errors:', filteredErrors);
@@ -822,6 +850,62 @@ function Form4868ERSPageContent() {
     return convertErsErrorsToErrorItems();
   }, [convertErsErrorsToErrorItems]);
 
+  // Helper function to check if there are any field errors present
+  const hasFieldErrors = useMemo(() => {
+    return errorItems.some(error => error.isFieldError);
+  }, [errorItems]);
+
+  // Helper function to get the current non-field error being displayed
+  const currentNonFieldError = useMemo(() => {
+    if (hasFieldErrors) return null; // No non-field error when field errors present
+    return errorItems.find(error => !error.isFieldError) || null;
+  }, [errorItems, hasFieldErrors]);
+
+  // Helper function to check if the currently displayed non-field error is clearable
+  const isCurrentErrorClearable = useMemo(() => {
+    if (!currentNonFieldError) return false;
+    
+    const errorConfigItem = (errorConfig as any)[currentNonFieldError.code];
+    return errorConfigItem?.clearable === true;
+  }, [currentNonFieldError]);
+
+  // Helper function to check if user has delete permission for current program
+  const hasDeletePermission = useMemo(() => {
+    if (!user?.profile?.profile?.profiles || !landingSelectionData?.program) {
+      return false;
+    }
+    
+    const currentProgram = landingSelectionData.program;
+    const programProfile = user.profile.profile.profiles[currentProgram];
+    return programProfile?.deleteEnabled === true;
+  }, [user, landingSelectionData]);
+
+  // Helper function to generate clear codes array for payload
+  const getPayloadClearCodes = useCallback(() => {
+    console.log('generating payload clear codes from clearCodesInput:', clearCodesInput);
+    
+    if (!clearCodesInput.trim()) {
+      return [];
+    }
+    
+    // Check if user entered 'C' or 'c' to clear current non-field error
+    const trimmed = clearCodesInput.trim().toLowerCase();
+    if (trimmed === 'c' && currentNonFieldError) {
+      const clearCode = currentNonFieldError.code;
+      console.log(`Converting 'C' input to clear code: ${clearCode}`);
+      return [clearCode];
+    }
+    
+    // Legacy support: parse comma-separated codes
+    const result = clearCodesInput
+      .split(',')
+      .map(code => code.trim())
+      .filter(code => code.length > 0);
+    
+    console.log('final payload clear codes array:', result);
+    return result;
+  }, [clearCodesInput, currentNonFieldError]);
+
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string>("");
@@ -861,7 +945,7 @@ function Form4868ERSPageContent() {
     
     // Check for clear codes changes
     const originalClearCodes = eraDto?.clearCodes || [];
-    const currentClearCodes = getClearCodesArray();
+    const currentClearCodes = getPayloadClearCodes();
     const originalClearCodesStr = Array.isArray(originalClearCodes) ? originalClearCodes.join(', ') : '';
     const currentClearCodesStr = currentClearCodes.join(', ');
     
@@ -958,7 +1042,7 @@ function Form4868ERSPageContent() {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
             "suspendStatusCode": actionCode,
-            "clearCodes": getClearCodesArray(),
+            "clearCodes": getPayloadClearCodes(),
             "notes": generateNotesWithChanges(),
             "fieldWithErrors": fieldWithErrors
           }
@@ -1204,7 +1288,7 @@ function Form4868ERSPageContent() {
           "inventoryItem": {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getClearCodesArray(),
+            "clearCodes": getPayloadClearCodes(),
             "notes": generateNotesWithChanges(),
             "fieldWithErrors": fieldWithErrors
           }
@@ -1341,7 +1425,7 @@ function Form4868ERSPageContent() {
           "inventoryItem": {
             "inventoryId": inventoryId,
             "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getClearCodesArray(),
+            "clearCodes": getPayloadClearCodes(),
             "notes": generateNotesWithChanges(),
             "fieldWithErrors": fieldWithErrors
           }
@@ -1482,6 +1566,26 @@ function Form4868ERSPageContent() {
       setSubmitting(false);
     }
   };
+
+  // Add keyboard event handler for Page Up key to trigger handleSubmit
+  useEffect(() => {
+    const handleKeyUp = (event: KeyboardEvent) => {
+      // Check if Page Up key is pressed (key code 33 or key name 'PageUp')
+      if (event.key === 'PageUp' || event.keyCode === 33) {
+        event.preventDefault();
+        console.log('Page Up key pressed - triggering handleSubmit');
+        handleSubmit();
+      }
+    };
+
+    // Add event listener to document
+    document.addEventListener('keyup', handleKeyUp);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []); // Empty dependency array since handleSubmit is stable
 
   if (loading) {
     return (
@@ -1657,12 +1761,19 @@ function Form4868ERSPageContent() {
                 <div className="space-y-8 px-1">
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-2">
-                      <FormField label="Clear Codes" required>
+                      <FormField 
+                        label="Clear Codes" 
+                        required={false}
+                      >
                         <FormInput
                           value={clearCodesInput}
                           onChange={(value) => setClearCodesInput(value)}
-                          placeholder="Enter comma separated clear code(s)"
+                          placeholder={hasFieldErrors ? "Disabled - resolve field errors first" : (isCurrentErrorClearable ? "Enter 'C' to clear error" : "Current error not clearable")}
+                          disabled={hasFieldErrors || !isCurrentErrorClearable}
                         />
+                        <div className="mt-1 text-xs text-gray-600">
+                          {hasFieldErrors ? "Clear codes disabled when field errors are present" : (isCurrentErrorClearable ? "Enter 'C' to clear the current error" : "Current error is not clearable")}
+                        </div>
                       </FormField>
                     </div>
 
@@ -1795,21 +1906,23 @@ function Form4868ERSPageContent() {
               >
                 {closingOut ? "Closing Out..." : "Close Out"}
               </button>
-              <button
-                type="button"
-                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  deleting
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
-                }`}
-                onClick={() => {
-                  clearFieldHighlight();
-                  handleDelete();
-                }}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
+              {hasDeletePermission && (
+                <button
+                  type="button"
+                  className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                    deleting
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                  }`}
+                  onClick={() => {
+                    clearFieldHighlight();
+                    handleDelete();
+                  }}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </button>
+              )}
             </div>
           </div>
           
