@@ -300,13 +300,42 @@ export default function HomePage() {
 
         router.push('/workRecord');
         
-        // Navigate to QR Inventory if quality review is selected, otherwise workRecord
-        // if (programForm.qualityReview) {
-        // //   router.push(`/qrInventory${programForm.seid ? `?seid=${programForm.seid}` : ''}`);
-        //   router.push(`/qrInventory`);
-        // } else {
-        //   router.push('/workRecord');
-        // }
+      } else if (response.status === 422) {
+        // Handle 422 - User already has assignment
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        
+        if (error.message === "User already has assigned inventory") {
+          console.log('User already has assignment, fetching existing assignment...');
+          
+          // Make fallback call to get existing assignment
+          const assignmentResponse = await fetch('/api/v1/era/inventories/assignment', {
+            method: 'GET',
+            headers
+          });
+          
+          if (assignmentResponse.ok) {
+            const eraDto = await assignmentResponse.json();
+            
+            // Store the ERA DTO data for the workRecord page (same as successful auto-assign)
+            sessionStorage.setItem('eraDto', JSON.stringify(eraDto));
+            sessionStorage.setItem('selectionData', JSON.stringify({
+              program: programForm.program,
+              statusCode: programForm.statusCode,
+              serviceCenter: programForm.serviceCenter,
+              seid: programForm.seid
+            }));
+
+            router.push('/workRecord');
+          } else {
+            const assignmentErrorText = await assignmentResponse.text();
+            setProgramStatusError(`Error fetching existing assignment: ${assignmentErrorText}`);
+            console.error('Assignment fetch error:', assignmentErrorText);
+          }
+        } else {
+          setProgramStatusError(`Error: ${error.message}`);
+          console.error('Work record assignment error:', errorText);
+        }
       } else {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
