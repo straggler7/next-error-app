@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Download, RefreshCw } from 'lucide-react';
+import { getServiceCenterName } from '../utils/serviceCenters';
 import { ReportRecord, ReportPayload } from '../services/reportsService';
 import ColumnSelector, { ColumnConfig } from './ColumnSelector';
 import DatePicker from './DatePicker';
@@ -255,19 +256,7 @@ export default function BaseReport({
     }
     
     if (key === 'serviceCenterId') {
-      const serviceCenterMap: { [key: number]: string } = {
-        16: 'Andover',
-        31: 'Atlanta', 
-        73: 'Austin',
-        10: 'Brookhaven',
-        21: 'Cincinnati',
-        93: 'Fresno',
-        64: 'Kansas City',
-        55: 'Memphis',
-        87: 'Ogden',
-        12: 'Philadelphia'
-      };
-      return serviceCenterMap[value as number] || `Service Center ${value}`;
+      return getServiceCenterName(value as number);
     }
 
     if (key === 'submissionErrorCodes' && (!value || value === 'null')) {

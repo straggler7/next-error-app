@@ -15,6 +15,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { useSeid } from '../../hooks/useSeid';
+import { getServiceCenterName } from '../../utils/serviceCenters';
 
 function DailySummaryContent() {
   const router = useRouter();
@@ -209,15 +210,7 @@ function DailySummaryContent() {
     columnHelper.accessor('serviceCenterId', {
       header: 'Service Center',
       cell: ({ getValue }) => {
-        const serviceCenterMap: { [key: number]: string } = {
-          16: 'Austin',
-          17: 'Ogden',
-          18: 'Kansas City',
-          19: 'Fresno',
-          20: 'Andover',
-          21: 'Charlotte'
-        };
-        return serviceCenterMap[getValue()] || 'Unknown';
+        return getServiceCenterName(getValue());
       },
       size: 120,
     }),
@@ -312,15 +305,7 @@ function DailySummaryContent() {
 
   // Handle row click to navigate to QR details (optional, keeping same behavior as QR inventory)
   const handleRowClick = (record: QRInventoryRecord) => {
-    const serviceCenterMap: { [key: number]: string } = {
-      16: 'Austin',
-      17: 'Ogden',
-      18: 'Kansas City',
-      19: 'Fresno',
-      20: 'Andover',
-      21: 'Charlotte'
-    };
-    const serviceCenter = serviceCenterMap[record.serviceCenterId] || 'Unknown';
+    const serviceCenter = getServiceCenterName(record.serviceCenterId);
     
     // Store the full record in sessionStorage for access on QR Details page (client-side only)
     if (typeof window !== 'undefined') {
