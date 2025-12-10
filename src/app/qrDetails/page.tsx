@@ -53,7 +53,7 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
             isModified 
               ? 'border-2 border-blue-300 text-gray-900' 
               : 'border-gray-300 text-gray-900'
-          } ${!beforeValue ? 'italic' : ''}`}
+          } ${!beforeValue ? '' : ''}`}
           value={displayBeforeValue}
           readOnly
         />
@@ -427,12 +427,12 @@ function QRDetailsPageContent() {
                 </p>
               </div>
               
-              <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-6 flex items-center gap-2 text-sm text-gray-700">
+              {/* <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-6 flex items-center gap-2 text-sm text-gray-700">
                 <User className="w-4 h-4 text-gray-500" />
                 <span>
-                  {/* <strong>Last modified by:</strong> {inventoryRecord?.seid || seid || 'Unknown'} at {inventoryRecord?.updatedDate || qrData?.metadata.lastModifiedDate} */}
+                  <strong>Last modified by:</strong> {inventoryRecord?.seid || seid || 'Unknown'} at {inventoryRecord?.updatedDate || qrData?.metadata.lastModifiedDate}
                 </span>
-              </div>
+              </div> */}
               
               {/* All Fields - Show Before/After Comparison */}
               <div className="grid grid-cols-1 gap-2">
