@@ -21,7 +21,7 @@ export interface UserProfile {
 export interface User {
   name?: string;
   role  ?: string;
-  group?: 'tax_examiners' | 'managers';
+  group?: 'tax_examiners' | 'managers' | 'analysts';
   avatar?: string;
   seid: string;
   profile?: UserProfile | null;

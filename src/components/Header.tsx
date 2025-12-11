@@ -154,7 +154,7 @@ export default function Header({ showBackButton = false, backHref = '/', disable
               Daily Summary
             </Link>
             {/* Only show Reports and Manage Profiles for managers */}
-            {user.group === 'managers' && (
+            {user.group === 'managers' || user.group === 'analysts' && (
               <>
                 <Link 
                   href="/reports"

@@ -11,13 +11,13 @@ export interface ServiceCenter {
 export const serviceCenters: ServiceCenter[] = [
   { name: 'Andover', codes: [14, 16] },
   { name: 'Atlanta', codes: [31] },
-  { name: 'Austin', codes: [75, 76] },
+  { name: 'Austin', codes: [75, 76, 20, 21] },
   { name: 'Brookhaven', codes: [10] },
-  { name: 'Cincinnati', codes: [21] },
+  { name: 'Cincinnati', codes: [26, 27, 35, 38] },
   { name: 'Fresno', codes: [80, 90] },
-  { name: 'Kansas City', codes: [70, 79] },
+  { name: 'Kansas City', codes: [37, 40, 42, 44, 70, 79] },
   { name: 'Memphis', codes: [55] },
-  { name: 'Ogden', codes: [87] },
+  { name: 'Ogden', codes: [60, 78, 81, 82, 83, 86, 88, 91, 92, 93] },
   { name: 'Philadelphia', codes: [30, 32] }
 ];
 

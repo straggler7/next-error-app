@@ -184,13 +184,17 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
 /**
  * Map designation from API to user group
  */
-function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers' {
+function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers' | 'analysts' {
   const lowerDesignation = designation.toLowerCase();
   
   if (lowerDesignation.includes('manager') || 
       lowerDesignation.includes('supervisor') || 
       lowerDesignation.includes('lead')) {
     return 'managers';
+  }
+  
+  if (lowerDesignation.includes('analyst')) {
+    return 'analysts';
   }
   
   return 'tax_examiners';

@@ -2342,3 +2342,27 @@ async rewrites() {
 }
 
         "ersReasonCds": ["135", "004", "103", "01TIN", "01NC"],
+
+
+-------------------
+Report 0340 
+
+create a new report 0340 page
+the report request url will be /api/v1/era/reports/errors/get-error-count-report
+payload needs to include programCode and hard code it to 44730
+the response will be like
+{
+  "created": "2025-12-10",
+  "serviceCenterId": 16,
+  "formType": "4868",
+  "taxClass": "3",
+  "docCode": "45",
+  "errorCode": "005",
+  "priority": "P1",
+  "count" : 1
+}
+
+the report shows these columns:
+Program Number, Total Inventory, Number of Days in Inventory
+
+      
