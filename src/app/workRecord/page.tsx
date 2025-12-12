@@ -1608,7 +1608,7 @@ function Form4868ERSPageContent() {
     return () => {
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [inventoryId]); // Include inventoryId in dependency array so handler has access to current value
+  }, [inventoryId, validationErrors, formElements, editableFieldKeys, nonEditableFieldKeys]); // Include all dependencies for hasAnyFieldErrors()
 
   if (loading) {
     return (
