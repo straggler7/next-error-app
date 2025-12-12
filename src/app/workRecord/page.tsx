@@ -1582,13 +1582,22 @@ function Form4868ERSPageContent() {
         event.preventDefault();
         console.log('Page Up key pressed - checking if handleSubmit can be called');
         
-        // Only call handleSubmit if inventoryId is available
-        if (inventoryId) {
-          console.log('inventoryId available - triggering handleSubmit');
-          handleSubmit();
-        } else {
+        // Only call handleSubmit if inventoryId is available and there are no field errors
+        if (!inventoryId) {
           console.log('inventoryId not available - ignoring Page Up key');
+          return;
         }
+        
+        if (hasAnyFieldErrors()) {
+          console.log('Field errors present - ignoring Page Up key');
+          setFlashMessage('Field errors need to be fixed for submission');
+          setShowFlash(true);
+          setTimeout(() => setShowFlash(false), 3000);
+          return;
+        }
+        
+        console.log('inventoryId available and no field errors - triggering handleSubmit');
+        handleSubmit();
       }
     };
 
