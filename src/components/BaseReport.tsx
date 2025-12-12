@@ -223,21 +223,22 @@ export default function BaseReport({
 
   // Update pagination when filtered data changes
   useEffect(() => {
-    const totalRecords = filteredData.length;
-    const totalPages = Math.ceil(totalRecords / pagination.pageSize);
+    // For API-based pagination, we don't know the total records upfront
+    // We determine if there are more pages based on whether we received a full page of data
+    const receivedRecords = data.length;
+    const hasMorePages = receivedRecords === pagination.pageSize;
+    
     setPagination(prev => ({
       ...prev,
-      totalRecords,
-      totalPages,
-      currentPage: Math.min(prev.currentPage, totalPages || 1)
+      totalRecords: receivedRecords, // Current page records
+      totalPages: hasMorePages ? prev.currentPage + 1 : prev.currentPage, // Enable next if we have full page
     }));
-  }, [filteredData.length, pagination.pageSize]);
+  }, [data.length, pagination.pageSize, pagination.currentPage]);
 
-  // Paginate the filtered data and add index-based IDs
+  // For API-based pagination, data is already paginated - just add unique IDs
   const paginatedData = useMemo(() => {
     const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
-    const endIndex = startIndex + pagination.pageSize;
-    return filteredData.slice(startIndex, endIndex).map((record, index) => ({
+    return filteredData.map((record, index) => ({
       ...record,
       _uniqueId: `record-${startIndex + index}-${record.dln || 'no-dln'}`
     }));
@@ -299,6 +300,40 @@ export default function BaseReport({
 
   const handlePaginationChange = (newPagination: PaginationState) => {
     setPagination(newPagination);
+    
+    // If page number changed, fetch new data
+    if (newPagination.currentPage !== pagination.currentPage) {
+      const payload: ReportPayload = {
+        pageNumber: newPagination.currentPage,
+        pageSize: newPagination.pageSize,
+        reportId: reportType,
+        startDateStr: selectedDate,
+      };
+
+      // Add current filter parameters
+      if (searchTerm.trim() && reportType !== '0340' && reportType !== '0540' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
+        payload.dln = searchTerm.trim();
+      }
+
+      if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '7740' && reportType !== '7741') {
+        payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
+      }
+
+      if (selectedProgramCode && selectedProgramCode !== 'All Program Codes') {
+        payload.programCode = selectedProgramCode;
+      }
+
+      // Add status for 1340 and 0540 reports
+      if (reportType === '1340') {
+        payload.status = 'NEW';
+      }
+      
+      if (reportType === '0540') {
+        payload.status = 'DELETED';
+      }
+
+      onRefresh(payload);
+    }
   };
 
   const handleSubmit = () => {
