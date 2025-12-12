@@ -52,6 +52,7 @@ export interface ReportPayload {
   status?: string; // Only for 1340 report
   dln?: string;
   serviceCenter?: string;
+  serviceCenterEnum?: string; // Service center name in uppercase
   programCode?: string;
   export?: boolean; // For export functionality
 }

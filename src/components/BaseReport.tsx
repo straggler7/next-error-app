@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Download, RefreshCw } from 'lucide-react';
-import { getServiceCenterName } from '../utils/serviceCenters';
+import { getServiceCenterName, serviceCenters } from '../utils/serviceCenters';
 import { ReportRecord, ReportPayload } from '../services/reportsService';
 import ColumnSelector, { ColumnConfig } from './ColumnSelector';
 import DatePicker from './DatePicker';
@@ -190,19 +190,10 @@ export default function BaseReport({
     totalPages: 0
   });
 
-  // Service Center options
+  // Service Center options - using names from serviceCenters utility
   const serviceCenterOptions = [
     'All Service Centers',
-    'Andover (16)',
-    'Atlanta (31)',
-    'Austin (73)',
-    'Brookhaven (10)',
-    'Cincinnati (21)',
-    'Fresno (93)',
-    'Kansas City (64)',
-    'Memphis (55)',
-    'Ogden (87)',
-    'Philadelphia (12)'
+    ...serviceCenters.map(center => center.name)
   ];
 
   // Program Code options
@@ -310,10 +301,7 @@ export default function BaseReport({
 
     // Add service center only for reports that support it (exclude 7740, 7741)
     if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '7740' && reportType !== '7741') {
-      const centerNumber = selectedServiceCenter.match(/\((\d+)\)/)?.[1];
-      if (centerNumber) {
-        payload.serviceCenter = centerNumber;
-      }
+      payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
     }
 
     if (selectedProgramCode && selectedProgramCode !== 'All Program Codes') {
@@ -347,10 +335,7 @@ export default function BaseReport({
 
     // Add service center only for reports that support it (exclude 7740, 7741)
     if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '7740' && reportType !== '7741') {
-      const centerNumber = selectedServiceCenter.match(/\((\d+)\)/)?.[1];
-      if (centerNumber) {
-        payload.serviceCenter = centerNumber;
-      }
+      payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
     }
 
     if (selectedProgramCode && selectedProgramCode !== 'All Program Codes') {
@@ -400,10 +385,10 @@ export default function BaseReport({
         </div>
 
         {/* Filters */}
-        <div className={`grid gap-4 mb-6 ${reportType === '0340' || reportType === '1341' || reportType === '7740' || reportType === '7741' ? 'grid-cols-3' : 'grid-cols-5'} items-end`}>
+        <div className="flex flex-wrap gap-4 mb-6 items-end">
           {/* DLN Search - Hidden for 0340, 1341, 7740, and 7741 reports */}
           {reportType !== '0340' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7746' && reportType !== '7747' && (
-            <div className="relative">
+            <div className="relative w-48">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
               </label>
@@ -419,7 +404,7 @@ export default function BaseReport({
           )}
 
           {/* Date Picker */}
-          <div>
+          <div className="w-48">
             <DatePicker
               value={selectedDate}
               onChange={setSelectedDate}
@@ -430,7 +415,7 @@ export default function BaseReport({
 
             {/* Service Center Filter - Hidden for 7740 and 7741 reports */}
             {reportType !== '7740' && reportType !== '7741' && (
-              <div>
+              <div className="w-48">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Service Center
                 </label>
@@ -449,7 +434,7 @@ export default function BaseReport({
             )}
 
             {/* Program Code Filter */}
-            <div>
+            <div className="w-48">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Program Code
               </label>
@@ -467,11 +452,11 @@ export default function BaseReport({
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-end">
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Loading...' : 'Submit'}
               </button>
