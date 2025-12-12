@@ -1580,8 +1580,15 @@ function Form4868ERSPageContent() {
       // Check if Page Up key is pressed (key code 33 or key name 'PageUp')
       if (event.key === 'PageUp' || event.keyCode === 33) {
         event.preventDefault();
-        console.log('Page Up key pressed - triggering handleSubmit');
-        handleSubmit();
+        console.log('Page Up key pressed - checking if handleSubmit can be called');
+        
+        // Only call handleSubmit if inventoryId is available
+        if (inventoryId) {
+          console.log('inventoryId available - triggering handleSubmit');
+          handleSubmit();
+        } else {
+          console.log('inventoryId not available - ignoring Page Up key');
+        }
       }
     };
 
@@ -1592,7 +1599,7 @@ function Form4868ERSPageContent() {
     return () => {
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, []); // Empty dependency array since handleSubmit is stable
+  }, [inventoryId]); // Include inventoryId in dependency array so handler has access to current value
 
   if (loading) {
     return (
