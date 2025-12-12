@@ -15,7 +15,7 @@ export default function Pagination({
   const { currentPage, pageSize, totalRecords, totalPages } = pagination;
   
   const startRecord = (currentPage - 1) * pageSize + 1;
-  const endRecord = Math.min(currentPage * pageSize, totalRecords);
+  const endRecord = startRecord + totalRecords - 1;
 
   const getVisiblePages = () => {
     const pages = [];
@@ -41,7 +41,7 @@ export default function Pagination({
   return (
     <div className="flex justify-between items-center px-8 py-6 bg-white border-t border-gray-200 rounded-b-xl -mt-px">
       <div className="text-gray-600 text-sm font-medium">
-        Showing {startRecord}-{endRecord} of {totalRecords} records
+        Showing {startRecord}-{endRecord} (Page {currentPage})
       </div>
       
       <div className="flex items-center gap-2">

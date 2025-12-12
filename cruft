@@ -2365,4 +2365,4 @@ the response will be like
 the report shows these columns:
 Program Number, Total Inventory, Number of Days in Inventory
 
-      
+dd a new report 0540. This is same as 1340 but with reportId 0540 in payload. For status use 'DELETED' in payload. The columns and rest will be the same as 1340
