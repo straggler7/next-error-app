@@ -35,6 +35,9 @@ export interface ReportRecord {
   suspendedQty?: number; // Suspended quantity for reports 7740/7741
   reWorkedQty?: number; // ReWorked quantity for reports 7740/7741
   rateOfProductionStr?: string; // Rate of production for reports 7740/7741
+  totalInventory?: number; // Total inventory for report 0340
+  day0Inventory?: number; // Day 0 inventory for report 0340
+  day1Inventory?: number; // Day 1 inventory for report 0340
   _uniqueId?: string; // Generated unique ID for table rows
 }
 
@@ -85,6 +88,34 @@ export class ReportsService {
       return reportData;
     } catch (error) {
       console.error('Error fetching 1340 report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch 0340 report data (Unselected Records Inventory)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get0340Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 0340 report:', error);
       throw error;
     }
   }

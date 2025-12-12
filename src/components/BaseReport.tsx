@@ -14,7 +14,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 
 interface BaseReportProps {
   title: string;
-  reportType: '1340' | '1341' | '1342' | '7740' | '7741' | '7746' | '7747';
+  reportType: '0340' | '1340' | '1341' | '1342' | '7740' | '7741' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
@@ -23,6 +23,15 @@ interface BaseReportProps {
 
 // Column configurations by report type
 const getDefaultColumns = (reportType: string): ColumnConfig[] => {
+  if (reportType === '0340') {
+    return [
+      { key: 'programId', label: 'Program Number', visible: true, width: 150 },
+      { key: 'totalInventory', label: 'Total Inventory', visible: true, width: 150 },
+      { key: 'day0Inventory', label: 'Day 0 Inventory', visible: true, width: 150 },
+      { key: 'day1Inventory', label: 'Day 1 Inventory', visible: true, width: 150 }
+    ];
+  }
+
   if (reportType === '1340') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
@@ -294,8 +303,8 @@ export default function BaseReport({
       startDateStr: selectedDate,
     };
 
-    // Add optional filter parameters if they have values (exclude DLN for 1341, 7740, 7741 reports)
-    if (searchTerm.trim() && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
+    // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 7740, 7741 reports)
+    if (searchTerm.trim() && reportType !== '0340' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
       payload.dln = searchTerm.trim();
     }
 
@@ -331,8 +340,8 @@ export default function BaseReport({
       export: true, // Add export flag
     };
 
-    // Add optional filter parameters if they have values (exclude DLN for 1341, 7740, 7741 reports)
-    if (searchTerm.trim() && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
+    // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 7740, 7741 reports)
+    if (searchTerm.trim() && reportType !== '0340' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741') {
       payload.dln = searchTerm.trim();
     }
 
@@ -391,9 +400,9 @@ export default function BaseReport({
         </div>
 
         {/* Filters */}
-        <div className={`grid gap-4 mb-6 ${reportType === '1341' || reportType === '7740' || reportType === '7741' ? 'grid-cols-3' : 'grid-cols-5'} items-end`}>
-          {/* DLN Search - Hidden for 1341, 7740, and 7741 reports */}
-          {reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7746' && reportType !== '7747' && (
+        <div className={`grid gap-4 mb-6 ${reportType === '0340' || reportType === '1341' || reportType === '7740' || reportType === '7741' ? 'grid-cols-3' : 'grid-cols-5'} items-end`}>
+          {/* DLN Search - Hidden for 0340, 1341, 7740, and 7741 reports */}
+          {reportType !== '0340' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7746' && reportType !== '7747' && (
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
