@@ -2366,3 +2366,36 @@ the report shows these columns:
 Program Number, Total Inventory, Number of Days in Inventory
 
 dd a new report 0540. This is same as 1340 but with reportId 0540 in payload. For status use 'DELETED' in payload. The columns and rest will be the same as 1340
+
+
+        // body: JSON.stringify({
+        //   reportId: payload.reportId,
+        //   startDateStr: payload.startDateStr,
+        //   programCode: payload.programCode,
+        //   pageSize: payload.pageSize,
+        //   pageNumber: payload.pageNumber
+        // }),
+
+        for 0340 report, use POST request
+payload will be some thing like:
+{
+  "reportId": "0340",
+  "startDateStr": "12/10/2025",
+  "programCode": "44730",
+  "pageSize" : 25,
+  "pageNumber": 1
+}
+
+and the response will be like:
+{
+  "created": "2025-12-10",
+  "serviceCenterId": 16,
+  "formType": "4868",
+  "taxClass": "3",
+  "docCode": "45",
+  "errorCode": "005",
+  "priority": "P1",
+  "count": 1
+}
+
+on the report show all columns from response 

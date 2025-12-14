@@ -5,7 +5,7 @@ import { ReportsService, ReportRecord, ReportPayload } from '../../../services/r
 import BaseReport from '../../../components/BaseReport';
 import { useSeid } from '../../../hooks/useSeid';
 
-export default function Report0340Page() {
+export default function Report0341Page() {
   const [data, setData] = useState<ReportRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const currentUserSeid = useSeid();
@@ -15,10 +15,10 @@ export default function Report0340Page() {
     
     setLoading(true);
     try {
-      const reportData = await ReportsService.get0340Report(currentUserSeid, payload);
+      const reportData = await ReportsService.get0341Report(currentUserSeid, payload);
       setData(reportData);
     } catch (error) {
-      console.error('Error fetching 0340 report:', error);
+      console.error('Error fetching 0341 report:', error);
       setData([]);
     } finally {
       setLoading(false);
@@ -26,7 +26,7 @@ export default function Report0340Page() {
   }, [currentUserSeid]);
 
   useEffect(() => {
-    // Initial load with default payload
+    // Initial load with default payload (no filters)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
@@ -36,8 +36,9 @@ export default function Report0340Page() {
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
       pageSize: 20,
-      reportId: '0340',
+      reportId: '0341',
       startDateStr: `${month}/${day}/${year}`,
+      // No filters on initial load - user must submit to apply filters
     };
     
     fetchReportData(defaultPayload);
@@ -48,12 +49,12 @@ export default function Report0340Page() {
     
     try {
       // Make API call with export flag
-      const exportData = await ReportsService.get0340Report(currentUserSeid, payload);
+      const exportData = await ReportsService.get0341Report(currentUserSeid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, '0340');
+      ReportsService.downloadCSV(exportData, '0341');
     } catch (error) {
-      console.error('Error exporting 0340 report:', error);
+      console.error('Error exporting 0341 report:', error);
       alert('Failed to export report. Please try again.');
     }
   };
@@ -61,7 +62,7 @@ export default function Report0340Page() {
   return (
     <BaseReport
       title="Error Count Report"
-      reportType="0340"
+      reportType="0341"
       data={data}
       loading={loading}
       onRefresh={fetchReportData}

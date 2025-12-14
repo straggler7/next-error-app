@@ -14,7 +14,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 
 interface BaseReportProps {
   title: string;
-  reportType: '0340' | '0540' | '1340' | '1341' | '1342' | '7740' | '7741' | '7746' | '7747';
+  reportType: '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '7740' | '7741' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
@@ -25,10 +25,53 @@ interface BaseReportProps {
 const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   if (reportType === '0340') {
     return [
-      { key: 'programId', label: 'Program Number', visible: true, width: 150 },
-      { key: 'totalInventory', label: 'Total Inventory', visible: true, width: 150 },
-      { key: 'day0Inventory', label: 'Day 0 Inventory', visible: true, width: 150 },
-      { key: 'day1Inventory', label: 'Day 1 Inventory', visible: true, width: 150 }
+      // { key: 'created', label: 'Created', visible: true, width: 120 },
+      { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 150 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 120 },
+      { key: 'taxClass', label: 'Tax Class', visible: true, width: 120 },
+      { key: 'docCode', label: 'Doc Code', visible: true, width: 120 },
+      { key: 'errorCode', label: 'Error Code', visible: true, width: 120 },
+      { key: 'priority', label: 'Priority', visible: true, width: 120 },
+      { key: 'count', label: 'Count', visible: true, width: 100 }
+    ];
+  }
+
+  if (reportType === '0341') {
+    return [
+      { key: 'created', label: 'Created', visible: true, width: 120 },
+      { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 150 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 120 },
+      { key: 'taxClass', label: 'Tax Class', visible: true, width: 120 },
+      { key: 'docCode', label: 'Doc Code', visible: true, width: 120 },
+      { key: 'errorCode', label: 'Error Code', visible: true, width: 120 },
+      { key: 'priority', label: 'Priority', visible: true, width: 120 },
+      { key: 'count', label: 'Count', visible: true, width: 100 }
+    ];
+  }
+
+  if (reportType === 'MERDAIL') {
+    return [
+      // { key: 'created', label: 'Created', visible: true, width: 120 },
+      { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 150 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 120 },
+      { key: 'taxClass', label: 'Tax Class', visible: true, width: 120 },
+      { key: 'docCode', label: 'Doc Code', visible: true, width: 120 },
+      { key: 'errorCode', label: 'Error Code', visible: true, width: 120 },
+      { key: 'priority', label: 'Priority', visible: true, width: 120 },
+      { key: 'count', label: 'Count', visible: true, width: 100 }
+    ];
+  }
+
+  if (reportType === 'MERYRDT') {
+    return [
+      { key: 'created', label: 'Created', visible: true, width: 120 },
+      { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 150 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 120 },
+      { key: 'taxClass', label: 'Tax Class', visible: true, width: 120 },
+      { key: 'docCode', label: 'Doc Code', visible: true, width: 120 },
+      { key: 'errorCode', label: 'Error Code', visible: true, width: 120 },
+      { key: 'priority', label: 'Priority', visible: true, width: 120 },
+      { key: 'count', label: 'Count', visible: true, width: 100 }
     ];
   }
 
@@ -440,8 +483,8 @@ export default function BaseReport({
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6 items-end">
-          {/* DLN Search - Hidden for 0340, 1341, 7740, and 7741 reports */}
-          {reportType !== '0340' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7746' && reportType !== '7747' && (
+          {/* DLN Search - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1341, 7740, and 7741 reports */}
+          {reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7746' && reportType !== '7747' && (
             <div className="relative w-48">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
@@ -467,8 +510,8 @@ export default function BaseReport({
             />
           </div>
 
-            {/* Service Center Filter - Hidden for 7740 and 7741 reports */}
-            {reportType !== '7740' && reportType !== '7741' && (
+            {/* Service Center Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT, 7740 and 7741 reports */}
+            {reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '7740' && reportType !== '7741' && (
               <div className="w-48">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Service Center
@@ -487,23 +530,25 @@ export default function BaseReport({
               </div>
             )}
 
-            {/* Program Code Filter */}
-            <div className="w-48">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Program Code
-              </label>
-              <select
-                value={selectedProgramCode}
-                onChange={(e) => setSelectedProgramCode(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-              >
-                {programCodeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Program Code Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT reports */}
+            {reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && (
+              <div className="w-48">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Program Code
+                </label>
+                <select
+                  value={selectedProgramCode}
+                  onChange={(e) => setSelectedProgramCode(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                >
+                  {programCodeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Submit Button */}
             <div className="flex gap-2 items-end">

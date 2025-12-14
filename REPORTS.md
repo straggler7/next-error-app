@@ -327,3 +327,55 @@ if (reportType === '1340') {
 - **✅ Cross-browser compatibility** - Standard web APIs used
 
 The export functionality now provides a complete server-side export solution that respects all active filters and delivers fresh data in properly formatted CSV files.
+
+
+I need to modify the BaseReport component to hide all filters except the start date for the specified reports (0340, 0341, MERDAIL, MERYRDT). Let me find the filter section and update it:
+
+Let me find the filter section to see the current structure:
+
+Now I can see the filter structure. I need to hide the Service Center and Program Code filters for the specified reports (0340, 0341, MERDAIL, MERYRDT). Let me update the conditions:
+
+Now I need to hide the Program Code filter for the same reports. Let me find and update it:
+
+I need to wrap the Program Code filter with a condition to hide it for the specified reports:
+
+I also need to update the DLN search condition to include the new reports:
+
+Perfect! I've successfully updated the BaseReport component to hide all filters except the start date for the specified reports. Here's a summary of the changes:
+
+## **Filter Updates for Reports 0340, 0341, MERDAIL, MERYRDT**
+
+### **Changes Made:**
+
+1. **DLN Search Filter**: 
+   - **Hidden** for reports: 0340, 0341, MERDAIL, MERYRDT, 1341, 7740, 7741, 7746, 7747
+   - **Visible** for reports: 0540, 1340, 1342
+
+2. **Service Center Filter**:
+   - **Hidden** for reports: 0340, 0341, MERDAIL, MERYRDT, 7740, 7741
+   - **Visible** for reports: 0540, 1340, 1341, 1342, 7746, 7747
+
+3. **Program Code Filter**:
+   - **Hidden** for reports: 0340, 0341, MERDAIL, MERYRDT
+   - **Visible** for all other reports
+
+4. **Start Date Filter**:
+   - **Always visible** for all reports (unchanged)
+
+### **Filter Visibility by Report:**
+
+| Report | Start Date | DLN Search | Service Center | Program Code |
+|--------|------------|------------|----------------|--------------|
+| 0340 | ✅ | ❌ | ❌ | ❌ |
+| 0341 | ✅ | ❌ | ❌ | ❌ |
+| MERDAIL | ✅ | ❌ | ❌ | ❌ |
+| MERYRDT | ✅ | ❌ | ❌ | ❌ |
+| 0540 | ✅ | ✅ | ✅ | ✅ |
+| 1340 | ✅ | ✅ | ✅ | ✅ |
+| 1341 | ✅ | ❌ | ✅ | ✅ |
+| 1342 | ✅ | ✅ | ✅ | ✅ |
+| 7740 | ✅ | ❌ | ❌ | ✅ |
+| 7741 | ✅ | ❌ | ❌ | ✅ |
+
+### **Result:**
+The error count reports (0340, 0341, MERDAIL, MERYRDT) now show only the **Start Date** filter, providing a cleaner and more focused interface for these specific report types. Users can only filter by date, which aligns with the simplified requirements for these error count reports.

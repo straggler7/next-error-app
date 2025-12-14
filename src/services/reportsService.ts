@@ -38,6 +38,12 @@ export interface ReportRecord {
   totalInventory?: number; // Total inventory for report 0340
   day0Inventory?: number; // Day 0 inventory for report 0340
   day1Inventory?: number; // Day 1 inventory for report 0340
+  created?: string; // Created date for report 0340
+  taxClass?: string; // Tax class for report 0340
+  docCode?: string; // Document code for report 0340
+  errorCode?: string; // Error code for report 0340
+  priority?: string; // Priority for report 0340
+  count?: number; // Count for report 0340
   _uniqueId?: string; // Generated unique ID for table rows
 }
 
@@ -126,7 +132,7 @@ export class ReportsService {
   }
 
   /**
-   * Fetch 0340 report data (Unselected Records Inventory)
+   * Fetch 0340 report data (Error Count Report)
    * @param seid - Current user's SEID
    * @param payload - Report request payload
    * @returns Promise<ReportRecord[]> - Array of report records
@@ -134,11 +140,15 @@ export class ReportsService {
   static async get0340Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
       const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
+        body: JSON.stringify({
+          ...payload,
+          programCode: '44730',
+        }),
       });
 
       if (!response.ok) {
@@ -149,6 +159,102 @@ export class ReportsService {
       return reportData;
     } catch (error) {
       console.error('Error fetching 0340 report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch 0341 report data (Error Count Report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get0341Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify({
+          ...payload,
+          programCode: '44730',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 0341 report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch MERDAIL report data (Error Count Report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async getMERDAILReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify({
+          ...payload,
+          programCode: '44720',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching MERDAIL report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch MERYRDT report data (Error Count Report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async getMERYRDTReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify({
+          ...payload,
+          programCode: '44720',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching MERYRDT report:', error);
       throw error;
     }
   }

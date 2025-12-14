@@ -81,7 +81,31 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
           label: '7747', 
           href: '/reports/7747', 
           filter: { type: 'navigate', value: 'report7747' }
-        }
+        },
+        { 
+          id: 'report0340', 
+          label: '0340', 
+          href: '/reports/0340', 
+          filter: { type: 'navigate', value: 'report0340' }
+        },
+        { 
+          id: 'report0341', 
+          label: '0341', 
+          href: '/reports/0341', 
+          filter: { type: 'navigate', value: 'report0341' }
+        },
+        { 
+          id: 'reportMERDAIL', 
+          label: 'MERDAIL', 
+          href: '/reports/MERDAIL', 
+          filter: { type: 'navigate', value: 'reportMERDAIL' }
+        },
+        { 
+          id: 'reportMERYRDT', 
+          label: 'MERYRDT', 
+          href: '/reports/MERYRDT', 
+          filter: { type: 'navigate', value: 'reportMERYRDT' }
+        },
       ]
     }
   ];
