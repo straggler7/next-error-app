@@ -139,7 +139,7 @@ export class ReportsService {
    */
   static async get0340Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+      const response = await fetch('/api2/v1/era/reports/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ export class ReportsService {
    */
   static async get0341Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+      const response = await fetch('/api2/v1/era/reports/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ export class ReportsService {
    */
   static async getMERDAILReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+      const response = await fetch('/api2/v1/era/reports/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -235,7 +235,7 @@ export class ReportsService {
    */
   static async getMERYRDTReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api/v1/era/reports/errors/get-error-count-report', {
+      const response = await fetch('/api2/v1/era/reports/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

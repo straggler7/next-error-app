@@ -2399,3 +2399,17 @@ and the response will be like:
 }
 
 on the report show all columns from response 
+
+
+[
+    {
+        "created": "2025-12-10",
+        "serviceCenterId": 16,
+        "formType": "4868",
+        "taxClass": "3",
+        "docCode": "45",
+        "errorCode": "005",
+        "priority": "P1",
+        "count": 1
+    }
+]
