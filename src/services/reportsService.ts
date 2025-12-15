@@ -147,7 +147,6 @@ export class ReportsService {
         },
         body: JSON.stringify({
           ...payload,
-          status: 'DELETED'
         }),
       });
 

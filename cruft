@@ -2413,3 +2413,36 @@ on the report show all columns from response
         "count": 1
     }
 ]
+
+iff --git a/src/app/workRecord/page.tsx b/src/app/workRecord/page.tsx
+index 3ceffab..c1eddcc 100644
+--- a/src/app/workRecord/page.tsx
++++ b/src/app/workRecord/page.tsx
+@@ -957,11 +957,25 @@ function Form4868ERSPageContent() {
+     const currentClearCodesStr = currentClearCodes.join(', ');
+     
+     if (originalClearCodesStr !== currentClearCodesStr) {
+-      fieldChanges.push({
+-        fieldName: 'Clear Codes',
+-        beforeValue: originalClearCodesStr,
+-        afterValue: currentClearCodesStr
+-      });
++      // For clear codes, show the actual error codes being cleared
++      const newClearCodes = currentClearCodes.filter(code => !originalClearCodes.includes(code));
++      const removedClearCodes = originalClearCodes.filter(code => !currentClearCodes.includes(code));
++      
++      if (newClearCodes.length > 0) {
++        fieldChanges.push({
++          fieldName: 'Clear Codes',
++          beforeValue: originalClearCodesStr || 'None',
++          afterValue: `${originalClearCodesStr ? originalClearCodesStr + ', ' : ''}${newClearCodes.join(', ')}`
++        });
++      }
++      
++      if (removedClearCodes.length > 0) {
++        fieldChanges.push({
++          fieldName: 'Clear Codes Removed',
++          beforeValue: originalClearCodesStr,
++          afterValue: currentClearCodesStr || 'None'
++        });
++      }

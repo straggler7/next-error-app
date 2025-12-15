@@ -1086,6 +1086,8 @@ function Form4868ERSPageContent() {
               console.error('Error fetching next work record:', fetchError);
               setFlashMessage('Record suspended successfully but failed to fetch new record');
             }
+            
+            setTimeout(() => setShowFlash(false), 4000);
           }
         } else {
           // Assignment not complete - update current record with workRecord from inventoryItem
