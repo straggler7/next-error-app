@@ -357,7 +357,8 @@ export class ReportsService {
    */
   static async get7740Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+      // const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+      const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +387,7 @@ export class ReportsService {
    */
   static async get7741Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+      const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -415,7 +416,7 @@ export class ReportsService {
    */
   static async get7746Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+      const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -444,7 +445,7 @@ export class ReportsService {
    */
   static async get7747Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
-      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
+      const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
