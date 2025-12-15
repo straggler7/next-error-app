@@ -132,6 +132,38 @@ export class ReportsService {
   }
 
   /**
+   * Fetch 1740 report data (Unselected Records Inventory)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get1740Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api2/v1/era/reports/get-reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify({
+          ...payload,
+          status: 'DELETED'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 1740 report:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch 0340 report data (Error Count Report)
    * @param seid - Current user's SEID
    * @param payload - Report request payload

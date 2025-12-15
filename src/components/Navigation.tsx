@@ -53,6 +53,12 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
           filter: { type: 'navigate', value: 'report1342' }
         },
         { 
+          id: 'report1740', 
+          label: '1740', 
+          href: '/reports/1740', 
+          filter: { type: 'navigate', value: 'report1740' }
+        },
+        { 
           id: 'report0540', 
           label: '0540', 
           href: '/reports/0540', 
