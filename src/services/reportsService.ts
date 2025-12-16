@@ -68,6 +68,37 @@ export interface ReportPayload {
  */
 export class ReportsService {
   /**
+   * Fetch 0040 report data
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get0040Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api2/v1/era/reports/get-reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify({
+          ...payload,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 0040 report:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch 1340 report data
    * @param seid - Current user's SEID
    * @param payload - Report request payload

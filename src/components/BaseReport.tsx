@@ -14,7 +14,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 
 interface BaseReportProps {
   title: string;
-  reportType: '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '1740' | '7740' | '7741' | '7746' | '7747';
+  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '1740' | '7740' | '7741' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
@@ -23,6 +23,18 @@ interface BaseReportProps {
 
 // Column configurations by report type
 const getDefaultColumns = (reportType: string): ColumnConfig[] => {
+  if (reportType === '0040') {
+    return [
+      { key: 'dln', label: 'DLN', visible: true, width: 150 },
+      { key: 'submissionNames', label: 'Primary Name Control', visible: true, width: 180 },
+      { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      { key: 'taxPeriod', label: 'Tax Period', visible: true, width: 120 },
+      { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 180 },
+      { key: 'daysInSuspense', label: 'Remaining Days in Suspense', visible: true, width: 180 },
+      { key: 'daysAged', label: 'Days in ERS', visible: true, width: 120 }
+    ];
+  }
+
   if (reportType === '0340') {
     return [
       // { key: 'created', label: 'Created', visible: true, width: 120 },
@@ -450,8 +462,8 @@ export default function BaseReport({
       payload.programCode = selectedProgramCode;
     }
 
-    // Add status for 1340 and 0540 reports
-    if (reportType === '1340') {
+    // Add status for 0040, 1340 and 0540 reports
+    if (reportType === '0040' || reportType === '1340') {
       payload.status = 'NEW';
     }
     
