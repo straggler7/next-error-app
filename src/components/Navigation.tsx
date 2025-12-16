@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NavigationProps {
   className?: string;
@@ -14,6 +15,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
   const router = useRouter();
   // const searchParams = useSearchParams();
   const [activeFilter, setActiveFilter] = useState('all');
+  const { user } = useAuth();
 
   const handleFilterClick = (filter: { type: string; value: string }, href: string, itemId: string) => {
     setActiveFilter(itemId);
@@ -30,89 +32,104 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     }
   };
 
+  // All available reports
+  const allReports = [
+    { 
+      id: 'report1340', 
+      label: '1340', 
+      href: '/reports/1340', 
+      filter: { type: 'navigate', value: 'report1340' }
+    },
+    { 
+      id: 'report1341', 
+      label: '1341', 
+      href: '/reports/1341', 
+      filter: { type: 'navigate', value: 'report1341' }
+    },
+    { 
+      id: 'report1342', 
+      label: '1342', 
+      href: '/reports/1342', 
+      filter: { type: 'navigate', value: 'report1342' }
+    },
+    { 
+      id: 'report1740', 
+      label: '1740', 
+      href: '/reports/1740', 
+      filter: { type: 'navigate', value: 'report1740' }
+    },
+    { 
+      id: 'report0540', 
+      label: '0540', 
+      href: '/reports/0540', 
+      filter: { type: 'navigate', value: 'report0540' }
+    },
+    { 
+      id: 'report7740', 
+      label: '7740', 
+      href: '/reports/7740', 
+      filter: { type: 'navigate', value: 'report7740' }
+    },
+    { 
+      id: 'report7741', 
+      label: '7741', 
+      href: '/reports/7741', 
+      filter: { type: 'navigate', value: 'report7741' }
+    },
+    { 
+      id: 'report7746', 
+      label: '7746', 
+      href: '/reports/7746', 
+      filter: { type: 'navigate', value: 'report7746' }
+    },
+    { 
+      id: 'report7747', 
+      label: '7747', 
+      href: '/reports/7747', 
+      filter: { type: 'navigate', value: 'report7747' }
+    },
+    { 
+      id: 'report0340', 
+      label: '0340', 
+      href: '/reports/0340', 
+      filter: { type: 'navigate', value: 'report0340' }
+    },
+    { 
+      id: 'report0341', 
+      label: '0341', 
+      href: '/reports/0341', 
+      filter: { type: 'navigate', value: 'report0341' }
+    },
+    { 
+      id: 'reportMERDAIL', 
+      label: 'MERDAIL', 
+      href: '/reports/MERDAIL', 
+      filter: { type: 'navigate', value: 'reportMERDAIL' }
+    },
+    { 
+      id: 'reportMERYRDT', 
+      label: 'MERYRDT', 
+      href: '/reports/MERYRDT', 
+      filter: { type: 'navigate', value: 'reportMERYRDT' }
+    },
+  ];
+
+  // Filter reports based on user group
+  const getFilteredReports = () => {
+    if (user?.group === 'tax_examiners') {
+      // Only show 7746 and 7747 reports for tax_examiners
+      return allReports.filter(report => 
+        report.id === 'report7746' || report.id === 'report7747'
+      );
+    }
+    // For all other groups (managers, analysts, etc.), show all reports
+    return allReports;
+  };
+
   const navSections = [
     {
       title: 'Reports',
-      items: [
-        { 
-          id: 'report1340', 
-          label: '1340', 
-          href: '/reports/1340', 
-          filter: { type: 'navigate', value: 'report1340' }
-        },
-        { 
-          id: 'report1341', 
-          label: '1341', 
-          href: '/reports/1341', 
-          filter: { type: 'navigate', value: 'report1341' }
-        },
-        { 
-          id: 'report1342', 
-          label: '1342', 
-          href: '/reports/1342', 
-          filter: { type: 'navigate', value: 'report1342' }
-        },
-        { 
-          id: 'report1740', 
-          label: '1740', 
-          href: '/reports/1740', 
-          filter: { type: 'navigate', value: 'report1740' }
-        },
-        { 
-          id: 'report0540', 
-          label: '0540', 
-          href: '/reports/0540', 
-          filter: { type: 'navigate', value: 'report0540' }
-        },
-        { 
-          id: 'report7740', 
-          label: '7740', 
-          href: '/reports/7740', 
-          filter: { type: 'navigate', value: 'report7740' }
-        },
-        { 
-          id: 'report7741', 
-          label: '7741', 
-          href: '/reports/7741', 
-          filter: { type: 'navigate', value: 'report7741' }
-        },
-        { 
-          id: 'report7746', 
-          label: '7746', 
-          href: '/reports/7746', 
-          filter: { type: 'navigate', value: 'report7746' }
-        },
-        { 
-          id: 'report7747', 
-          label: '7747', 
-          href: '/reports/7747', 
-          filter: { type: 'navigate', value: 'report7747' }
-        },
-        { 
-          id: 'report0340', 
-          label: '0340', 
-          href: '/reports/0340', 
-          filter: { type: 'navigate', value: 'report0340' }
-        },
-        { 
-          id: 'report0341', 
-          label: '0341', 
-          href: '/reports/0341', 
-          filter: { type: 'navigate', value: 'report0341' }
-        },
-        { 
-          id: 'reportMERDAIL', 
-          label: 'MERDAIL', 
-          href: '/reports/MERDAIL', 
-          filter: { type: 'navigate', value: 'reportMERDAIL' }
-        },
-        { 
-          id: 'reportMERYRDT', 
-          label: 'MERYRDT', 
-          href: '/reports/MERYRDT', 
-          filter: { type: 'navigate', value: 'reportMERYRDT' }
-        },
-      ]
+      items: getFilteredReports()
     }
   ];
 

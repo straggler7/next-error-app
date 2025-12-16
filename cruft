@@ -2446,3 +2446,5 @@ index 3ceffab..c1eddcc 100644
 +          afterValue: currentClearCodesStr || 'None'
 +        });
 +      }
+
+curl -u "your_username:your_password_or_pat" https://your.repository.url

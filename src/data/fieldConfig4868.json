@@ -59,7 +59,7 @@
       }
     }
   },
-  "napEifNameCtrlUndrptrt": {
+  "napEifNameCtrlUndrprt": {
     "label": "Name Control (01NC_)"
   },
   "napEifResponseInd": {
@@ -71,8 +71,8 @@
   "mftCd": {
     "label": "Master File System ID Code (01MFT)"
   },
-  "primaryTransCd": {
-    "label": "Primary Transaction Code (01TC)"
+  "transCd": {
+    "label": "Transaction Code (01TC)"
   },
   "secondaryTransCd": {
     "label": "Secondary Transaction Code (01STC)"
