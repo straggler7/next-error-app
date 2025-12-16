@@ -891,8 +891,13 @@ function Form4868ERSPageContent() {
   const getPayloadClearCodes = useCallback(() => {
     console.log('generating payload clear codes from clearCodesInput:', clearCodesInput);
     
+    // Start with existing clear codes from eraDto
+    const existingClearCodes = eraDto?.clearCodes || [];
+    
     if (!clearCodesInput.trim()) {
-      return [];
+      // If no new clear codes input, return existing clear codes
+      console.log('No new clear codes input, returning existing:', existingClearCodes);
+      return existingClearCodes;
     }
     
     // Check if user entered 'C' or 'c' to clear current non-field error
@@ -900,18 +905,28 @@ function Form4868ERSPageContent() {
     if (trimmed === 'c' && currentNonFieldError) {
       const clearCode = currentNonFieldError.code;
       console.log(`Converting 'C' input to clear code: ${clearCode}`);
-      return [clearCode];
+      
+      // Add new clear code to existing ones if not already present
+      const updatedClearCodes = existingClearCodes.includes(clearCode) 
+        ? existingClearCodes 
+        : [...existingClearCodes, clearCode];
+      
+      console.log('Updated clear codes with new code:', updatedClearCodes);
+      return updatedClearCodes;
     }
     
     // Legacy support: parse comma-separated codes
-    const result = clearCodesInput
+    const newClearCodes = clearCodesInput
       .split(',')
       .map(code => code.trim())
       .filter(code => code.length > 0);
     
-    console.log('final payload clear codes array:', result);
-    return result;
-  }, [clearCodesInput, currentNonFieldError]);
+    // Combine existing and new clear codes, removing duplicates
+    const combinedClearCodes = [...new Set([...existingClearCodes, ...newClearCodes])];
+    
+    console.log('final payload clear codes array:', combinedClearCodes);
+    return combinedClearCodes;
+  }, [clearCodesInput, currentNonFieldError, eraDto?.clearCodes]);
 
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
