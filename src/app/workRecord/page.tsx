@@ -1062,6 +1062,12 @@ function Form4868ERSPageContent() {
   const [infoMessage, setInfoMessage] = useState<string>("");
   const [showInfo, setShowInfo] = useState(false);
 
+  // Timeout state for auto-closeout
+  const [timeoutWarning, setTimeoutWarning] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
 
@@ -1332,7 +1338,7 @@ function Form4868ERSPageContent() {
     }
   };
 
-  const handleCloseout = async () => {
+  const handleCloseout = useCallback(async () => {
     console.log("handleCloseout called");
     console.log("inventoryId:", inventoryId);
 
@@ -1439,7 +1445,7 @@ function Form4868ERSPageContent() {
     } finally {
       setClosingOut(false);
     }
-  };
+  }, [inventoryId, formElements, eraDto, landingSelectionData, currentUserSeid, router]);
 
   const handleDelete = async () => {
     if (!inventoryId) {
@@ -1853,6 +1859,119 @@ function Form4868ERSPageContent() {
     nonEditableFieldKeys,
   ]); // Include all dependencies for hasAnyFieldErrors()
 
+  // Auto-closeout timeout functionality
+  useEffect(() => {
+    const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+    const WARNING_DURATION = 2 * 30 * 1000; // Show warning 2 minutes before timeout
+
+    const resetTimeout = () => {
+      lastActivityRef.current = Date.now();
+      setTimeoutWarning(false);
+
+      // Clear existing timeouts
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+
+      // Set warning timeout (8 minutes)
+      warningTimeoutRef.current = setTimeout(() => {
+        setTimeoutWarning(true);
+        setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
+        setShowInfo(true);
+        console.log("Timeout warning shown - 2 minutes remaining");
+      }, TIMEOUT_DURATION - WARNING_DURATION);
+
+      // Set main timeout (10 minutes)
+      timeoutRef.current = setTimeout(() => {
+        console.log("Auto-closeout triggered after timeout duration:", TIMEOUT_DURATION);
+        console.log("handleCloseout function:", typeof handleCloseout);
+        setInfoMessage("Session timed out due to inactivity. Closing out record...");
+        setShowInfo(true);
+        
+        // Trigger closeout after a brief delay to show the message
+        setTimeout(() => {
+          console.log("About to call handleCloseout...");
+          handleCloseout();
+        }, 1000);
+      }, TIMEOUT_DURATION);
+    };
+
+    const handleUserActivity = (event: Event) => {
+      // Only reset timeout for meaningful user interactions
+      const target = event.target as HTMLElement;
+      
+      // Ignore activity on timeout warning elements
+      if (target?.closest('[data-timeout-warning]')) {
+        return;
+      }
+
+      resetTimeout();
+    };
+
+    // Activity event listeners
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'focus', 'blur'];
+    
+    // Add event listeners for user activity
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity, true);
+    });
+
+    // Initialize timeout on component mount
+    resetTimeout();
+
+    // Cleanup on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+      
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity, true);
+      });
+    };
+  }, [handleCloseout]); // Include handleCloseout as dependency
+
+  // Function to dismiss timeout warning
+  const dismissTimeoutWarning = () => {
+    setTimeoutWarning(false);
+    setShowInfo(false);
+    
+    // Reset the timeout when user dismisses warning
+    const TIMEOUT_DURATION = 10 * 60 * 1000;
+    const WARNING_DURATION = 2 * 60 * 1000;
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+
+    lastActivityRef.current = Date.now();
+    
+    // Restart the timeout cycle
+    warningTimeoutRef.current = setTimeout(() => {
+      setTimeoutWarning(true);
+      setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
+      setShowInfo(true);
+    }, TIMEOUT_DURATION - WARNING_DURATION);
+
+    timeoutRef.current = setTimeout(() => {
+      console.log("Auto-closeout triggered after timeout warning dismissal");
+      setInfoMessage("Session timed out due to inactivity. Closing out record...");
+      setShowInfo(true);
+      setTimeout(() => {
+        handleCloseout();
+      }, 1000);
+    }, TIMEOUT_DURATION);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -1954,11 +2073,14 @@ function Form4868ERSPageContent() {
 
       {/* Info Alert */}
       {showInfo && (
-        <div className="px-4 pt-6 pb-2">
+        <div className="px-4 pt-6 pb-2" data-timeout-warning={timeoutWarning ? "true" : undefined}>
           <InfoAlert
             ref={infoAlertRef}
             message={infoMessage}
-            onClose={() => setShowInfo(false)}
+            onClose={timeoutWarning ? dismissTimeoutWarning : () => setShowInfo(false)}
+            showDismissButton={timeoutWarning}
+            dismissButtonText={timeoutWarning ? "Continue Working" : undefined}
+            variant={timeoutWarning ? "warning" : "info"}
           />
         </div>
       )}
