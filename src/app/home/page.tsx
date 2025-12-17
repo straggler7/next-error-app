@@ -8,7 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
 import { useSeid } from "../../hooks/useSeid";
 import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
-import { serviceCenters } from "../../utils/serviceCenters";
+import { serviceCenters, getServiceCenterName } from "../../utils/serviceCenters";
 
 interface SearchFormData {
   dln: string;
@@ -159,6 +159,23 @@ export default function HomePage() {
 
     fetchStatusCodes();
   }, [currentUserSeid]);
+
+  // Set default service center based on user profile
+  useEffect(() => {
+    if (user?.profile?.serviceCenterId && !programForm.serviceCenter) {
+      const serviceCenterCode = parseInt(user.profile.serviceCenterId, 10);
+      const serviceCenterName = getServiceCenterName(serviceCenterCode);
+      
+      // Only set if we found a valid service center name (not the fallback)
+      if (!serviceCenterName.startsWith('Service Center ')) {
+        setProgramForm(prev => ({ 
+          ...prev, 
+          serviceCenter: serviceCenterName.toLowerCase() 
+        }));
+        console.log(`Default service center set to: ${serviceCenterName} (code: ${serviceCenterCode})`);
+      }
+    }
+  }, [user?.profile?.serviceCenterId, programForm.serviceCenter]);
 
   // Handle search form input changes
   const handleSearchInputChange = (field: keyof SearchFormData, value: string) => {
@@ -486,7 +503,7 @@ export default function HomePage() {
                   >
                     <option value="">Select a service center...</option>
                     {serviceCenters.map((center) => (
-                      <option key={center.name} value={center.name.toLowerCase().replace(' ', '-')}>
+                      <option key={center.name} value={center.name.toLowerCase()}>
                         {center.name}
                       </option>
                     ))}
