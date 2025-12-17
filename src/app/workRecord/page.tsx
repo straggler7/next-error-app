@@ -1326,13 +1326,17 @@ function Form4868ERSPageContent() {
         }
       } else {
         const errorText = await response.text();
-        throw new Error(`Suspend failed: ${errorText}`);
+        const error = JSON.parse(errorText);
+        console.error("Error suspending record:", error);
+        setFlashMessage(error.message);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
       }
     } catch (error) {
       console.error("Error suspending record:", error);
-      setFlashMessage("Error suspending record. Please try again.");
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 3000);
+      // setFlashMessage("Error suspending record. Please try again.");
+      // setShowFlash(true);
+      // setTimeout(() => setShowFlash(false), 3000);
     } finally {
       setSuspending(false);
     }
@@ -1435,7 +1439,12 @@ function Form4868ERSPageContent() {
         }
       } else {
         const errorText = await response.text();
-        throw new Error(`Closeout failed: ${errorText}`);
+        const error = JSON.parse(errorText);
+        console.error("Error closing out record:", error);
+        setFlashMessage(error.message);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
+        // throw new Error(`Closeout failed: ${errorText}`);
       }
     } catch (error) {
       console.error("Error closing out record:", error);
@@ -1548,7 +1557,12 @@ function Form4868ERSPageContent() {
         setTimeout(() => setShowFlash(false), 4000);
       } else {
         const errorText = await response.text();
-        throw new Error(`Delete failed: ${errorText}`);
+        const error = JSON.parse(errorText);
+        console.error("Error deleting record:", error);
+        setFlashMessage(error.message);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
+        // throw new Error(`Delete failed: ${errorText}`);
       }
     } catch (error) {
       console.error("Error deleting record:", error);
@@ -1801,7 +1815,11 @@ function Form4868ERSPageContent() {
         }
       } else {
         const errorText = await response.text();
-        throw new Error(`Revalidate failed: ${errorText}`);
+        const error = JSON.parse(errorText);
+        console.error("Error submitting form:", error);
+        setFlashMessage(error.message);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
