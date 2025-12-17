@@ -41,6 +41,10 @@ import { useSeid, useUserGroup } from "../../hooks/useSeid";
 import fieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
 
+// Timeout constants for auto-closeout functionality
+const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+const WARNING_DURATION = 2 * 60 * 1000; // Show warning 2 minutes before timeout
+
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
 const toLabel = (key: string) =>
   key
@@ -1879,8 +1883,6 @@ function Form4868ERSPageContent() {
 
   // Auto-closeout timeout functionality
   useEffect(() => {
-    const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
-    const WARNING_DURATION = 2 * 30 * 1000; // Show warning 2 minutes before timeout
 
     const resetTimeout = () => {
       lastActivityRef.current = Date.now();
@@ -1961,8 +1963,6 @@ function Form4868ERSPageContent() {
     setShowInfo(false);
     
     // Reset the timeout when user dismisses warning
-    const TIMEOUT_DURATION = 10 * 60 * 1000;
-    const WARNING_DURATION = 2 * 60 * 1000;
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
