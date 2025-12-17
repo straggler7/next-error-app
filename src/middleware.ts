@@ -10,14 +10,14 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Log the specific headers you mentioned
-  console.log('🔍 Middleware Headers Debug:', {
+  console.log('🔍 Middleware Headers Debug:', JSON.stringify({
     pathname,
     displayName: request.headers.get('displayName'),
     mail: request.headers.get('mail'),
     memberof: request.headers.get('memberof'),
     employeeId: request.headers.get('employeeId'),
     REMOTE_USER: request.headers.get('REMOTE_USER')
-  });
+  }));
   
   // Development bypass - check environment variables at runtime
   const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;
@@ -28,14 +28,14 @@ export function middleware(request: NextRequest) {
   // TEMPORARY: Force bypass for development (remove this line when env vars work)
   // const forceBypass = true; // Set to false to disable
   
-  console.log('🔍 Middleware Debug:', {
+  console.log('🔍 Middleware Debug:', JSON.stringify({
     pathname,
     NODE_ENV: process.env.NODE_ENV,
     BYPASS_AUTH: process.env.BYPASS_AUTH,
     isDevelopment,
     bypassAuth,
     shouldBypass: isDevelopment && bypassAuth
-  });
+  }));
   
   // Development bypass - skip authentication entirely
   // if ((isDevelopment && bypassAuth) || forceBypass) {

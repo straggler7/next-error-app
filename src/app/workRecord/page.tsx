@@ -1793,10 +1793,6 @@ function Form4868ERSPageContent() {
             <form className="space-y-8">
               <FormSection 
                 title="Form 4868 - Application for Automatic Extension"
-                metadata={{
-                  receivedDate: eraDto?.transDt ? new Date(eraDto.transDt).toLocaleDateString() : (jsonWorkRecord?.workRecord?.transDt ? new Date(jsonWorkRecord.workRecord.transDt).toLocaleDateString() : undefined),
-                  taxPeriod: eraDto?.taxPrd || jsonWorkRecord?.workRecord?.taxPrd,
-                }}
               >
                 <div className="space-y-8 px-1">
                   <div>

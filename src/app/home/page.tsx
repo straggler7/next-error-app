@@ -8,6 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
 import { useSeid } from "../../hooks/useSeid";
 import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
+import { serviceCenters } from "../../utils/serviceCenters";
 
 interface SearchFormData {
   dln: string;
@@ -64,7 +65,7 @@ export default function HomePage() {
   const [programForm, setProgramForm] = useState<ProgramFormData>({
     program: "",
     statusCode: "",
-    serviceCenter: "andover",
+    serviceCenter: "",
     seid: "",
     qualityReview: false
   });
@@ -484,11 +485,11 @@ export default function HomePage() {
                     onChange={(e) => handleProgramInputChange('serviceCenter', e.target.value)}
                   >
                     <option value="">Select a service center...</option>
-                    <option value="andover">Andover</option>
-                    <option value="austin">Austin</option>
-                    <option value="ogden">Ogden</option>
-                    <option value="fresno">Fresno</option>
-                    <option value="kansas-city">Kansas City</option>
+                    {serviceCenters.map((center) => (
+                      <option key={center.name} value={center.name.toLowerCase().replace(' ', '-')}>
+                        {center.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 

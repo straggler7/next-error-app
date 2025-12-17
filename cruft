@@ -2448,3 +2448,12 @@ index 3ceffab..c1eddcc 100644
 +      }
 
 curl -u "your_username:your_password_or_pat" https://your.repository.url
+
+# remove tax period on the work record page
+  metadata={{
+    receivedDate: eraDto?.transDt ? new Date(eraDto.transDt).toLocaleDateString() : (jsonWorkRecord?.workRecord?.transDt ? new Date(jsonWorkRecord.workRecord.transDt).toLocaleDateString() : undefined),
+    taxPeriod: eraDto?.taxPrd || jsonWorkRecord?.workRecord?.taxPrd,
+  }}
+
+
+  
