@@ -27,9 +27,9 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
       { key: 'submissionNames', label: 'Primary Name Control', visible: true, width: 180 },
-      { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      { key: 'submissionTins', label: 'Primary TIN', visible: true, width: 120 },
       { key: 'taxPeriod', label: 'Tax Period', visible: true, width: 120 },
-      { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 180 },
+      { key: 'suspendedStatusCode', label: 'Status Code', visible: true, width: 180 },
       { key: 'daysInSuspense', label: 'Remaining Days in Suspense', visible: true, width: 180 },
       { key: 'daysAged', label: 'Days in ERS', visible: true, width: 120 }
     ];
