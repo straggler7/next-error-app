@@ -1,20 +1,40 @@
 "use client";
 
 // Force dynamic rendering for this page since it requires authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useEffect, useMemo, useState, Suspense, useRef, useCallback } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  Suspense,
+  useRef,
+  useCallback,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
 import InfoAlert from "../../components/InfoAlert";
-import FormSection, { FormField, FormInput } from "../../components/FormSection";
+import FormSection, {
+  FormField,
+  FormInput,
+} from "../../components/FormSection";
 // import NotesSection from "../../components/NotesSection";
 import { ErrorItem, Note } from "../../types";
-import { workAssignmentService, FormElement, GMFError, AssignedWork, WorkRecord, AssignedWorkResponse } from "../../services/workAssignmentService";
+import {
+  workAssignmentService,
+  FormElement,
+  GMFError,
+  AssignedWork,
+  WorkRecord,
+  AssignedWorkResponse,
+} from "../../services/workAssignmentService";
 // import { landingSearchService } from "../../services/landingSearchService";
-import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
+import {
+  SuspenseCodesService,
+  SuspenseCode,
+} from "../../services/suspenseCodesService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
 // import DevBanner from "../../components/DevBanner";
@@ -37,23 +57,23 @@ const createZodSchema = (fieldKey: string) => {
   if (!config) return z.union([z.string(), z.number()]).optional();
 
   let schema = z.string();
-  
+
   if (config.required) {
     schema = schema.min(1, config.messages.required);
   }
-  
+
   if (config.minLength) {
     schema = schema.min(config.minLength, config.messages.minLength);
   }
-  
+
   if (config.maxLength) {
     schema = schema.max(config.maxLength, config.messages.maxLength);
   }
-  
+
   if (config.pattern) {
     schema = schema.regex(new RegExp(config.pattern), config.messages.pattern);
   }
-  
+
   return schema;
 };
 
@@ -65,9 +85,9 @@ const validateField = (fieldKey: string, value: string): string | null => {
     return null; // No error
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return error.issues[0]?.message || 'Invalid value';
+      return error.issues[0]?.message || "Invalid value";
     }
-    return 'Invalid value';
+    return "Invalid value";
   }
 };
 
@@ -77,30 +97,34 @@ function Form4868ERSPageContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const currentUserSeid = useSeid();
   const userGroup = useUserGroup();
-  const isQrReviewer = searchParams.get('qrReviewer') === 'true';
-  const isReopen = searchParams.get('reopen') === 'true';
+  const isQrReviewer = searchParams.get("qrReviewer") === "true";
+  const isReopen = searchParams.get("reopen") === "true";
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
   const [jsonWorkRecord, setJsonWorkRecord] = useState<any>(null);
   const [eraDto, setEraDto] = useState<any>(null);
   const [inventoryId, setInventoryId] = useState<string | null>(null);
   const [formElements, setFormElements] = useState<FormElement[]>([]);
-  const [originalFormElements, setOriginalFormElements] = useState<FormElement[]>([]);
+  const [originalFormElements, setOriginalFormElements] = useState<
+    FormElement[]
+  >([]);
   const [landingSearchData, setLandingSearchData] = useState<any>(null);
   const [landingSelectionData, setLandingSelectionData] = useState<any>(null);
-  
+
   // Validation state
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+
   // Track fields that have been edited
   const [fieldWithErrors, setFieldWithErrors] = useState<string[]>([]);
 
   // Convert JSON work record to form elements based on editableFields
   // const convertJsonWorkRecordToFormElements = (jsonRecord: any): FormElement[] => {
   //   if (!jsonRecord?.workRecord?.editableFields) return [];
-    
+
   //   const editableFields = jsonRecord.workRecord.editableFields;
   //   const workRecord = jsonRecord.workRecord;
-    
+
   //   return Object.keys(editableFields).map((fieldKey, index) => ({
   //     id: fieldKey,
   //     name: fieldKey,
@@ -115,94 +139,99 @@ function Form4868ERSPageContent() {
   // Convert ERA DTO to form elements using displayFields structure
   const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
     if (!eraData) return [];
-    
+
     // Get the data source (workRecord or root)
     const dataSource = eraData?.workRecord || eraData;
-    
+
     // Use displayFields structure from eraDto
-    const displayFields = eraData?.displayFields || eraData?.workRecord?.displayFields;
+    const displayFields =
+      eraData?.displayFields || eraData?.workRecord?.displayFields;
     if (displayFields) {
       // Create form elements based on displayFields structure
       const formElements: FormElement[] = [];
-      
+
       // Separate editable and non-editable fields
       const editableFields: FormElement[] = [];
       const nonEditableFields: FormElement[] = [];
-      
-      Object.entries(displayFields).forEach(([fieldKey, displayFieldConfig]: [string, any]) => {
-        const fieldValue = dataSource[fieldKey] || '';
-        // Get label from fieldConfig4868.json first, then fallback
-        const fieldLabel = (fieldConfig as any)[fieldKey]?.label || toLabel(fieldKey);
-        
-        const formElement: FormElement = {
-          id: fieldKey,
-          name: fieldKey,
-          label: fieldLabel,
-          value: fieldValue,
-          type: 'text',
-          editable: displayFieldConfig.editable,
-          hasFieldError: displayFieldConfig.hasFieldError || false
-        };
-        
-        if (displayFieldConfig.editable) {
-          editableFields.push(formElement);
-        } else {
-          nonEditableFields.push(formElement);
+
+      Object.entries(displayFields).forEach(
+        ([fieldKey, displayFieldConfig]: [string, any]) => {
+          const fieldValue = dataSource[fieldKey] || "";
+          // Get label from fieldConfig4868.json first, then fallback
+          const fieldLabel =
+            (fieldConfig as any)[fieldKey]?.label || toLabel(fieldKey);
+
+          const formElement: FormElement = {
+            id: fieldKey,
+            name: fieldKey,
+            label: fieldLabel,
+            value: fieldValue,
+            type: "text",
+            editable: displayFieldConfig.editable,
+            hasFieldError: displayFieldConfig.hasFieldError || false,
+          };
+
+          if (displayFieldConfig.editable) {
+            editableFields.push(formElement);
+          } else {
+            nonEditableFields.push(formElement);
+          }
         }
-      });
-      
+      );
+
       // Return editable fields first, then non-editable fields
       return [...editableFields, ...nonEditableFields];
     }
-    
+
     // Fallback to fieldConfig approach
     const formElements: FormElement[] = [];
     const editableFields: FormElement[] = [];
     const nonEditableFields: FormElement[] = [];
-    
-    Object.entries(fieldConfig).forEach(([fieldKey, config]: [string, any], index) => {
-      const fieldValue = dataSource[fieldKey] || '';
-      
-      const formElement: FormElement = {
-        id: fieldKey,
-        name: fieldKey,
-        label: config.label,
-        value: fieldValue,
-        type: 'text',
-        editable: config.editable || false,
-        hasFieldError: false
-      };
-      
-      if (config.editable) {
-        editableFields.push(formElement);
-      } else {
-        nonEditableFields.push(formElement);
+
+    Object.entries(fieldConfig).forEach(
+      ([fieldKey, config]: [string, any], index) => {
+        const fieldValue = dataSource[fieldKey] || "";
+
+        const formElement: FormElement = {
+          id: fieldKey,
+          name: fieldKey,
+          label: config.label,
+          value: fieldValue,
+          type: "text",
+          editable: config.editable || false,
+          hasFieldError: false,
+        };
+
+        if (config.editable) {
+          editableFields.push(formElement);
+        } else {
+          nonEditableFields.push(formElement);
+        }
       }
-    });
-    
+    );
+
     // Return editable fields first, then non-editable fields
     return [...editableFields, ...nonEditableFields];
   };
   const [loading, setLoading] = useState(true);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
-  const [noWorkMessage, setNoWorkMessage] = useState<string>('');
-
-
+  const [noWorkMessage, setNoWorkMessage] = useState<string>("");
 
   const editableFieldKeys: string[] = useMemo(() => {
     if (formElements.length > 0) {
       // Use actual form elements from API
-      return formElements.filter(el => el.editable).map(el => el.name);
+      return formElements.filter((el) => el.editable).map((el) => el.name);
     }
-    
+
     // Check for displayFields structure from eraDto
-    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    const displayFields =
+      eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
       return Object.entries(displayFields)
         .filter(([_, fieldConfig]: [string, any]) => fieldConfig.editable)
         .map(([fieldKey, _]) => fieldKey);
     }
-    
+
     // Default fallback - return empty array if no structure found
     return [];
   }, [formElements, eraDto]);
@@ -210,27 +239,31 @@ function Form4868ERSPageContent() {
   // Non-editable fields list from formElements
   const nonEditableFieldKeys: string[] = useMemo(() => {
     if (formElements.length > 0) {
-      return formElements.filter(el => !el.editable).map(el => el.name);
+      return formElements.filter((el) => !el.editable).map((el) => el.name);
     }
-    
+
     // Check for displayFields structure
-    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    const displayFields =
+      eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
       return Object.entries(displayFields)
         .filter(([_, fieldConfig]: [string, any]) => !fieldConfig.editable)
         .map(([fieldKey, _]) => fieldKey);
     }
-    
+
     return [];
   }, [formElements, eraDto]);
 
   // Map DTO keys to actual WorkRecord property names (simplified)
-  const dtoToRecordKey = useMemo((): Record<string, string> => ({
-    TaxPeriodEndDt: "taxPeriodEndDt",
-    primaryNameControlTxt: "primaryNameControlTxt",
-    nameLine1Txt: "nameLine1Txt",
-    primarySSN: "primarySSN",
-  }), []);
+  const dtoToRecordKey = useMemo(
+    (): Record<string, string> => ({
+      TaxPeriodEndDt: "taxPeriodEndDt",
+      primaryNameControlTxt: "primaryNameControlTxt",
+      nameLine1Txt: "nameLine1Txt",
+      primarySSN: "primarySSN",
+    }),
+    []
+  );
 
   // Build initial values and original snapshot
   const initialValues = useMemo(() => {
@@ -238,7 +271,10 @@ function Form4868ERSPageContent() {
     for (const key of editableFieldKeys) {
       if (formElements.length > 0) {
         // Use actual form elements from API
-        const element = workAssignmentService.getFormElementByName(formElements, key);
+        const element = workAssignmentService.getFormElementByName(
+          formElements,
+          key
+        );
         values[key] = element?.value || "";
       } else {
         // Fallback to eraDto workRecord
@@ -256,41 +292,46 @@ function Form4868ERSPageContent() {
   }, [editableFieldKeys, formElements, eraDto, dtoToRecordKey]);
 
   const [values, setValues] = useState<Record<string, string>>({});
-  const [originalValues, setOriginalValues] = useState<Record<string, string>>({});
+  const [originalValues, setOriginalValues] = useState<Record<string, string>>(
+    {}
+  );
   const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
   const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [clearCodesInput, setClearCodesInput] = useState<string>('');
-  const [actionCode, setActionCode] = useState<string>('');
+  const [clearCodesInput, setClearCodesInput] = useState<string>("");
+  const [actionCode, setActionCode] = useState<string>("");
   const [suspenseCodes, setSuspenseCodes] = useState<SuspenseCode[]>([]);
   const [loadingSuspenseCodes, setLoadingSuspenseCodes] = useState(false);
   const [suspending, setSuspending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [closingOut, setClosingOut] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
-  const [additionalNotes, setAdditionalNotes] = useState<string>('');
+  const [additionalNotes, setAdditionalNotes] = useState<string>("");
 
   // Helper function to check if clear code is entered (C or c)
   const hasClearCode = useCallback(() => {
     const trimmed = clearCodesInput.trim().toLowerCase();
-    return trimmed === 'c';
+    return trimmed === "c";
   }, [clearCodesInput]);
 
   // Helper function to parse clear codes from comma-separated input (for error filtering)
   const getClearCodesArray = useCallback(() => {
-    console.log('getting clear codes array from clearCodesInput:', clearCodesInput);
-    
+    console.log(
+      "getting clear codes array from clearCodesInput:",
+      clearCodesInput
+    );
+
     if (!clearCodesInput.trim()) {
       return [];
     }
-    
+
     // Legacy support: parse comma-separated codes
     const result = clearCodesInput
-      .split(',')
-      .map(code => code.trim())
-      .filter(code => code.length > 0);
-    
-    console.log('final clear codes array:', result);
+      .split(",")
+      .map((code) => code.trim())
+      .filter((code) => code.length > 0);
+
+    console.log("final clear codes array:", result);
     return result;
   }, [clearCodesInput]);
 
@@ -299,11 +340,11 @@ function Form4868ERSPageContent() {
     const fieldErrors: ErrorItem[] = [];
     const nonFieldErrors: ErrorItem[] = [];
     let errorIndex = 0;
-    
+
     // Try ERA DTO first, then fallback to jsonWorkRecord
     let errorSource = null;
     let ersReasonCds: string[] = [];
-    
+
     if (eraDto) {
       // For ERA DTO, check both root level and workRecord level
       errorSource = eraDto.workRecord || eraDto;
@@ -312,64 +353,76 @@ function Form4868ERSPageContent() {
       errorSource = jsonWorkRecord.workRecord;
       ersReasonCds = errorSource.ersReasonCds || [];
     }
-    
+
     // Get current clear codes to filter out matching errors
     const currentClearCodes = getClearCodesArray();
-    
+
     // Process ERS reason codes
     if (errorSource && ersReasonCds.length > 0) {
       // For new clear code system: filter out non-field errors if 'C' is entered and error is clearable
       const clearCodeEntered = hasClearCode();
-      
+
       const filteredErrors = ersReasonCds.filter((code: string) => {
         // Check if this is a field error
         const errorConfigItem = (errorConfig as any)[code];
         const fieldMappings = errorConfigItem?.fieldMappings || [];
         const isFieldError = fieldMappings.length > 0;
-        
+
         // Field errors are never cleared by clear codes
         if (isFieldError) {
           return true;
         }
-        
+
         // Check if error is already cleared in the loaded eraDto.clearCodes
         const eraDtoClearCodes = eraDto?.clearCodes || [];
         if (eraDtoClearCodes.includes(code)) {
-          console.log(`Error ${code} is already cleared in eraDto.clearCodes, hiding from display`);
+          console.log(
+            `Error ${code} is already cleared in eraDto.clearCodes, hiding from display`
+          );
           return false;
         }
-        
+
         // For non-field errors, check if clear code is entered and error is clearable
         // if (clearCodeEntered && errorConfigItem?.clearable === true) {
         //   console.log(`Non-field error ${code} is cleared by clear code 'C'`);
         //   return false; // Hide this error
         // }
-        
+
         // Legacy support: also check old clear codes array
         const isCleared = currentClearCodes.includes(code);
         if (isCleared) {
-          console.log(`Error ${code} is cleared by clear codes, hiding from display`);
+          console.log(
+            `Error ${code} is cleared by clear codes, hiding from display`
+          );
           return false;
         }
-        
+
         return true; // Show this error
       });
-      
-      console.log('Original errors:', ersReasonCds, 'Clear codes:', currentClearCodes, 'Filtered errors:', filteredErrors);
-      
+
+      console.log(
+        "Original errors:",
+        ersReasonCds,
+        "Clear codes:",
+        currentClearCodes,
+        "Filtered errors:",
+        filteredErrors
+      );
+
       filteredErrors.forEach((code: string) => {
         // Look up error configuration
         const errorConfigItem = (errorConfig as any)[code];
-        const description = errorConfigItem?.description || `Error code: ${code}`;
+        const description =
+          errorConfigItem?.description || `Error code: ${code}`;
         const fieldMappings = errorConfigItem?.fieldMappings || [];
         const isFieldError = fieldMappings.length > 0;
-        
+
         const errorItem = {
           id: `ers-error-${errorIndex}`,
           code: code,
           description: description,
-          type: 'Error' as const,
-          status: 'active' as const,
+          type: "Error" as const,
+          status: "active" as const,
           errorFields: fieldMappings, // Use fieldMappings from error config
           errorConfigKey: isFieldError ? code : undefined, // Add error config key for field errors only
           isFieldError: isFieldError, // Flag to identify field errors
@@ -377,13 +430,13 @@ function Form4868ERSPageContent() {
             title: `IRM 3.12.${180 + errorIndex} - Error Resolution`,
             content: `Resolve the following error: ${description}`,
             steps: [
-              'Review the error description',
-              'Correct the identified issue in the highlighted fields',
-              'Validate the correction'
-            ]
-          }
+              "Review the error description",
+              "Correct the identified issue in the highlighted fields",
+              "Validate the correction",
+            ],
+          },
         };
-        
+
         // Separate field errors from non-field errors
         if (isFieldError) {
           fieldErrors.push(errorItem);
@@ -393,59 +446,67 @@ function Form4868ERSPageContent() {
         errorIndex++;
       });
     }
-    
+
     // Process displayFields with hasFieldError: true
-    const displayFields = eraDto?.displayFields || eraDto?.workRecord?.displayFields;
+    const displayFields =
+      eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
-      Object.entries(displayFields).forEach(([fieldKey, fieldConfig]: [string, any]) => {
-        if (fieldConfig.hasFieldError === true) {
-          // Find corresponding error config key for this field
-          let errorConfigKey: string | undefined;
-          let description = `Field error: ${fieldKey}`;
-          
-          // Look for error config entries that map to this field
-          Object.entries(errorConfig).forEach(([errorCode, errorConfigItem]: [string, any]) => {
-            if (errorConfigItem.fieldMappings && errorConfigItem.fieldMappings.includes(fieldKey)) {
-              errorConfigKey = errorCode;
-              description = errorConfigItem.description || description;
+      Object.entries(displayFields).forEach(
+        ([fieldKey, fieldConfig]: [string, any]) => {
+          if (fieldConfig.hasFieldError === true) {
+            // Find corresponding error config key for this field
+            let errorConfigKey: string | undefined;
+            let description = `Field error: ${fieldKey}`;
+
+            // Look for error config entries that map to this field
+            Object.entries(errorConfig).forEach(
+              ([errorCode, errorConfigItem]: [string, any]) => {
+                if (
+                  errorConfigItem.fieldMappings &&
+                  errorConfigItem.fieldMappings.includes(fieldKey)
+                ) {
+                  errorConfigKey = errorCode;
+                  description = errorConfigItem.description || description;
+                }
+              }
+            );
+
+            // If no specific error config found, use field config for description
+            if (!errorConfigKey) {
+              const fieldConfigItem = (fieldConfig as any)[fieldKey];
+              if (fieldConfigItem?.label) {
+                description = `Field error: ${fieldConfigItem.label}`;
+              }
             }
-          });
-          
-          // If no specific error config found, use field config for description
-          if (!errorConfigKey) {
-            const fieldConfigItem = (fieldConfig as any)[fieldKey];
-            if (fieldConfigItem?.label) {
-              description = `Field error: ${fieldConfigItem.label}`;
-            }
+
+            fieldErrors.push({
+              id: `field-error-${errorIndex}`,
+              code: errorConfigKey || fieldKey,
+              description: description,
+              type: "Error" as const,
+              status: "active" as const,
+              errorFields: [fieldKey], // The field itself
+              errorConfigKey: errorConfigKey, // Error config key if found
+              isFieldError: true, // Always true for displayField errors
+              irm: {
+                title: `IRM 3.12.${180 + errorIndex} - Field Error Resolution`,
+                content: `Resolve the following field error: ${description}`,
+                steps: [
+                  "Review the field error",
+                  "Correct the value in the highlighted field",
+                  "Validate the correction",
+                ],
+              },
+            });
+            errorIndex++;
           }
-          
-          fieldErrors.push({
-            id: `field-error-${errorIndex}`,
-            code: errorConfigKey || fieldKey,
-            description: description,
-            type: 'Error' as const,
-            status: 'active' as const,
-            errorFields: [fieldKey], // The field itself
-            errorConfigKey: errorConfigKey, // Error config key if found
-            isFieldError: true, // Always true for displayField errors
-            irm: {
-              title: `IRM 3.12.${180 + errorIndex} - Field Error Resolution`,
-              content: `Resolve the following field error: ${description}`,
-              steps: [
-                'Review the field error',
-                'Correct the value in the highlighted field',
-                'Validate the correction'
-              ]
-            }
-          });
-          errorIndex++;
         }
-      });
+      );
     }
-    
+
     // Apply the new logic: show field errors first, or if none exist, show only the first non-field error
     let finalErrorItems: ErrorItem[] = [];
-    
+
     if (fieldErrors.length > 0) {
       // Show all field errors
       finalErrorItems = fieldErrors;
@@ -453,13 +514,22 @@ function Form4868ERSPageContent() {
     } else if (nonFieldErrors.length > 0) {
       // Show only the first non-field error from ersReasonCds
       finalErrorItems = [nonFieldErrors[0]];
-      console.log(`No field errors found, showing first non-field error: ${nonFieldErrors[0].code}`);
+      console.log(
+        `No field errors found, showing first non-field error: ${nonFieldErrors[0].code}`
+      );
     }
-    
+
     if (finalErrorItems.length === 0) {
-      console.log('No errors found. ErrorSource:', errorSource, 'ersReasonCds:', ersReasonCds, 'displayFields:', displayFields);
+      console.log(
+        "No errors found. ErrorSource:",
+        errorSource,
+        "ersReasonCds:",
+        ersReasonCds,
+        "displayFields:",
+        displayFields
+      );
     }
-    
+
     return finalErrorItems;
   }, [eraDto, jsonWorkRecord, getClearCodesArray]);
 
@@ -467,13 +537,16 @@ function Form4868ERSPageContent() {
   useEffect(() => {
     const fetchSuspenseCodes = async () => {
       if (!currentUserSeid) return;
-      
+
       setLoadingSuspenseCodes(true);
       try {
-        const codesWithDetails = await SuspenseCodesService.getSuspenseCodesWithDetails(currentUserSeid);
+        const codesWithDetails =
+          await SuspenseCodesService.getSuspenseCodesWithDetails(
+            currentUserSeid
+          );
         setSuspenseCodes(codesWithDetails);
       } catch (error) {
-        console.error('Error fetching suspense codes:', error);
+        console.error("Error fetching suspense codes:", error);
         // Fallback to empty array if fetch fails
         setSuspenseCodes([]);
       } finally {
@@ -486,14 +559,14 @@ function Form4868ERSPageContent() {
 
   useEffect(() => {
     // Load ERA DTO from sessionStorage
-    const storedEraDto = sessionStorage.getItem('eraDto');
-    const storedSelectionData = sessionStorage.getItem('selectionData');
-    
+    const storedEraDto = sessionStorage.getItem("eraDto");
+    const storedSelectionData = sessionStorage.getItem("selectionData");
+
     if (storedEraDto) {
       const eraDtoData = JSON.parse(storedEraDto);
       setEraDto(eraDtoData);
       setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
-      
+
       // Populate action code from stored DTO
       // Note: clearCodesInput is separate from eraDtoData.clearCodes
       // eraDtoData.clearCodes contains actual error codes like ["111", "103"]
@@ -501,50 +574,54 @@ function Form4868ERSPageContent() {
       if (eraDtoData.suspendStatusCode) {
         setActionCode(eraDtoData.suspendStatusCode);
       }
-      
+
       // Parse and set notes from new DTO
       if (eraDtoData.notes) {
         try {
-          const parsedNotes = typeof eraDtoData.notes === 'string' 
-            ? JSON.parse(eraDtoData.notes) 
-            : eraDtoData.notes;
+          const parsedNotes =
+            typeof eraDtoData.notes === "string"
+              ? JSON.parse(eraDtoData.notes)
+              : eraDtoData.notes;
           // Ensure all notes have stringified comments
-          const normalizedNotes = Array.isArray(parsedNotes) 
-            ? parsedNotes.map(note => ({
+          const normalizedNotes = Array.isArray(parsedNotes)
+            ? parsedNotes.map((note) => ({
                 ...note,
-                comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                comments:
+                  typeof note.comments === "string"
+                    ? note.comments
+                    : JSON.stringify(note.comments),
               }))
             : [];
           setNotes(normalizedNotes);
-          console.log('Notes parsed from new record:', parsedNotes);
+          console.log("Notes parsed from new record:", parsedNotes);
         } catch (error) {
-          console.error('Error parsing notes from new record:', error);
+          console.error("Error parsing notes from new record:", error);
           setNotes([]);
         }
       } else {
         setNotes([]);
       }
-      
+
       // Convert ERA DTO to form elements
       const elements = convertEraDtoToFormElements(eraDtoData);
       setFormElements(elements);
       setOriginalFormElements([...elements]);
-      
-      console.log('ERA DTO loaded from sessionStorage:', eraDtoData);
-      console.log('Form elements created:', elements);
-      console.log('ERA DTO workRecord:', eraDtoData.workRecord);
-      console.log('Clear codes populated:', eraDtoData.clearCodes);
-      console.log('Action code populated:', eraDtoData.suspendStatusCode);
+
+      console.log("ERA DTO loaded from sessionStorage:", eraDtoData);
+      console.log("Form elements created:", elements);
+      console.log("ERA DTO workRecord:", eraDtoData.workRecord);
+      console.log("Clear codes populated:", eraDtoData.clearCodes);
+      console.log("Action code populated:", eraDtoData.suspendStatusCode);
     }
-    
+
     if (storedSelectionData) {
       const selectionData = JSON.parse(storedSelectionData);
       setLandingSelectionData(selectionData);
-      console.log('Selection data loaded:', selectionData);
+      console.log("Selection data loaded:", selectionData);
     }
-    
+
     setLoading(false);
-    
+
     // Reset fieldWithErrors when component initializes
     setFieldWithErrors([]);
   }, []);
@@ -558,40 +635,42 @@ function Form4868ERSPageContent() {
   const loadNextWorkRecord = async () => {
     try {
       setLoading(true);
-      setActionCode('');
-      setClearCodesInput('');
-      setAdditionalNotes('');
+      setActionCode("");
+      setClearCodesInput("");
+      setAdditionalNotes("");
       setFieldWithErrors([]);
-      
+
       // Get selection data from sessionStorage
-      const storedSelectionData = sessionStorage.getItem('selectionData');
+      const storedSelectionData = sessionStorage.getItem("selectionData");
       if (!storedSelectionData) {
         setNoWorkAvailable(true);
-        setNoWorkMessage('No selection data available. Please return to home page.');
+        setNoWorkMessage(
+          "No selection data available. Please return to home page."
+        );
         return;
       }
-      
+
       const selectionData = JSON.parse(storedSelectionData);
-      console.log('Selection data:', selectionData);
-      
+      console.log("Selection data:", selectionData);
+
       // Make GET request to auto-assign endpoint
-      const response = await fetch('/api/v1/era/inventories/auto-assign', {
-        method: 'GET',
+      const response = await fetch("/api/v1/era/inventories/auto-assign", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'SERVICE_CENTER': selectionData.serviceCenter.toUpperCase(),
-          'PROGRAM_CODE': selectionData.program || selectionData.statusCode,
-          'SEID': `${currentUserSeid}`
-        }
+          "Content-Type": "application/json",
+          SERVICE_CENTER: selectionData.serviceCenter.toUpperCase(),
+          PROGRAM_CODE: selectionData.program || selectionData.statusCode,
+          SEID: `${currentUserSeid}`,
+        },
       });
 
       if (response.ok) {
         const eraDtoData = await response.json();
-        
+
         // Update state with new ERA DTO
         setEraDto(eraDtoData);
         setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
-        
+
         // Populate action code from new DTO
         // Note: clearCodesInput is separate from eraDtoData.clearCodes
         // eraDtoData.clearCodes contains actual error codes like ["111", "103"]
@@ -599,97 +678,114 @@ function Form4868ERSPageContent() {
         if (eraDtoData.suspendStatusCode) {
           setActionCode(eraDtoData.suspendStatusCode);
         }
-        
+
         // Parse and set notes from new DTO
         if (eraDtoData.notes) {
           try {
-            const parsedNotes = typeof eraDtoData.notes === 'string' 
-              ? JSON.parse(eraDtoData.notes) 
-              : eraDtoData.notes;
+            const parsedNotes =
+              typeof eraDtoData.notes === "string"
+                ? JSON.parse(eraDtoData.notes)
+                : eraDtoData.notes;
             // Ensure all notes have stringified comments
-            const normalizedNotes = Array.isArray(parsedNotes) 
-              ? parsedNotes.map(note => ({
+            const normalizedNotes = Array.isArray(parsedNotes)
+              ? parsedNotes.map((note) => ({
                   ...note,
-                  comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                  comments:
+                    typeof note.comments === "string"
+                      ? note.comments
+                      : JSON.stringify(note.comments),
                 }))
               : [];
             setNotes(normalizedNotes);
-            console.log('Notes parsed from new record:', parsedNotes);
+            console.log("Notes parsed from new record:", parsedNotes);
           } catch (error) {
-            console.error('Error parsing notes from new record:', error);
+            console.error("Error parsing notes from new record:", error);
             setNotes([]);
           }
         } else {
           setNotes([]);
         }
-        
+
         // Convert to form elements
         const elements = convertEraDtoToFormElements(eraDtoData);
         setFormElements(elements);
         setOriginalFormElements([...elements]);
-        
+
         // Update sessionStorage
-        sessionStorage.setItem('eraDto', JSON.stringify(eraDtoData));
-        
+        sessionStorage.setItem("eraDto", JSON.stringify(eraDtoData));
+
         setNoWorkAvailable(false);
-        console.log('New work record loaded:', eraDtoData);
-        
+        console.log("New work record loaded:", eraDtoData);
+
         // Show info alert for new work record
-        const dln = eraDtoData?.dln || eraDtoData?.workRecord?.dln || 'N/A';
+        const dln = eraDtoData?.dln || eraDtoData?.workRecord?.dln || "N/A";
         setInfoMessage(`New work record loaded, DLN: ${dln}`);
         setShowInfo(true);
         setTimeout(() => setShowInfo(false), 20000);
       } else if (response.status === 204) {
         setNoWorkAvailable(true);
-        setNoWorkMessage('No more work records available at this time.');
+        setNoWorkMessage("No more work records available at this time.");
       } else {
-        throw new Error(`Failed to get work assignment: ${response.statusText}`);
+        throw new Error(
+          `Failed to get work assignment: ${response.statusText}`
+        );
       }
     } catch (error) {
-      console.error('Error loading next work record:', error);
+      console.error("Error loading next work record:", error);
       setNoWorkAvailable(true);
-      setNoWorkMessage('Error loading work record. Please try again.');
+      setNoWorkMessage("Error loading work record. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const getDLN = () => eraDto?.workRecord?.dln || jsonWorkRecord?.workRecord?.dln || "N/A";
+  const getDLN = () =>
+    eraDto?.workRecord?.dln || jsonWorkRecord?.workRecord?.dln || "N/A";
 
   const handleInputChange = (fieldKey: string, val: string) => {
     console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
-    
+
     // Track that this field has been edited
-    setFieldWithErrors(prev => {
+    setFieldWithErrors((prev) => {
       if (!prev.includes(fieldKey)) {
         const updated = [...prev, fieldKey];
-        console.log('Updated fieldWithErrors:', updated);
+        console.log("Updated fieldWithErrors:", updated);
         return updated;
       }
       return prev;
     });
-    
+
     // Validate the field value
     const validationError = validateField(fieldKey, val);
-    console.log(`Validation result for ${fieldKey}:`, validationError || 'Valid');
-    
+    console.log(
+      `Validation result for ${fieldKey}:`,
+      validationError || "Valid"
+    );
+
     // Update validation errors state
-    setValidationErrors(prev => {
+    setValidationErrors((prev) => {
       const newErrors = { ...prev };
       if (validationError) {
         newErrors[fieldKey] = validationError;
       } else {
         delete newErrors[fieldKey];
       }
-      console.log('Updated validation errors:', newErrors);
+      console.log("Updated validation errors:", newErrors);
       return newErrors;
     });
-    
+
     if (formElements.length > 0) {
       // Update form elements if using API data
-      setFormElements(prev => {
-        const updated = workAssignmentService.updateFormElementValue(prev, fieldKey, val);
-        console.log(`Updated formElements for ${fieldKey}:`, updated.find(el => el.name === fieldKey));
+      setFormElements((prev) => {
+        const updated = workAssignmentService.updateFormElementValue(
+          prev,
+          fieldKey,
+          val
+        );
+        console.log(
+          `Updated formElements for ${fieldKey}:`,
+          updated.find((el) => el.name === fieldKey)
+        );
         return updated;
       });
     } else {
@@ -711,15 +807,22 @@ function Form4868ERSPageContent() {
     } else {
       setHighlightedFields(error.errorFields || []);
       setSelectedErrorId(error.id);
-      
+
       // Only focus on fields for field errors, not other errors
-      if (error.isFieldError && error.errorFields && error.errorFields.length > 0) {
+      if (
+        error.isFieldError &&
+        error.errorFields &&
+        error.errorFields.length > 0
+      ) {
         const firstFieldId = error.errorFields[0];
         setTimeout(() => {
           const fieldElement = document.getElementById(firstFieldId);
           if (fieldElement) {
             fieldElement.focus();
-            fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            fieldElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
           }
         }, 100); // Small delay to ensure DOM is updated
       }
@@ -729,10 +832,13 @@ function Form4868ERSPageContent() {
   // Helper function to get form element value by name
   const getFormElementValue = (name: string): string => {
     if (formElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(formElements, name);
-      return element?.value || '';
+      const element = workAssignmentService.getFormElementByName(
+        formElements,
+        name
+      );
+      return element?.value || "";
     }
-    return values[name] || '';
+    return values[name] || "";
   };
 
   // Helper function to get form element label by name
@@ -742,15 +848,18 @@ function Form4868ERSPageContent() {
     if (fieldConfigItem?.label) {
       return fieldConfigItem.label;
     }
-    
+
     // Fallback to form element label if fieldConfig doesn't have it
     if (formElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(formElements, name);
+      const element = workAssignmentService.getFormElementByName(
+        formElements,
+        name
+      );
       if (element?.label) {
         return String(element.label);
       }
     }
-    
+
     // Final fallback to generated label
     return toLabel(name);
   };
@@ -758,10 +867,13 @@ function Form4868ERSPageContent() {
   // Helper function to get original value
   const getOriginalValue = (name: string): string => {
     if (originalFormElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(originalFormElements, name);
-      return element?.value || '';
+      const element = workAssignmentService.getFormElementByName(
+        originalFormElements,
+        name
+      );
+      return element?.value || "";
     }
-    return originalValues[name] || '';
+    return originalValues[name] || "";
   };
 
   // Helper function to check if field has error (includes validation errors)
@@ -770,19 +882,22 @@ function Form4868ERSPageContent() {
     if (validationErrors[name]) {
       return true;
     }
-    
+
     // Check for existing field errors from data, but only if value hasn't changed
     if (formElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(formElements, name);
+      const element = workAssignmentService.getFormElementByName(
+        formElements,
+        name
+      );
       const currentValue = getFormElementValue(name);
       const originalValue = getOriginalValue(name);
-      
-      // If the field has an error flag but the value has changed from original, 
+
+      // If the field has an error flag but the value has changed from original,
       // don't show the error (user is addressing it)
       if (element?.hasFieldError && currentValue !== originalValue) {
         return false;
       }
-      
+
       return Boolean(element?.hasFieldError) || false;
     }
     return false;
@@ -794,36 +909,39 @@ function Form4868ERSPageContent() {
     if (validationErrors[name]) {
       return validationErrors[name];
     }
-    
+
     // For original field errors, only show if value hasn't changed
     if (formElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(formElements, name);
+      const element = workAssignmentService.getFormElementByName(
+        formElements,
+        name
+      );
       const currentValue = getFormElementValue(name);
       const originalValue = getOriginalValue(name);
-      
+
       // If field has error but value changed, don't show original error message
       if (element?.hasFieldError && currentValue !== originalValue) {
         return undefined;
       }
-      
+
       // You could return a generic message for original field errors if needed
       // For now, returning undefined since we don't have specific error messages in the data
     }
-    
+
     return undefined;
   };
 
   // Helper function to validate all editable fields
   const validateAllFields = (): boolean => {
     const errors: Record<string, string> = {};
-    editableFieldKeys.forEach(fieldKey => {
+    editableFieldKeys.forEach((fieldKey) => {
       const value = getFormElementValue(fieldKey);
       const error = validateField(fieldKey, value);
       if (error) {
         errors[fieldKey] = error;
       }
     });
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -834,15 +952,18 @@ function Form4868ERSPageContent() {
     if (Object.keys(validationErrors).length > 0) {
       return true;
     }
-    
+
     // Check for original field errors that haven't been addressed
     const allFieldKeys = [...editableFieldKeys, ...nonEditableFieldKeys];
-    return allFieldKeys.some(fieldKey => {
+    return allFieldKeys.some((fieldKey) => {
       if (formElements.length > 0) {
-        const element = workAssignmentService.getFormElementByName(formElements, fieldKey);
+        const element = workAssignmentService.getFormElementByName(
+          formElements,
+          fieldKey
+        );
         const currentValue = getFormElementValue(fieldKey);
         const originalValue = getOriginalValue(fieldKey);
-        
+
         // If field has error and value hasn't changed, it's still an error
         return element?.hasFieldError && currentValue === originalValue;
       }
@@ -859,19 +980,19 @@ function Form4868ERSPageContent() {
 
   // Helper function to check if there are any field errors present
   const hasFieldErrors = useMemo(() => {
-    return errorItems.some(error => error.isFieldError);
+    return errorItems.some((error) => error.isFieldError);
   }, [errorItems]);
 
   // Helper function to get the current non-field error being displayed
   const currentNonFieldError = useMemo(() => {
     if (hasFieldErrors) return null; // No non-field error when field errors present
-    return errorItems.find(error => !error.isFieldError) || null;
+    return errorItems.find((error) => !error.isFieldError) || null;
   }, [errorItems, hasFieldErrors]);
 
   // Helper function to check if the currently displayed non-field error is clearable
   const isCurrentErrorClearable = useMemo(() => {
     if (!currentNonFieldError) return false;
-    
+
     const errorConfigItem = (errorConfig as any)[currentNonFieldError.code];
     return errorConfigItem?.clearable === true;
   }, [currentNonFieldError]);
@@ -881,7 +1002,7 @@ function Form4868ERSPageContent() {
     if (!user?.profile?.profile?.profiles || !landingSelectionData?.program) {
       return false;
     }
-    
+
     const currentProgram = landingSelectionData.program;
     const programProfile = user.profile.profile.profiles[currentProgram];
     return programProfile?.deleteEnabled === true;
@@ -889,42 +1010,50 @@ function Form4868ERSPageContent() {
 
   // Helper function to generate clear codes array for payload
   const getPayloadClearCodes = useCallback(() => {
-    console.log('generating payload clear codes from clearCodesInput:', clearCodesInput);
-    
+    console.log(
+      "generating payload clear codes from clearCodesInput:",
+      clearCodesInput
+    );
+
     // Start with existing clear codes from eraDto
     const existingClearCodes = eraDto?.clearCodes || [];
-    
+
     if (!clearCodesInput.trim()) {
       // If no new clear codes input, return existing clear codes
-      console.log('No new clear codes input, returning existing:', existingClearCodes);
+      console.log(
+        "No new clear codes input, returning existing:",
+        existingClearCodes
+      );
       return existingClearCodes;
     }
-    
+
     // Check if user entered 'C' or 'c' to clear current non-field error
     const trimmed = clearCodesInput.trim().toLowerCase();
-    if (trimmed === 'c' && currentNonFieldError) {
+    if (trimmed === "c" && currentNonFieldError) {
       const clearCode = currentNonFieldError.code;
       console.log(`Converting 'C' input to clear code: ${clearCode}`);
-      
+
       // Add new clear code to existing ones if not already present
-      const updatedClearCodes = existingClearCodes.includes(clearCode) 
-        ? existingClearCodes 
+      const updatedClearCodes = existingClearCodes.includes(clearCode)
+        ? existingClearCodes
         : [...existingClearCodes, clearCode];
-      
-      console.log('Updated clear codes with new code:', updatedClearCodes);
+
+      console.log("Updated clear codes with new code:", updatedClearCodes);
       return updatedClearCodes;
     }
-    
+
     // Legacy support: parse comma-separated codes
     const newClearCodes = clearCodesInput
-      .split(',')
-      .map(code => code.trim())
-      .filter(code => code.length > 0);
-    
+      .split(",")
+      .map((code) => code.trim())
+      .filter((code) => code.length > 0);
+
     // Combine existing and new clear codes, removing duplicates
-    const combinedClearCodes = [...new Set([...existingClearCodes, ...newClearCodes])];
-    
-    console.log('final payload clear codes array:', combinedClearCodes);
+    const combinedClearCodes = [
+      ...new Set([...existingClearCodes, ...newClearCodes]),
+    ];
+
+    console.log("final payload clear codes array:", combinedClearCodes);
     return combinedClearCodes;
   }, [clearCodesInput, currentNonFieldError, eraDto?.clearCodes]);
 
@@ -932,7 +1061,7 @@ function Form4868ERSPageContent() {
   const [showFlash, setShowFlash] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string>("");
   const [showInfo, setShowInfo] = useState(false);
-  
+
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
 
@@ -949,65 +1078,69 @@ function Form4868ERSPageContent() {
   // Helper function to generate notes with field changes
   const generateNotesWithChanges = () => {
     const fieldChanges: any[] = [];
-    const storedSelectionData = sessionStorage.getItem('selectionData');
-    const selectionData = JSON.parse(storedSelectionData || '{}');
-    const noteSeid = currentUserSeid || selectionData.seid || 'unknown';
-    
+    const storedSelectionData = sessionStorage.getItem("selectionData");
+    const selectionData = JSON.parse(storedSelectionData || "{}");
+    const noteSeid = currentUserSeid || selectionData.seid || "unknown";
+
     // Check for form field changes
-    formElements.forEach(element => {
-      const originalElement = originalFormElements.find(orig => orig.name === element.name);
+    formElements.forEach((element) => {
+      const originalElement = originalFormElements.find(
+        (orig) => orig.name === element.name
+      );
       if (originalElement && originalElement.value !== element.value) {
         fieldChanges.push({
           fieldName: element.label || element.name,
-          beforeValue: originalElement.value || '',
-          afterValue: element.value || ''
+          beforeValue: originalElement.value || "",
+          afterValue: element.value || "",
         });
       }
     });
-    
+
     // Check for clear codes changes
     const originalClearCodes = eraDto?.clearCodes || [];
     const currentClearCodes = getPayloadClearCodes();
-    const originalClearCodesStr = Array.isArray(originalClearCodes) ? originalClearCodes.join(', ') : '';
-    const currentClearCodesStr = currentClearCodes.join(', ');
-    
+    const originalClearCodesStr = Array.isArray(originalClearCodes)
+      ? originalClearCodes.join(", ")
+      : "";
+    const currentClearCodesStr = currentClearCodes.join(", ");
+
     if (originalClearCodesStr !== currentClearCodesStr) {
       fieldChanges.push({
-        fieldName: 'Clear Codes',
+        fieldName: "Clear Codes",
         beforeValue: originalClearCodesStr,
-        afterValue: currentClearCodesStr
+        afterValue: currentClearCodesStr,
       });
     }
-    
+
     // Check for action code changes
-    const originalActionCode = eraDto?.suspendStatusCode || '';
+    const originalActionCode = eraDto?.suspendStatusCode || "";
     if (originalActionCode !== actionCode) {
       fieldChanges.push({
-        fieldName: 'Action Code',
+        fieldName: "Action Code",
         beforeValue: originalActionCode,
-        afterValue: actionCode
+        afterValue: actionCode,
       });
     }
-    
+
     // Create new note if there are changes or additional notes
     if (fieldChanges.length > 0 || additionalNotes.trim()) {
       const commentsObj = {
         ...(fieldChanges.length > 0 && { fieldChanges: fieldChanges }),
-        ...(additionalNotes.trim() && { additionalComments: additionalNotes })
+        ...(additionalNotes.trim() && { additionalComments: additionalNotes }),
       };
-      
+
       const newNote = {
         author: noteSeid,
         createdTime: new Date().toISOString(),
-        comments: JSON.stringify(commentsObj)
+        comments: JSON.stringify(commentsObj),
       };
-      
+
       // Add to existing notes (notes are already normalized when loaded)
       const updatedNotes = [...notes, newNote];
       // return JSON.stringify(updatedNotes);
       return updatedNotes;
     }
-    
+
     // Return existing notes as string if no changes (notes are already normalized)
     // return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
     return notes.length > 0 ? notes : [];
@@ -1031,140 +1164,167 @@ function Form4868ERSPageContent() {
 
     // Clear any highlighted fields on suspend
     setHighlightedFields([]);
-    
+
     setSuspending(true);
     try {
       // Create updated ERA DTO with form changes
       const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
-      
+
       // Ensure workRecord exists
       if (!updatedEraDto.workRecord) {
         updatedEraDto.workRecord = {};
       }
-      
+
       // Update form element values in the workRecord section
-      formElements.forEach(element => {
+      formElements.forEach((element) => {
         updatedEraDto.workRecord[element.name] = element.value;
       });
-      
-      const storedSelectionData = sessionStorage.getItem('selectionData');
-      const selectionData = JSON.parse(storedSelectionData || '{}');
 
-      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'SEID': currentUserSeid || 'X1000'
-        },
-        body: JSON.stringify({
-          "event": {
-            "eventStatus":"SUSPEND",
+      const storedSelectionData = sessionStorage.getItem("selectionData");
+      const selectionData = JSON.parse(storedSelectionData || "{}");
+
+      const response = await fetch(
+        `/api/v1/era/inventories/items/${inventoryId}/event`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            SEID: currentUserSeid || "X1000",
           },
-          "inventoryItem": {
-            "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord,
-            "suspendStatusCode": actionCode,
-            "clearCodes": getPayloadClearCodes(),
-            "notes": generateNotesWithChanges(),
-            "fieldWithErrors": fieldWithErrors
-          }
-        })
-      });
+          body: JSON.stringify({
+            event: {
+              eventStatus: "SUSPEND",
+            },
+            inventoryItem: {
+              inventoryId: inventoryId,
+              workRecord: updatedEraDto.workRecord,
+              suspendStatusCode: actionCode,
+              clearCodes: getPayloadClearCodes(),
+              notes: generateNotesWithChanges(),
+              fieldWithErrors: fieldWithErrors,
+            },
+          }),
+        }
+      );
 
       if (response.status === 200) {
         const result = await response.json();
-        
+
         // Clear additional notes after successful operation
-        setAdditionalNotes('');
-        
+        setAdditionalNotes("");
+
         if (result.assignmentComplete) {
           if (isQrReviewer) {
-            setFlashMessage('Record suspended successfully. Returning to QR inventory...');
+            setFlashMessage(
+              "Record suspended successfully. Returning to QR inventory..."
+            );
             setShowFlash(true);
             setTimeout(() => {
-              router.push('/qrInventory');
+              router.push("/qrInventory");
             }, 2000);
           } else if (isReopen) {
-            setFlashMessage('Record suspended successfully. Returning to daily summary...');
+            setFlashMessage(
+              "Record suspended successfully. Returning to daily summary..."
+            );
             setShowFlash(true);
             setTimeout(() => {
-              router.push('/daily-summary');
+              router.push("/daily-summary");
             }, 2000);
           } else {
-            setFlashMessage('Record suspended successfully. Loading next record...');
+            setFlashMessage(
+              "Record suspended successfully. Loading next record..."
+            );
             setShowFlash(true);
-            
+
             try {
               await loadNextWorkRecord();
-              setFlashMessage('Record suspended successfully and new record retrieved');
+              setFlashMessage(
+                "Record suspended successfully and new record retrieved"
+              );
             } catch (fetchError) {
-              console.error('Error fetching next work record:', fetchError);
-              setFlashMessage('Record suspended successfully but failed to fetch new record');
+              console.error("Error fetching next work record:", fetchError);
+              setFlashMessage(
+                "Record suspended successfully but failed to fetch new record"
+              );
             }
-            
+
             setTimeout(() => setShowFlash(false), 4000);
           }
         } else {
           // Assignment not complete - update current record with workRecord from inventoryItem
           const updatedRecord = result.inventoryItem;
-          
+
           if (updatedRecord) {
             setEraDto(updatedRecord);
-            setInventoryId(result.inventoryId || updatedRecord.inventoryId || updatedRecord.id);
-            
+            setInventoryId(
+              result.inventoryId ||
+                updatedRecord.inventoryId ||
+                updatedRecord.id
+            );
+
             // Convert to form elements
             const elements = convertEraDtoToFormElements(updatedRecord);
             setFormElements(elements);
             setOriginalFormElements([...elements]);
-            
+
             // Parse and update notes from updatedRecord
             if (updatedRecord.notes) {
               try {
-                const parsedNotes = typeof updatedRecord.notes === 'string' 
-                  ? JSON.parse(updatedRecord.notes) 
-                  : updatedRecord.notes;
+                const parsedNotes =
+                  typeof updatedRecord.notes === "string"
+                    ? JSON.parse(updatedRecord.notes)
+                    : updatedRecord.notes;
                 // Ensure all notes have stringified comments
-                const normalizedNotes = Array.isArray(parsedNotes) 
-                  ? parsedNotes.map(note => ({
+                const normalizedNotes = Array.isArray(parsedNotes)
+                  ? parsedNotes.map((note) => ({
                       ...note,
-                      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                      comments:
+                        typeof note.comments === "string"
+                          ? note.comments
+                          : JSON.stringify(note.comments),
                     }))
                   : [];
                 setNotes(normalizedNotes);
-                console.log('Notes updated from API response:', normalizedNotes);
+                console.log(
+                  "Notes updated from API response:",
+                  normalizedNotes
+                );
               } catch (error) {
-                console.error('Error parsing notes from updated record:', error);
+                console.error(
+                  "Error parsing notes from updated record:",
+                  error
+                );
                 setNotes([]);
               }
             } else {
               setNotes([]);
             }
-            
+
             // Update sessionStorage
-            sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
-            
+            sessionStorage.setItem("eraDto", JSON.stringify(updatedRecord));
+
             // Show info alert for additional error correction needed
-            setInfoMessage('Requires additional error correction');
+            setInfoMessage("Requires additional error correction");
             setShowInfo(true);
             setTimeout(() => setShowInfo(false), 10000);
-            
-            setFlashMessage('Record suspended and submitted for validation. Record updated');
+
+            setFlashMessage(
+              "Record suspended and submitted for validation. Record updated"
+            );
           } else {
-            setFlashMessage('Record suspended and submitted for validation');
+            setFlashMessage("Record suspended and submitted for validation");
           }
-          
+
           setShowFlash(true);
           setTimeout(() => setShowFlash(false), 4000);
         }
-        
       } else {
         const errorText = await response.text();
         throw new Error(`Suspend failed: ${errorText}`);
       }
-      
     } catch (error) {
-      console.error('Error suspending record:', error);
-      setFlashMessage('Error suspending record. Please try again.');
+      console.error("Error suspending record:", error);
+      setFlashMessage("Error suspending record. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
@@ -1173,9 +1333,9 @@ function Form4868ERSPageContent() {
   };
 
   const handleCloseout = async () => {
-    console.log('handleCloseout called');
-    console.log('inventoryId:', inventoryId);
-    
+    console.log("handleCloseout called");
+    console.log("inventoryId:", inventoryId);
+
     if (!inventoryId) {
       setFlashMessage("No inventory ID available. Please return to home page.");
       setShowFlash(true);
@@ -1193,76 +1353,87 @@ function Form4868ERSPageContent() {
 
     // Clear any highlighted fields on closeout
     setHighlightedFields([]);
-    
+
     setClosingOut(true);
-    console.log('Setting closingOut to true');
+    console.log("Setting closingOut to true");
     try {
       // Create updated ERA DTO with form changes
       const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
-      
+
       // Ensure workRecord exists
       if (!updatedEraDto.workRecord) {
         updatedEraDto.workRecord = {};
       }
-      
+
       // Update form element values in the workRecord section
-      formElements.forEach(element => {
+      formElements.forEach((element) => {
         updatedEraDto.workRecord[element.name] = element.value;
       });
-      
-      const storedSelectionData = sessionStorage.getItem('selectionData');
-      const selectionData = JSON.parse(storedSelectionData || '{}');
 
-      console.log('Making PATCH request to:', `/api/v1/era/inventories/${inventoryId}/event`);
-      console.log('Request body:', { eventStatus: "CLOSEOUT" });
-      
-      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/event`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'SEID': `${currentUserSeid}`
-        },
-        body: JSON.stringify({"eventStatus":"CLOSEOUT"})
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
+      const storedSelectionData = sessionStorage.getItem("selectionData");
+      const selectionData = JSON.parse(storedSelectionData || "{}");
+
+      console.log(
+        "Making PATCH request to:",
+        `/api/v1/era/inventories/${inventoryId}/event`
+      );
+      console.log("Request body:", { eventStatus: "CLOSEOUT" });
+
+      const response = await fetch(
+        `/api/v1/era/inventories/${inventoryId}/event`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            SEID: `${currentUserSeid}`,
+          },
+          body: JSON.stringify({ eventStatus: "CLOSEOUT" }),
+        }
+      );
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
 
       if (response.status === 200) {
         const result = await response.json();
-        
+
         // Clear additional notes after successful operation
-        setAdditionalNotes('');
-        
+        setAdditionalNotes("");
+
         if (isQrReviewer) {
-          setFlashMessage('Record closed out successfully. Returning to QR inventory...');
+          setFlashMessage(
+            "Record closed out successfully. Returning to QR inventory..."
+          );
           setShowFlash(true);
           setTimeout(() => {
-            router.push('/qrInventory');
+            router.push("/qrInventory");
           }, 2000);
         } else if (isReopen) {
-          setFlashMessage('Record closed out successfully. Returning to daily summary...');
+          setFlashMessage(
+            "Record closed out successfully. Returning to daily summary..."
+          );
           setShowFlash(true);
           setTimeout(() => {
-            router.push('/daily-summary');
+            router.push("/daily-summary");
           }, 2000);
         } else {
-          setFlashMessage('Record closed out successfully. Returning to home...');
+          setFlashMessage(
+            "Record closed out successfully. Returning to home..."
+          );
           setShowFlash(true);
-          
+
           // Navigate to home after a brief delay to show the message
           setTimeout(() => {
-            router.push('/home');
+            router.push("/home");
           }, 2000);
         }
       } else {
         const errorText = await response.text();
         throw new Error(`Closeout failed: ${errorText}`);
       }
-      
     } catch (error) {
-      console.error('Error closing out record:', error);
-      setFlashMessage('Error closing out record. Please try again.');
+      console.error("Error closing out record:", error);
+      setFlashMessage("Error closing out record. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
@@ -1280,91 +1451,102 @@ function Form4868ERSPageContent() {
 
     // Clear any highlighted fields on delete
     setHighlightedFields([]);
-    
+
     setDeleting(true);
     try {
       // Create updated ERA DTO with form changes
       const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
-      
+
       // Ensure workRecord exists
       if (!updatedEraDto.workRecord) {
         updatedEraDto.workRecord = {};
       }
-      
+
       // Update form element values in the workRecord section
-      formElements.forEach(element => {
+      formElements.forEach((element) => {
         updatedEraDto.workRecord[element.name] = element.value;
       });
-      
-      const storedSelectionData = sessionStorage.getItem('selectionData');
-      const selectionData = JSON.parse(storedSelectionData || '{}');
 
-      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'SEID': `${currentUserSeid}`
-        },
-        body: JSON.stringify({
-          "event": {
-            "eventStatus":"DELETED",
+      const storedSelectionData = sessionStorage.getItem("selectionData");
+      const selectionData = JSON.parse(storedSelectionData || "{}");
+
+      const response = await fetch(
+        `/api/v1/era/inventories/items/${inventoryId}/event`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            SEID: `${currentUserSeid}`,
           },
-          "inventoryItem": {
-            "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getPayloadClearCodes(),
-            "notes": generateNotesWithChanges(),
-            "fieldWithErrors": fieldWithErrors
-          }
-        })
-      });
+          body: JSON.stringify({
+            event: {
+              eventStatus: "DELETED",
+            },
+            inventoryItem: {
+              inventoryId: inventoryId,
+              workRecord: updatedEraDto.workRecord,
+              clearCodes: getPayloadClearCodes(),
+              notes: generateNotesWithChanges(),
+              fieldWithErrors: fieldWithErrors,
+            },
+          }),
+        }
+      );
 
       if (response.status === 200) {
         const result = await response.json();
-        
+
         // Clear additional notes after successful operation
-        setAdditionalNotes('');
-        
+        setAdditionalNotes("");
+
         if (result.assignmentComplete) {
           if (isQrReviewer) {
-            setFlashMessage('Record deleted successfully. Returning to QR inventory...');
+            setFlashMessage(
+              "Record deleted successfully. Returning to QR inventory..."
+            );
             setShowFlash(true);
             setTimeout(() => {
-              router.push('/qrInventory');
+              router.push("/qrInventory");
             }, 2000);
           } else if (isReopen) {
-            setFlashMessage('Record deleted successfully. Returning to daily summary...');
+            setFlashMessage(
+              "Record deleted successfully. Returning to daily summary..."
+            );
             setShowFlash(true);
             setTimeout(() => {
-              router.push('/daily-summary');
+              router.push("/daily-summary");
             }, 2000);
           } else {
-            setFlashMessage('Record deleted successfully. Loading next record...');
+            setFlashMessage(
+              "Record deleted successfully. Loading next record..."
+            );
             setShowFlash(true);
-            
+
             try {
               await loadNextWorkRecord();
-              setFlashMessage('Record deleted successfully and new record retrieved');
+              setFlashMessage(
+                "Record deleted successfully and new record retrieved"
+              );
             } catch (fetchError) {
-              console.error('Error fetching next work record:', fetchError);
-              setFlashMessage('Record deleted successfully but failed to fetch new record');
+              console.error("Error fetching next work record:", fetchError);
+              setFlashMessage(
+                "Record deleted successfully but failed to fetch new record"
+              );
             }
           }
         } else {
-          setFlashMessage('Record deleted successfully');
+          setFlashMessage("Record deleted successfully");
           setShowFlash(true);
         }
-        
+
         setTimeout(() => setShowFlash(false), 4000);
-        
       } else {
         const errorText = await response.text();
         throw new Error(`Delete failed: ${errorText}`);
       }
-      
     } catch (error) {
-      console.error('Error deleting record:', error);
-      setFlashMessage('Error deleting record. Please try again.');
+      console.error("Error deleting record:", error);
+      setFlashMessage("Error deleting record. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
@@ -1382,7 +1564,7 @@ function Form4868ERSPageContent() {
 
     // Validate all editable fields before submission
     const validationErrors: Record<string, string> = {};
-    editableFieldKeys.forEach(fieldKey => {
+    editableFieldKeys.forEach((fieldKey) => {
       const value = getFormElementValue(fieldKey);
       const error = validateField(fieldKey, value);
       if (error) {
@@ -1401,30 +1583,30 @@ function Form4868ERSPageContent() {
 
     // Clear any highlighted fields on submit
     setHighlightedFields([]);
-    
+
     setSubmitting(true);
     try {
       // Create updated ERA DTO with form changes
       const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
-      
+
       // Ensure workRecord exists
       if (!updatedEraDto.workRecord) {
         updatedEraDto.workRecord = {};
       }
-      
+
       // Update form element values in the workRecord section
-      formElements.forEach(element => {
+      formElements.forEach((element) => {
         console.log(`Updating field ${element.name}: "${element.value}"`);
         updatedEraDto.workRecord[element.name] = element.value;
       });
-      
-      console.log('Original ERA DTO:', eraDto);
-      console.log('Updated ERA DTO being sent:', updatedEraDto);
-      console.log('Form elements being applied:', formElements);
-      console.log('WorkRecord after updates:', updatedEraDto.workRecord);
-      
-      const storedSelectionData = sessionStorage.getItem('selectionData');
-      const selectionData = JSON.parse(storedSelectionData || '{}');
+
+      console.log("Original ERA DTO:", eraDto);
+      console.log("Updated ERA DTO being sent:", updatedEraDto);
+      console.log("Form elements being applied:", formElements);
+      console.log("WorkRecord after updates:", updatedEraDto.workRecord);
+
+      const storedSelectionData = sessionStorage.getItem("selectionData");
+      const selectionData = JSON.parse(storedSelectionData || "{}");
 
       // POST to revalidate endpoint
       // const response = await fetch(`/api/v1/era/inventories/${inventoryId}/revalidate`, {
@@ -1436,154 +1618,188 @@ function Form4868ERSPageContent() {
       //   body: JSON.stringify(updatedEraDto)
       // });
 
-      const response = await fetch(`/api/v1/era/inventories/items/${inventoryId}/event`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'SEID': `${currentUserSeid}`
-        },
-        body: JSON.stringify({
-          "event": {
-            "eventStatus":"RESOLVED",
+      const response = await fetch(
+        `/api/v1/era/inventories/items/${inventoryId}/event`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            SEID: `${currentUserSeid}`,
           },
-          "inventoryItem": {
-            "inventoryId": inventoryId,
-            "workRecord": updatedEraDto.workRecord,
-            "clearCodes": getPayloadClearCodes(),
-            "notes": generateNotesWithChanges(),
-            "fieldWithErrors": fieldWithErrors
-          }
-        })
-      });
+          body: JSON.stringify({
+            event: {
+              eventStatus: "RESOLVED",
+            },
+            inventoryItem: {
+              inventoryId: inventoryId,
+              workRecord: updatedEraDto.workRecord,
+              clearCodes: getPayloadClearCodes(),
+              notes: generateNotesWithChanges(),
+              fieldWithErrors: fieldWithErrors,
+            },
+          }),
+        }
+      );
 
       if (response.status === 200) {
         const result = await response.json();
-        
+
         // Clear additional notes after successful operation
-        setAdditionalNotes('');
-        
+        setAdditionalNotes("");
+
         if (result.assignmentComplete) {
           // Assignment complete - get next record from auto-assign or navigate to QR inventory
           if (isQrReviewer) {
-            setFlashMessage('Form submitted successfully. Returning to QR inventory...');
+            setFlashMessage(
+              "Form submitted successfully. Returning to QR inventory..."
+            );
             setShowFlash(true);
             setTimeout(() => {
-              router.push('/qrInventory');
+              router.push("/qrInventory");
             }, 2000);
           } else if (isReopen) {
-            setFlashMessage('Form submitted successfully. Returning to daily summary...');
+            setFlashMessage(
+              "Form submitted successfully. Returning to daily summary..."
+            );
             setShowFlash(true);
             setTimeout(() => {
-              router.push('/daily-summary');
+              router.push("/daily-summary");
             }, 2000);
           } else {
-            setFlashMessage('Form submitted successfully. Loading next record...');
+            setFlashMessage(
+              "Form submitted successfully. Loading next record..."
+            );
             setShowFlash(true);
-            
+
             try {
               await loadNextWorkRecord();
-              setFlashMessage('Form submitted successfully and new record retrieved');
+              setFlashMessage(
+                "Form submitted successfully and new record retrieved"
+              );
             } catch (fetchError) {
-              console.error('Error fetching next work record:', fetchError);
-              setFlashMessage('Form submitted successfully but failed to fetch new record');
+              console.error("Error fetching next work record:", fetchError);
+              setFlashMessage(
+                "Form submitted successfully but failed to fetch new record"
+              );
             }
-            
+
             setTimeout(() => setShowFlash(false), 4000);
           }
         } else {
           // Assignment not complete - update current record with workRecord from inventoryItem
           // const updatedRecord = result.inventoryItem?.workRecord;
           const updatedRecord = result.inventoryItem;
-          
+
           if (updatedRecord) {
             setEraDto(updatedRecord);
-            setInventoryId(result.inventoryId || updatedRecord.inventoryId || updatedRecord.id);
-            
+            setInventoryId(
+              result.inventoryId ||
+                updatedRecord.inventoryId ||
+                updatedRecord.id
+            );
+
             // Convert to form elements
             const elements = convertEraDtoToFormElements(updatedRecord);
             setFormElements(elements);
             setOriginalFormElements([...elements]);
-            
+
             // Parse and update notes from updatedRecord
             if (updatedRecord.notes) {
               try {
-                const parsedNotes = typeof updatedRecord.notes === 'string' 
-                  ? JSON.parse(updatedRecord.notes) 
-                  : updatedRecord.notes;
+                const parsedNotes =
+                  typeof updatedRecord.notes === "string"
+                    ? JSON.parse(updatedRecord.notes)
+                    : updatedRecord.notes;
                 // Ensure all notes have stringified comments
-                const normalizedNotes = Array.isArray(parsedNotes) 
-                  ? parsedNotes.map(note => ({
+                const normalizedNotes = Array.isArray(parsedNotes)
+                  ? parsedNotes.map((note) => ({
                       ...note,
-                      comments: typeof note.comments === 'string' ? note.comments : JSON.stringify(note.comments)
+                      comments:
+                        typeof note.comments === "string"
+                          ? note.comments
+                          : JSON.stringify(note.comments),
                     }))
                   : [];
                 setNotes(normalizedNotes);
-                console.log('Notes updated from API response:', normalizedNotes);
+                console.log(
+                  "Notes updated from API response:",
+                  normalizedNotes
+                );
               } catch (error) {
-                console.error('Error parsing notes from updated record:', error);
+                console.error(
+                  "Error parsing notes from updated record:",
+                  error
+                );
                 setNotes([]);
               }
             } else {
               setNotes([]);
             }
-            
+
             // Update sessionStorage
-            sessionStorage.setItem('eraDto', JSON.stringify(updatedRecord));
-            
+            sessionStorage.setItem("eraDto", JSON.stringify(updatedRecord));
+
             // Show info alert for additional error correction needed
-            setInfoMessage('Requires additional error correction');
+            setInfoMessage("Requires additional error correction");
             setShowInfo(true);
             setTimeout(() => setShowInfo(false), 10000);
-            
-            setFlashMessage('Form submitted for validation. Record updated');
+
+            setFlashMessage("Form submitted for validation. Record updated");
           } else {
-            setFlashMessage('Form submitted for validation');
+            setFlashMessage("Form submitted for validation");
           }
-          
+
           setShowFlash(true);
           setTimeout(() => setShowFlash(false), 4000);
         }
-        
       } else if (response.status === 204) {
         // Clear additional notes after successful operation
-        setAdditionalNotes('');
-        
+        setAdditionalNotes("");
+
         // No content - get next record from auto-assign or navigate to QR inventory
         if (isQrReviewer) {
-          setFlashMessage('Form submitted successfully. Returning to QR inventory...');
+          setFlashMessage(
+            "Form submitted successfully. Returning to QR inventory..."
+          );
           setShowFlash(true);
           setTimeout(() => {
-            router.push('/qrInventory');
+            router.push("/qrInventory");
           }, 2000);
         } else if (isReopen) {
-          setFlashMessage('Form submitted successfully. Returning to daily summary...');
+          setFlashMessage(
+            "Form submitted successfully. Returning to daily summary..."
+          );
           setShowFlash(true);
           setTimeout(() => {
-            router.push('/daily-summary');
+            router.push("/daily-summary");
           }, 2000);
         } else {
-          setFlashMessage('Form submitted successfully. Loading next record...');
+          setFlashMessage(
+            "Form submitted successfully. Loading next record..."
+          );
           setShowFlash(true);
-          
+
           try {
             await loadNextWorkRecord();
-            setFlashMessage('Form submitted successfully and new record retrieved');
+            setFlashMessage(
+              "Form submitted successfully and new record retrieved"
+            );
           } catch (fetchError) {
-            console.error('Error fetching next work record:', fetchError);
-            setFlashMessage('Form submitted successfully but failed to fetch new record');
+            console.error("Error fetching next work record:", fetchError);
+            setFlashMessage(
+              "Form submitted successfully but failed to fetch new record"
+            );
           }
-          
+
           setTimeout(() => setShowFlash(false), 4000);
         }
-        
       } else {
         const errorText = await response.text();
         throw new Error(`Revalidate failed: ${errorText}`);
       }
-      
     } catch (error) {
-      console.error('Error submitting form:', error);
-      setFlashMessage('Error submitting form. Please try again.');
+      console.error("Error submitting form:", error);
+      setFlashMessage("Error submitting form. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
@@ -1595,49 +1811,59 @@ function Form4868ERSPageContent() {
   useEffect(() => {
     const handleKeyUp = (event: KeyboardEvent) => {
       // Check if Page Up key is pressed (key code 33 or key name 'PageUp')
-      if (event.key === 'PageUp' || event.keyCode === 33) {
+      if (event.key === "PageUp" || event.keyCode === 33) {
         event.preventDefault();
-        console.log('Page Up key pressed - checking if handleSubmit can be called');
-        
+        console.log(
+          "Page Up key pressed - checking if handleSubmit can be called"
+        );
+
         // Only call handleSubmit if inventoryId is available and there are no field errors
         if (!inventoryId) {
-          console.log('inventoryId not available - ignoring Page Up key');
+          console.log("inventoryId not available - ignoring Page Up key");
           return;
         }
-        
+
         if (hasAnyFieldErrors()) {
-          console.log('Field errors present - ignoring Page Up key');
-          setFlashMessage('Field errors need to be fixed for submission');
+          console.log("Field errors present - ignoring Page Up key");
+          setFlashMessage("Field errors need to be fixed for submission");
           setShowFlash(true);
           setTimeout(() => setShowFlash(false), 3000);
           return;
         }
-        
-        console.log('inventoryId available and no field errors - triggering handleSubmit');
+
+        console.log(
+          "inventoryId available and no field errors - triggering handleSubmit"
+        );
         handleSubmit();
       }
     };
 
     // Add event listener to document
-    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener("keyup", handleKeyUp);
 
     // Cleanup event listener on component unmount
     return () => {
-      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener("keyup", handleKeyUp);
     };
-  }, [inventoryId, validationErrors, formElements, editableFieldKeys, nonEditableFieldKeys]); // Include all dependencies for hasAnyFieldErrors()
+  }, [
+    inventoryId,
+    validationErrors,
+    formElements,
+    editableFieldKeys,
+    nonEditableFieldKeys,
+  ]); // Include all dependencies for hasAnyFieldErrors()
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
-        <Header hideNav={true}/>
-        
+        <Header hideNav={true} />
+
         {/* Breadcrumbs */}
         {/* <div className="px-4 pt-4 pb-2">
           <Breadcrumbs items={createBreadcrumbs.workRecord()} />
         </div> */}
-        
+
         <div className="p-8 text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-600 mt-4">Loading assigned work...</p>
@@ -1651,20 +1877,32 @@ function Form4868ERSPageContent() {
       <div className="min-h-screen bg-gray-100">
         {/* <Header user={mockUser} showBackButton backHref="/home" /> */}
         <Header hideNav={true} />
-        
+
         {/* Breadcrumbs */}
         {/* <div className="px-4 pt-4 pb-2">
           <Breadcrumbs items={createBreadcrumbs.workRecord()} />
         </div> */}
-        
+
         <div className="p-8 text-center">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
             <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg
+                className="w-6 h-6 text-yellow-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-gray-800 mb-2">No Work Records Available</h1>
+            <h1 className="text-xl font-bold text-gray-800 mb-2">
+              No Work Records Available
+            </h1>
             <p className="text-gray-600">{noWorkMessage}</p>
           </div>
         </div>
@@ -1689,16 +1927,22 @@ function Form4868ERSPageContent() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600">Authentication required. Redirecting...</p>
+          <p className="text-red-600">
+            Authentication required. Redirecting...
+          </p>
         </div>
       </div>
     );
   }
 
+  function getProgram(): string {
+    return eraDto?.program || jsonWorkRecord?.workRecord?.program || "";
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
       {/* <DevBanner /> */}
-      <Header disableDailySummary={true} hideNav={true}/>
+      <Header disableDailySummary={true} hideNav={true} />
 
       {/* Breadcrumbs */}
       {/* <div className="px-4 pt-4 pb-2">
@@ -1711,7 +1955,7 @@ function Form4868ERSPageContent() {
       {/* Info Alert */}
       {showInfo && (
         <div className="px-4 pt-6 pb-2">
-          <InfoAlert 
+          <InfoAlert
             ref={infoAlertRef}
             message={infoMessage}
             onClose={() => setShowInfo(false)}
@@ -1735,21 +1979,39 @@ function Form4868ERSPageContent() {
             <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
               Inventory ID: {inventoryId}
             </span>
-            {landingSearchData && (
+            {/* {landingSearchData && (
               <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                Search: {landingSearchData.dln || landingSearchData.nameControl || landingSearchData.tin || landingSearchData.taxpayerName || 'Multiple criteria'}
+                Search:{" "}
+                {landingSearchData.dln ||
+                  landingSearchData.nameControl ||
+                  landingSearchData.tin ||
+                  landingSearchData.taxpayerName ||
+                  "Multiple criteria"}
               </span>
-            )}
+            )} */}
             {landingSelectionData && (
-              // <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
-              //   {landingSelectionData.program && `Program: ${landingSelectionData.program}`}
-              //   {landingSelectionData.statusCode && `Status: ${landingSelectionData.statusCode}`}
-              //   {landingSelectionData.serviceCenter && ` | ${landingSelectionData.serviceCenter.toUpperCase()}`}
-              // </span>
-              <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
-              {landingSelectionData.program && `Service Center: ${landingSelectionData.serviceCenter.toUpperCase()}`}
-            </span>
-
+              <>
+                {/* <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+                  {landingSelectionData.program &&
+                    `Program: ${landingSelectionData.program}`}
+                  {landingSelectionData.statusCode &&
+                    `Status: ${landingSelectionData.statusCode}`}
+                  {landingSelectionData.serviceCenter &&
+                    ` | ${landingSelectionData.serviceCenter.toUpperCase()}`}
+                </span> */}
+                <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+                  {landingSelectionData.program &&
+                    `Service Center: ${
+                      landingSelectionData.serviceCenter
+                        .charAt(0)
+                        .toUpperCase() +
+                      landingSelectionData.serviceCenter.slice(1)
+                    }`}
+                </span>
+                <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+                  Program: {landingSelectionData.program}
+                </span>
+              </>
             )}
           </div>
           {/* <button className="inline-flex items-center gap-2 px-6 py-2 bg-[#0f507e] text-white text-sm font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm">
@@ -1761,19 +2023,29 @@ function Form4868ERSPageContent() {
       {/* Error Badges Section - Only show if there are visible errors */}
       {errorItems.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
-          <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">Errors</div>
+          <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">
+            Errors
+          </div>
           <div className="error-badges-container flex flex-wrap gap-2">
             {errorItems.map((error) => (
               <div
                 key={error.id}
                 className={`error-badge cursor-pointer transition-all duration-200 px-3.5 py-2 rounded-2xl text-sm font-medium flex items-center gap-2 ${
                   selectedErrorId === error.id
-                    ? 'bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5'
-                    : 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md'
+                    ? "bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5"
+                    : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md"
                 }`}
                 onClick={() => handleErrorClick(error)}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-80">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="opacity-80"
+                >
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="15" y1="9" x2="9" y2="15"></line>
                   <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -1791,26 +2063,27 @@ function Form4868ERSPageContent() {
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
             <form className="space-y-8">
-              <FormSection 
-                title="Form 4868 - Application for Automatic Extension"
-              >
+              <FormSection title="Form 4868 - Application for Automatic Extension">
                 <div className="space-y-8 px-1">
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-2">
-                      <FormField 
-                        label="Clear Codes" 
-                        required={false}
-                      >
+                      <FormField label="Clear Codes" required={false}>
                         <FormInput
                           value={clearCodesInput}
                           onChange={(value) => {
                             // Only allow 'C' or 'c' characters
-                            const filteredValue = value.replace(/[^Cc]/g, '');
+                            const filteredValue = value.replace(/[^Cc]/g, "");
                             // Limit to single character
                             const singleChar = filteredValue.slice(0, 1);
                             setClearCodesInput(singleChar);
                           }}
-                          placeholder={hasFieldErrors ? "Disabled - resolve field errors first" : (isCurrentErrorClearable ? "Enter 'C' to clear error" : "Current error not clearable")}
+                          placeholder={
+                            hasFieldErrors
+                              ? "Disabled - resolve field errors first"
+                              : isCurrentErrorClearable
+                              ? "Enter 'C' to clear error"
+                              : "Current error not clearable"
+                          }
                           disabled={hasFieldErrors || !isCurrentErrorClearable}
                         />
                         {/* <div className="mt-1 text-xs text-gray-600">
@@ -1845,8 +2118,7 @@ function Form4868ERSPageContent() {
                     {/* Non-Editable Fields Section */}
                     {nonEditableFieldKeys.length > 0 && (
                       <div className="mt-2">
-                        <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">
-                        </h4>
+                        <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2"></h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {nonEditableFieldKeys.map((key) => (
                             <FormField
@@ -1877,17 +2149,23 @@ function Form4868ERSPageContent() {
                       onChange={(e) => {
                         const value = e.target.value;
                         setActionCode(value);
-                        handleInputChange('suspendStatusCode', value);
+                        handleInputChange("suspendStatusCode", value);
                       }}
                       disabled={loadingSuspenseCodes}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-sm hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                     >
                       <option value="">
-                        {loadingSuspenseCodes ? 'Loading suspense codes...' : 'Select action code'}
+                        {loadingSuspenseCodes
+                          ? "Loading suspense codes..."
+                          : "Select action code"}
                       </option>
                       {suspenseCodes.map((suspenseCode) => (
-                        <option key={suspenseCode.code} value={suspenseCode.code}>
-                          {suspenseCode.code} - {suspenseCode.description} ({suspenseCode.daysSuspended} days)
+                        <option
+                          key={suspenseCode.code}
+                          value={suspenseCode.code}
+                        >
+                          {suspenseCode.code} - {suspenseCode.description} (
+                          {suspenseCode.daysSuspended} days)
                         </option>
                       ))}
                     </select>
@@ -1904,8 +2182,8 @@ function Form4868ERSPageContent() {
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                   submitting || hasAnyFieldErrors()
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
                 onClick={() => {
                   clearFieldHighlight();
@@ -1918,15 +2196,21 @@ function Form4868ERSPageContent() {
               <button
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  !actionCode.trim() || suspending || Object.keys(validationErrors).length > 0
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                  !actionCode.trim() ||
+                  suspending ||
+                  Object.keys(validationErrors).length > 0
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
                 onClick={() => {
                   clearFieldHighlight();
                   handleSuspend();
                 }}
-                disabled={!actionCode.trim() || suspending || Object.keys(validationErrors).length > 0}
+                disabled={
+                  !actionCode.trim() ||
+                  suspending ||
+                  Object.keys(validationErrors).length > 0
+                }
               >
                 {suspending ? "Suspending..." : "Suspend"}
               </button>
@@ -1936,11 +2220,11 @@ function Form4868ERSPageContent() {
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                   closingOut
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
                 onClick={() => {
-                  console.log('Close Out button clicked');
+                  console.log("Close Out button clicked");
                   clearFieldHighlight();
                   handleCloseout();
                 }}
@@ -1953,8 +2237,8 @@ function Form4868ERSPageContent() {
                   type="button"
                   className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                     deleting
-                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                      ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                      : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                   }`}
                   onClick={() => {
                     clearFieldHighlight();
@@ -1967,7 +2251,7 @@ function Form4868ERSPageContent() {
               )}
             </div>
           </div>
-          
+
           {/* Field Error Warning Message */}
           {hasAnyFieldErrors() && (
             <div className="mt-3 text-left">
@@ -1983,7 +2267,7 @@ function Form4868ERSPageContent() {
           <div className="notes-title text-lg font-semibold mb-4 pb-2 border-b border-gray-200 text-gray-700 flex-shrink-0">
             Notes
           </div>
-          
+
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Additional Notes Input */}
             <div className="additional-notes-input mb-4 flex-shrink-0">
@@ -1998,86 +2282,107 @@ function Form4868ERSPageContent() {
                 rows={3}
               />
             </div>
-            
+
             <div className="notes-content overflow-y-auto flex-1 space-y-4">
               {notes.length === 0 ? (
                 <div className="text-gray-500 text-sm">No notes available</div>
               ) : (
                 notes.map((note, index) => (
-                  <div key={index} className="note-entry border-b border-gray-100 pb-4 last:border-b-0">
+                  <div
+                    key={index}
+                    className="note-entry border-b border-gray-100 pb-4 last:border-b-0"
+                  >
                     <div className="note-header mb-2">
                       <div className="text-sm font-medium text-gray-700">
-                        Author: {note.author || 'Unknown'}
+                        Author: {note.author || "Unknown"}
                       </div>
                       <div className="text-xs text-gray-500">
-                        Created At: {note.createdTime ? new Date(note.createdTime).toLocaleString() : 'Unknown'}
+                        Created At:{" "}
+                        {note.createdTime
+                          ? new Date(note.createdTime).toLocaleString()
+                          : "Unknown"}
                       </div>
                     </div>
-                    
-                    {note.comments && (() => {
-                      try {
-                        // Handle different comment formats
-                        let parsedComments = note.comments;
-                        
-                        // If comments is a string, try to parse it as JSON first
-                        if (typeof note.comments === 'string') {
-                          try {
-                            parsedComments = JSON.parse(note.comments);
-                          } catch {
-                            // If JSON parsing fails, treat it as a plain string
-                            parsedComments = note.comments;
+
+                    {note.comments &&
+                      (() => {
+                        try {
+                          // Handle different comment formats
+                          let parsedComments = note.comments;
+
+                          // If comments is a string, try to parse it as JSON first
+                          if (typeof note.comments === "string") {
+                            try {
+                              parsedComments = JSON.parse(note.comments);
+                            } catch {
+                              // If JSON parsing fails, treat it as a plain string
+                              parsedComments = note.comments;
+                            }
                           }
-                        }
-                        
-                        console.log("note.comments", note.comments);
-                        console.log("parsedComments", parsedComments);
-                        
-                        // Handle case where parsedComments is a plain string
-                        if (typeof parsedComments === 'string') {
+
+                          console.log("note.comments", note.comments);
+                          console.log("parsedComments", parsedComments);
+
+                          // Handle case where parsedComments is a plain string
+                          if (typeof parsedComments === "string") {
+                            return (
+                              <div className="note-comments">
+                                <div className="text-sm text-gray-700 whitespace-pre-line">
+                                  {parsedComments}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          // Handle case where parsedComments is an object with properties
                           return (
                             <div className="note-comments">
-                              <div className="text-sm text-gray-700 whitespace-pre-line">
-                                {parsedComments}
-                              </div>
+                              {parsedComments.fieldChanges &&
+                                parsedComments.fieldChanges.length > 0 && (
+                                  <div className="field-changes mb-3">
+                                    <div className="text-sm font-medium text-gray-600 mb-1">
+                                      Field Changes:
+                                    </div>
+                                    <div className="ml-4 space-y-1">
+                                      {parsedComments.fieldChanges.map(
+                                        (change: any, changeIndex: number) => (
+                                          <div
+                                            key={changeIndex}
+                                            className="text-xs text-gray-600"
+                                          >
+                                            <span className="font-medium">
+                                              {change.fieldName}:
+                                            </span>{" "}
+                                            {change.beforeValue} →{" "}
+                                            {change.afterValue}
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                              {parsedComments.additionalComments && (
+                                <div className="additional-comments">
+                                  <div className="text-sm font-medium text-gray-600 mb-1">
+                                    Additional Comments:
+                                  </div>
+                                  <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
+                                    {parsedComments.additionalComments}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } catch (error) {
+                          console.error("Error parsing comments:", error);
+                          return (
+                            <div className="text-xs text-red-500">
+                              Error displaying comments
                             </div>
                           );
                         }
-                        
-                        // Handle case where parsedComments is an object with properties
-                        return (
-                          <div className="note-comments">
-                            {parsedComments.fieldChanges && parsedComments.fieldChanges.length > 0 && (
-                              <div className="field-changes mb-3">
-                                <div className="text-sm font-medium text-gray-600 mb-1">Field Changes:</div>
-                                <div className="ml-4 space-y-1">
-                                  {parsedComments.fieldChanges.map((change: any, changeIndex: number) => (
-                                    <div key={changeIndex} className="text-xs text-gray-600">
-                                      <span className="font-medium">{change.fieldName}:</span> {change.beforeValue} → {change.afterValue}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {parsedComments.additionalComments && (
-                              <div className="additional-comments">
-                                <div className="text-sm font-medium text-gray-600 mb-1">Additional Comments:</div>
-                                <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
-                                  {parsedComments.additionalComments}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      } catch (error) {
-                        console.error('Error parsing comments:', error);
-                        return (
-                          <div className="text-xs text-red-500">
-                            Error displaying comments
-                          </div>
-                        );
-                      }
-                    })()}
+                      })()}
                   </div>
                 ))
               )}
@@ -2091,7 +2396,13 @@ function Form4868ERSPageContent() {
 
 export default function Form4868ERSPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <Form4868ERSPageContent />
     </Suspense>
   );
