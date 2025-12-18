@@ -1003,6 +1003,16 @@ function Form4868ERSPageContent() {
 
   // Helper function to check if user has delete permission for current program
   const hasDeletePermission = useMemo(() => {
+    if (!user) {
+      return false;
+    }
+
+    // Managers and analysts always have delete permission
+    if (user.group === 'managers' || user.group === 'analysts') {
+      return true;
+    }
+
+    // For tax examiners, check program-specific delete permission
     if (!user?.profile?.profile?.profiles || !landingSelectionData?.program) {
       return false;
     }
