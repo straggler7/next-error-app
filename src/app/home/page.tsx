@@ -275,7 +275,7 @@ export default function HomePage() {
         program: programForm.program,
         statusCode: programForm.statusCode,
         serviceCenter: programForm.serviceCenter,
-        seid: programForm.seid
+        seid: programForm.seid.toLowerCase(),
       };
       
       console.log('Storing selectionData:', selectionData);
