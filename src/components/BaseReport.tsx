@@ -98,7 +98,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'source', label: 'Source', visible: true, width: 120 },
       { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
       { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
-      { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 }
+      { key: 'actionCode', label: 'Action Code', visible: true, width: 120 },
     ];
   }
 
@@ -133,11 +133,11 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
-      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
     ];
   }
 
@@ -151,7 +151,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
-      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
     ];
   }
 
@@ -179,7 +178,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
-      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
     ];
   }
 

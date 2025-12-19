@@ -44,6 +44,7 @@ export interface ReportRecord {
   errorCode?: string; // Error code for report 0340
   priority?: string; // Priority for report 0340
   count?: number; // Count for report 0340
+  actionCode?: string; // Action code for report 0540
   _uniqueId?: string; // Generated unique ID for table rows
 }
 
@@ -155,7 +156,14 @@ export class ReportsService {
       }
 
       const reportData: ReportRecord[] = await response.json();
-      return reportData;
+      
+      // Add default actionCode value of '640' for 0540 report
+      const reportDataWithActionCode = reportData.map(record => ({
+        ...record,
+        actionCode: '640'
+      }));
+      
+      return reportDataWithActionCode;
     } catch (error) {
       console.error('Error fetching 0540 report:', error);
       throw error;
