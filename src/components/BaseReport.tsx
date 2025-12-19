@@ -510,9 +510,9 @@ export default function BaseReport({
               <h2 className="card-title text-xl font-semibold text-[#003d6b]">
                 Report {reportType}: {title}
               </h2>
-              <div className="text-sm text-gray-600 mt-1">
+              {/* <div className="text-sm text-gray-600 mt-1">
                 <p>{loading ? 'Loading...' : `${filteredData.length} records found`}</p>
-              </div>
+              </div> */}
             </div>
             <div className="flex items-center gap-3">
               <button
