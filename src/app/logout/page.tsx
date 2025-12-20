@@ -2,7 +2,9 @@
 
 export default function LogoutPage() {
   const handleLogin = () => {
-    const loginUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4003';
+    // const loginUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4003';
+    // const loginUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    const loginUrl = window.location.origin;
     console.log('Redirecting to login URL:', loginUrl);
     window.location.href = loginUrl;
   };

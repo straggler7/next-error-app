@@ -6,6 +6,7 @@ import Header from "../../components/Header";
 import ErrorAlert from "../../components/ErrorAlert";
 import { useAuth } from "../../contexts/AuthContext";
 import { landingSearchService } from "../../services/landingSearchService";
+import { DLNSearchService } from "../../services/dlnSearchService";
 import { useSeid } from "../../hooks/useSeid";
 import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
 import { serviceCenters, getServiceCenterName } from "../../utils/serviceCenters";
@@ -48,12 +49,12 @@ export default function HomePage() {
   };
 
   const hasDlnSearchEnabled = () => {
-    return false;
-    // if (!user?.profile?.profile?.profiles || !programForm.program) return false;
+    // return false;
+    if (!user?.profile?.profile?.profiles || !programForm.program) return false;
     
-    // // Only show search records if a program is selected AND that program has dlnSearch enabled
-    // const selectedProgramProfile = user.profile.profile.profiles[programForm.program];
-    // return selectedProgramProfile?.dlnSearch || false;
+    // Only show search records if a program is selected AND that program has dlnSearch enabled
+    const selectedProgramProfile = user.profile.profile.profiles[programForm.program];
+    return selectedProgramProfile?.dlnSearch || false;
   };
   
   // Search form state
@@ -241,19 +242,42 @@ export default function HomePage() {
     }
     
     try {
-      // Perform search using the service
-      const searchResult = await landingSearchService.searchRecords({
-        dln: searchForm.dln ? searchForm.dln.replace(/\D/g, '') : '',
-        nameControl: searchForm.nameControl.toUpperCase(),
-        tin: searchForm.tin.replace(/\D/g, ''),
-        taxpayerName: searchForm.taxpayerName
-      });
+      // Check if any DLN search fields are provided (dln, tin, or nameControl)
+      const hasDlnSearchFields = searchForm.dln || searchForm.tin || searchForm.nameControl;
       
-      if (searchResult.success) {
-        // Navigate to form4868-ers page with search results
-        router.push('/form4868-ers');
+      if (hasDlnSearchFields) {
+        // Use DLN search service for any combination of dln, tin, or nameControl
+        const dlnSearchResult = await DLNSearchService.searchRecords({
+          dln: searchForm.dln.replace(/\D/g, ''),
+          tin: searchForm.tin.replace(/\D/g, ''),
+          nameControl: searchForm.nameControl
+        }, currentUserSeid || undefined);
+        
+        if (dlnSearchResult.success) {
+          // Build query parameters for the fields that have values
+          const queryParams = new URLSearchParams();
+          if (searchForm.dln) queryParams.set('dln', searchForm.dln.replace(/\D/g, ''));
+          if (searchForm.tin) queryParams.set('tin', searchForm.tin.replace(/\D/g, ''));
+          if (searchForm.nameControl) queryParams.set('nameControl', searchForm.nameControl);
+          
+          router.push(`/dln-search?${queryParams.toString()}`);
+        } else {
+          setSearchError(dlnSearchResult.message || "DLN search failed. Please try again.");
+        }
       } else {
-        setSearchError(searchResult.message || "Search failed. Please try again.");
+        // Use original landing search service for taxpayer name only searches
+        const searchResult = await landingSearchService.searchRecords({
+          dln: '',
+          nameControl: searchForm.nameControl.toUpperCase(),
+          tin: searchForm.tin.replace(/\D/g, ''),
+          taxpayerName: searchForm.taxpayerName
+        });
+        
+        if (searchResult.success) {
+          router.push('/form4868-ers');
+        } else {
+          setSearchError(searchResult.message || "Search failed. Please try again.");
+        }
       }
     } catch (error) {
       console.error('Search error:', error);
@@ -669,30 +693,6 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="nameControlInput">
-                        Name Control
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
-                        style={{
-                          padding: '0.875rem 1.125rem',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          fontSize: '0.875rem',
-                          lineHeight: '1.4',
-                          background: '#fafafa',
-                          color: '#374151'
-                        }}
-                        id="nameControlInput"
-                        name="nameControl"
-                        placeholder="Enter name control"
-                        maxLength={4}
-                        value={searchForm.nameControl}
-                        onChange={(e) => handleSearchInputChange('nameControl', e.target.value)}
-                      />
-                    </div>
-                    <div className="form-group">
                       <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="tinInput">
                         TIN
                       </label>
@@ -717,8 +717,8 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="taxpayerNameInput">
-                        Taxpayer Name
+                      <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="nameControlInput">
+                        Name Control
                       </label>
                       <input
                         type="text"
@@ -732,14 +732,15 @@ export default function HomePage() {
                           background: '#fafafa',
                           color: '#374151'
                         }}
-                        id="taxpayerNameInput"
-                        name="taxpayerName"
-                        placeholder="Enter taxpayer name"
-                        maxLength={50}
-                        value={searchForm.taxpayerName}
-                        onChange={(e) => handleSearchInputChange('taxpayerName', e.target.value)}
+                        id="nameControlInput"
+                        name="nameControl"
+                        placeholder="Enter name control"
+                        maxLength={4}
+                        value={searchForm.nameControl}
+                        onChange={(e) => handleSearchInputChange('nameControl', e.target.value)}
                       />
                     </div>
+
                     <div className="search-input-group flex justify-center">
                       <button
                         type="submit"
