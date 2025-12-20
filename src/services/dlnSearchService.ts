@@ -51,21 +51,35 @@ export class DLNSearchService {
     currentUserSeid?: string
   ): Promise<DLNSearchResponse | undefined> {
     try {
+      // Build payload with only fields that have values
+      const payload: any = {
+        page: page.toString(),
+        pageSize: pageSize.toString()
+      };
+      
+      if (filters.dln) {
+        payload.dln = filters.dln;
+      }
+      if (filters.tin) {
+        payload.tin = filters.tin;
+      }
+      if (filters.nameControl) {
+        payload.nameControl = filters.nameControl;
+      }
+      if (filters.programCode) {
+        payload.programCode = filters.programCode;
+      }
+      if (filters.serviceCenter) {
+        payload.serviceCenter = filters.serviceCenter;
+      }
+
       const response = await fetch('/api/v1/era/inventories/inventory-search/dlnSearch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': `${currentUserSeid}`
         },
-        body: JSON.stringify({
-          dln: filters.dln || '',
-          tin: filters.tin || '',
-          nameControl: filters.nameControl || '',
-          programCode: filters.programCode || '',
-          serviceCenter: filters.serviceCenter || '',
-          page: page.toString(),
-          pageSize: pageSize.toString()
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -101,17 +115,29 @@ export class DLNSearchService {
     currentUserSeid?: string
   ): Promise<{ success: boolean; message?: string; records?: DLNSearchRecord[] }> {
     try {
+      // Build payload with only fields that have values
+      const payload: any = {
+        pageNumber: 1,
+        pageSize: 15
+      };
+      
+      if (searchCriteria.dln) {
+        payload.dln = searchCriteria.dln;
+      }
+      if (searchCriteria.tin) {
+        payload.tin = searchCriteria.tin;
+      }
+      if (searchCriteria.nameControl) {
+        payload.nameControl = searchCriteria.nameControl;
+      }
+
       const response = await fetch('/api/v1/era/inventories/inventory-search/dlnSearch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': `${currentUserSeid}`
         },
-        body: JSON.stringify({
-          dln: searchCriteria.dln || '',
-          tin: searchCriteria.tin || '',
-          nameControl: searchCriteria.nameControl || ''
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {

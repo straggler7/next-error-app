@@ -88,7 +88,8 @@ export default function HomePage() {
   // Validation functions
   const validateDLN = (dln: string): boolean => {
     const cleanDLN = dln.replace(/\D/g, '');
-    return cleanDLN.length === 17 && /^\d{17}$/.test(cleanDLN);
+    return true;
+    // return cleanDLN.length === 17 && /^\d{17}$/.test(cleanDLN);
   };
 
   const validateTIN = (tin: string): boolean => {
@@ -263,20 +264,6 @@ export default function HomePage() {
           router.push(`/dln-search?${queryParams.toString()}`);
         } else {
           setSearchError(dlnSearchResult.message || "DLN search failed. Please try again.");
-        }
-      } else {
-        // Use original landing search service for taxpayer name only searches
-        const searchResult = await landingSearchService.searchRecords({
-          dln: '',
-          nameControl: searchForm.nameControl.toUpperCase(),
-          tin: searchForm.tin.replace(/\D/g, ''),
-          taxpayerName: searchForm.taxpayerName
-        });
-        
-        if (searchResult.success) {
-          router.push('/form4868-ers');
-        } else {
-          setSearchError(searchResult.message || "Search failed. Please try again.");
         }
       }
     } catch (error) {
