@@ -2388,7 +2388,7 @@ function Form4868ERSPageContent() {
                   className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                     deleting
                       ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                      : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
+                      : "bg-orange-600 text-white hover:bg-orange-700 hover:-translate-y-0.5"
                   }`}
                   onClick={() => {
                     clearFieldHighlight();

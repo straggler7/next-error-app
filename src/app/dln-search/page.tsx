@@ -45,6 +45,7 @@ function DLNSearchContent() {
   const hasInitiallyLoaded = useRef(false);
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
+  const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
 
   // Load DLN search records
   const loadDLNSearchRecords = useCallback(async () => {
@@ -189,8 +190,21 @@ function DLNSearchContent() {
     setPagination(newPagination);
   };
 
-  // Handle reopen functionality - similar to daily summary page
-  const handleReopen = useCallback(async (record: DLNSearchRecord) => {
+  // Helper function to determine button text based on record status
+  const getButtonText = (status: string, inventoryId: string) => {
+    if (loadingStates[inventoryId]) {
+      return status === 'DELETED' ? 'Undeleting...' : 'Assigning...';
+    }
+    return status === 'DELETED' ? 'Undelete' : 'Assign';
+  };
+
+  // Helper function to determine if button should be disabled
+  const isButtonDisabled = (inventoryId: string) => {
+    return loadingStates[inventoryId] || false;
+  };
+
+  // Handle assign functionality
+  const handleAssign = useCallback(async (record: DLNSearchRecord) => {
     const inventoryId = record.inventoryId;
     
     if (!inventoryId) {
@@ -200,47 +214,140 @@ function DLNSearchContent() {
       return;
     }
 
+    // Set loading state for this specific record
+    setLoadingStates(prev => ({ ...prev, [inventoryId]: true }));
+
     try {
-      // Make GET call to retrieve the inventory item with workRecord
-      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/reopen`, {
-        method: 'GET',
+      console.log('Making PATCH request to assign record:', inventoryId);
+      
+      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/event`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'SEID': `${currentUserSeid || undefined}`
-        }
+          'SEID': `${currentUserSeid}`
+        },
+        body: JSON.stringify({ eventStatus: 'ASSIGN_TO_SELF_EVENT' })
       });
 
+      console.log('Assign response status:', response.status);
+
       if (response.ok) {
-        const inventoryItem = await response.json();
-        console.log('Retrieved inventory item for reopen:', inventoryItem);
+        const result = await response.json();
+        console.log('Assign response:', result);
         
-        // Extract workRecord from the inventory item response
-        const workRecord = inventoryItem.workRecord;
+        // Store the eraDto in sessionStorage for the workRecord page
+        sessionStorage.setItem('eraDto', JSON.stringify(result));
         
-        if (workRecord) {
-          // Store the entire inventory item as eraDto in sessionStorage for the workRecord page
-          sessionStorage.setItem('eraDto', JSON.stringify(inventoryItem));
-          
-          // Navigate to workRecord page with reopen flag
-          const searchParams = new URLSearchParams({
-            reopen: 'true'
-          });
-          
-          router.push(`/workRecord?${searchParams.toString()}`);
-        } else {
-          throw new Error('No work record found in inventory item');
-        }
+        // Navigate to workRecord page
+        router.push('/workRecord');
       } else {
         const errorText = await response.text();
-        throw new Error(`Failed to retrieve inventory item: ${errorText}`);
+        let errorMessage = 'Failed to assign record';
+        
+        try {
+          const error = JSON.parse(errorText);
+          errorMessage = error.message || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        console.error('Error assigning record:', errorMessage);
+        setFlashMessage(errorMessage);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 5000);
       }
     } catch (error) {
-      console.error('Error reopening record:', error);
-      setFlashMessage('Error retrieving work record for reopen. Please try again.');
+      console.error('Error assigning record:', error);
+      setFlashMessage('Error assigning record. Please try again.');
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      // Clear loading state for this specific record
+      setLoadingStates(prev => ({ ...prev, [inventoryId]: false }));
     }
   }, [currentUserSeid, router]);
+
+  // Handle undelete functionality
+  const handleUndelete = useCallback(async (record: DLNSearchRecord) => {
+    const inventoryId = record.inventoryId;
+    
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    // Set loading state for this specific record
+    setLoadingStates(prev => ({ ...prev, [inventoryId]: true }));
+
+    try {
+      console.log('Making PATCH request to undelete record:', inventoryId);
+      
+      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/event`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': `${currentUserSeid}`
+        },
+        body: JSON.stringify({ eventStatus: 'UNDO_DELETE_EVENT' })
+      });
+
+      console.log('Undelete response status:', response.status);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Undelete response:', result);
+        
+        // Update the record status in the local state
+        setRecords(prevRecords => 
+          prevRecords.map(r => 
+            r.inventoryId === inventoryId 
+              ? { ...r, status: 'NEW' } // Update status to NEW after undelete
+              : r
+          )
+        );
+        
+        setFlashMessage('Record undeleted successfully');
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
+      } else {
+        const errorText = await response.text();
+        let errorMessage = 'Failed to undelete record';
+        
+        try {
+          const error = JSON.parse(errorText);
+          errorMessage = error.message || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        console.error('Error undeleting record:', errorMessage);
+        setFlashMessage(errorMessage);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 5000);
+      }
+    } catch (error) {
+      console.error('Error undeleting record:', error);
+      setFlashMessage('Error undeleting record. Please try again.');
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      // Clear loading state for this specific record
+      setLoadingStates(prev => ({ ...prev, [inventoryId]: false }));
+    }
+  }, [currentUserSeid]);
+
+  // Handle button click based on record status
+  const handleButtonClick = useCallback((record: DLNSearchRecord) => {
+    const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD'];
+    
+    if (record.status === 'DELETED') {
+      handleUndelete(record);
+    } else if (assignableStatuses.includes(record.status)) {
+      handleAssign(record);
+    }
+  }, [handleAssign, handleUndelete]);
 
   const columnHelper = createColumnHelper<DLNSearchRecord>();
 
@@ -335,24 +442,41 @@ function DLNSearchContent() {
       header: 'Updated Date',
       size: 120,
     }),
-    // Add Reopen button column
+    // Add dynamic action button column
     columnHelper.display({
-      id: 'reopen',
+      id: 'actions',
       header: 'Actions',
-      cell: ({ row }) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent row click
-            handleReopen(row.original);
-          }}
-          className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-700 transition-colors duration-200"
-        >
-          Reopen
-        </button>
-      ),
+      cell: ({ row }) => {
+        const record = row.original;
+        const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD'];
+        const isAssignable = assignableStatuses.includes(record.status);
+        const isDeleted = record.status === 'DELETED';
+        const showButton = isAssignable || isDeleted;
+        
+        if (!showButton) {
+          return <span className="text-gray-400 text-xs">N/A</span>;
+        }
+        
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click
+              handleButtonClick(record);
+            }}
+            disabled={isButtonDisabled(record.inventoryId.toString())}
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors duration-200 ${
+              isDeleted
+                ? 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-orange-400'
+                : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400'
+            } disabled:cursor-not-allowed`}
+          >
+            {getButtonText(record.status, record.inventoryId.toString())}
+          </button>
+        );
+      },
       size: 100,
     }),
-  ], [columnHelper, handleReopen]);
+  ], [columnHelper, handleButtonClick, getButtonText, isButtonDisabled]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -367,7 +491,11 @@ function DLNSearchContent() {
       </div>
       
       {showFlash && (
-        <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right">
+        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right ${
+          flashMessage.includes('Error') || flashMessage.includes('Failed') 
+            ? 'bg-red-500 text-white' 
+            : 'bg-green-500 text-white'
+        }`}>
           <span>{flashMessage}</span>
         </div>
       )}
