@@ -105,7 +105,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   if (reportType === '1340') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
-      { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
       { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
