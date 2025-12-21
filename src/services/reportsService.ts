@@ -562,6 +562,47 @@ export class ReportsService {
     }
   }
   /**
+   * Fetch 1747 report data (Error Resolution Inventory Control)
+   * @param seid - Current user's SEID
+   * @returns Promise<any> - Inventory control data with 4 sections
+   */
+  static async get1747Report(seid: string): Promise<any> {
+    try {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
+      const day = yesterday.getDate().toString().padStart(2, '0');
+      const year = yesterday.getFullYear();
+
+      const payload = {
+        pageNumber: 1,
+        pageSize: 20,
+        reportId: '1747',
+        startDateStr: `${month}/${day}/${year}`,
+      };
+
+      const response = await fetch('/api2/v1/era/reports/get-reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 1747 report:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Download CSV file from report data
    * @param data - Report data array
    * @param reportType - Type of report for filename
