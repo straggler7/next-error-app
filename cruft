@@ -2527,3 +2527,56 @@ the call is similar to closeout call in work record page
                         onChange={(e) => handleSearchInputChange('taxpayerName', e.target.value)}
                       />
                     </div>
+
+-- reports layout height 
+<div className="main-container p-4 mx-auto h-[calc(100vh-120px)]">
+
+
+create a new report 1747 - Error Resolution Inventory Control report
+
+It has 4 sections, with the rows within each section as described below
+1. Selection Inventory
+  Beginning Inventory: 0
+  Total Records Added From GMF: 27, 306
+   Workable Sususpense Selected: 0
+   Unworkable Suspense Selected: 10
+  Error Records Selected: 27,296
+  Ending Inventory: 0
+
+
+2. Error Inventory
+  Beginning Inventory: 46181
+  Error Records Selected: 27296
+  Records Corrected: 29101
+  Records Suspended: 1284
+  Records Rejected: 0
+  Duplicate Records Dropped: 0
+  Duplicate block records moved to suspense: 0
+  Ending Inventory: 43,092
+  quality assurance hold: 7082
+
+3. Workable Suspense Inventory
+  Beginning inventory: 5636
+  Error Inventory Records: 160
+  Returns Analysis records added: 0
+  Guf records added: 0
+  Unworkable suspense records added: 1856
+  Duplicate block error records added: 0
+  Records Corrected: 855
+  Records Suspended: 679
+  Records Rejected: 42
+  Duplicate records dropped: 0
+  Ending inventory: 6076
+  Quality assurance hold: 362
+
+
+4. Unworkable Suspense Inventory
+  Beginning inventory: 16154
+  Error records added: 1234
+  Returns analysis records added: 10
+  workable suspense records added: 679
+  workable suspense records removed: 1856
+  Duplicate records removed: 0
+ Ending Inventory: 16,111
+
+the fetch call will be similar to report 1340 with report id of 1747. Assume response json will have these 4 keys for the 4 sections in camel case and under each object, there will be the required row data

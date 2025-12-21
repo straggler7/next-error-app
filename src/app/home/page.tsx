@@ -493,69 +493,74 @@ export default function HomePage() {
                   </select>
                 </div>
 
-                {/* 2. Service Center */}
-                <div className="form-group">
-                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
-                    Service Center <span className="text-red-500">*</span>
-                  </label>
-                  <select 
-                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
-                    style={{
-                      padding: '0.875rem 1.125rem',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '0.875rem',
-                      lineHeight: '1.4',
-                      background: '#fafafa',
-                      color: '#374151'
-                    }}
-                    id="serviceCenterSelect" 
-                    name="serviceCenter" 
-                    required
-                    value={programForm.serviceCenter}
-                    onChange={(e) => handleProgramInputChange('serviceCenter', e.target.value)}
-                  >
-                    <option value="">Select a service center...</option>
-                    {serviceCenters.map((center) => (
-                      <option key={center.name} value={center.name.toLowerCase()}>
-                        {center.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
-                    Status Code
-                  </label>
-                  <select 
-                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
-                    style={{
-                      padding: '0.875rem 1.125rem',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '0.875rem',
-                      lineHeight: '1.4',
-                      background: '#fafafa',
-                      color: '#374151'
-                    }}
-                    id="statusCodeSelect" 
-                    name="statusCode" 
-                    value={programForm.statusCode}
-                    onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
-                  >
-                    <option value="">Select a status code (optional)</option>
-                    {loadingStatusCodes ? (
-                      <option disabled>Loading status codes...</option>
-                    ) : (
-                      statusCodes.map((statusCode) => (
-                        <option key={statusCode.code} value={statusCode.code}>
-                          {statusCode.code} - {statusCode.description}
+                {/* 2. Service Center - Hidden when Quality Review is checked */}
+                {!programForm.qualityReview && (
+                  <div className="form-group">
+                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="serviceCenterSelect">
+                      Service Center <span className="text-red-500">*</span>
+                    </label>
+                    <select 
+                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                      style={{
+                        padding: '0.875rem 1.125rem',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.4',
+                        background: '#fafafa',
+                        color: '#374151'
+                      }}
+                      id="serviceCenterSelect" 
+                      name="serviceCenter" 
+                      required
+                      value={programForm.serviceCenter}
+                      onChange={(e) => handleProgramInputChange('serviceCenter', e.target.value)}
+                    >
+                      <option value="">Select a service center...</option>
+                      {serviceCenters.map((center) => (
+                        <option key={center.name} value={center.name.toLowerCase()}>
+                          {center.name}
                         </option>
-                      ))
-                    )}
-                  </select>
-                </div>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                {/* Status Code - Hidden when Quality Review is checked */}
+                {!programForm.qualityReview && (
+                  <div className="form-group">
+                    <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="statusCodeSelect">
+                      Status Code
+                    </label>
+                    <select 
+                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                      style={{
+                        padding: '0.875rem 1.125rem',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.4',
+                        background: '#fafafa',
+                        color: '#374151'
+                      }}
+                      id="statusCodeSelect" 
+                      name="statusCode" 
+                      value={programForm.statusCode}
+                      onChange={(e) => handleProgramInputChange('statusCode', e.target.value)}
+                    >
+                      <option value="">Select a status code (optional)</option>
+                      {loadingStatusCodes ? (
+                        <option disabled>Loading status codes...</option>
+                      ) : (
+                        statusCodes.map((statusCode) => (
+                          <option key={statusCode.code} value={statusCode.code}>
+                            {statusCode.code} - {statusCode.description}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                )}
 
                 {/* 3. Work on Quality Review Checkbox - Only show if user has qualityReviewEnabled */}
                 {hasQualityReviewEnabled() && (
