@@ -50,6 +50,9 @@ export default function HomePage() {
 
   const hasDlnSearchEnabled = () => {
     // return false;
+    // for analysts, dln search should be enabled
+    if (user?.group === 'analysts') return true;
+
     if (!user?.profile?.profile?.profiles || !programForm.program) return false;
     
     // Only show search records if a program is selected AND that program has dlnSearch enabled
