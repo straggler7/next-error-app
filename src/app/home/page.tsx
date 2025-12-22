@@ -257,6 +257,7 @@ export default function HomePage() {
         if (searchForm.dln) queryParams.set('dln', searchForm.dln.replace(/\D/g, ''));
         if (searchForm.tin) queryParams.set('tin', searchForm.tin.replace(/\D/g, ''));
         if (searchForm.nameControl) queryParams.set('nameControl', searchForm.nameControl);
+        if (programForm.program) queryParams.set('program', programForm.program);
         
         router.push(`/dln-search?${queryParams.toString()}`);
       }

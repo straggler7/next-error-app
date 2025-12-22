@@ -23,6 +23,7 @@ function DLNSearchContent() {
   const dlnQuery = searchParams.get('dln');
   const tinQuery = searchParams.get('tin');
   const nameControlQuery = searchParams.get('nameControl');
+  const programQuery = searchParams.get('program');
   const currentUserSeid = useSeid();
 
   // DLN search specific filters - matching home page form
@@ -67,13 +68,15 @@ function DLNSearchContent() {
       setLoading(true);
       setError(null);
 
-      // Get selection data from session storage (client-side only)
-      let parsedSelectionData: any = {};
-      if (typeof window !== 'undefined') {
+      // Get program code from URL parameter first, then fallback to session storage
+      let programCode = programQuery || undefined;
+      
+      if (!programCode && typeof window !== 'undefined') {
         const selectionData = sessionStorage.getItem('selectionData');
         console.log('DLN Search - Raw selectionData from sessionStorage:', selectionData);
-        parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
+        const parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
         console.log('DLN Search - Parsed selectionData:', parsedSelectionData);
+        programCode = parsedSelectionData.program;
       }
 
       // Use the DLN search service with current filter state
@@ -81,6 +84,7 @@ function DLNSearchContent() {
         dln: searchFilters.dln,
         tin: searchFilters.tin,
         nameControl: searchFilters.nameControl,
+        programCode: programCode,
       };
 
       const response = await DLNSearchService.searchByDLN(
@@ -141,8 +145,25 @@ function DLNSearchContent() {
       setError(null);
       setPagination(prev => ({ ...prev, currentPage: 1 }));
 
+      // Get program code from URL parameter first, then fallback to session storage
+      let programCode = programQuery || undefined;
+      
+      if (!programCode && typeof window !== 'undefined') {
+        const selectionData = sessionStorage.getItem('selectionData');
+        const parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
+        programCode = parsedSelectionData.program;
+      }
+
+      // Include program code in search filters like in loadDLNSearchRecords
+      const currentSearchFilters: DLNSearchFilters = {
+        dln: searchFilters.dln,
+        tin: searchFilters.tin,
+        nameControl: searchFilters.nameControl,
+        programCode: programCode,
+      };
+
       const response = await DLNSearchService.searchByDLN(
-        searchFilters,
+        currentSearchFilters,
         1, // Reset to first page
         pagination.pageSize,
         currentUserSeid || undefined
@@ -218,7 +239,7 @@ function DLNSearchContent() {
     try {
       console.log('Making PATCH request to assign record:', inventoryId);
       
-      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/event`, {
+      const response = await fetch(`/api/v1/era/inventories/${inventoryId}/to-items/event`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
