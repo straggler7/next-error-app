@@ -340,7 +340,7 @@ function DLNSearchContent() {
 
   // Handle button click based on record status
   const handleButtonClick = useCallback((record: DLNSearchRecord) => {
-    const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD'];
+    const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED'];
     
     if (record.status === 'DELETED') {
       handleUndelete(record);
@@ -448,7 +448,7 @@ function DLNSearchContent() {
       header: 'Actions',
       cell: ({ row }) => {
         const record = row.original;
-        const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD'];
+        const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED'];
         const isAssignable = assignableStatuses.includes(record.status);
         const isDeleted = record.status === 'DELETED';
         const showButton = isAssignable || isDeleted;
