@@ -78,6 +78,30 @@ const createZodSchema = (fieldKey: string) => {
     schema = schema.regex(new RegExp(config.pattern), config.messages.pattern);
   }
 
+  // Add custom validation for taxPrd field to ensure date is not in the future
+  if (fieldKey === 'taxPrd') {
+    schema = schema.refine((value) => {
+      // Check if value matches YYYYMM format
+      const match = value.match(/^(\d{4})(\d{2})$/);
+      if (!match) return true; // Let pattern validation handle format errors
+      
+      const year = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10);
+      
+      // Create date object for the entered month (using last day of month to be inclusive)
+      const enteredDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const currentDate = new Date();
+      
+      // Compare year and month only (ignore day)
+      const enteredYearMonth = year * 100 + month;
+      const currentYearMonth = currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1);
+      
+      return enteredYearMonth <= currentYearMonth;
+    }, {
+      message: "Tax Period cannot be in the future"
+    });
+  }
+
   return schema;
 };
 
