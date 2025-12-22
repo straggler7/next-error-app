@@ -272,7 +272,8 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error('Search error:', error);
-      setSearchError("An error occurred during search. Please try again.");
+      // setSearchError("An error occurred during search. Please try again.");
+      setSearchError(error instanceof Error ? error.message : "An error occurred during search. Please try again.");
     }
   };
 

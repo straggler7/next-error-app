@@ -87,6 +87,8 @@ function DailySummaryContent() {
           // programCode: parsedSelectionData.program,
           // statusCode: parsedSelectionData.statusCode,
           // serviceCenter: parsedSelectionData.serviceCenter
+          pageNumber: pagination.currentPage,
+          pageSize: pagination.pageSize,
           statuses: ['RESOLVED', 'SUSPEND']
         })
       });

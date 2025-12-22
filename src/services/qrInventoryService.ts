@@ -92,8 +92,8 @@ export class QRInventoryService {
         },
         body: JSON.stringify({
           // status: 'QR_HOLD',
-          // page: page.toString(),
-          // pageSize: pageSize.toString(),
+          pageNumber: page,
+          pageSize: pageSize,
           ...(filters.seid && { seid: filters.seid }),
           programCode: filters.program,
           statuses: ['QR_HOLD', 'SUSPEND_HOLD'],

@@ -84,7 +84,10 @@ export class DLNSearchService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        // throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        const error = JSON.parse(errorText);
+        console.error("Error loading daily summary records:", error);
+        throw new Error(error.message);
       }
 
       const data = await response.json();
@@ -142,10 +145,9 @@ export class DLNSearchService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        return {
-          success: false,
-          message: `Search failed: ${errorText}`
-        };
+        const error = JSON.parse(errorText);
+        console.error("Error loading daily summary records:", error);
+        throw new Error(error.message);
       }
 
       const data = await response.json();
@@ -157,10 +159,7 @@ export class DLNSearchService {
       };
     } catch (error) {
       console.error('Error in DLN search:', error);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Search failed. Please try again.'
-      };
+      throw error;
     }
   }
 }
