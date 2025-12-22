@@ -140,11 +140,12 @@ export default function HomePage() {
   useEffect(() => {
     const hasProgram = programForm.program;
     const hasServiceCenter = programForm.serviceCenter;
+    const hasRequiredSeid = !programForm.qualityReview || programForm.seid.trim();
     
     // setProgramStatusError(hasProgram ? "" : "Please select a program or status code.");
     // setServiceCenterError(hasServiceCenter ? "" : "Please select a service center.");
     
-    setIsSubmitButtonEnabled(Boolean(hasProgram && hasServiceCenter));
+    setIsSubmitButtonEnabled(Boolean(hasProgram && hasServiceCenter && hasRequiredSeid));
   }, [programForm]);
 
   // Fetch status codes on component mount
@@ -585,7 +586,7 @@ export default function HomePage() {
                 {hasQualityReviewEnabled() && programForm.qualityReview && (
                   <div className="form-group">
                     <label className="form-label block text-sm font-semibold text-gray-800 mb-2" htmlFor="seidInput">
-                      SEID
+                      SEID <span className="text-red-500">*</span>
                     </label>
                     <input 
                       type="text" 
