@@ -2587,3 +2587,15 @@ It has 4 sections, with the rows within each section as described below
  Ending Inventory: 16,111
 
 the fetch call will be similar to report 1340 with report id of 1747. Assume response json will have these 4 keys for the 4 sections in camel case and under each object, there will be the required row data
+
+
+dln search
+{
+    "pageNumber": "1",
+    "pageSize": "15",
+    "dln": "23424324324324234",
+    "programCode": "44730",
+    "serviceCenter": "austin"
+}
+
+        // serviceCenter: parsedSelectionData.serviceCenter

@@ -81,8 +81,6 @@ function DLNSearchContent() {
         dln: searchFilters.dln,
         tin: searchFilters.tin,
         nameControl: searchFilters.nameControl,
-        programCode: parsedSelectionData.program,
-        serviceCenter: parsedSelectionData.serviceCenter
       };
 
       const response = await DLNSearchService.searchByDLN(
@@ -129,7 +127,7 @@ function DLNSearchContent() {
         loadDLNSearchRecords();
       }
     }
-  }, [loadDLNSearchRecords]);
+  }, [dlnQuery, currentUserSeid, pagination.currentPage, pagination.pageSize]);
 
   // Filter the records based on 
   const filteredRecords = useMemo(() => {

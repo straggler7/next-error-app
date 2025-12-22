@@ -251,24 +251,14 @@ export default function HomePage() {
       const hasDlnSearchFields = searchForm.dln || searchForm.tin || searchForm.nameControl;
       
       if (hasDlnSearchFields) {
-        // Use DLN search service for any combination of dln, tin, or nameControl
-        const dlnSearchResult = await DLNSearchService.searchRecords({
-          dln: searchForm.dln.replace(/\D/g, ''),
-          tin: searchForm.tin.replace(/\D/g, ''),
-          nameControl: searchForm.nameControl
-        }, currentUserSeid || undefined);
+        // Navigate directly to DLN search page with query parameters
+        // The DLN search page will handle the actual API call and display results
+        const queryParams = new URLSearchParams();
+        if (searchForm.dln) queryParams.set('dln', searchForm.dln.replace(/\D/g, ''));
+        if (searchForm.tin) queryParams.set('tin', searchForm.tin.replace(/\D/g, ''));
+        if (searchForm.nameControl) queryParams.set('nameControl', searchForm.nameControl);
         
-        if (dlnSearchResult.success) {
-          // Build query parameters for the fields that have values
-          const queryParams = new URLSearchParams();
-          if (searchForm.dln) queryParams.set('dln', searchForm.dln.replace(/\D/g, ''));
-          if (searchForm.tin) queryParams.set('tin', searchForm.tin.replace(/\D/g, ''));
-          if (searchForm.nameControl) queryParams.set('nameControl', searchForm.nameControl);
-          
-          router.push(`/dln-search?${queryParams.toString()}`);
-        } else {
-          setSearchError(dlnSearchResult.message || "DLN search failed. Please try again.");
-        }
+        router.push(`/dln-search?${queryParams.toString()}`);
       }
     } catch (error) {
       console.error('Search error:', error);
