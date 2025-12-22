@@ -25,7 +25,7 @@ export default function Report7743() {
     }
   }, [seid]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!seid) return;
     
     try {
@@ -33,7 +33,7 @@ export default function Report7743() {
       const exportData = await ReportsService.get7743Report(seid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, '7743');
+      ReportsService.downloadCSV(exportData, '7743', columns);
     } catch (error) {
       console.error('Error exporting 7743 report:', error);
       alert('Failed to export report. Please try again.');

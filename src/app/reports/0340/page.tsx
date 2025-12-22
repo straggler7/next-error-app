@@ -43,7 +43,7 @@ export default function Report0340Page() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!currentUserSeid) return;
     
     try {
@@ -51,7 +51,7 @@ export default function Report0340Page() {
       const exportData = await ReportsService.get0340Report(currentUserSeid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, '0340');
+      ReportsService.downloadCSV(exportData, '0340', columns);
     } catch (error) {
       console.error('Error exporting 0340 report:', error);
       alert('Failed to export report. Please try again.');

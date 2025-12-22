@@ -44,7 +44,7 @@ export default function ReportMERYRDTPage() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!currentUserSeid) return;
     
     try {
@@ -52,7 +52,7 @@ export default function ReportMERYRDTPage() {
       const exportData = await ReportsService.getMERYRDTReport(currentUserSeid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, 'MERYRDT');
+      ReportsService.downloadCSV(exportData, 'MERYRDT', columns);
     } catch (error) {
       console.error('Error exporting MERYRDT report:', error);
       alert('Failed to export report. Please try again.');

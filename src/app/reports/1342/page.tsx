@@ -43,7 +43,7 @@ export default function Report1342Page() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!currentUserSeid) return;
     
     try {
@@ -51,7 +51,7 @@ export default function Report1342Page() {
       const exportData = await ReportsService.get1342Report(currentUserSeid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, '1342');
+      ReportsService.downloadCSV(exportData, '1342', columns);
     } catch (error) {
       console.error('Error exporting 1342 report:', error);
       alert('Failed to export report. Please try again.');

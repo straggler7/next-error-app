@@ -44,15 +44,15 @@ export default function Report1340Page() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!currentUserSeid) return;
     
     try {
       // Make API call with export flag
       const exportData = await ReportsService.get1340Report(currentUserSeid, payload);
       
-      // Download as CSV
-      ReportsService.downloadCSV(exportData, '1340');
+      // Download as CSV with column configuration
+      ReportsService.downloadCSV(exportData, '1340', columns);
     } catch (error) {
       console.error('Error exporting 1340 report:', error);
       alert('Failed to export report. Please try again.');

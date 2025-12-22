@@ -606,20 +606,49 @@ export class ReportsService {
    * Download CSV file from report data
    * @param data - Report data array
    * @param reportType - Type of report for filename
+   * @param columns - Column configuration to determine visible columns and labels
    */
-  static downloadCSV(data: ReportRecord[], reportType: string): void {
+  static downloadCSV(data: ReportRecord[], reportType: string, columns?: { key: string; label: string; visible: boolean }[]): void {
     if (data.length === 0) {
       console.warn('No data to export');
       return;
     }
     
-    // Get headers from the first record
-    const headers = Object.keys(data[0]).join(',');
+    let headers: string;
+    let rowData: string[];
     
-    // Convert data to CSV format
-    const csvContent = [
-      headers,
-      ...data.map(row => 
+    if (columns) {
+      // Filter to only visible columns
+      const visibleColumns = columns.filter(col => col.visible);
+      
+      if (visibleColumns.length === 0) {
+        console.warn('No visible columns to export');
+        return;
+      }
+      
+      // Use column labels as headers
+      headers = visibleColumns.map(col => col.label).join(',');
+      
+      // Extract only visible column data
+      rowData = data.map(row => 
+        visibleColumns.map(col => {
+          const value = (row as any)[col.key];
+          
+          // Handle null/undefined values
+          if (value === null || value === undefined) return '';
+          
+          // Convert to string and escape commas and quotes
+          const stringValue = value.toString();
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        }).join(',')
+      );
+    } else {
+      // Fallback to original behavior if no columns provided
+      headers = Object.keys(data[0]).join(',');
+      rowData = data.map(row => 
         Object.values(row).map(value => {
           // Handle null/undefined values
           if (value === null || value === undefined) return '';
@@ -631,8 +660,11 @@ export class ReportsService {
           }
           return stringValue;
         }).join(',')
-      )
-    ].join('\n');
+      );
+    }
+    
+    // Convert data to CSV format
+    const csvContent = [headers, ...rowData].join('\n');
     
     // Create and download the file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

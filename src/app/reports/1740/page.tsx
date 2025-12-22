@@ -44,7 +44,7 @@ export default function Report1740Page() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!currentUserSeid) return;
     
     try {
@@ -52,7 +52,7 @@ export default function Report1740Page() {
       const exportData = await ReportsService.get1740Report(currentUserSeid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, '1740');
+      ReportsService.downloadCSV(exportData, '1740', columns);
     } catch (error) {
       console.error('Error exporting 1740 report:', error);
       alert('Failed to export report. Please try again.');

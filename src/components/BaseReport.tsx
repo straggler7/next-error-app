@@ -18,7 +18,7 @@ interface BaseReportProps {
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
-  onExport?: (payload: ReportPayload) => void;
+  onExport?: (payload: ReportPayload, columns: ColumnConfig[]) => void;
 }
 
 // Column configurations by report type
@@ -476,12 +476,12 @@ export default function BaseReport({
     };
 
     // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 7740, 7741, 7742, 7743 reports)
-    if (searchTerm.trim() && reportType !== '0340' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743') {
+    const excludeDlnReports = ['0340', '1341', '7740', '7741', '7742', '7743'];
+    if (!excludeDlnReports.includes(reportType) && searchTerm.trim()) {
       payload.dln = searchTerm.trim();
     }
 
-    // Add service center only for reports that support it (exclude 7740, 7741, 7742, 7743)
-    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743') {
+    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers') {
       payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
     }
 
@@ -489,16 +489,14 @@ export default function BaseReport({
       payload.programCode = selectedProgramCode;
     }
 
-    // Add status for 0040, 1340 and 0540 reports
-    if (reportType === '0040' || reportType === '1340') {
+    // Add status for specific report types
+    if (reportType === '1340' || reportType === '0040') {
       payload.status = 'NEW';
-    }
-    
-    if (reportType === '0540') {
+    } else if (reportType === '0540') {
       payload.status = 'DELETED';
     }
 
-    onExport(payload);
+    onExport(payload, columns);
   };
 
   return (

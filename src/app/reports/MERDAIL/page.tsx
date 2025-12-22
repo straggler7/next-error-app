@@ -44,7 +44,7 @@ export default function ReportMERDAILPage() {
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
-  const handleExport = async (payload: ReportPayload) => {
+  const handleExport = async (payload: ReportPayload, columns: { key: string; label: string; visible: boolean }[]) => {
     if (!currentUserSeid) return;
     
     try {
@@ -52,7 +52,7 @@ export default function ReportMERDAILPage() {
       const exportData = await ReportsService.getMERDAILReport(currentUserSeid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, 'MERDAIL');
+      ReportsService.downloadCSV(exportData, 'MERDAIL', columns);
     } catch (error) {
       console.error('Error exporting MERDAIL report:', error);
       alert('Failed to export report. Please try again.');
