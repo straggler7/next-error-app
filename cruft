@@ -499,6 +499,13 @@ git branch: mvp-november-bypass-auth-no-static
 git branch: mvp-december
 (12/09/2025)
 
+git branch: mvp-december-browser-navigation
+(12/21/2025)
+
+git branch: mvp-december-table-sorting
+(12/21/2025)
+
+
 {
   "inventoryId": 14,
   "status": "RESOLVED",
