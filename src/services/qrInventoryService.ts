@@ -103,7 +103,12 @@ export class QRInventoryService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading daily summary records:", error);
+        // setError(error.message);
+        throw new Error(error.message);
       }
 
       const data = await response.json();

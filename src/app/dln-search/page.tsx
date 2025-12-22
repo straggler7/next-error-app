@@ -252,9 +252,11 @@ function DLNSearchContent() {
         }
         
         console.error('Error assigning record:', errorMessage);
-        setFlashMessage(errorMessage);
-        setShowFlash(true);
-        setTimeout(() => setShowFlash(false), 5000);
+        setError(errorMessage);
+        throw new Error(errorMessage);
+        // setFlashMessage(errorMessage);
+        // setShowFlash(true);
+        // setTimeout(() => setShowFlash(false), 5000);
       }
     } catch (error) {
       console.error('Error assigning record:', error);
