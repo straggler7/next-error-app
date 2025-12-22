@@ -104,6 +104,7 @@ function QRInventoryContent() {
       }));
     } catch (err) {
       // setError('Failed to load QR records');
+      setError(err instanceof Error ? err.message : 'Failed to load QR records');
       console.error('QR Inventory: Error loading QR records:', err);
       console.error(err instanceof Error ? err.message : 'Failed to load QR records');
     } finally {
@@ -362,7 +363,8 @@ function QRInventoryContent() {
                   </svg>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Records for QR</h3>
                   <p className="text-sm text-gray-500 mb-4">
-                    {authSeid ? `No QR review records found for SEID: ${authSeid}` : 'No QR review records found matching your criteria.'}
+                    {/* {authSeid ? `No QR review records found for SEID: ${authSeid}` : 'No QR review records found matching your criteria.'} */}
+                    {'No QR review records found matching your criteria.'}
                   </p>
                   <button
                     onClick={loadQRRecords}
