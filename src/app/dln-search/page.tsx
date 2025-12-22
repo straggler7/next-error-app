@@ -111,7 +111,7 @@ function DLNSearchContent() {
     } finally {
       setLoading(false);
     }
-  }, [dlnQuery, currentUserSeid, pagination.currentPage, pagination.pageSize]);
+  }, [searchFilters.dln, searchFilters.tin, searchFilters.nameControl, currentUserSeid, pagination.currentPage, pagination.pageSize]);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -127,7 +127,7 @@ function DLNSearchContent() {
         loadDLNSearchRecords();
       }
     }
-  }, [dlnQuery, currentUserSeid, pagination.currentPage, pagination.pageSize]);
+  }, [searchFilters.dln, searchFilters.tin, searchFilters.nameControl, currentUserSeid, pagination.currentPage, pagination.pageSize]);
 
   // Filter the records based on 
   const filteredRecords = useMemo(() => {

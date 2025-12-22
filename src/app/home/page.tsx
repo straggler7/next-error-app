@@ -673,7 +673,7 @@ export default function HomePage() {
                         }}
                         id="dlnInput"
                         name="dln"
-                        placeholder="Enter 17-digit DLN"
+                        placeholder="Enter DLN"
                         maxLength={20}
                         value={searchForm.dln}
                         onChange={(e) => handleSearchInputChange('dln', e.target.value)}
