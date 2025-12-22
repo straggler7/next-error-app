@@ -53,7 +53,7 @@ export class DLNSearchService {
     try {
       // Build payload with only fields that have values
       const payload: any = {
-        page: page.toString(),
+        pageNumber: page.toString(),
         pageSize: pageSize.toString()
       };
       
