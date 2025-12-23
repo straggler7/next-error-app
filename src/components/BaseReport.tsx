@@ -231,7 +231,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   if (reportType === '1740') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
-      { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
       { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
@@ -536,7 +536,7 @@ export default function BaseReport({
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6 items-end">
           {/* DLN Search - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1341, 7740, 7741, 7742, 7743, 7746, and 7747 reports */}
-          {reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7746' && reportType !== '7747' && (
+          {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1341' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7746' && reportType !== '7747' && (
             <div className="relative w-48">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
