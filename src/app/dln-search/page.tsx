@@ -84,7 +84,7 @@ function DLNSearchContent() {
         dln: searchFilters.dln,
         tin: searchFilters.tin,
         nameControl: searchFilters.nameControl,
-        programCode: programCode,
+        // programCode: programCode,
       };
 
       const response = await DLNSearchService.searchByDLN(
@@ -159,7 +159,7 @@ function DLNSearchContent() {
         dln: searchFilters.dln,
         tin: searchFilters.tin,
         nameControl: searchFilters.nameControl,
-        programCode: programCode,
+        // programCode: programCode,
       };
 
       const response = await DLNSearchService.searchByDLN(
