@@ -117,7 +117,7 @@ function DLNSearchContent() {
     }
   }, [searchFilters.dln, searchFilters.tin, searchFilters.nameControl, currentUserSeid, pagination.currentPage, pagination.pageSize]);
 
-  // Load data on component mount and when filters/pagination change
+  // Load data on component mount and when pagination changes
   useEffect(() => {
     console.log('DLN Search useEffect triggered, hasInitiallyLoaded:', hasInitiallyLoaded.current);
     
@@ -125,13 +125,12 @@ function DLNSearchContent() {
     if (!hasInitiallyLoaded.current) {
       hasInitiallyLoaded.current = true;
       loadDLNSearchRecords();
-    } else {
-      // On subsequent changes, only load if not currently loading
-      if (!loading) {
-        loadDLNSearchRecords();
-      }
+    } else if (records.length > 0) {
+      // On subsequent pagination changes, only load if we have existing records
+      console.log('DLN Search pagination change, reloading...');
+      loadDLNSearchRecords();
     }
-  }, [searchFilters.dln, searchFilters.tin, searchFilters.nameControl, currentUserSeid, pagination.currentPage, pagination.pageSize]);
+  }, [pagination.currentPage, pagination.pageSize]);
 
   // Filter the records based on 
   const filteredRecords = useMemo(() => {
@@ -177,6 +176,8 @@ function DLNSearchContent() {
           totalRecords: response.totalCount,
           totalPages: response.totalPages
         }));
+        // Mark as initially loaded so pagination will work
+        hasInitiallyLoaded.current = true;
       } else {
         setRecords([]);
         setPagination(prev => ({
@@ -185,6 +186,8 @@ function DLNSearchContent() {
           totalRecords: 0,
           totalPages: 0
         }));
+        // Mark as initially loaded even if no results
+        hasInitiallyLoaded.current = true;
       }
     } catch (error) {
       console.error('Error performing DLN search:', error);
