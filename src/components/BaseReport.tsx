@@ -563,7 +563,7 @@ export default function BaseReport({
           </div>
 
             {/* Service Center Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT, 7740, 7741, 7742, and 7743 reports */}
-            {reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && (
+            {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && (
               <div className="w-48">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Service Center
@@ -583,7 +583,7 @@ export default function BaseReport({
             )}
 
             {/* Program Code Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT reports */}
-            {reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && (
+            {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && (
               <div className="w-48">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Program Code
