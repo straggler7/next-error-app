@@ -5,35 +5,35 @@ import { ReportsService } from '../../../services/reportsService';
 import { useSeid } from '../../../hooks/useSeid';
 import { RefreshCw, Download } from 'lucide-react';
 
-interface InventorySection {
-  beginningInventory?: number;
-  totalRecordsAddedFromGmf?: number;
-  workableSuspenseSelected?: number;
-  unworkableSuspenseSelected?: number;
-  errorRecordsSelected?: number;
-  endingInventory?: number;
-  errorInventoryRecords?: number;
-  recordsCorrected?: number;
-  recordsSuspended?: number;
-  recordsRejected?: number;
-  duplicateRecordsDropped?: number;
-  duplicateBlockRecordsMovedToSuspense?: number;
-  qualityAssuranceHold?: number;
-  returnsAnalysisRecordsAdded?: number;
-  gufRecordsAdded?: number;
-  unworkableSuspenseRecordsAdded?: number;
-  duplicateBlockErrorRecordsAdded?: number;
-  workableSuspenseRecordsAdded?: number;
-  workableSuspenseRecordsRemoved?: number;
-  duplicateRecordsRemoved?: number;
-  errorRecordsAdded?: number;
-}
-
 interface Report1747Data {
-  selectionInventory: InventorySection;
-  errorInventory: InventorySection;
-  workableSuspenseInventory: InventorySection;
-  unworkableSuspenseInventory: InventorySection;
+  // New Receipts section
+  newReceiptsTotalGMFRecordAdded?: number | null;
+  newReceiptsExpiredSuspense?: number | null;
+  newReceiptsUnderSuspense?: number | null;
+  newReceiptsNEW?: number | null;
+  
+  // New Error Inventory section
+  newErrorInventoryBeginning?: number | null;
+  newErrorInventoryResolved?: number | null;
+  newErrorInventorySuspended?: number | null;
+  newErrorInventoryDeleted?: number | null;
+  newErrorInventoryQRhold?: number | null;
+  
+  // Expired Suspense Inventory section
+  expiredSuspenseBeginning?: number | null;
+  expiredSuspenseResolved?: number | null;
+  expiredSuspenseSuspended?: number | null;
+  expiredSuspenseDeleted?: number | null;
+  expiredSuspenseQRhold?: number | null;
+  
+  // Under Suspense section
+  unexpiredSuspenseBeginning?: number | null;
+  unexpiredSuspenseResolved?: number | null;
+  unexpiredSuspenseSuspended?: number | null;
+  unexpiredSuspenseDeleted?: number | null;
+  unexpiredSuspenseQRhold?: number | null;
+  unexpiredSuspenseWorkableAdded?: number | null;
+  unexpiredSuspenseWorkableDeleted?: number | null;
 }
 
 export default function Report1747Page() {
@@ -51,10 +51,34 @@ export default function Report1747Page() {
       
       // Validate and provide fallback structure
       const validatedData: Report1747Data = {
-        selectionInventory: reportData?.selectionInventory || {},
-        errorInventory: reportData?.errorInventory || {},
-        workableSuspenseInventory: reportData?.workableSuspenseInventory || {},
-        unworkableSuspenseInventory: reportData?.unworkableSuspenseInventory || {}
+        // New Receipts
+        newReceiptsTotalGMFRecordAdded: reportData?.newReceiptsTotalGMFRecordAdded || 0,
+        newReceiptsExpiredSuspense: reportData?.newReceiptsExpiredSuspense || 0,
+        newReceiptsUnderSuspense: reportData?.newReceiptsUnderSuspense || 0,
+        newReceiptsNEW: reportData?.newReceiptsNEW || 0,
+        
+        // New Error Inventory
+        newErrorInventoryBeginning: reportData?.newErrorInventoryBeginning || 0,
+        newErrorInventoryResolved: reportData?.newErrorInventoryResolved || 0,
+        newErrorInventorySuspended: reportData?.newErrorInventorySuspended || 0,
+        newErrorInventoryDeleted: reportData?.newErrorInventoryDeleted || 0,
+        newErrorInventoryQRhold: reportData?.newErrorInventoryQRhold || 0,
+        
+        // Expired Suspense Inventory
+        expiredSuspenseBeginning: reportData?.expiredSuspenseBeginning || 0,
+        expiredSuspenseResolved: reportData?.expiredSuspenseResolved || 0,
+        expiredSuspenseSuspended: reportData?.expiredSuspenseSuspended || 0,
+        expiredSuspenseDeleted: reportData?.expiredSuspenseDeleted || 0,
+        expiredSuspenseQRhold: reportData?.expiredSuspenseQRhold || 0,
+        
+        // Under Suspense
+        unexpiredSuspenseBeginning: reportData?.unexpiredSuspenseBeginning || 0,
+        unexpiredSuspenseResolved: reportData?.unexpiredSuspenseResolved || 0,
+        unexpiredSuspenseSuspended: reportData?.unexpiredSuspenseSuspended || 0,
+        unexpiredSuspenseDeleted: reportData?.unexpiredSuspenseDeleted || 0,
+        unexpiredSuspenseQRhold: reportData?.unexpiredSuspenseQRhold || 0,
+        unexpiredSuspenseWorkableAdded: reportData?.unexpiredSuspenseWorkableAdded || 0,
+        unexpiredSuspenseWorkableDeleted: reportData?.unexpiredSuspenseWorkableDeleted || 0
       };
       
       setData(validatedData);
@@ -70,7 +94,7 @@ export default function Report1747Page() {
     fetchReportData();
   }, [fetchReportData]);
 
-  const formatNumber = (value: number | undefined): string => {
+  const formatNumber = (value: number | null | undefined): string => {
     if (value === undefined || value === null) return '0';
     return value.toLocaleString();
   };
@@ -81,47 +105,34 @@ export default function Report1747Page() {
     try {
       // Convert the inventory data to a flat structure for CSV export
       const exportData = [
-        // Selection Inventory
-        { Section: 'Selection Inventory', Item: 'Beginning Inventory', Value: data.selectionInventory.beginningInventory || 0 },
-        { Section: 'Selection Inventory', Item: 'Total Records Added From GMF', Value: data.selectionInventory.totalRecordsAddedFromGmf || 0 },
-        { Section: 'Selection Inventory', Item: 'Workable Suspense Selected', Value: data.selectionInventory.workableSuspenseSelected || 0 },
-        { Section: 'Selection Inventory', Item: 'Unworkable Suspense Selected', Value: data.selectionInventory.unworkableSuspenseSelected || 0 },
-        { Section: 'Selection Inventory', Item: 'Error Records Selected', Value: data.selectionInventory.errorRecordsSelected || 0 },
-        { Section: 'Selection Inventory', Item: 'Ending Inventory', Value: data.selectionInventory.endingInventory || 0 },
+        // New Receipts
+        { Section: 'New Receipts', Item: 'Total GMF Record Added', Value: data.newReceiptsTotalGMFRecordAdded || 0 },
+        { Section: 'New Receipts', Item: 'Expired Suspense', Value: data.newReceiptsExpiredSuspense || 0 },
+        { Section: 'New Receipts', Item: 'Under Suspense', Value: data.newReceiptsUnderSuspense || 0 },
+        { Section: 'New Receipts', Item: 'NEW', Value: data.newReceiptsNEW || 0 },
         
-        // Error Inventory
-        { Section: 'Error Inventory', Item: 'Beginning Inventory', Value: data.errorInventory.beginningInventory || 0 },
-        { Section: 'Error Inventory', Item: 'Error Records Selected', Value: data.errorInventory.errorRecordsSelected || 0 },
-        { Section: 'Error Inventory', Item: 'Records Corrected', Value: data.errorInventory.recordsCorrected || 0 },
-        { Section: 'Error Inventory', Item: 'Records Suspended', Value: data.errorInventory.recordsSuspended || 0 },
-        { Section: 'Error Inventory', Item: 'Records Rejected', Value: data.errorInventory.recordsRejected || 0 },
-        { Section: 'Error Inventory', Item: 'Duplicate Records Dropped', Value: data.errorInventory.duplicateRecordsDropped || 0 },
-        { Section: 'Error Inventory', Item: 'Duplicate Block Records Moved to Suspense', Value: data.errorInventory.duplicateBlockRecordsMovedToSuspense || 0 },
-        { Section: 'Error Inventory', Item: 'Ending Inventory', Value: data.errorInventory.endingInventory || 0 },
-        { Section: 'Error Inventory', Item: 'Quality Assurance Hold', Value: data.errorInventory.qualityAssuranceHold || 0 },
+        // New Error Inventory
+        { Section: 'New Error Inventory', Item: 'Beginning', Value: data.newErrorInventoryBeginning || 0 },
+        { Section: 'New Error Inventory', Item: 'Resolved', Value: data.newErrorInventoryResolved || 0 },
+        { Section: 'New Error Inventory', Item: 'Suspended', Value: data.newErrorInventorySuspended || 0 },
+        { Section: 'New Error Inventory', Item: 'Deleted', Value: data.newErrorInventoryDeleted || 0 },
+        { Section: 'New Error Inventory', Item: 'QR Hold', Value: data.newErrorInventoryQRhold || 0 },
         
-        // Workable Suspense Inventory
-        { Section: 'Workable Suspense Inventory', Item: 'Beginning Inventory', Value: data.workableSuspenseInventory.beginningInventory || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Error Inventory Records', Value: data.workableSuspenseInventory.errorInventoryRecords || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Returns Analysis Records Added', Value: data.workableSuspenseInventory.returnsAnalysisRecordsAdded || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'GUF Records Added', Value: data.workableSuspenseInventory.gufRecordsAdded || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Unworkable Suspense Records Added', Value: data.workableSuspenseInventory.unworkableSuspenseRecordsAdded || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Duplicate Block Error Records Added', Value: data.workableSuspenseInventory.duplicateBlockErrorRecordsAdded || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Records Corrected', Value: data.workableSuspenseInventory.recordsCorrected || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Records Suspended', Value: data.workableSuspenseInventory.recordsSuspended || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Records Rejected', Value: data.workableSuspenseInventory.recordsRejected || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Duplicate Records Dropped', Value: data.workableSuspenseInventory.duplicateRecordsDropped || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Ending Inventory', Value: data.workableSuspenseInventory.endingInventory || 0 },
-        { Section: 'Workable Suspense Inventory', Item: 'Quality Assurance Hold', Value: data.workableSuspenseInventory.qualityAssuranceHold || 0 },
+        // Expired Suspense
+        { Section: 'Expired Suspense', Item: 'Beginning', Value: data.expiredSuspenseBeginning || 0 },
+        { Section: 'Expired Suspense', Item: 'Resolved', Value: data.expiredSuspenseResolved || 0 },
+        { Section: 'Expired Suspense', Item: 'Suspended', Value: data.expiredSuspenseSuspended || 0 },
+        { Section: 'Expired Suspense', Item: 'Deleted', Value: data.expiredSuspenseDeleted || 0 },
+        { Section: 'Expired Suspense', Item: 'QR Hold', Value: data.expiredSuspenseQRhold || 0 },
         
-        // Unworkable Suspense Inventory
-        { Section: 'Unworkable Suspense Inventory', Item: 'Beginning Inventory', Value: data.unworkableSuspenseInventory.beginningInventory || 0 },
-        { Section: 'Unworkable Suspense Inventory', Item: 'Error Records Added', Value: data.unworkableSuspenseInventory.errorRecordsAdded || 0 },
-        { Section: 'Unworkable Suspense Inventory', Item: 'Returns Analysis Records Added', Value: data.unworkableSuspenseInventory.returnsAnalysisRecordsAdded || 0 },
-        { Section: 'Unworkable Suspense Inventory', Item: 'Workable Suspense Records Added', Value: data.unworkableSuspenseInventory.workableSuspenseRecordsAdded || 0 },
-        { Section: 'Unworkable Suspense Inventory', Item: 'Workable Suspense Records Removed', Value: data.unworkableSuspenseInventory.workableSuspenseRecordsRemoved || 0 },
-        { Section: 'Unworkable Suspense Inventory', Item: 'Duplicate Records Removed', Value: data.unworkableSuspenseInventory.duplicateRecordsRemoved || 0 },
-        { Section: 'Unworkable Suspense Inventory', Item: 'Ending Inventory', Value: data.unworkableSuspenseInventory.endingInventory || 0 }
+        // Unexpired Suspense
+        { Section: 'Unexpired Suspense', Item: 'Beginning', Value: data.unexpiredSuspenseBeginning || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Resolved', Value: data.unexpiredSuspenseResolved || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Suspended', Value: data.unexpiredSuspenseSuspended || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Deleted', Value: data.unexpiredSuspenseDeleted || 0 },
+        { Section: 'Unexpired Suspense', Item: 'QR Hold', Value: data.unexpiredSuspenseQRhold || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Workable Added', Value: data.unexpiredSuspenseWorkableAdded || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Workable Deleted', Value: data.unexpiredSuspenseWorkableDeleted || 0 }
       ];
 
       // Use ReportsService downloadCSV method
@@ -132,16 +143,16 @@ export default function Report1747Page() {
     }
   };
 
-  const renderSection = (title: string, data: InventorySection, fields: Array<{key: keyof InventorySection, label: string}>) => (
+  const renderSection = (title: string, fields: Array<{key: keyof Report1747Data, label: string, value: number | null | undefined}>) => (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h3 className="text-lg font-semibold bg-[color:var(--color-irs-blue)] text-white p-3 rounded-t-lg -m-6 mb-4">
         {title}
       </h3>
       <div className="space-y-3">
-        {fields.map(({ key, label }) => (
+        {fields.map(({ key, label, value }) => (
           <div key={key} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
             <span className="text-gray-700 font-medium">{label}:</span>
-            <span className="text-gray-900 font-semibold">{formatNumber(data[key] as number)}</span>
+            <span className="text-gray-900 font-semibold">{formatNumber(value)}</span>
           </div>
         ))}
       </div>
@@ -218,64 +229,47 @@ export default function Report1747Page() {
       {data ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {renderSection(
-            '1. Selection Inventory',
-            data.selectionInventory,
+            '1. New Receipts',
             [
-              { key: 'beginningInventory', label: 'Beginning Inventory' },
-              { key: 'totalRecordsAddedFromGmf', label: 'Total Records Added From GMF' },
-              { key: 'workableSuspenseSelected', label: 'Workable Suspense Selected' },
-              { key: 'unworkableSuspenseSelected', label: 'Unworkable Suspense Selected' },
-              { key: 'errorRecordsSelected', label: 'Error Records Selected' },
-              { key: 'endingInventory', label: 'Ending Inventory' }
+              { key: 'newReceiptsTotalGMFRecordAdded', label: 'Total GMF Record Added', value: data.newReceiptsTotalGMFRecordAdded },
+              { key: 'newReceiptsExpiredSuspense', label: 'Expired Suspense', value: data.newReceiptsExpiredSuspense },
+              { key: 'newReceiptsUnderSuspense', label: 'Under Suspense', value: data.newReceiptsUnderSuspense },
+              { key: 'newReceiptsNEW', label: 'NEW', value: data.newReceiptsNEW }
             ]
           )}
 
           {renderSection(
-            '2. Error Inventory',
-            data.errorInventory,
+            '2. New Error Inventory',
             [
-              { key: 'beginningInventory', label: 'Beginning Inventory' },
-              { key: 'errorRecordsSelected', label: 'Error Records Selected' },
-              { key: 'recordsCorrected', label: 'Records Corrected' },
-              { key: 'recordsSuspended', label: 'Records Suspended' },
-              { key: 'recordsRejected', label: 'Records Rejected' },
-              { key: 'duplicateRecordsDropped', label: 'Duplicate Records Dropped' },
-              { key: 'duplicateBlockRecordsMovedToSuspense', label: 'Duplicate Block Records Moved to Suspense' },
-              { key: 'endingInventory', label: 'Ending Inventory' },
-              { key: 'qualityAssuranceHold', label: 'Quality Assurance Hold' }
+              { key: 'newErrorInventoryBeginning', label: 'Beginning', value: data.newErrorInventoryBeginning },
+              { key: 'newErrorInventoryResolved', label: 'Resolved', value: data.newErrorInventoryResolved },
+              { key: 'newErrorInventorySuspended', label: 'Suspended', value: data.newErrorInventorySuspended },
+              { key: 'newErrorInventoryDeleted', label: 'Deleted', value: data.newErrorInventoryDeleted },
+              { key: 'newErrorInventoryQRhold', label: 'QR Hold', value: data.newErrorInventoryQRhold }
             ]
           )}
 
           {renderSection(
-            '3. Workable Suspense Inventory',
-            data.workableSuspenseInventory,
+            '3. Expired Suspense',
             [
-              { key: 'beginningInventory', label: 'Beginning Inventory' },
-              { key: 'errorInventoryRecords', label: 'Error Inventory Records' },
-              { key: 'returnsAnalysisRecordsAdded', label: 'Returns Analysis Records Added' },
-              { key: 'gufRecordsAdded', label: 'GUF Records Added' },
-              { key: 'unworkableSuspenseRecordsAdded', label: 'Unworkable Suspense Records Added' },
-              { key: 'duplicateBlockErrorRecordsAdded', label: 'Duplicate Block Error Records Added' },
-              { key: 'recordsCorrected', label: 'Records Corrected' },
-              { key: 'recordsSuspended', label: 'Records Suspended' },
-              { key: 'recordsRejected', label: 'Records Rejected' },
-              { key: 'duplicateRecordsDropped', label: 'Duplicate Records Dropped' },
-              { key: 'endingInventory', label: 'Ending Inventory' },
-              { key: 'qualityAssuranceHold', label: 'Quality Assurance Hold' }
+              { key: 'expiredSuspenseBeginning', label: 'Beginning', value: data.expiredSuspenseBeginning },
+              { key: 'expiredSuspenseResolved', label: 'Resolved', value: data.expiredSuspenseResolved },
+              { key: 'expiredSuspenseSuspended', label: 'Suspended', value: data.expiredSuspenseSuspended },
+              { key: 'expiredSuspenseDeleted', label: 'Deleted', value: data.expiredSuspenseDeleted },
+              { key: 'expiredSuspenseQRhold', label: 'QR Hold', value: data.expiredSuspenseQRhold }
             ]
           )}
 
           {renderSection(
-            '4. Unworkable Suspense Inventory',
-            data.unworkableSuspenseInventory,
+            '4. Unexpired Suspense',
             [
-              { key: 'beginningInventory', label: 'Beginning Inventory' },
-              { key: 'errorRecordsAdded', label: 'Error Records Added' },
-              { key: 'returnsAnalysisRecordsAdded', label: 'Returns Analysis Records Added' },
-              { key: 'workableSuspenseRecordsAdded', label: 'Workable Suspense Records Added' },
-              { key: 'workableSuspenseRecordsRemoved', label: 'Workable Suspense Records Removed' },
-              { key: 'duplicateRecordsRemoved', label: 'Duplicate Records Removed' },
-              { key: 'endingInventory', label: 'Ending Inventory' }
+              { key: 'unexpiredSuspenseBeginning', label: 'Beginning', value: data.unexpiredSuspenseBeginning },
+              { key: 'unexpiredSuspenseResolved', label: 'Resolved', value: data.unexpiredSuspenseResolved },
+              { key: 'unexpiredSuspenseSuspended', label: 'Suspended', value: data.unexpiredSuspenseSuspended },
+              { key: 'unexpiredSuspenseDeleted', label: 'Deleted', value: data.unexpiredSuspenseDeleted },
+              { key: 'unexpiredSuspenseQRhold', label: 'QR Hold', value: data.unexpiredSuspenseQRhold },
+              { key: 'unexpiredSuspenseWorkableAdded', label: 'Workable Added', value: data.unexpiredSuspenseWorkableAdded },
+              { key: 'unexpiredSuspenseWorkableDeleted', label: 'Workable Deleted', value: data.unexpiredSuspenseWorkableDeleted }
             ]
           )}
         </div>

@@ -575,13 +575,13 @@ export class ReportsService {
       const year = yesterday.getFullYear();
 
       const payload = {
-        pageNumber: 1,
-        pageSize: 20,
+        // pageNumber: 1,
+        // pageSize: 20,
         reportId: '1747',
         startDateStr: `${month}/${day}/${year}`,
       };
 
-      const response = await fetch('/api2/v1/era/reports/get-reports', {
+      const response = await fetch('/api2/v1/era/reports/get-summary-report-1747', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

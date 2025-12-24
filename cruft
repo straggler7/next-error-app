@@ -2598,4 +2598,52 @@ dln search
     "serviceCenter": "austin"
 }
 
-        // serviceCenter: parsedSelectionData.serviceCenter
+
+
+for report 1747, the report data json is in this form
+{
+  newReceiptsTotalGMFRecordAdded": 0, 
+  newReceiptsExpiredSuspense: 19,
+  newReceiptsUnderSuspense: 86,
+  newReceiptsNEW: null,
+  newErrorInventoryBeginning: 105,
+  newErrorInventoryResolved: 10,
+  newErrorInventorySuspended: 0,
+  newErrorInventoryDeleted: 0,
+  newErrorInventoryQRhold: null,
+  expiredSuspenseInventoryBeginning: null,
+  expiredSuspenseResolved: null,
+  expiredSuspenseSuspended: null,
+  expiredSuspenseDeleted: null,
+  expiredSuspenseQRhold: null,
+  underSuspenseBeginning: null,
+  underSuspenseResolved: null,
+  underSuspenseSuspended: null,
+  underSuspenseDeleted: null,
+  underSuspenseQRhold: null
+}
+
+make changes so that the values from this json structure are extracted and shown on the report
+
+
+{
+  newReceiptsTotalGMFRecordAdded": 0, 
+  newReceiptsExpiredSuspense: 19,
+  newReceiptsUnderSuspense: 86,
+  newReceiptsNEW: null,
+  newErrorInventoryBeginning: 105,
+  newErrorInventoryResolved: 10,
+  newErrorInventorySuspended: 0,
+  newErrorInventoryDeleted: 0,
+  newErrorInventoryQRhold: null,
+  expiredSuspenseBeginning: null,
+  expiredSuspenseResolved: null,
+  expiredSuspenseSuspended: null,
+  expiredSuspenseDeleted: null,
+  expiredSuspenseQRhold: null,
+  unexpiredSuspenseBeginning: null,
+  unexpiredSuspenseResolved: null,
+  unexpiredSuspenseSuspended: null,
+  unexpiredSuspenseDeleted: null,
+  unexpiredSuspenseQRhold: null
+}
