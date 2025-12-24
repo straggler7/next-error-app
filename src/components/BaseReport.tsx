@@ -134,7 +134,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
+      { key: 'rateofProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -207,7 +207,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
-      { key: 'rateOfProductionStr', label: 'Rate of Production', visible: true, width: 150 },
+      { key: 'rateofProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -381,6 +381,11 @@ export default function BaseReport({
 
     if (key === 'submissionErrorCodes' && (!value || value === 'null')) {
       return 'No Errors';
+    }
+
+    if (key === 'rateofProductionStr') {
+      const numValue = parseFloat(value);
+      return !isNaN(numValue) ? numValue.toFixed(3) : value?.toString() || '-';
     }
 
     if (key === 'daysInSuspense') {
