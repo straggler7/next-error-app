@@ -61,6 +61,7 @@ export interface ReportPayload {
   serviceCenter?: string;
   serviceCenterEnum?: string; // Service center name in uppercase
   programCode?: string;
+  seid?: string; // Tax Examiner SEID for 7740 report
   export?: boolean; // For export functionality
 }
 

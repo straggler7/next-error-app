@@ -90,6 +90,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   if (reportType === '0540') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
+      { key: 'seid', label: 'Operator', visible: true, width: 150 },
       { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
       { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
@@ -147,6 +148,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -160,6 +162,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -174,6 +177,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -188,6 +192,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
@@ -233,6 +238,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
       // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
       { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
+      { key: 'seid', label: 'Operator', visible: true, width: 150 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
@@ -295,6 +301,7 @@ export default function BaseReport({
   });
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
+  const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 25,
@@ -420,6 +427,11 @@ export default function BaseReport({
         payload.programCode = selectedProgramCode;
       }
 
+      // Add Tax Examiner SEID for 7740 report
+      if (reportType === '7740' && taxExaminerSeid.trim()) {
+        payload.seid = taxExaminerSeid.trim().toLowerCase();
+      }
+
       // Add status for 1340 and 0540 reports
       if (reportType === '1340') {
         payload.status = 'NEW';
@@ -455,6 +467,11 @@ export default function BaseReport({
       payload.programCode = selectedProgramCode;
     }
 
+    // Add Tax Examiner SEID for 7740 report
+    if (reportType === '7740' && taxExaminerSeid.trim()) {
+      payload.seid = taxExaminerSeid.trim().toLowerCase();
+    }
+
     // Reset pagination to first page
     setPagination(prev => ({ ...prev, currentPage: 1 }));
     onRefresh(payload);
@@ -487,6 +504,11 @@ export default function BaseReport({
 
     if (selectedProgramCode && selectedProgramCode !== 'All Program Codes') {
       payload.programCode = selectedProgramCode;
+    }
+
+    // Add Tax Examiner SEID for 7740 report
+    if (reportType === '7740' && taxExaminerSeid.trim()) {
+      payload.seid = taxExaminerSeid.trim().toLowerCase();
     }
 
     // Add status for specific report types
@@ -602,6 +624,22 @@ export default function BaseReport({
               </div>
             )}
 
+            {/* Tax Examiner SEID Filter - Only for 7740 report */}
+            {reportType === '7740' && (
+              <div className="w-48">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tax Examiner SEID
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter SEID"
+                  value={taxExaminerSeid}
+                  onChange={(e) => setTaxExaminerSeid(e.target.value)}
+                  className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+            )}
+
             {/* Submit Button */}
             <div className="flex gap-2 items-end">
               <button
@@ -616,6 +654,7 @@ export default function BaseReport({
                   setSearchTerm('');
                   setSelectedServiceCenter('');
                   setSelectedProgramCode('');
+                  setTaxExaminerSeid('');
                 }}
                 className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 title="Clear Filters"
