@@ -140,10 +140,10 @@ export default function Report1747Page() {
         
         // Unexpired Suspense
         { Section: 'Unexpired Suspense', Item: 'Beginning', Value: data.unexpiredSuspenseBeginning || 0 },
-        { Section: 'Unexpired Suspense', Item: 'Resolved', Value: data.unexpiredSuspenseResolved || 0 },
-        { Section: 'Unexpired Suspense', Item: 'Suspended', Value: data.unexpiredSuspenseSuspended || 0 },
-        { Section: 'Unexpired Suspense', Item: 'Deleted', Value: data.unexpiredSuspenseDeleted || 0 },
-        { Section: 'Unexpired Suspense', Item: 'QR Hold', Value: data.unexpiredSuspenseQRhold || 0 },
+        // { Section: 'Unexpired Suspense', Item: 'Resolved', Value: data.unexpiredSuspenseResolved || 0 },
+        // { Section: 'Unexpired Suspense', Item: 'Suspended', Value: data.unexpiredSuspenseSuspended || 0 },
+        // { Section: 'Unexpired Suspense', Item: 'Deleted', Value: data.unexpiredSuspenseDeleted || 0 },
+        // { Section: 'Unexpired Suspense', Item: 'QR Hold', Value: data.unexpiredSuspenseQRhold || 0 },
         { Section: 'Unexpired Suspense', Item: 'Workable Added', Value: data.unexpiredSuspenseWorkableAdded || 0 },
         { Section: 'Unexpired Suspense', Item: 'Workable Deleted', Value: data.unexpiredSuspenseWorkableDeleted || 0 }
       ];
@@ -301,10 +301,10 @@ export default function Report1747Page() {
             '4. Unexpired Suspense',
             [
               { key: 'unexpiredSuspenseBeginning', label: 'Beginning', value: data.unexpiredSuspenseBeginning },
-              { key: 'unexpiredSuspenseResolved', label: 'Resolved', value: data.unexpiredSuspenseResolved },
-              { key: 'unexpiredSuspenseSuspended', label: 'Suspended', value: data.unexpiredSuspenseSuspended },
-              { key: 'unexpiredSuspenseDeleted', label: 'Deleted', value: data.unexpiredSuspenseDeleted },
-              { key: 'unexpiredSuspenseQRhold', label: 'QR Hold', value: data.unexpiredSuspenseQRhold },
+              // { key: 'unexpiredSuspenseResolved', label: 'Resolved', value: data.unexpiredSuspenseResolved },
+              // { key: 'unexpiredSuspenseSuspended', label: 'Suspended', value: data.unexpiredSuspenseSuspended },
+              // { key: 'unexpiredSuspenseDeleted', label: 'Deleted', value: data.unexpiredSuspenseDeleted },
+              // { key: 'unexpiredSuspenseQRhold', label: 'QR Hold', value: data.unexpiredSuspenseQRhold },
               { key: 'unexpiredSuspenseWorkableAdded', label: 'Workable Added', value: data.unexpiredSuspenseWorkableAdded },
               { key: 'unexpiredSuspenseWorkableDeleted', label: 'Workable Deleted', value: data.unexpiredSuspenseWorkableDeleted }
             ]
