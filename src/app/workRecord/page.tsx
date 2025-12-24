@@ -2209,6 +2209,11 @@ function Form4868ERSPageContent() {
                 <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
                   Program: {landingSelectionData.program}
                 </span>
+                {landingSelectionData.statusCode && (
+                  <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
+                    Status: {landingSelectionData.statusCode}
+                  </span>
+                )}
               </>
             )}
           </div>
