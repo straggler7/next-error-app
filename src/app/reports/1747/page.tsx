@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ReportsService } from '../../../services/reportsService';
 import { useSeid } from '../../../hooks/useSeid';
 import { RefreshCw, Download } from 'lucide-react';
+import DatePicker from '../../../components/DatePicker';
 
 interface Report1747Data {
   // New Receipts section
@@ -39,6 +40,15 @@ interface Report1747Data {
 export default function Report1747Page() {
   const [data, setData] = useState<Report1747Data | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Default to yesterday's date
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
+    const day = yesterday.getDate().toString().padStart(2, '0');
+    const year = yesterday.getFullYear();
+    return `${month}/${day}/${year}`;
+  });
   const currentUserSeid = useSeid();
 
   const fetchReportData = useCallback(async () => {
@@ -46,7 +56,7 @@ export default function Report1747Page() {
     
     setLoading(true);
     try {
-      const reportData = await ReportsService.get1747Report(currentUserSeid);
+      const reportData = await ReportsService.get1747Report(currentUserSeid, selectedDate);
       console.log('1747 Report API Response:', reportData);
       
       // Validate and provide fallback structure
@@ -73,10 +83,10 @@ export default function Report1747Page() {
         
         // Under Suspense
         unexpiredSuspenseBeginning: reportData?.unexpiredSuspenseBeginning || 0,
-        unexpiredSuspenseResolved: reportData?.unexpiredSuspenseResolved || 0,
-        unexpiredSuspenseSuspended: reportData?.unexpiredSuspenseSuspended || 0,
-        unexpiredSuspenseDeleted: reportData?.unexpiredSuspenseDeleted || 0,
-        unexpiredSuspenseQRhold: reportData?.unexpiredSuspenseQRhold || 0,
+        // unexpiredSuspenseResolved: reportData?.unexpiredSuspenseResolved || 0,
+        // unexpiredSuspenseSuspended: reportData?.unexpiredSuspenseSuspended || 0,
+        // unexpiredSuspenseDeleted: reportData?.unexpiredSuspenseDeleted || 0,
+        // unexpiredSuspenseQRhold: reportData?.unexpiredSuspenseQRhold || 0,
         unexpiredSuspenseWorkableAdded: reportData?.unexpiredSuspenseWorkableAdded || 0,
         unexpiredSuspenseWorkableDeleted: reportData?.unexpiredSuspenseWorkableDeleted || 0
       };
@@ -88,11 +98,14 @@ export default function Report1747Page() {
     } finally {
       setLoading(false);
     }
-  }, [currentUserSeid]);
+  }, [currentUserSeid, selectedDate]);
 
   useEffect(() => {
-    fetchReportData();
-  }, [fetchReportData]);
+    // Initial load only when component mounts
+    if (currentUserSeid) {
+      fetchReportData();
+    }
+  }, [currentUserSeid]); // Remove fetchReportData dependency to prevent auto-refresh on date change
 
   const formatNumber = (value: number | null | undefined): string => {
     if (value === undefined || value === null) return '0';
@@ -207,14 +220,14 @@ export default function Report1747Page() {
             Report 1747: Error Resolution Inventory Control
           </h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
-            onClick={fetchReportData}
+            onClick={() => fetchReportData()}
             disabled={loading}
-            className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            {loading ? 'Loading...' : 'Refresh'}
           </button>
           <button
             onClick={handleExport}
@@ -222,6 +235,30 @@ export default function Report1747Page() {
           >
             <Download size={16} className="mr-2" />
             Export
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-6 items-end">
+        {/* Date Picker */}
+        <div className="w-48">
+          <DatePicker
+            value={selectedDate}
+            onChange={setSelectedDate}
+            label="Status On"
+            placeholder="Select status date..."
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex gap-2 items-end">
+          <button
+            onClick={fetchReportData}
+            disabled={loading}
+            className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Loading...' : 'Submit'}
           </button>
         </div>
       </div>

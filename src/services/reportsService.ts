@@ -563,23 +563,29 @@ export class ReportsService {
     }
   }
   /**
-   * Fetch 1747 report data (Error Resolution Inventory Control)
+   * Fetch 1747 report data
    * @param seid - Current user's SEID
+   * @param dateFilter - Optional date filter in MM/DD/YYYY format
    * @returns Promise<any> - Inventory control data with 4 sections
    */
-  static async get1747Report(seid: string): Promise<any> {
+  static async get1747Report(seid: string, dateFilter?: string): Promise<any> {
     try {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
-      const day = yesterday.getDate().toString().padStart(2, '0');
-      const year = yesterday.getFullYear();
+      let startDateStr = dateFilter;
+      
+      if (!startDateStr) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
+        const day = yesterday.getDate().toString().padStart(2, '0');
+        const year = yesterday.getFullYear();
+        startDateStr = `${month}/${day}/${year}`;
+      }
 
       const payload = {
         // pageNumber: 1,
         // pageSize: 20,
         reportId: '1747',
-        startDateStr: `${month}/${day}/${year}`,
+        startDateStr,
       };
 
       const response = await fetch('/api2/v1/era/reports/get-summary-report-1747', {
