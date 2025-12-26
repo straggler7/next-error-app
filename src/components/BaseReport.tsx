@@ -282,7 +282,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
     return [
       { key: 'programId', label: 'Program ID', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
-      { key: 'suspendedCode', label: 'Suspended Code', visible: true, width: 130 },
+      { key: 'suspendstatusCode', label: 'Status Code', visible: true, width: 130 },
       { key: 'day0', label: 'Day 0', visible: true, width: 80 },
       { key: 'day1', label: 'Day 1', visible: true, width: 80 },
       { key: 'day2', label: 'Day 2', visible: true, width: 80 },
@@ -367,6 +367,7 @@ export default function BaseReport({
     const year = yesterday.getFullYear();
     return `${month}/${day}/${year}`;
   });
+  const [selectedEndDate, setSelectedEndDate] = useState<string>('');
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
@@ -487,6 +488,11 @@ export default function BaseReport({
         startDateStr: selectedDate,
       };
 
+      // Add end date for report 0540 if provided
+      if (reportType === '0540' && selectedEndDate) {
+        payload.endDateStr = selectedEndDate;
+      }
+
       // Add current filter parameters
       if (searchTerm.trim() && reportType !== '0340' && reportType !== '0540' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745') {
         payload.dln = searchTerm.trim();
@@ -519,12 +525,23 @@ export default function BaseReport({
   };
 
   const handleSubmit = () => {
+    // Validate end date if it's provided for report 0540
+    if (reportType === '0540' && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
+      alert('End date must be on or after the start date.');
+      return;
+    }
+
     const payload: ReportPayload = {
       pageNumber: 1, // Reset to first page on new search
       pageSize: pagination.pageSize,
       reportId: reportType,
       startDateStr: selectedDate,
     };
+
+    // Add end date for report 0540 if provided
+    if (reportType === '0540' && selectedEndDate) {
+      payload.endDateStr = selectedEndDate;
+    }
 
     // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 1343, 7740, 7741, 7742, 7743, 7744, 7745 reports)
     if (searchTerm.trim() && reportType !== '0340' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745') {
@@ -550,6 +567,16 @@ export default function BaseReport({
     onRefresh(payload);
   };
 
+  // Validation function to check if end date is after start date
+  const isEndDateValid = (startDate: string, endDate: string): boolean => {
+    if (!endDate) return true; // End date is optional
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    return end >= start;
+  };
+
   const handleRefresh = () => {
     handleSubmit(); // Use the same logic as submit
   };
@@ -564,6 +591,11 @@ export default function BaseReport({
       startDateStr: selectedDate,
       export: true, // Add export flag
     };
+
+    // Add end date for report 0540 if provided
+    if (reportType === '0540' && selectedEndDate) {
+      payload.endDateStr = selectedEndDate;
+    }
 
     // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 1343, 7740, 7741, 7742, 7743, 7744, 7745 reports)
     const excludeDlnReports = ['0340', '1341', '1343', '7740', '7741', '7742', '7743', '7744', '7745'];
@@ -659,6 +691,21 @@ export default function BaseReport({
             />
           </div>
 
+          {/* End Date Picker - Only for report 0540 */}
+          {reportType === '0540' && (
+            <div className="w-48">
+              <DatePicker
+                value={selectedEndDate}
+                onChange={setSelectedEndDate}
+                label="End Date (Optional)"
+                placeholder="Select end date..."
+              />
+              {selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate) && (
+                <p className="text-red-500 text-xs mt-1">End date must be on or after start date</p>
+              )}
+            </div>
+          )}
+
             {/* Service Center Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1343, 7740, 7741, 7742, 7743, 7744, and 7745 reports */}
             {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && (
               <div className="w-48">
@@ -730,6 +777,7 @@ export default function BaseReport({
                   setSelectedServiceCenter('');
                   setSelectedProgramCode('');
                   setTaxExaminerSeid('');
+                  setSelectedEndDate('');
                 }}
                 className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 title="Clear Filters"

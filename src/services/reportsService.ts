@@ -56,6 +56,7 @@ export interface ReportPayload {
   pageSize: number;
   reportId: string;
   startDateStr: string;
+  endDateStr?: string;
   status?: string; // Only for 1340 report
   dln?: string;
   serviceCenter?: string;

@@ -2752,3 +2752,168 @@ Based on the API response structure provided:
 | **Navigation** | Integrated in reports menu |
 
 The report 1343 is now fully functional and ready for use. It will display suspense summary data with day-based aging columns and only use the date filter as requested.
+
+
+I'll create a new report 7744 based on the existing 7743 report. Let me start by creating a todo list for this task.
+
+Let me first examine the existing 7743 report to understand its structure and implementation.
+
+Now let me examine the get7743Report method in ReportsService to understand its implementation.
+
+
+
+Now I'll create the new report 7744 based on the 7743 report structure. Let me create the report page first.
+
+I need to fix the TypeScript errors by adding the get7744Report method to ReportsService and updating BaseReport to support the 7744 report type. Let me continue with the implementation.
+
+Now I'll add the get7744Report method to ReportsService, based on the get7743Report method.
+
+Now I need to update the BaseReport component to support the 7744 report type. Let me add '7744' to the reportType union and add the column configuration.
+
+Now I need to add the column configuration for the 7744 report. Since it's similar to 7743, I'll find the 7743 column configuration and add a similar one for 7744.
+
+Now I'll add the column configuration for the 7744 report, based on the 7743 configuration.
+
+Now I need to add the 7744 report to the Navigation component and ensure the filter logic is properly configured. Let me continue with the implementation.
+
+Now I'll add the 7744 report to the Navigation component. Let me find where the 7743 report is listed and add 7744 next to it.
+
+Now I need to ensure the filter logic is properly configured for the 7744 report. Since 7744 is similar to 7743, I should check if there are any specific filter exclusions that need to be updated.
+
+I can see that the 7743 report is excluded from DLN and Service Center filters, so I need to add 7744 to those exclusion lists as well since it's similar to 7743. Let me update the filter logic.
+
+Now I need to update the other filter exclusion locations for the 7744 report. Let me continue with the handleSubmit and export payload generation.
+
+Now I need to update the export payload generation and the UI filter visibility for the 7744 report.
+
+Now I need to update the UI filter visibility to hide DLN and Service Center filters for the 7744 report.
+
+
+
+Perfect! I've successfully created the new report 7744 based on the 7743 report structure. Here's what was implemented:
+
+## **Report 7744 Implementation Complete**
+
+### **1. Created New Report Page**
+- **File**: [/src/app/reports/7744/page.tsx](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/app/reports/7744/page.tsx:0:0-0:0)
+- **Title**: "Program Production Summary Report 7744"
+- **Route**: `/reports/7744`
+- **Uses**: BaseReport component for consistent UI
+
+### **2. Updated ReportsService**
+- **Added**: [get7744Report()](cci:1://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/services/reportsService.ts:623:2-650:3) method
+- **Endpoint**: `/api2/v1/era/reports/assignments` (same as 7743)
+- **Method**: POST
+- **Payload**: Uses `reportId: '7744'` (as requested)
+
+### **3. Updated BaseReport Component**
+- **Added**: `'7744'` to reportType union
+- **Filters**: Same as 7743 - hides DLN and Service Center filters, shows only Date and Program Code
+- **Payload**: Excludes DLN and Service Center from payload generation for 7744
+
+### **4. Column Configuration**
+Identical to 7743 report:
+- **Form Type** (formType)
+- **Program** (programId)
+- **Total Hours Worked** (totalTimeSpentStr)
+- **Total Volume Worked** (totalVolume)
+- **Volume Per Hour** (volumePerHr)
+- **Resolved Quantity** (resolvedQty)
+- **Deleted Quantity** (deletedQty)
+- **Suspended Quantity** (suspendedQty)
+- **ReWorked Quantity** (reWorkedQty)
+
+### **5. Navigation Integration**
+- **Added**: 7744 report to Navigation component
+- **Position**: Between 7743 and 7746 reports
+- **Label**: "7744"
+
+## **Key Features**
+
+| Feature | Details |
+|---------|---------|
+| **API Endpoint** | `/api2/v1/era/reports/assignments` |
+| **Report ID** | `7744` (in payload) |
+| **Filters** | Date and Program Code only |
+| **Columns** | 9 columns matching 7743 structure |
+| **Export** | CSV export supported |
+| **Navigation** | Integrated in reports menu |
+
+The report 7744 is now fully functional and ready for use. It behaves exactly like the 7743 report but sends the correct report ID (7744) to the backend API as requested.
+
+
+
+I'll create a new report 7745 similar to 7744. Let me start by creating a todo list for this task.
+
+I'll create the new report 7745 based on the 7744 report structure. Let me start by creating the report page.
+
+I need to fix the TypeScript errors by adding the get7745Report method to ReportsService and updating BaseReport to support the 7745 report type. Let me continue with the implementation.
+
+Now I'll add the get7745Report method to ReportsService, based on the get7744Report method.
+
+Now I need to update the BaseReport component to support the 7745 report type. Let me add '7745' to the reportType union and add the column configuration.
+
+Now I need to add the column configuration for the 7745 report, based on the 7744 configuration.
+
+Now I need to update the filter logic to include 7745 in the exclusion lists, similar to 7744. Let me update the filter exclusions for DLN and Service Center filters.
+
+Now I need to update the handleSubmit and export payload generation to include 7745 in the exclusion lists.
+
+Now I need to update the export payload generation to include 7745 in the exclusion lists.
+
+Now I need to update the UI filter visibility to hide DLN and Service Center filters for the 7745 report.
+
+Now I need to add the 7745 report to the Navigation component. Let me find where the 7744 report is listed and add 7745 next to it.
+
+
+
+Perfect! I've successfully created the new report 7745 similar to 7744. Here's what was implemented:
+
+## **Report 7745 Implementation Complete**
+
+### **1. Created New Report Page**
+- **File**: [/src/app/reports/7745/page.tsx](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/app/reports/7745/page.tsx:0:0-0:0)
+- **Title**: "Program Production Summary Report 7745"
+- **Route**: `/reports/7745`
+- **Uses**: BaseReport component for consistent UI
+
+### **2. Updated ReportsService**
+- **Added**: [get7745Report()](cci:1://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/services/reportsService.ts:652:2-679:3) method
+- **Endpoint**: `/api2/v1/era/reports/assignments` (same as 7744)
+- **Method**: POST
+- **Payload**: Uses `reportId: '7745'`
+
+### **3. Updated BaseReport Component**
+- **Added**: `'7745'` to reportType union
+- **Filters**: Same as 7744 - hides DLN and Service Center filters, shows only Date and Program Code
+- **Payload**: Excludes DLN and Service Center from payload generation for 7745
+
+### **4. Column Configuration**
+Identical to 7744 report:
+- **Form Type** (formType)
+- **Program** (programId)
+- **Total Hours Worked** (totalTimeSpentStr)
+- **Total Volume Worked** (totalVolume)
+- **Volume Per Hour** (volumePerHr)
+- **Resolved Quantity** (resolvedQty)
+- **Deleted Quantity** (deletedQty)
+- **Suspended Quantity** (suspendedQty)
+- **ReWorked Quantity** (reWorkedQty)
+
+### **5. Navigation Integration**
+- **Added**: 7745 report to Navigation component
+- **Position**: Between 7744 and 7746 reports
+- **Label**: "7745"
+
+## **Key Features**
+
+| Feature | Details |
+|---------|---------|
+| **API Endpoint** | `/api2/v1/era/reports/assignments` |
+| **Report ID** | `7745` (in payload) |
+| **Filters** | Date and Program Code only |
+| **Columns** | 9 columns matching 7744 structure |
+| **Export** | CSV export supported |
+| **Navigation** | Integrated in reports menu |
+
+The report 7745 is now fully functional and ready for use. It behaves exactly like the 7744 report but sends the correct report ID (7745) to the backend API.
