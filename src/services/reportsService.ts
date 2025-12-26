@@ -418,6 +418,35 @@ export class ReportsService {
   }
 
   /**
+   * Fetch 1343 report data (suspense summary report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get1343Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api2/v1/era/reports/get-suspense-summary-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 1343 report:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch 7740 report data (summary report)
    * @param seid - Current user's SEID
    * @param payload - Report request payload

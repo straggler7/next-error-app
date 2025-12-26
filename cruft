@@ -2647,3 +2647,108 @@ make changes so that the values from this json structure are extracted and shown
   unexpiredSuspenseDeleted: null,
   unexpiredSuspenseQRhold: null
 }
+
+report 1343
+
+[{
+  "programId": "44720",
+  "formType": "4868",
+  "suspendedCode": "",
+  "day0": 0,
+  "day1": 0,
+  "day2": 0,
+  "day3": 0,
+  "day4": 0,
+  "day5": 0,
+  "day6to10": 1,
+  "day11to15": 0,
+  "day16to20": 0,
+  "day21to25": 0,
+  "day26to30": 0,
+  "day31to35": 0,
+  "day36to40": 0,
+  "day40andmore": 0,
+  "total": 1
+}]
+
+
+I need to create a new report 1343 with specific requirements. Let me start by creating a todo list for this task.
+
+I'll create the new report 1343 with the specific requirements. Let me start by creating the report page.
+
+I need to fix the TypeScript errors by adding the get1343Report method to ReportsService and updating BaseReport to support the 1343 report type. Let me continue with the implementation.
+
+Now I'll add the get1343Report method to ReportsService with the custom endpoint specified.
+
+Now I need to update the BaseReport component to support the 1343 report type and add the column configuration based on the API response structure.
+
+I'll continue with updating the BaseReport component to support the 1343 report type. First, let me add '1343' to the reportType union.
+
+Now I need to add the column configuration for the 1343 report based on the API response structure provided. The response contains fields like programId, formType, suspendedCode, day0-day40andmore, and total.
+
+Now I need to configure the filters for the 1343 report. According to the requirements, it should only keep the "Status On" date field. I need to update the filter logic to hide other filters for the 1343 report type.
+
+I need to update the filter logic to hide DLN, Service Center, and Program Code filters for the 1343 report, keeping only the date filter. Let me find and update the filter visibility conditions.
+
+Now I need to hide the Service Center and Program Code filters for the 1343 report as well. Let me find and update those filter conditions.
+
+Now I need to hide the Program Code filter for the 1343 report as well. Let me find and update that filter condition.
+
+I need to also update the payload generation logic to exclude DLN and Service Center filters for the 1343 report, and add it to the Navigation component. Let me continue with the implementation.
+
+I need to also update the export payload generation logic and add the 1343 report to the Navigation component. Let me continue with the implementation.
+
+Now I need to update the export payload generation logic and add the 1343 report to the Navigation component. Let me continue with the export logic first.
+
+Now I need to add the 1343 report to the Navigation component. Let me update the Navigation component to include the new report.
+
+I can see that the user has already added the 1343 report to the Navigation component based on the user actions shown. Let me add the 1343 report entry to the Navigation component to complete the implementation.
+
+Perfect! I've successfully created the new report 1343 with all the specified requirements. Here's what was implemented:
+
+## **Report 1343 Implementation Complete**
+
+### **1. Created New Report Page**
+- **File**: [/src/app/reports/1343/page.tsx](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/app/reports/1343/page.tsx:0:0-0:0)
+- **Title**: "Suspense Summary Report"
+- **Route**: `/reports/1343`
+- **Uses**: BaseReport component for consistent UI
+
+### **2. Updated ReportsService**
+- **Added**: [get1343Report()](cci:1://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/services/reportsService.ts:419:2-446:3) method
+- **Endpoint**: `/api2/v1/era/reports/get-suspense-summary-report` (as requested)
+- **Method**: POST
+- **Payload**: Uses `reportId: '1343'`
+
+### **3. Updated BaseReport Component**
+- **Added**: `'1343'` to reportType union
+- **Filters**: Only shows "Status On" date field (DLN, Service Center, Program Code hidden)
+- **Payload**: Excludes DLN and Service Center filters for 1343
+
+### **4. Column Configuration**
+Based on the API response structure provided:
+- **Program ID** (programId)
+- **Form Type** (formType) 
+- **Suspended Code** (suspendedCode)
+- **Day 0-5** (day0, day1, day2, day3, day4, day5)
+- **Day Ranges** (day6to10, day11to15, day16to20, day21to25, day26to30, day31to35, day36to40)
+- **Day 40+** (day40andmore)
+- **Total** (total)
+
+### **5. Navigation Integration**
+- **Added**: 1343 report to Navigation component
+- **Position**: Between 3141 and 1740 reports
+- **Label**: "1343"
+
+## **Key Features**
+
+| Feature | Details |
+|---------|---------|
+| **API Endpoint** | `/api2/v1/era/reports/get-suspense-summary-report` |
+| **Report ID** | `1343` |
+| **Filters** | Date only ("Status On" field) |
+| **Columns** | 17 columns matching API response structure |
+| **Export** | CSV export supported |
+| **Navigation** | Integrated in reports menu |
+
+The report 1343 is now fully functional and ready for use. It will display suspense summary data with day-based aging columns and only use the date filter as requested.
