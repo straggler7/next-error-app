@@ -14,7 +14,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 
 interface BaseReportProps {
   title: string;
-  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '1740' | '7740' | '7741' | '7742' | '7743' | '7746' | '7747';
+  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '1740' | '3141' | '7740' | '7741' | '7742' | '7743' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
   onRefresh: (payload: ReportPayload) => void;
@@ -217,6 +217,23 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   }
   
   if (reportType === '1342') {
+    return [
+      { key: 'dln', label: 'DLN', visible: true, width: 150 },
+      { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
+      { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'source', label: 'Source', visible: true, width: 120 },
+      { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
+      { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
+      { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 },
+      { key: 'daysInSuspense', label: 'Days in Suspense', visible: true, width: 130 },
+      { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 130 }
+    ];
+  }
+
+  if (reportType === '3141') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
       { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
