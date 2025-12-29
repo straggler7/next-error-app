@@ -330,20 +330,30 @@ function DailySummaryContent() {
     columnHelper.display({
       id: 'reopen',
       header: 'Actions',
-      cell: ({ row }) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent row click
-            handleReopen(row.original);
-          }}
-          className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-700 transition-colors duration-200"
-        >
-          Reopen
-        </button>
-      ),
+      cell: ({ row }) => {
+        const isDisabled = row.original.seid !== currentUserSeid;
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click
+              if (!isDisabled) {
+                handleReopen(row.original);
+              }
+            }}
+            disabled={isDisabled}
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors duration-200 ${
+              isDisabled 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            Reopen
+          </button>
+        );
+      },
       size: 100,
     }),
-  ], [columnHelper, handleReopen]);
+  ], [columnHelper, handleReopen, currentUserSeid]);
 
   // Handle row click to navigate to QR details (optional, keeping same behavior as QR inventory)
   const handleRowClick = (record: QRInventoryRecord) => {
