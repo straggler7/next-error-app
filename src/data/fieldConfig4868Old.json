@@ -1,53 +1,5 @@
-[
-  {
-    "key": "meFReceiptDate",
-    "label": "Transaction Date (01TDT)",
-    "validation": {
-      "required": true,
-      "type": "string",
-      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
-      "minLength": 10,
-      "maxLength": 10,
-      "messages": {
-        "required": "Transaction Date is required",
-        "pattern": "Transaction Date must be in YYYY-MM-DD format (e.g., 2023-01-15)",
-        "minLength": "Transaction Date must be exactly 10 characters",
-        "maxLength": "Transaction Date must be exactly 10 characters"
-      }
-    }
-  },
-  {
-    "key": "primarySSN",
-    "label": "Taxpayer Identification Number (01TIN)",
-    "validation": {
-      "required": true,
-      "type": "string",
-      "pattern": "^\\d{3}-?\\d{2}-?\\d{4}$",
-      "messages": {
-        "required": "Social Security Number is required",
-        "pattern": "SSN must be 9 digits (e.g., 123456789 or 123-45-6789)"
-      }
-    }
-  },
-  {
-    "key": "taxPrd",
-    "label": "Tax Period (01TXP)",
-    "validation": {
-      "required": true,
-      "type": "string",
-      "pattern": "^\\d{4}(0[1-9]|1[0-2])$",
-      "minLength": 6,
-      "maxLength": 6,
-      "messages": {
-        "required": "Tax Period is required",
-        "pattern": "Tax Period must be in YYYYMM format (e.g., 202301 for January 2023)",
-        "minLength": "Tax Period must be exactly 6 digits",
-        "maxLength": "Tax Period must be exactly 6 digits"
-      }
-    }
-  },
-  {
-    "key": "primaryNameCtrl",
+{
+  "primaryNameCtrl": {
     "label": "Taxpayer Name Control (01NC)",
     "validation": {
       "required": true,
@@ -63,32 +15,69 @@
       }
     }
   },
-  {
-    "key": "mftCd",
-    "label": "Master File System ID Code (01MFT)"
+  "primarySSN": {
+    "label": "Taxpayer Identification Number (01TIN)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "pattern": "^\\d{3}-?\\d{2}-?\\d{4}$",
+      "messages": {
+        "required": "Social Security Number is required",
+        "pattern": "SSN must be 9 digits (e.g., 123456789 or 123-45-6789)"
+      }
+    }
   },
-  {
-    "key": "napEifNameCtrlUndrprt",
+  "taxPrd": {
+    "label": "Tax Period (01TXP)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "pattern": "^\\d{4}(0[1-9]|1[0-2])$",
+      "minLength": 6,
+      "maxLength": 6,
+      "messages": {
+        "required": "Tax Period is required",
+        "pattern": "Tax Period must be in YYYYMM format (e.g., 202301 for January 2023)",
+        "minLength": "Tax Period must be exactly 6 digits",
+        "maxLength": "Tax Period must be exactly 6 digits"
+      }
+    }
+  },
+  "meFReceiptDate": {
+    "label": "Transaction Date (01TDT)",
+    "validation": {
+      "required": true,
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+      "minLength": 10,
+      "maxLength": 10,
+      "messages": {
+        "required": "Transaction Date is required",
+        "pattern": "Transaction Date must be in YYYY-MM-DD format (e.g., 2023-01-15)",
+        "minLength": "Transaction Date must be exactly 10 characters",
+        "maxLength": "Transaction Date must be exactly 10 characters"
+      }
+    }
+  },
+  "napEifNameCtrlUndrprt": {
     "label": "Name Control (01NC_)"
   },
-  {
-    "key": "napAccessInd",
-    "label": "NAP Access Indicator (01NA1)"
-  },
-  {
-    "key": "napEifResponseInd",
+  "napEifResponseInd": {
     "label": "NAP EIF Response Indicator (01NR1)"
   },
-  {
-    "key": "transCd",
+  "napAccessInd": {
+    "label": "NAP Access Indicator (01NA1)"
+  },
+  "mftCd": {
+    "label": "Master File System ID Code (01MFT)"
+  },
+  "transCd": {
     "label": "Transaction Code (01TC)"
   },
-  {
-    "key": "secondaryTransCd",
+  "secondaryTransCd": {
     "label": "Secondary Transaction Code (01STC)"
   },
-  {
-    "key": "docCode",
+  "docCode": {
     "label": "Document Code (01DC)"
   }
-]
+}

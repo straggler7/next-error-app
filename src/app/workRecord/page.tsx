@@ -38,8 +38,17 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
 // import DevBanner from "../../components/DevBanner";
-import fieldConfig from "../../data/fieldConfig4868.json";
+import newFieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
+
+// Convert new field config array to lookup object for compatibility
+const fieldConfig = newFieldConfig.reduce((acc: any, field: any) => {
+  acc[field.key] = {
+    label: field.label,
+    validation: field.validation
+  };
+  return acc;
+}, {});
 
 // Timeout constants for auto-closeout functionality
 const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
@@ -202,16 +211,15 @@ function Form4868ERSPageContent() {
       // Create form elements based on displayFields structure
       const formElements: FormElement[] = [];
 
-      // Separate editable and non-editable fields
-      const editableFields: FormElement[] = [];
-      const nonEditableFields: FormElement[] = [];
-
-      Object.entries(displayFields).forEach(
-        ([fieldKey, displayFieldConfig]: [string, any]) => {
+      // Iterate through newFieldConfig array to maintain JSON order
+      newFieldConfig.forEach((fieldConfigItem: any) => {
+        const fieldKey = fieldConfigItem.key;
+        const displayFieldConfig = displayFields[fieldKey];
+        
+        // Only process fields that exist in displayFields
+        if (displayFieldConfig) {
           const fieldValue = dataSource[fieldKey] || "";
-          // Get label from fieldConfig4868.json first, then fallback
-          const fieldLabel =
-            (fieldConfig as any)[fieldKey]?.label || toLabel(fieldKey);
+          const fieldLabel = fieldConfigItem.label || toLabel(fieldKey);
 
           const formElement: FormElement = {
             id: fieldKey,
@@ -223,16 +231,13 @@ function Form4868ERSPageContent() {
             hasFieldError: displayFieldConfig.hasFieldError || false,
           };
 
-          if (displayFieldConfig.editable) {
-            editableFields.push(formElement);
-          } else {
-            nonEditableFields.push(formElement);
-          }
+          // Add to formElements array in the order they appear in newFieldConfig
+          formElements.push(formElement);
         }
-      );
+      });
 
-      // Return editable fields first, then non-editable fields
-      return [...editableFields, ...nonEditableFields];
+      // Return form elements in the exact order from newFieldConfig
+      return formElements;
     }
 
     // Fallback to fieldConfig approach
@@ -279,9 +284,12 @@ function Form4868ERSPageContent() {
     const displayFields =
       eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
-      return Object.entries(displayFields)
-        .filter(([_, fieldConfig]: [string, any]) => fieldConfig.editable)
-        .map(([fieldKey, _]) => fieldKey);
+      return newFieldConfig
+        .filter((fieldConfigItem: any) => {
+          const displayFieldConfig = displayFields[fieldConfigItem.key];
+          return displayFieldConfig && displayFieldConfig.editable;
+        })
+        .map((fieldConfigItem: any) => fieldConfigItem.key);
     }
 
     // Default fallback - return empty array if no structure found
@@ -298,9 +306,12 @@ function Form4868ERSPageContent() {
     const displayFields =
       eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
-      return Object.entries(displayFields)
-        .filter(([_, fieldConfig]: [string, any]) => !fieldConfig.editable)
-        .map(([fieldKey, _]) => fieldKey);
+      return newFieldConfig
+        .filter((fieldConfigItem: any) => {
+          const displayFieldConfig = displayFields[fieldConfigItem.key];
+          return displayFieldConfig && !displayFieldConfig.editable;
+        })
+        .map((fieldConfigItem: any) => fieldConfigItem.key);
     }
 
     return [];
