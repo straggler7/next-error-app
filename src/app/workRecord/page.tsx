@@ -808,6 +808,33 @@ function Form4868ERSPageContent() {
   const handleInputChange = (fieldKey: string, val: string) => {
     console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
 
+    // Convert primaryNameCtrl to uppercase automatically
+    if (fieldKey === 'primaryNameCtrl') {
+      val = val.toUpperCase();
+    }
+
+    // Convert meFReceiptDate from YYYYMMDD to YYYY-MM-DD format
+    if (fieldKey === 'meFReceiptDate') {
+      // Check if input is in YYYYMMDD format (8 digits, no dashes)
+      if (/^\d{8}$/.test(val)) {
+        const year = val.substring(0, 4);
+        const month = val.substring(4, 6);
+        const day = val.substring(6, 8);
+        val = `${year}-${month}-${day}`;
+      }
+    }
+
+    // Convert primarySSN from 9 digits to XXX-XX-XXXX format
+    if (fieldKey === 'primarySSN') {
+      // Check if input is 9 digits without dashes
+      if (/^\d{9}$/.test(val)) {
+        const area = val.substring(0, 3);
+        const group = val.substring(3, 5);
+        const serial = val.substring(5, 9);
+        val = `${area}-${group}-${serial}`;
+      }
+    }
+
     // Track that this field has been edited
     setFieldWithErrors((prev) => {
       if (!prev.includes(fieldKey)) {
