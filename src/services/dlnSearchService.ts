@@ -82,6 +82,17 @@ export class DLNSearchService {
         body: JSON.stringify(payload)
       });
 
+      // Handle 204 No Content - successful request with no data
+      if (response.status === 204) {
+        return {
+          records: [],
+          totalCount: 0,
+          currentPage: page,
+          pageSize: pageSize,
+          totalPages: 0
+        };
+      }
+
       if (!response.ok) {
         const errorText = await response.text();
         // throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
