@@ -824,15 +824,10 @@ function Form4868ERSPageContent() {
       }
     }
 
-    // Convert primarySSN from 9 digits to XXX-XX-XXXX format
+    // Convert primarySSN by removing dashes
     if (fieldKey === 'primarySSN') {
-      // Check if input is 9 digits without dashes
-      if (/^\d{9}$/.test(val)) {
-        const area = val.substring(0, 3);
-        const group = val.substring(3, 5);
-        const serial = val.substring(5, 9);
-        val = `${area}-${group}-${serial}`;
-      }
+      // Remove all dashes from SSN input
+      val = val.replace(/-/g, '');
     }
 
     // Track that this field has been edited

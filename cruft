@@ -2917,3 +2917,15 @@ Identical to 7744 report:
 | **Navigation** | Integrated in reports menu |
 
 The report 7745 is now fully functional and ready for use. It behaves exactly like the 7744 report but sends the correct report ID (7745) to the backend API.
+
+
+    // Convert primarySSN from 9 digits to XXX-XX-XXXX format
+    if (fieldKey === 'primarySSN') {
+      // Check if input is 9 digits without dashes
+      if (/^\d{9}$/.test(val)) {
+        const area = val.substring(0, 3);
+        const group = val.substring(3, 5);
+        const serial = val.substring(5, 9);
+        val = `${area}-${group}-${serial}`;
+      }
+    }
