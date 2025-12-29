@@ -14,7 +14,7 @@ import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinn
 import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
-import { useSeid } from '../../hooks/useSeid';
+import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
 
 function DailySummaryContent() {
@@ -22,12 +22,15 @@ function DailySummaryContent() {
   const searchParams = useSearchParams();
   const seid = searchParams.get('seid');
   const currentUserSeid = useSeid();
+  const isManager = useIsManager();
 
   const [filters, setFilters] = useState<FilterState>({
     searchAll: '',
     assignedTo: '',
     status: ''
   });
+
+  const [seidFilter, setSeidFilter] = useState<string>('');
 
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
@@ -56,40 +59,19 @@ function DailySummaryContent() {
       setLoading(true);
       setError(null);
 
-      // Get selection data from session storage (client-side only)
-      let parsedSelectionData: any = {};
-      if (typeof window !== 'undefined') {
-        const selectionData = sessionStorage.getItem('selectionData');
-        console.log('Daily Summary - Raw selectionData from sessionStorage:', selectionData);
-        parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
-        console.log('Daily Summary - Parsed selectionData:', parsedSelectionData);
-      }
-
-      const dailySummaryFilters: QRInventoryFilters = {
-        qrStatus: filters.status,
-        seid: parsedSelectionData.seid,
-        program: parsedSelectionData.program,
-        statusCode: parsedSelectionData.statusCode,
-        serviceCenter: parsedSelectionData.serviceCenter
-      };
-
       // Use the daily summary endpoint
       const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
-      // const response = await fetch('/api/v1/era/inventories/daily-summary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'SEID': parsedSelectionData.seid || 'u1000'
           'SEID': `${currentUserSeid}`
         },
         body: JSON.stringify({
-          // seid: parsedSelectionData.seid,
-          // programCode: parsedSelectionData.program,
-          // statusCode: parsedSelectionData.statusCode,
-          // serviceCenter: parsedSelectionData.serviceCenter
           pageNumber: pagination.currentPage,
           pageSize: pagination.pageSize,
-          statuses: ['RESOLVED', 'SUSPEND']
+          statuses: ['RESOLVED', 'SUSPEND'],
+          ...(isManager && { managerSearch: true }),
+          ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
         })
       });
 
@@ -118,6 +100,59 @@ function DailySummaryContent() {
       setLoading(false);
     }
   }, [filters.status, currentUserSeid, pagination.pageSize]);
+
+  // Separate function for Submit button that includes current seidFilter
+  const handleSubmitWithSeidFilter = useCallback(async () => {
+    // Prevent duplicate calls if already loading
+    if (loading) {
+      console.log('Daily Summary: Already loading, skipping duplicate call');
+      return;
+    }
+
+    try {
+      console.log('Daily Summary: Starting handleSubmitWithSeidFilter with SEID:', seidFilter);
+      setLoading(true);
+      setError(null);
+
+      console.log('SEID FILTER: ', seidFilter);
+      // Use the daily summary endpoint
+      const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': `${currentUserSeid}`
+        },
+        body: JSON.stringify({
+          pageNumber: pagination.currentPage,
+          pageSize: pagination.pageSize,
+          statuses: ['RESOLVED', 'SUSPEND'],
+          ...(isManager && { managerSearch: true }),
+          ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading daily summary records:", error);
+        setError(error.message);
+        throw new Error(error.message);
+      }
+
+      const data = await response.json();
+      
+      setRecords(data.records || data);
+      setPagination(prev => ({
+        ...prev,
+        totalRecords: data.totalCount || data.length,
+        totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
+      }));
+    } catch (err) {
+      console.error('Daily Summary: Error loading daily summary records:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUserSeid, pagination.currentPage, pagination.pageSize, seidFilter, isManager, loading]);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
@@ -384,6 +419,45 @@ function DailySummaryContent() {
 
           {/* Toolbar */}
           <div className="toolbar flex justify-between items-center gap-4 mb-6">
+            {/* Manager SEID Filter */}
+            {isManager && (
+              <div className="flex flex-wrap gap-4 mb-6 items-end">
+                <div className="w-48">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    SEID
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter SEID"
+                    value={seidFilter}
+                    onChange={(e) => setSeidFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      // Trigger reload with current SEID filter
+                      handleSubmitWithSeidFilter();
+                    }}
+                    disabled={loading}
+                    className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Loading...' : 'Submit'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSeidFilter('');
+                      // Trigger reload without SEID filter
+                      loadDailySummaryRecords();
+                    }}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Filter Bar */}
