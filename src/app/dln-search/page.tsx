@@ -640,7 +640,8 @@ function DLNSearchContent() {
                   </svg>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Records Found</h3>
                   <p className="text-sm text-gray-500 mb-4">
-                    {dlnQuery ? `No records found for DLN: ${dlnQuery}` : 'No records found matching your search criteria.'}
+                    {/* {dlnQuery ? `No records found for DLN: ${dlnQuery}` : 'No records found matching your search criteria.'} */}
+                    {'No records found matching your search criteria.'}
                   </p>
                   <button
                     onClick={loadDLNSearchRecords}
