@@ -97,6 +97,16 @@ async function handleRequest(
 
     console.log(`✅ API2 Backend responded with status: ${response.status}`);
 
+    // Handle 204 No Content - return empty response with status
+    if (response.status === 204) {
+      return new NextResponse(null, {
+        status: 204,
+        headers: {
+          'cache-control': response.headers.get('cache-control') || 'no-cache',
+        }
+      });
+    }
+
     // Handle different response types
     const contentType = response.headers.get('content-type') || '';
     
