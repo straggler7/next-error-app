@@ -97,7 +97,7 @@ export class DLNSearchService {
         const errorText = await response.text();
         // throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         const error = JSON.parse(errorText);
-        console.error("Error loading daily summary records:", error);
+        console.error("Error loading dln search records:", error);
         throw new Error(error.message);
       }
 

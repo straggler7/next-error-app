@@ -90,7 +90,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 0040 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -122,7 +125,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1340 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -154,7 +160,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 0540 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -191,8 +200,15 @@ export class ReportsService {
         }),
       });
 
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // }
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1740 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -224,7 +240,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 0340 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -256,7 +275,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 0341 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -288,7 +310,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading MERDAIL report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -320,7 +345,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading MERYRDT report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -349,7 +377,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1341 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -378,7 +409,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1342 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -407,7 +441,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 3141 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -436,7 +473,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1343 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -466,7 +506,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7740 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -495,7 +538,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7741 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -524,7 +570,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7746 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -553,7 +602,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7747 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -582,7 +634,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7742 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -611,7 +666,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7743 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -640,7 +698,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7744 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -669,7 +730,10 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 7745 report:", error);
+        throw new Error(error.message);
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -715,11 +779,14 @@ export class ReportsService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1747 report:", error);
+        throw new Error(error.message);
       }
 
-      const reportData = await response.json();
-      return reportData;
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error fetching 1747 report:', error);
       throw error;
