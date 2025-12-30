@@ -2929,3 +2929,34 @@ The report 7745 is now fully functional and ready for use. It behaves exactly li
         val = `${area}-${group}-${serial}`;
       }
     }
+
+          {/* Table */}
+          <div className="grid-container flex-1 min-h-0 overflow-auto">
+            {loading ? (
+
+
+diff --git a/src/app/dln-search/page.tsx b/src/app/dln-search/page.tsx
+index b629c9a..5791a3e 100644
+--- a/src/app/dln-search/page.tsx
++++ b/src/app/dln-search/page.tsx
+@@ -524,8 +524,8 @@ function DLNSearchContent() {
+         </div>
+       )}
+       
+-      <div className="main-container p-4 max-w-[1900px] mx-auto h-[calc(100vh-80px)]">
+-        <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
++      <div className="main-container p-4 max-w-[1900px] mx-auto">
++        <div className="center-panel bg-white rounded-lg shadow-sm p-6">
+           {/* Header */}
+           <div className="card-header flex justify-between items-center mb-2 pb-2 border-b-2 border-gray-100">
+             <div className="flex items-center gap-4">
+@@ -629,7 +629,7 @@ function DLNSearchContent() {
+           )}
+ 
+           {/* Table */}
+-          <div className="grid-container flex-1 min-h-0 overflow-auto">
++          <div className="grid-container">
+             {loading ? (
+               <TableLoadingState />
+             ) : filteredRecords.length === 0 ? (
+(END)              

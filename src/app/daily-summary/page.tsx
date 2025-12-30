@@ -385,7 +385,7 @@ function DailySummaryContent() {
         </div>
       )}
       
-      <div className="main-container p-4 max-w-[1900px] mx-auto h-[calc(100vh-80px)]">
+      <div className="main-container p-4 max-w-[1900px] mx-auto">
         <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
           {/* Header */}
           <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
@@ -486,7 +486,7 @@ function DailySummaryContent() {
           )}
 
           {/* Table */}
-          <div className="grid-container flex-1 min-h-0 overflow-auto">
+          <div className="grid-container">
             {loading ? (
               <TableLoadingState />
             ) : filteredRecords.length === 0 ? (
