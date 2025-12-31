@@ -54,7 +54,7 @@ async function handleRequest(
     const searchParams = request.nextUrl.searchParams.toString();
     const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
-    console.log(`🔄 API2 Proxying ${method} request to: ${fullUrl}`);
+    console.log(`API2 Proxying ${method} request to: ${fullUrl}`);
 
     // Prepare headers - forward important ones and exclude problematic ones
     const forwardHeaders = new Headers();
@@ -95,7 +95,7 @@ async function handleRequest(
       signal: AbortSignal.timeout(30000) // 30 second timeout
     });
 
-    console.log(`✅ API2 Backend responded with status: ${response.status}`);
+    console.log(`API2 Backend responded with status: ${response.status}`);
 
     // Handle 204 No Content - return empty response with status
     if (response.status === 204) {
@@ -141,7 +141,7 @@ async function handleRequest(
     }
 
   } catch (error) {
-    console.error('❌ API2 Proxy error:', error);
+    console.error('API2 Proxy error:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(
