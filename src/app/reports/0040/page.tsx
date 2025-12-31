@@ -25,7 +25,7 @@ export default function Report0040Page() {
     } finally {
       setLoading(false);
     }
-  }, [currentUserSeid, error]);
+  }, [currentUserSeid]);
 
   useEffect(() => {
     // Initial load with default payload (no filters)

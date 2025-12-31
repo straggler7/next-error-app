@@ -374,7 +374,7 @@ export default function BaseReport({
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(error || null);
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 25,
@@ -792,7 +792,7 @@ export default function BaseReport({
           </div>
 
           {/* Error Alert */}
-          {(error || localError) && (
+          {(localError) && (
             <ErrorAlert 
               message={error || localError || ''} 
               onClose={() => {
