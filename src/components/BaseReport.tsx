@@ -374,6 +374,7 @@ export default function BaseReport({
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 25,
@@ -791,7 +792,17 @@ export default function BaseReport({
           </div>
 
           {/* Error Alert */}
-          {error && <ErrorAlert message={error} />}
+          {(error || localError) && (
+            <ErrorAlert 
+              message={error || localError || ''} 
+              onClose={() => {
+                if (localError) {
+                  setLocalError(null);
+                }
+                // Note: Cannot clear prop error from parent component
+              }} 
+            />
+          )}
 
           {/* Table */}
           <div className="grid-container flex-1 min-h-0 overflow-auto">
