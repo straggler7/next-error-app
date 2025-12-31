@@ -374,7 +374,7 @@ export default function BaseReport({
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
-  const [localError, setLocalError] = useState<string | null>(error || null);
+  const [dismissedError, setDismissedError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 25,
@@ -792,13 +792,11 @@ export default function BaseReport({
           </div>
 
           {/* Error Alert */}
-          {(localError) && (
+          {(error && error !== dismissedError) && (
             <ErrorAlert 
-              message={error || localError || ''} 
+              message={error || ''} 
               onClose={() => {
-                if (localError) {
-                  setLocalError(null);
-                }
+                  setDismissedError(error);
                 // Note: Cannot clear prop error from parent component
               }} 
             />
