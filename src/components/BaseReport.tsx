@@ -374,7 +374,7 @@ export default function BaseReport({
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
-  const [dismissedError, setDismissedError] = useState<string | null>(null);
+  const [dismissedError, setDismissedError] = useState<boolean>(false);
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 25,
@@ -529,6 +529,7 @@ export default function BaseReport({
   };
 
   const handleSubmit = () => {
+    setDismissedError(null);
     // Validate end date if it's provided for report 0540
     if (reportType === '0540' && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
       alert('End date must be on or after the start date.');
@@ -792,11 +793,11 @@ export default function BaseReport({
           </div>
 
           {/* Error Alert */}
-          {(error && error !== dismissedError) && (
+          {(error && !dismissedError) && (
             <ErrorAlert 
               message={error || ''} 
               onClose={() => {
-                  setDismissedError(error);
+                  setDismissedError(true);
                 // Note: Cannot clear prop error from parent component
               }} 
             />
