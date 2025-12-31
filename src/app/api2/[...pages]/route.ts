@@ -145,13 +145,15 @@ async function handleRequest(
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(
-        { error: 'Backend request timeout' },
+        // { error: 'Backend request timeout' },
+        { error: 'Backend request timeout', message: error instanceof Error ? error.message : 'Request Timeout' },
         { status: 504 }
       );
     }
     
     return NextResponse.json(
-      { error: 'Backend service unavailable', details: error instanceof Error ? error.message : 'Unknown error' },
+      // { error: 'Backend service unavailable', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Backend service unavailable', message: error instanceof Error ? error.message : 'Service Unavailable' },
       { status: 502 }
     );
   }
