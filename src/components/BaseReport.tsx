@@ -11,12 +11,14 @@ import { PaginationState } from '../types';
 import LoadingSpinner, { TableLoadingState } from './LoadingSpinner';
 import TanStackInventoryTable from './TanStackInventoryTable';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
+import ErrorAlert from './ErrorAlert';
 
 interface BaseReportProps {
   title: string;
   reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '1343' | '1740' | '3141' | '7740' | '7741' | '7742' | '7743' | '7744' | '7745' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
+  error?: string | null;
   onRefresh: (payload: ReportPayload) => void;
   onExport?: (payload: ReportPayload, columns: ColumnConfig[]) => void;
 }
@@ -352,7 +354,8 @@ export default function BaseReport({
   title, 
   reportType, 
   data, 
-  loading, 
+  loading,
+  error,
   onRefresh, 
   onExport 
 }: BaseReportProps) {
@@ -786,6 +789,9 @@ export default function BaseReport({
               </button>
             </div>
           </div>
+
+          {/* Error Alert */}
+          {error && <ErrorAlert message={error} />}
 
           {/* Table */}
           <div className="grid-container flex-1 min-h-0 overflow-auto">
