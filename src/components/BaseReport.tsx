@@ -350,6 +350,14 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 
 const columnHelper = createColumnHelper<ReportRecord>();
 
+// Reports that support end date functionality
+const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1342', '7742', '7743', '7744', '7745', '7746', '7747'] as const;
+
+// Helper function to check if a report supports end date
+const supportsEndDate = (reportType: string): boolean => {
+  return REPORTS_WITH_END_DATE.includes(reportType as any);
+};
+
 export default function BaseReport({ 
   title, 
   reportType, 
@@ -493,7 +501,7 @@ export default function BaseReport({
       };
 
       // Add end date for reports that support it
-      if ((reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && selectedEndDate) {
+      if (supportsEndDate(reportType) && selectedEndDate) {
         payload.endDateStr = selectedEndDate;
       }
 
@@ -531,7 +539,7 @@ export default function BaseReport({
   const handleSubmit = () => {
     setDismissedError(false);
     // Validate end date if it's provided for reports that support it
-    if ((reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
+    if (supportsEndDate(reportType) && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
       alert('End date must be on or after the start date.');
       return;
     }
@@ -544,7 +552,7 @@ export default function BaseReport({
     };
 
     // Add end date for reports that support it
-    if ((reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && selectedEndDate) {
+    if (supportsEndDate(reportType) && selectedEndDate) {
       payload.endDateStr = selectedEndDate;
     }
 
@@ -697,7 +705,7 @@ export default function BaseReport({
           </div>
 
           {/* End Date Picker - For reports that support it */}
-          {(reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && (
+          {supportsEndDate(reportType) && (
             <div className="w-48">
               <DatePicker
                 value={selectedEndDate}
