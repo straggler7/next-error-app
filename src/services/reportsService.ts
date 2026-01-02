@@ -89,12 +89,19 @@ export class ReportsService {
         }),
       });
 
+
       if (!response.ok) {
-        const errorText = await response.text();
-        const error = JSON.parse(errorText);
-        console.error("Error loading 0040 report:", error);
-        throw new Error(error.message);
-      }
+        const errorData = await response.json();
+        console.error("Error loading 0040 report:", errorData);
+        throw new Error(errorData.message);
+      }      
+
+      // if (!response.ok) {
+      //   const errorText = await response.text();
+      //   const error = JSON.parse(errorText);
+      //   console.error("Error loading 0040 report:", error);
+      //   throw new Error(error.message);
+      // }
 
       const reportData: ReportRecord[] = await response.json();
       return reportData;
@@ -199,10 +206,6 @@ export class ReportsService {
           ...payload,
         }),
       });
-
-      // if (!response.ok) {
-      //   throw new Error(`HTTP error! status: ${response.status}`);
-      // }
 
       if (!response.ok) {
         const errorText = await response.text();

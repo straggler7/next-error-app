@@ -7,6 +7,7 @@ import { useSeid } from '../../../hooks/useSeid';
 
 export default function Report0340Page() {
   const [data, setData] = useState<ReportRecord[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const currentUserSeid = useSeid();
 
@@ -19,6 +20,7 @@ export default function Report0340Page() {
       setData(reportData);
     } catch (error) {
       console.error('Error fetching 0340 report:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch 0340 report');
       setData([]);
     } finally {
       setLoading(false);
@@ -66,6 +68,7 @@ export default function Report0340Page() {
       loading={loading}
       onRefresh={fetchReportData}
       onExport={handleExport}
+      error={error}
     />
   );
 }

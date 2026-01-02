@@ -792,17 +792,6 @@ export default function BaseReport({
             </div>
           </div>
 
-          {/* Error Alert */}
-          {/* {(error && !dismissedError) && (
-            <ErrorAlert 
-              message={error || ''} 
-              onClose={() => {
-                  setDismissedError(true);
-                // Note: Cannot clear prop error from parent component
-              }} 
-            />
-          )} */}
-
           {/* Table */}
           <div className="grid-container flex-1 min-h-0 overflow-auto">
             {loading ? (

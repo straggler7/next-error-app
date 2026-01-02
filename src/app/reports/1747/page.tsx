@@ -39,6 +39,7 @@ interface Report1747Data {
 
 export default function Report1747Page() {
   const [data, setData] = useState<Report1747Data | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     // Default to yesterday's date
@@ -94,6 +95,7 @@ export default function Report1747Page() {
       setData(validatedData);
     } catch (error) {
       console.error('Error fetching 1747 report:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch 1747 report');
       setData(null);
     } finally {
       setLoading(false);

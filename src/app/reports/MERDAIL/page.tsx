@@ -7,6 +7,7 @@ import { useSeid } from '../../../hooks/useSeid';
 
 export default function ReportMERDAILPage() {
   const [data, setData] = useState<ReportRecord[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const currentUserSeid = useSeid();
 
@@ -19,6 +20,7 @@ export default function ReportMERDAILPage() {
       setData(reportData);
     } catch (error) {
       console.error('Error fetching MERDAIL report:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch MERDAIL report');
       setData([]);
     } finally {
       setLoading(false);
@@ -67,6 +69,7 @@ export default function ReportMERDAILPage() {
       loading={loading}
       onRefresh={fetchReportData}
       onExport={handleExport}
+      error={error}
     />
   );
 }

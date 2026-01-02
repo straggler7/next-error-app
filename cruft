@@ -2961,9 +2961,27 @@ index b629c9a..5791a3e 100644
              ) : filteredRecords.length === 0 ? (
 (END)              
 
-
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error loading 0040 report:", errorData);
         throw new Error(errorData.message);
       }      
+
+      // if (!response.ok) {
+      //   const errorText = await response.text();
+      //   const error = JSON.parse(errorText);
+      //   console.error("Error loading 0040 report:", error);
+      //   throw new Error(error.message);
+      // }
+
+          {/* Error Alert */}
+          {/* {(error && !dismissedError) && (
+            <ErrorAlert 
+              message={error || ''} 
+              onClose={() => {
+                  setDismissedError(true);
+                // Note: Cannot clear prop error from parent component
+              }} 
+            />
+          )} */}
+

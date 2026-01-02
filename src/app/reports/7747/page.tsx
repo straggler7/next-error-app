@@ -7,6 +7,7 @@ import { useSeid } from '../../../hooks/useSeid';
 
 export default function Report7747() {
   const [data, setData] = useState<ReportRecord[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const seid = useSeid();
 
@@ -19,6 +20,7 @@ export default function Report7747() {
       setData(reportData);
     } catch (error) {
       console.error('Error fetching 7747 report:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch 7747 report');
       setData([]);
     } finally {
       setLoading(false);
@@ -65,6 +67,7 @@ export default function Report7747() {
       loading={loading}
       onRefresh={handleRefresh}
       onExport={handleExport}
+      error={error}
     />
   );
 }
