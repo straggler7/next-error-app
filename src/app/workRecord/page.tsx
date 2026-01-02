@@ -2131,7 +2131,13 @@ function Form4868ERSPageContent() {
             <h1 className="text-xl font-bold text-gray-800 mb-2">
               No Work Records Available
             </h1>
-            <p className="text-gray-600">{noWorkMessage}</p>
+            <p className="text-gray-600 mb-4">{noWorkMessage}</p>
+            <button
+              onClick={() => router.push('/home')}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              Go to Home
+            </button>
           </div>
         </div>
       </div>
