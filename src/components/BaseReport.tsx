@@ -492,8 +492,8 @@ export default function BaseReport({
         startDateStr: selectedDate,
       };
 
-      // Add end date for report 0540 if provided
-      if (reportType === '0540' && selectedEndDate) {
+      // Add end date for reports that support it
+      if ((reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && selectedEndDate) {
         payload.endDateStr = selectedEndDate;
       }
 
@@ -530,8 +530,8 @@ export default function BaseReport({
 
   const handleSubmit = () => {
     setDismissedError(false);
-    // Validate end date if it's provided for report 0540
-    if (reportType === '0540' && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
+    // Validate end date if it's provided for reports that support it
+    if ((reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
       alert('End date must be on or after the start date.');
       return;
     }
@@ -543,8 +543,8 @@ export default function BaseReport({
       startDateStr: selectedDate,
     };
 
-    // Add end date for report 0540 if provided
-    if (reportType === '0540' && selectedEndDate) {
+    // Add end date for reports that support it
+    if ((reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && selectedEndDate) {
       payload.endDateStr = selectedEndDate;
     }
 
@@ -696,8 +696,8 @@ export default function BaseReport({
             />
           </div>
 
-          {/* End Date Picker - Only for report 0540 */}
-          {reportType === '0540' && (
+          {/* End Date Picker - For reports that support it */}
+          {(reportType === '0540' || reportType === '0340' || reportType === 'MERDAIL' || reportType === '1342' || reportType === '7742' || reportType === '7743' || reportType === '7744' || reportType === '7745' || reportType === '7746' || reportType === '7747') && (
             <div className="w-48">
               <DatePicker
                 value={selectedEndDate}
