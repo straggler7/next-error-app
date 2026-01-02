@@ -699,8 +699,8 @@ export default function BaseReport({
             <DatePicker
               value={selectedDate}
               onChange={setSelectedDate}
-              label="Start Date"
-              placeholder="Select start date..."
+              label={supportsEndDate(reportType) ? "Start Date" : "Status On"}
+              placeholder={supportsEndDate(reportType) ? "Select start date..." : "Select status date..."}
             />
           </div>
 
