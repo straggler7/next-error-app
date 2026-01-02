@@ -529,7 +529,7 @@ export default function BaseReport({
   };
 
   const handleSubmit = () => {
-    setDismissedError(null);
+    setDismissedError(false);
     // Validate end date if it's provided for report 0540
     if (reportType === '0540' && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
       alert('End date must be on or after the start date.');
@@ -793,7 +793,7 @@ export default function BaseReport({
           </div>
 
           {/* Error Alert */}
-          {(error && !dismissedError) && (
+          {/* {(error && !dismissedError) && (
             <ErrorAlert 
               message={error || ''} 
               onClose={() => {
@@ -801,13 +801,24 @@ export default function BaseReport({
                 // Note: Cannot clear prop error from parent component
               }} 
             />
-          )}
+          )} */}
 
           {/* Table */}
           <div className="grid-container flex-1 min-h-0 overflow-auto">
             {loading ? (
               <TableLoadingState />
             ) : filteredData.length === 0 ? (
+              <>
+                {(error && !dismissedError) && (
+                  <ErrorAlert 
+                    message={error || ''} 
+                    onClose={() => {
+                        setDismissedError(true);
+                      // Note: Cannot clear prop error from parent component
+                    }} 
+                  />
+                )}
+
               <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                 <div className="text-center">
                   <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -825,6 +836,8 @@ export default function BaseReport({
                   </button>
                 </div>
               </div>
+              </>
+
             ) : (
               <TanStackInventoryTable<ReportRecord>
                 records={paginatedData}

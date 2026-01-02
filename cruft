@@ -2960,3 +2960,10 @@ index b629c9a..5791a3e 100644
                <TableLoadingState />
              ) : filteredRecords.length === 0 ? (
 (END)              
+
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error loading 0040 report:", errorData);
+        throw new Error(errorData.message);
+      }      
