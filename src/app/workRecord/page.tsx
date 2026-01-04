@@ -716,15 +716,23 @@ function Form4868ERSPageContent() {
       const selectionData = JSON.parse(storedSelectionData);
       console.log("Selection data:", selectionData);
 
+      // Build headers for auto-assign request
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        SERVICE_CENTER: selectionData.serviceCenter.toUpperCase(),
+        PROGRAM_CODE: selectionData.program,
+        SEID: `${currentUserSeid}`,
+      };
+
+      // Add SUSPEND_STATUS_CODE if statusCode is present
+      if (selectionData.statusCode) {
+        headers['SUSPEND_STATUS_CODE'] = selectionData.statusCode;
+      }
+
       // Make GET request to auto-assign endpoint
       const response = await fetch("/api/v1/era/inventories/auto-assign", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          SERVICE_CENTER: selectionData.serviceCenter.toUpperCase(),
-          PROGRAM_CODE: selectionData.program || selectionData.statusCode,
-          SEID: `${currentUserSeid}`,
-        },
+        headers,
       });
 
       if (response.ok) {
@@ -2250,7 +2258,7 @@ function Form4868ERSPageContent() {
                 </span>
                 {landingSelectionData.statusCode && (
                   <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                    Status: {landingSelectionData.statusCode}
+                    Status Code: {landingSelectionData.statusCode}
                   </span>
                 )}
               </>
