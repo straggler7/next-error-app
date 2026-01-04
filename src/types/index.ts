@@ -123,5 +123,35 @@ export type InvetoryItem = {
   [key: string]: any;
 }
 
+export interface InventoryRecord {
+  inventoryId: number;
+  processId: number;
+  createdTime: string;
+  taxPeriod: string;
+  statusEventId: number;
+  status: string;
+  updatedDate: string;
+  payloadId: number;
+  seid: string;
+  submissionTins: string;
+  submissionErrorCodes: string | null;
+  submissionNames: string;
+  ageFromDate: string | null;
+  daysAged: number;
+  suspendedExpirationDate: string | null;
+  suspendedStatusCode: string | null;
+  clearCodes: string | null;
+  dln: string;
+  formType: string;
+  controlDay: string;
+  serviceCenterId: number;
+  // Computed fields for display
+  serviceCenter?: string;
+  returnType?: string;
+  errors?: string[];
+  assignedTo?: string;
+  qrStatus?: 'pending' | 'approved' | 'rejected' | 'rework';
+}
+
 export type StatusBadgeVariant = 'new' | 'assigned' | 'qr-review' | 'suspended';
 export type PriorityLevel = 'high' | 'medium' | 'low';

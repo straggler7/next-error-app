@@ -13,7 +13,8 @@ import Pagination from '../../components/Pagination';
 import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
-import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
+// import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
+import { InventoryRecord } from '../../types';
 import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
 
@@ -39,7 +40,8 @@ function DailySummaryContent() {
     totalPages: 0
   });
 
-  const [records, setRecords] = useState<QRInventoryRecord[]>([]);
+  // const [records, setRecords] = useState<QRInventoryRecord[]>([]);
+  const [records, setRecords] = useState<InventoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasInitiallyLoaded = useRef(false);
@@ -93,9 +95,9 @@ function DailySummaryContent() {
         totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
       }));
     } catch (err) {
-      // setError('Failed to load daily summary records.');
+      // Clear records on error
+      setRecords([]);
       console.error('Daily Summary: Error loading daily summary records:', err);
-      // console.error(err instanceof Error ? err.message : 'Failed to load daily summary records');
     } finally {
       setLoading(false);
     }
@@ -148,6 +150,8 @@ function DailySummaryContent() {
         totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
       }));
     } catch (err) {
+      // Clear records on error
+      setRecords([]);
       console.error('Daily Summary: Error loading daily summary records:', err);
     } finally {
       setLoading(false);
@@ -174,10 +178,10 @@ function DailySummaryContent() {
   const filteredRecords = records;
 
   // Handle filter changes
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
+  // const handleFilterChange = (newFilters: FilterState) => {
+  //   setFilters(newFilters);
+  //   setPagination(prev => ({ ...prev, currentPage: 1 }));
+  // };
 
   // Handle pagination changes
   const handlePaginationChange = (newPagination: PaginationState) => {
@@ -185,7 +189,7 @@ function DailySummaryContent() {
   };
 
   // Handle reopen functionality - similar to QR Details page
-  const handleReopen = useCallback(async (record: QRInventoryRecord) => {
+  const handleReopen = useCallback(async (record: InventoryRecord) => {
     const inventoryId = record.inventoryId;
     
     if (!inventoryId) {
@@ -238,10 +242,10 @@ function DailySummaryContent() {
     }
   }, [currentUserSeid, router, setFlashMessage, setShowFlash]);
 
-  const columnHelper = createColumnHelper<QRInventoryRecord>();
+  const columnHelper = createColumnHelper<InventoryRecord>();
 
   // Daily summary columns - same as QR inventory plus Reopen button
-  const dailySummaryColumns = useMemo<ColumnDef<QRInventoryRecord, any>[]>(() => [
+  const dailySummaryColumns = useMemo<ColumnDef<InventoryRecord, any>[]>(() => [
     columnHelper.accessor('dln', {
       header: 'DLN',
       cell: ({ getValue }) => (
@@ -356,19 +360,19 @@ function DailySummaryContent() {
   ], [columnHelper, handleReopen, currentUserSeid]);
 
   // Handle row click to navigate to QR details (optional, keeping same behavior as QR inventory)
-  const handleRowClick = (record: QRInventoryRecord) => {
-    const serviceCenter = getServiceCenterName(record.serviceCenterId);
+  // const handleRowClick = (record: InventoryRecord) => {
+  //   const serviceCenter = getServiceCenterName(record.serviceCenterId);
     
-    // Store the full record in sessionStorage for access on QR Details page (client-side only)
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('selectedQRRecord', JSON.stringify({
-        ...record,
-        serviceCenter // Add the mapped service center name
-      }));
-    }
+  //   // Store the full record in sessionStorage for access on QR Details page (client-side only)
+  //   if (typeof window !== 'undefined') {
+  //     sessionStorage.setItem('selectedQRRecord', JSON.stringify({
+  //       ...record,
+  //       serviceCenter // Add the mapped service center name
+  //     }));
+  //   }
     
-    router.push(`/qrDetails?inventoryId=${record.inventoryId}&dln=${record.dln}&serviceCenter=${encodeURIComponent(serviceCenter)}&seid=${record.seid}`);
-  };
+  //   router.push(`/qrDetails?inventoryId=${record.inventoryId}&dln=${record.dln}&serviceCenter=${encodeURIComponent(serviceCenter)}&seid=${record.seid}`);
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -508,7 +512,7 @@ function DailySummaryContent() {
                 </div>
               </div>
             ) : (
-              <TanStackInventoryTable<QRInventoryRecord>
+              <TanStackInventoryTable<InventoryRecord>
                 records={filteredRecords}
                 selectedRecords={[]}
                 onSelectionChange={() => {}}
