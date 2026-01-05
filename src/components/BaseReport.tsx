@@ -378,7 +378,18 @@ export default function BaseReport({
     const year = yesterday.getFullYear();
     return `${month}/${day}/${year}`;
   });
-  const [selectedEndDate, setSelectedEndDate] = useState<string>('');
+  const [selectedEndDate, setSelectedEndDate] = useState<string>(() => {
+    // For reports that support end date, default to same date as start date (yesterday)
+    if (REPORTS_WITH_END_DATE.includes(reportType as any)) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
+      const day = yesterday.getDate().toString().padStart(2, '0');
+      const year = yesterday.getFullYear();
+      return `${month}/${day}/${year}`;
+    }
+    return '';
+  });
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
@@ -710,7 +721,8 @@ export default function BaseReport({
               <DatePicker
                 value={selectedEndDate}
                 onChange={setSelectedEndDate}
-                label="End Date (Optional)"
+                // label={reportType === '0340' || reportType === 'MERDAIL' ? "End Date" : "End Date (Optional)"}
+                label="End Date"
                 placeholder="Select end date..."
               />
               {selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate) && (

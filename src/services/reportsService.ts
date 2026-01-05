@@ -67,6 +67,17 @@ export interface ReportPayload {
 }
 
 /**
+ * Helper function to get today's date in MM/DD/YYYY format
+ */
+function getTodayDateString(): string {
+  const today = new Date();
+  const month = (today.getMonth() + 1).toString().padStart(2, '0');
+  const day = today.getDate().toString().padStart(2, '0');
+  const year = today.getFullYear();
+  return `${month}/${day}/${year}`;
+}
+
+/**
  * Service for fetching report data from the backend API
  */
 export class ReportsService {
@@ -157,16 +168,20 @@ export class ReportsService {
    */
   static async get0540Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 0540 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+        // status: 'DELETED' // Always include DELETED status for 0540
+      };
+
       const response = await fetch('/api2/v1/era/reports/get-reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify({
-          ...payload,
-          // status: 'DELETED' // Always include DELETED status for 0540
-        }),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -243,16 +258,20 @@ export class ReportsService {
    */
   static async get0340Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 0340 report, endDateStr is required - use startDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        programCode: '44730',
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify({
-          ...payload,
-          programCode: '44730',
-        }),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -323,16 +342,20 @@ export class ReportsService {
    */
   static async getMERDAILReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For MERDAIL report, endDateStr is required - use startDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        programCode: '44720',
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify({
-          ...payload,
-          programCode: '44720',
-        }),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -440,13 +463,19 @@ export class ReportsService {
    */
   static async get1342Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 1342 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/get-reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload), // No status for 1342
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -626,13 +655,19 @@ export class ReportsService {
    */
   static async get7746Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 7746 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -663,13 +698,19 @@ export class ReportsService {
    */
   static async get7747Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 7747 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -700,13 +741,19 @@ export class ReportsService {
    */
   static async get7742Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 7742 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -737,13 +784,19 @@ export class ReportsService {
    */
   static async get7743Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 7743 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -774,13 +827,19 @@ export class ReportsService {
    */
   static async get7744Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 7744 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {
@@ -811,13 +870,19 @@ export class ReportsService {
    */
   static async get7745Report(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
     try {
+      // For 7745 report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
       const response = await fetch('/api2/v1/era/reports/assignments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'SEID': seid,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(enhancedPayload),
       });
 
       if (!response.ok) {

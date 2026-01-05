@@ -40,6 +40,7 @@ export default function ReportMERDAILPage() {
       pageSize: 20,
       reportId: 'MERDAIL',
       startDateStr: `${month}/${day}/${year}`,
+      endDateStr: `${month}/${day}/${year}`,
       // No filters on initial load - user must submit to apply filters
     };
     

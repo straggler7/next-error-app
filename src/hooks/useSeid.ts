@@ -22,7 +22,7 @@ export function useSeid(): string | null {
  * Custom hook to get the current user's group
  * Useful for role-based access control
  */
-export function useUserGroup(): 'tax_examiners' | 'managers' | null {
+export function useUserGroup(): 'tax_examiners' | 'managers' | 'analysts' | null {
   const { user } = useAuth();
   return user?.group || null;
 }

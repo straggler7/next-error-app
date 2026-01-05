@@ -40,6 +40,7 @@ export default function Report1342Page() {
       pageSize: 20,
       reportId: '1342',
       startDateStr: `${month}/${day}/${year}`,
+      endDateStr: `${month}/${day}/${year}`,
     };
     
     fetchReportData(defaultPayload);
