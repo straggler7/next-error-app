@@ -86,6 +86,17 @@ function DailySummaryContent() {
         // throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        setRecords([]);
+        setPagination(prev => ({
+          ...prev,
+          totalRecords: 0,
+          totalPages: 0
+        }));
+        return;
+      }
+
       const data = await response.json();
       
       setRecords(data.records || data);
@@ -139,6 +150,17 @@ function DailySummaryContent() {
         console.error("Error loading daily summary records:", error);
         setError(error.message);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        setRecords([]);
+        setPagination(prev => ({
+          ...prev,
+          totalRecords: 0,
+          totalPages: 0
+        }));
+        return;
       }
 
       const data = await response.json();
