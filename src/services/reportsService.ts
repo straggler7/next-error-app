@@ -96,12 +96,10 @@ export class ReportsService {
         throw new Error(errorData.message);
       }      
 
-      // if (!response.ok) {
-      //   const errorText = await response.text();
-      //   const error = JSON.parse(errorText);
-      //   console.error("Error loading 0040 report:", error);
-      //   throw new Error(error.message);
-      // }
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
 
       const reportData: ReportRecord[] = await response.json();
       return reportData;
@@ -138,6 +136,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -171,6 +174,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 0540 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -214,6 +222,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -247,6 +260,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 0340 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -284,6 +302,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -317,6 +340,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading MERDAIL report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -354,6 +382,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -384,6 +417,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 1341 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -418,6 +456,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -450,6 +493,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -480,6 +528,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 1343 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -515,6 +568,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -545,6 +603,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 7741 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -579,6 +642,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -609,6 +677,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 7747 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -643,6 +716,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -673,6 +751,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 7743 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -707,6 +790,11 @@ export class ReportsService {
         throw new Error(error.message);
       }
 
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
       const reportData: ReportRecord[] = await response.json();
       return reportData;
     } catch (error) {
@@ -737,6 +825,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 7745 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
       }
 
       const reportData: ReportRecord[] = await response.json();
@@ -786,6 +879,11 @@ export class ReportsService {
         const error = JSON.parse(errorText);
         console.error("Error loading 1747 report:", error);
         throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return {};
       }
 
       const data = await response.json();
