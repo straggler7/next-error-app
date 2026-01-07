@@ -40,6 +40,7 @@ interface FormFieldProps {
   currentValue?: string;
   showChangeIndicator?: boolean;
   isHighlighted?: boolean;
+  htmlFor?: string;
 }
 
 export function FormField({ 
@@ -52,13 +53,14 @@ export function FormField({
   originalValue,
   currentValue,
   showChangeIndicator = false,
-  isHighlighted = false
+  isHighlighted = false,
+  htmlFor
 }: FormFieldProps) {
   const hasChanged = showChangeIndicator && originalValue && currentValue && originalValue !== currentValue;
   
   return (
     <div className={`mb-2 ${className} ${isHighlighted ? 'ring-1 ring-red-200 ring-opacity-50 rounded-md p-2 bg-red-50' : ''}`}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
+      <label htmlFor={htmlFor} className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
         {label}
         {required && <span className="text-red-600 ml-1">*</span>}
       </label>

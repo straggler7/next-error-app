@@ -2283,9 +2283,18 @@ function Form4868ERSPageContent() {
                 className={`error-badge cursor-pointer transition-all duration-200 px-3.5 py-2 rounded-2xl text-sm font-medium flex items-center gap-2 ${
                   selectedErrorId === error.id
                     ? "bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5"
-                    : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md"
+                    : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 }`}
                 onClick={() => handleErrorClick(error)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleErrorClick(error);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Error ${error.code}: ${error.description}. Click to ${selectedErrorId === error.id ? 'deselect' : 'select'} this error.`}
               >
                 <svg
                   width="14"
@@ -2317,8 +2326,9 @@ function Form4868ERSPageContent() {
                 <div className="space-y-8 px-1">
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-2">
-                      <FormField label="Clear Codes" required={false}>
+                      <FormField label="Clear Codes" required={false} htmlFor="clearCodesInput">
                         <FormInput
+                          id="clearCodesInput"
                           value={clearCodesInput}
                           onChange={(value) => {
                             // Only allow 'C' or 'c' characters
@@ -2347,6 +2357,7 @@ function Form4868ERSPageContent() {
                         <FormField
                           key={key}
                           label={getFormElementLabel(key)}
+                          htmlFor={key}
                           originalValue={getOriginalValue(key)}
                           currentValue={getFormElementValue(key)}
                           showChangeIndicator={true}
@@ -2374,13 +2385,13 @@ function Form4868ERSPageContent() {
                             <FormField
                               key={key}
                               label={getFormElementLabel(key)}
+                              htmlFor={key}
                               error={getValidationError(key)}
                             >
                               <FormInput
                                 id={key}
                                 value={getFormElementValue(key)}
                                 disabled={true}
-                                placeholder="N/A"
                                 error={getFieldHasError(key)}
                               />
                             </FormField>
@@ -2393,8 +2404,9 @@ function Form4868ERSPageContent() {
               </FormSection>
               <FormSection title="">
                 <div>
-                  <FormField label="Action Code" required>
+                  <FormField label="Action Code" required htmlFor="actionCodeSelect">
                     <select
+                      id="actionCodeSelect"
                       value={actionCode}
                       onChange={(e) => {
                         const value = e.target.value;
