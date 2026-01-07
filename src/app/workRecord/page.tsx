@@ -1184,6 +1184,20 @@ function Form4868ERSPageContent() {
     }
   }, [showInfo]);
 
+  // Helper function to get current time in Eastern timezone
+  const getEasternTimestamp = () => {
+    return new Date().toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
+    });
+  };
+
   // Helper function to generate notes with field changes
   const generateNotesWithChanges = () => {
     const fieldChanges: any[] = [];
@@ -1240,7 +1254,7 @@ function Form4868ERSPageContent() {
 
       const newNote = {
         author: noteSeid,
-        createdTime: new Date().toISOString(),
+        createdTime: getEasternTimestamp(),
         comments: JSON.stringify(commentsObj),
       };
 
