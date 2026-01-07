@@ -2444,7 +2444,7 @@ function Form4868ERSPageContent() {
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                   submitting || hasAnyFieldErrors()
-                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                     : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
                 onClick={() => {
@@ -2461,7 +2461,7 @@ function Form4868ERSPageContent() {
                   !actionCode.trim() ||
                   suspending ||
                   Object.keys(validationErrors).length > 0
-                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                     : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
                 onClick={() => {
@@ -2482,7 +2482,7 @@ function Form4868ERSPageContent() {
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                   closingOut
-                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                     : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
                 onClick={() => {
@@ -2499,7 +2499,7 @@ function Form4868ERSPageContent() {
                   type="button"
                   className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                     deleting
-                      ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                      ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                       : "bg-orange-600 text-white hover:bg-orange-700 hover:-translate-y-0.5"
                   }`}
                   onClick={() => {

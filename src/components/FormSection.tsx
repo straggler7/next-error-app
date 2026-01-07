@@ -120,11 +120,11 @@ export function FormInput({
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
       className={`
-        w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 text-gray-700
-        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
+        w-full px-4 py-3 border rounded-md text-sm transition-all duration-150
+        ${disabled ? 'bg-gray-200 text-gray-600 border-gray-400 cursor-not-allowed opacity-90' : 'bg-white text-gray-700'}
         ${error 
           ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
-          : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
+          : disabled ? 'border-gray-400' : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
         }
         focus:outline-none ${className}
       `}
