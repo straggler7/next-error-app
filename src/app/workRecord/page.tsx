@@ -1184,18 +1184,19 @@ function Form4868ERSPageContent() {
     }
   }, [showInfo]);
 
-  // Helper function to get current time in Eastern timezone
+  // Helper function to get current time in Eastern timezone as ISO string
   const getEasternTimestamp = () => {
-    return new Date().toLocaleString("en-US", {
-      timeZone: "America/New_York",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true
-    });
+    const now = new Date();
+    // Get the timezone offset for Eastern time
+    const easternTime = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    const utcTime = new Date(now.toLocaleString("en-US", { timeZone: "UTC" }));
+    const offset = easternTime.getTime() - utcTime.getTime();
+    
+    // Create a new date adjusted for Eastern timezone
+    const easternDate = new Date(now.getTime() + offset);
+    
+    // Return as ISO string but representing Eastern time
+    return easternDate.toISOString();
   };
 
   // Helper function to generate notes with field changes
