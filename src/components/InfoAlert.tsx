@@ -60,6 +60,7 @@ const InfoAlert = forwardRef<HTMLDivElement, InfoAlertProps>(({
             <button
               onClick={onClose}
               className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close alert"
             >
               <X size={16} />
             </button>
