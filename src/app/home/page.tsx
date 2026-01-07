@@ -467,7 +467,7 @@ export default function HomePage() {
                     Program Selection <span className="text-red-500">*</span>
                   </label>
                   <select 
-                    className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                    className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
                     style={{
                       padding: '0.875rem 1.125rem',
                       border: '1px solid #e5e7eb',
@@ -496,7 +496,7 @@ export default function HomePage() {
                       Service Center <span className="text-red-500">*</span>
                     </label>
                     <select 
-                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                      className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
                       style={{
                         padding: '0.875rem 1.125rem',
                         border: '1px solid #e5e7eb',
@@ -529,7 +529,7 @@ export default function HomePage() {
                       Status Code
                     </label>
                     <select 
-                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
+                      className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400 cursor-pointer" 
                       style={{
                         padding: '0.875rem 1.125rem',
                         border: '1px solid #e5e7eb',
@@ -564,7 +564,7 @@ export default function HomePage() {
                     <input 
                       type="checkbox" 
                       id="qualityReviewCheckbox" 
-                      className="w-5 h-5 accent-blue-600"
+                      className="w-5 h-5 accent-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1"
                       checked={programForm.qualityReview}
                       onChange={(e) => setProgramForm(prev => ({ ...prev, qualityReview: e.target.checked }))}
                     />
@@ -582,7 +582,7 @@ export default function HomePage() {
                     </label>
                     <input 
                       type="text" 
-                      className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                      className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400"
                       style={{
                         padding: '0.875rem 1.125rem',
                         border: '1px solid #e5e7eb',
@@ -662,7 +662,7 @@ export default function HomePage() {
                       </label>
                       <input
                         type="text"
-                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',
@@ -686,7 +686,7 @@ export default function HomePage() {
                       </label>
                       <input
                         type="text"
-                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',
@@ -710,7 +710,7 @@ export default function HomePage() {
                       </label>
                       <input
                         type="text"
-                        className="w-full transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white hover:border-gray-400"
+                        className="w-full transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 focus:border-blue-600 focus:bg-white hover:border-gray-400"
                         style={{
                           padding: '0.875rem 1.125rem',
                           border: '1px solid #e5e7eb',

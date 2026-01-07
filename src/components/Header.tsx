@@ -62,10 +62,10 @@ export default function Header({ showBackButton = false, backHref = '/', disable
                 <span className="sm:hidden">← Back</span>
               </Link>
             )}
-            <h1 className="text-lg sm:text-2xl font-semibold truncate">
+            <div className="text-lg sm:text-2xl font-semibold truncate">
               <span className="hidden sm:inline">IRS Error Resolution Application</span>
               <span className="sm:hidden">IRS ERS</span>
-            </h1>
+            </div>
           </div>
           
           <div className="flex items-center gap-3 relative">
