@@ -514,7 +514,7 @@ export default function HomePage() {
                     >
                       <option value="">Select a service center...</option>
                       {serviceCenters.map((center) => (
-                        <option key={center.name} value={center.name.toLowerCase()}>
+                        <option key={center.name} value={center.name === 'Kansas City' ? 'kansas' : center.name.toLowerCase()}>
                           {center.name}
                         </option>
                       ))}
