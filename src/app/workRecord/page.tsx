@@ -1246,11 +1246,15 @@ function Form4868ERSPageContent() {
       });
     }
 
+    // Get current errors being corrected
+    const errorsBeingCorrected = errorItems.map(error => error.code);
+
     // Create new note if there are changes or additional notes
     if (fieldChanges.length > 0 || additionalNotes.trim()) {
       const commentsObj = {
         ...(fieldChanges.length > 0 && { fieldChanges: fieldChanges }),
         ...(additionalNotes.trim() && { additionalComments: additionalNotes }),
+        ...(errorsBeingCorrected.length > 0 && { errorsBeingCorrected: errorsBeingCorrected }),
       };
 
       const newNote = {
@@ -2640,7 +2644,7 @@ function Form4868ERSPageContent() {
                                 )}
 
                               {parsedComments.additionalComments && (
-                                <div className="additional-comments">
+                                <div className="additional-comments mb-3">
                                   <div className="text-sm font-medium text-gray-600 mb-1">
                                     Additional Comments:
                                   </div>
@@ -2649,6 +2653,18 @@ function Form4868ERSPageContent() {
                                   </div>
                                 </div>
                               )}
+
+                              {parsedComments.errorsBeingCorrected &&
+                                parsedComments.errorsBeingCorrected.length > 0 && (
+                                  <div className="errors-being-corrected">
+                                    <div className="text-sm font-medium text-gray-600 mb-1">
+                                      Errors Being Corrected:
+                                    </div>
+                                    <div className="text-sm text-gray-700 ml-4">
+                                      {parsedComments.errorsBeingCorrected.join(", ")}
+                                    </div>
+                                  </div>
+                                )}
                             </div>
                           );
                         } catch (error) {

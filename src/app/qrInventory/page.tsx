@@ -95,7 +95,6 @@ function QRInventoryContent() {
         pagination.pageSize,
         currentUserSeid || undefined
       );
-
       const records = response?.records || [];
       setQRRecords(records);
       setPagination(prev => {
@@ -110,8 +109,8 @@ function QRInventoryContent() {
         
         // If no totalPages, determine pagination based on received records
         const receivedRecords = records.length;
-        const hasMorePages = receivedRecords === pagination.pageSize;
-        
+        const hasMorePages = receivedRecords === prev.pageSize;
+
         return {
           ...prev,
           totalRecords: receivedRecords,

@@ -43,7 +43,7 @@ export interface QRInventoryResponse {
   totalCount: number;
   currentPage: number;
   pageSize: number;
-  totalPages: number;
+  totalPages?: number;
 }
 
 export class QRInventoryService {
@@ -119,7 +119,7 @@ export class QRInventoryService {
         totalCount: data.length || 0,
         currentPage: page,
         pageSize: pageSize,
-        totalPages: Math.ceil((data.length || 0) / pageSize)
+        // totalPages: Math.ceil((data.length || 0) / pageSize)
       };
     } catch (error) {
       console.error('Error fetching QR records:', error);
