@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
-import fieldMappings from "../../data/fieldConfig4868.json";
+import newFieldConfig from "../../data/fieldConfig4868.json";
 import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
 import { QRInventoryRecord } from "../../services/qrInventoryService";
 import { useSeid } from "@/hooks/useSeid";
@@ -35,8 +35,8 @@ const ComparisonField: React.FC<ComparisonFieldProps> = ({
   afterValue,
   isModified
 }) => {
-  const displayBeforeValue = beforeValue || 'Not provided';
-  const displayAfterValue = afterValue || 'Not provided';
+  const displayBeforeValue = beforeValue || '';
+  const displayAfterValue = afterValue || '';
   
   // Simple before/after comparison without editable or error logic
   return (
@@ -131,10 +131,10 @@ function QRDetailsPageContent() {
     return parsedNotes.length > 0 ? parsedNotes : [];
   };
 
-  // Helper function to get field label from fieldMappings
+  // Helper function to get field label from newFieldConfig
   const getFieldLabel = (fieldKey: string): string => {
-    const fieldConfig = (fieldMappings as any)[fieldKey];
-    return fieldConfig?.label || toLabel(fieldKey);
+    const fieldConfigItem = newFieldConfig.find((item: any) => item.key === fieldKey);
+    return fieldConfigItem?.label || toLabel(fieldKey);
   };
 
 
@@ -230,8 +230,9 @@ function QRDetailsPageContent() {
   const getComparisonFields = () => {
     if (!qrData) return [];
 
-    // Use fieldMappings for consistent field list
-    return Object.keys(fieldMappings).map(fieldKey => {
+    // Use newFieldConfig for consistent field list
+    return newFieldConfig.map((fieldConfigItem: any) => {
+      const fieldKey = fieldConfigItem.key;
       const beforeValue = getFieldValue(qrData.NEW, fieldKey);
       const afterValue = getFieldValue(qrData.QR_HOLD, fieldKey);
       const isModified = isFieldModified(beforeValue, afterValue);
@@ -422,9 +423,9 @@ function QRDetailsPageContent() {
             <div className="mb-6">
               <div className="text-lg font-semibold mb-4 text-gray-700 border-b-2 border-gray-200 pb-2">
                 FORM 4868 - Application for Automatic Extension
-                <p className="text-sm font-normal mt-2 text-gray-600">
+                {/* <p className="text-sm font-normal mt-2 text-gray-600">
                   Received Date: 2025-09-25 | Tax Period: {qrData?.QR_HOLD?.workRecord?.taxPrd || qrData?.NEW?.workRecord?.taxPrd || 'N/A'}
-                </p>
+                </p> */}
               </div>
               
               {/* <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-6 flex items-center gap-2 text-sm text-gray-700">
