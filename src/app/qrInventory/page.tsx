@@ -96,12 +96,28 @@ function QRInventoryContent() {
         currentUserSeid || undefined
       );
 
-      setQRRecords(response?.records || []);
-      setPagination(prev => ({
-        ...prev,
-        totalRecords: response?.totalCount || 0,
-        totalPages: response?.totalPages || 0
-      }));
+      const records = response?.records || [];
+      setQRRecords(records);
+      setPagination(prev => {
+        // If API provides totalPages, use it for accurate pagination
+        if (response?.totalPages !== undefined && response?.totalPages > 0) {
+          return {
+            ...prev,
+            totalRecords: response?.totalCount || 0,
+            totalPages: response.totalPages
+          };
+        }
+        
+        // If no totalPages, determine pagination based on received records
+        const receivedRecords = records.length;
+        const hasMorePages = receivedRecords === pagination.pageSize;
+        
+        return {
+          ...prev,
+          totalRecords: receivedRecords,
+          totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
+        };
+      });
     } catch (err) {
       // setError('Failed to load QR records');
       setError(err instanceof Error ? err.message : 'Failed to load QR records');

@@ -77,13 +77,16 @@ function DailySummaryContent() {
         })
       });
 
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // }
+
       if (!response.ok) {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
         console.error("Error loading daily summary records:", error);
         setError(error.message);
         throw new Error(error.message);
-        // throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       // Handle 204 No Content response
@@ -98,13 +101,29 @@ function DailySummaryContent() {
       }
 
       const data = await response.json();
+      const records = data.records || data;
       
-      setRecords(data.records || data);
-      setPagination(prev => ({
-        ...prev,
-        totalRecords: data.totalCount || data.length,
-        totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
-      }));
+      setRecords(records);
+      setPagination(prev => {
+        // If API provides totalCount, use it for accurate pagination
+        if (data.totalCount !== undefined) {
+          return {
+            ...prev,
+            totalRecords: data.totalCount,
+            totalPages: Math.ceil(data.totalCount / pagination.pageSize)
+          };
+        }
+        
+        // If no totalCount, determine pagination based on received records
+        const receivedRecords = records.length;
+        const hasMorePages = receivedRecords === pagination.pageSize;
+        
+        return {
+          ...prev,
+          totalRecords: receivedRecords,
+          totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
+        };
+      });
     } catch (err) {
       // Clear records on error
       setRecords([]);
@@ -164,13 +183,29 @@ function DailySummaryContent() {
       }
 
       const data = await response.json();
+      const records = data.records || data;
       
-      setRecords(data.records || data);
-      setPagination(prev => ({
-        ...prev,
-        totalRecords: data.totalCount || data.length,
-        totalPages: Math.ceil((data.totalCount || data.length) / pagination.pageSize)
-      }));
+      setRecords(records);
+      setPagination(prev => {
+        // If API provides totalCount, use it for accurate pagination
+        if (data.totalCount !== undefined) {
+          return {
+            ...prev,
+            totalRecords: data.totalCount,
+            totalPages: Math.ceil(data.totalCount / pagination.pageSize)
+          };
+        }
+        
+        // If no totalCount, determine pagination based on received records
+        const receivedRecords = records.length;
+        const hasMorePages = receivedRecords === pagination.pageSize;
+        
+        return {
+          ...prev,
+          totalRecords: receivedRecords,
+          totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
+        };
+      });
     } catch (err) {
       // Clear records on error
       setRecords([]);

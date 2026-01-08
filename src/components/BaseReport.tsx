@@ -427,7 +427,7 @@ export default function BaseReport({
     setPagination(prev => ({
       ...prev,
       totalRecords: receivedRecords, // Current page records
-      totalPages: hasMorePages ? prev.currentPage + 1 : prev.currentPage, // Enable next if we have full page
+      totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage, // Enable next if we have full page
     }));
   }, [data.length, pagination.pageSize, pagination.currentPage]);
 
