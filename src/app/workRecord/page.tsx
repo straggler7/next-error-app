@@ -1079,7 +1079,7 @@ function Form4868ERSPageContent() {
   // Helper function to get the current non-field error being displayed
   const currentNonFieldError = useMemo(() => {
     if (hasFieldErrors) return null; // No non-field error when field errors present
-    return errorItems.find((error) => !error.isFieldError) || null;
+    return errorItems.sort().find((error) => !error.isFieldError) || null;
   }, [errorItems, hasFieldErrors]);
 
   // Helper function to check if the currently displayed non-field error is clearable
