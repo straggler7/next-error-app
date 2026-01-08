@@ -131,7 +131,7 @@ function DailySummaryContent() {
     } finally {
       setLoading(false);
     }
-  }, [filters.status, currentUserSeid, pagination.pageSize]);
+  }, [filters.status, currentUserSeid, pagination.pageSize, pagination.currentPage]);
 
   // Separate function for Submit button that includes current seidFilter
   const handleSubmitWithSeidFilter = useCallback(async () => {
