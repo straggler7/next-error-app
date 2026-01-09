@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Download, RefreshCw } from 'lucide-react';
 import { getServiceCenterName, serviceCenters } from '../utils/serviceCenters';
 import { ReportRecord, ReportPayload } from '../services/reportsService';
@@ -249,7 +249,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   if (reportType === '1342') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
-      { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
       { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
@@ -367,6 +367,10 @@ export default function BaseReport({
   onRefresh, 
   onExport 
 }: BaseReportProps) {
+  // Refs for focus management and screen reader announcements
+  const reportHeaderRef = useRef<HTMLHeadingElement>(null);
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+  
   const [columns, setColumns] = useState<ColumnConfig[]>(() => getDefaultColumns(reportType));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>(() => {
@@ -400,6 +404,32 @@ export default function BaseReport({
     totalRecords: 0,
     totalPages: 0
   });
+
+  // Focus management and screen reader announcements for 508 compliance
+  useEffect(() => {
+    // Move focus to report header when component mounts (report is selected)
+    if (reportHeaderRef.current) {
+      reportHeaderRef.current.focus();
+    }
+
+    // Announce report loading to screen readers
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = `Report ${reportType}: ${title} has been loaded`;
+    }
+  }, [reportType, title]);
+
+  // Announce loading state changes to screen readers
+  useEffect(() => {
+    if (liveRegionRef.current) {
+      if (loading) {
+        liveRegionRef.current.textContent = `Loading Report ${reportType}: ${title}...`;
+      } else if (data.length > 0) {
+        liveRegionRef.current.textContent = `Report ${reportType}: ${title} loaded with ${data.length} records`;
+      } else if (!loading && data.length === 0) {
+        liveRegionRef.current.textContent = `Report ${reportType}: ${title} loaded with no records found`;
+      }
+    }
+  }, [loading, data.length, reportType, title]);
 
   // Service Center options - using names from serviceCenters utility
   const serviceCenterOptions = [
@@ -654,10 +684,22 @@ export default function BaseReport({
 
   return (
     <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
+          {/* Screen reader live region for announcements */}
+          <div 
+            ref={liveRegionRef}
+            aria-live="polite" 
+            aria-atomic="true"
+            className="sr-only"
+          />
+          
           {/* Header */}
           <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
             <div>
-              <h2 className="card-title text-xl font-semibold text-[#003d6b]">
+              <h2 
+                ref={reportHeaderRef}
+                tabIndex={-1}
+                className="card-title text-xl font-semibold text-[#003d6b] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              >
                 Report {reportType}: {title}
               </h2>
               {/* <div className="text-sm text-gray-600 mt-1">
@@ -691,11 +733,12 @@ export default function BaseReport({
           {/* DLN Search - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1341, 1343, 7740, 7741, 7742, 7743, 7744, 7745, 7746, and 7747 reports */}
           {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== '7746' && reportType !== '7747' && (
             <div className="relative w-48">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="dln-input" className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
               </label>
               {/* <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /> */}
               <input
+                id="dln-input"
                 type="text"
                 placeholder="Enter DLN"
                 value={searchTerm}
@@ -708,6 +751,7 @@ export default function BaseReport({
           {/* Date Picker */}
           <div className="w-48">
             <DatePicker
+              id="start-date-picker"
               value={selectedDate}
               onChange={setSelectedDate}
               label={supportsEndDate(reportType) ? "Start Date" : "Status On"}
@@ -719,6 +763,7 @@ export default function BaseReport({
           {supportsEndDate(reportType) && (
             <div className="w-48">
               <DatePicker
+                id="end-date-picker"
                 value={selectedEndDate}
                 onChange={setSelectedEndDate}
                 // label={reportType === '0340' || reportType === 'MERDAIL' ? "End Date" : "End Date (Optional)"}
@@ -734,10 +779,11 @@ export default function BaseReport({
             {/* Service Center Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1343, 7740, 7741, 7742, 7743, 7744, and 7745 reports */}
             {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && (
               <div className="w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="service-center-select" className="block text-sm font-medium text-gray-700 mb-1">
                   Service Center
                 </label>
                 <select
+                  id="service-center-select"
                   value={selectedServiceCenter}
                   onChange={(e) => setSelectedServiceCenter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
@@ -754,10 +800,11 @@ export default function BaseReport({
             {/* Program Code Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1343 reports */}
             {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1343' && (
               <div className="w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="program-code-select" className="block text-sm font-medium text-gray-700 mb-1">
                   Program Code
                 </label>
                 <select
+                  id="program-code-select"
                   value={selectedProgramCode}
                   onChange={(e) => setSelectedProgramCode(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
@@ -774,10 +821,11 @@ export default function BaseReport({
             {/* Tax Examiner SEID Filter - Only for 7740 report */}
             {reportType === '7740' && (
               <div className="w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="tax-examiner-seid-input" className="block text-sm font-medium text-gray-700 mb-1">
                   Tax Examiner SEID
                 </label>
                 <input
+                  id="tax-examiner-seid-input"
                   type="text"
                   placeholder="Enter SEID"
                   value={taxExaminerSeid}

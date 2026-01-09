@@ -7,13 +7,15 @@ interface DatePickerProps {
   onChange: (date: string) => void;
   label?: string;
   placeholder?: string;
+  id?: string;
 }
 
 export default function DatePicker({ 
   value, 
   onChange, 
   label = 'Date', 
-  placeholder = 'Select date...' 
+  placeholder = 'Select date...', 
+  id 
 }: DatePickerProps) {
   // const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const selectedDate = e.target.value;
@@ -50,14 +52,18 @@ export default function DatePicker({
     }
   };
 
+  // Generate unique ID if not provided
+  const inputId = id || `date-picker-${Math.random().toString(36).substr(2, 9)}`;
+
   return (
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
       <div className="relative">
         <Calendar size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
+          id={inputId}
           type="date"
           value={getInputValue()}
           onChange={handleDateChange}

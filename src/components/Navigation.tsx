@@ -199,9 +199,9 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     <div className={`bg-white rounded-lg shadow-lg p-6 h-full overflow-y-auto border border-gray-200 ${className}`}>
       {navSections.map((section) => (
         <div key={section.title} className="mb-8 last:mb-0">
-          <div className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4 px-4">
+          <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4 px-4">
             {section.title}
-          </div>
+          </h2>
           <nav>
             {section.items.map((item) => (
               <button
