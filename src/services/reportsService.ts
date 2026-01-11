@@ -930,7 +930,7 @@ export class ReportsService {
         startDateStr,
       };
 
-      const response = await fetch('/api2/v1/era/reports/get-summary-report-1747', {
+      const response = await fetch('/api2/v1/era/reports/get-summary-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -12,11 +12,13 @@ import ActionDropdown from '../../components/ActionDropdown';
 import Pagination from '../../components/Pagination';
 import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
+import WorkLogPanel from '../../components/WorkLogPanel';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
 // import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { InventoryRecord } from '../../types';
 import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
+import { useAuth } from '../../contexts/AuthContext';
 
 function DailySummaryContent() {
   const router = useRouter();
@@ -24,6 +26,10 @@ function DailySummaryContent() {
   const seid = searchParams.get('seid');
   const currentUserSeid = useSeid();
   const isManager = useIsManager();
+  const { user } = useAuth();
+
+  // Check if user is tax examiner or analyst (should show Work Log panel)
+  const shouldShowWorkLog = user?.group === 'tax_examiners' || user?.group === 'analysts';
 
   const [filters, setFilters] = useState<FilterState>({
     searchAll: '',
@@ -447,7 +453,17 @@ function DailySummaryContent() {
       )}
       
       <div className="main-container p-4 max-w-[1900px] mx-auto">
-        <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
+        <div className={`grid gap-6 ${shouldShowWorkLog ? 'grid-cols-[30%_1fr]' : 'grid-cols-1'}`}>
+          {/* Work Log Panel - 30% width, only for tax examiners and analysts */}
+          {shouldShowWorkLog && (
+            <div className="min-h-0">
+              <WorkLogPanel />
+            </div>
+          )}
+          
+          {/* Main Content Panel - remaining space when Work Log is shown, full width otherwise */}
+          <div className="min-h-0">
+            <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col min-h-0">
           {/* Header */}
           <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
             <div className="flex items-center gap-4">
@@ -547,11 +563,11 @@ function DailySummaryContent() {
           )}
 
           {/* Table */}
-          <div className="grid-container">
+          <div className="flex-1 min-h-0">
             {loading ? (
               <TableLoadingState />
             ) : filteredRecords.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+              <div className="flex flex-col items-center justify-center py-16 text-gray-500">
                 <div className="text-center">
                   <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -585,6 +601,8 @@ function DailySummaryContent() {
             pagination={pagination}
             onPaginationChange={handlePaginationChange}
           />
+            </div>
+          </div>
         </div>
       </div>
     </div>

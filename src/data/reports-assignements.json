@@ -1,0 +1,19 @@
+[
+    {
+        "daysInErs": 0,
+        "deletedQty": 0,
+        "employeeNumber": null,
+        "formType": "4868",
+        "programId": "44720",
+        "rateOfProduction": 0,
+        "rateOfProductionStr": "0",
+        "resolvedQty": 0,
+        "reWorkedQty": 0,
+        "suspendedQty": 0,
+        "seid": "u1000",
+        "totalTimeSpent": 0.341,
+        "totalTimeSpentStr": "0.341",
+        "totalVolume": 0,
+        "volumePerHr": 0
+    }
+]
