@@ -3007,4 +3007,20 @@ MERDAIL - Error Count Report ✅
 +      totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage, // Enable next if we have full page
      }));
    }, [data.length, pagination.pageSize, pagination.currentPage]);
- 
+
+
+on the dln search page, for tax examiners, analysts, show a panel on the left side of the daily summary table
+the panel should have cards for each program code. The panel has 'Work Log' as the title
+the card should have Program Code as the header and should have the below info
+Total Hours Worked
+Total Volume Worked
+Volume Per Hour
+Resolved
+Deleted
+Suspended
+Reworked
+
+The cards should be similar to the cards on the 1747 report and use the data based on the 7746 report. 
+The api call for the cards is same as the 7746 report
+Use 2 columns for the cards and the panel should be on the left side of the daily summary table, use 30% width for the panel
+There will be one card per program code 
