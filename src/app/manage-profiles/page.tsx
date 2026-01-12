@@ -99,6 +99,7 @@ export default function RoleAssignmentPage() {
   const [isLoadingStatusCodes, setIsLoadingStatusCodes] = useState(false);
   const [programs, setPrograms] = useState<Program[]>(createPrograms());
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [updateProfile, setUpdateProfile] = useState(false);
 
   // Helper function to add notifications
   const addNotification = useCallback((type: Notification['type'], message: string, title?: string) => {
@@ -370,6 +371,41 @@ export default function RoleAssignmentPage() {
     setExaminerOptions([]);
   };
 
+  const handleUpdateProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    setUpdateProfile(isChecked);
+    
+    if (isChecked) {
+      // Clear current examiner selection and fetch manager's own profile
+      setSelectedExaminer(null);
+      setUserProfile(null);
+      setRoleAssignments([]);
+      
+      // Use current user's SEID to fetch their own profile
+      if (currentUserSeid) {
+        // Create examiner data for the manager themselves
+        const managerOption = managerOptions.find(opt => opt.value === currentUserSeid);
+        if (managerOption) {
+          const managerExaminerData: ExaminerData = {
+            name: managerOption.label,
+            seid: currentUserSeid,
+            teamCode: 'Manager Team', // Default, will be updated by API
+            avatar: managerOption.label.split(' ').map(n => n[0]).join('').toUpperCase(),
+          };
+          setSelectedExaminer(managerExaminerData);
+        }
+        
+        // Fetch the manager's own profile
+        fetchUserProfile(currentUserSeid);
+      }
+    } else {
+      // Clear selection when unchecked
+      setSelectedExaminer(null);
+      setUserProfile(null);
+      setRoleAssignments([]);
+    }
+  };
+
   const handleTeamChange = (newTeam: string) => {
     if (selectedExaminer) {
       setSelectedExaminer({
@@ -532,7 +568,7 @@ export default function RoleAssignmentPage() {
             <select
               value={selectedProxy}
               onChange={handleProxyChange}
-              disabled={isLoadingManagers}
+              disabled={isLoadingManagers || updateProfile}
               className="w-full px-4 py-3 border-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:bg-white focus:shadow-sm
                 disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
                 border-gray-300 bg-gray-50 text-gray-700 hover:border-gray-400 focus:border-blue-600"
@@ -544,6 +580,26 @@ export default function RoleAssignmentPage() {
                 </option>
               ))}
             </select>
+            
+            {/* Update Profile Checkbox */}
+            <div className="mt-4 flex items-center">
+              <input
+                type="checkbox"
+                id="updateProfile"
+                checked={updateProfile}
+                onChange={handleUpdateProfileChange}
+                disabled={isLoadingManagers}
+                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <label htmlFor="updateProfile" className="ml-2 text-sm font-medium text-orange-800">
+                Update profile
+              </label>
+            </div>
+            {updateProfile && (
+              <p className="mt-2 text-xs text-orange-600">
+                Tax examiner selection is disabled. Managing your own profile.
+              </p>
+            )}
           </div>
 
           {/* Tax Examiner Selection */}
@@ -554,8 +610,8 @@ export default function RoleAssignmentPage() {
             <ComboBox
               options={examinerOptions}
               onSelect={handleExaminerSelect}
-              placeholder={isLoadingExaminers ? 'Loading tax examiners...' : 'Enter SEID or select from dropdown...'}
-              disabled={isLoadingExaminers}
+              placeholder={updateProfile ? 'Disabled - Update profile is checked' : (isLoadingExaminers ? 'Loading tax examiners...' : 'Enter SEID or select from dropdown...')}
+              disabled={isLoadingExaminers || updateProfile}
             />
           </div>
         </div>
