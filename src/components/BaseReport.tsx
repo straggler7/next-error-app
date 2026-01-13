@@ -698,7 +698,7 @@ export default function BaseReport({
               <h2 
                 ref={reportHeaderRef}
                 tabIndex={-1}
-                className="card-title text-xl font-semibold text-[#003d6b] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                className="card-title text-xl font-semibold text-[#003d6b] focus:outline-none"
               >
                 Report {reportType}: {title}
               </h2>
