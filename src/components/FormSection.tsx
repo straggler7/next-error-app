@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 interface FormSectionProps {
@@ -57,6 +57,8 @@ export function FormField({
   htmlFor
 }: FormFieldProps) {
   const hasChanged = showChangeIndicator && originalValue && currentValue && originalValue !== currentValue;
+  const errorId = error && htmlFor ? `${htmlFor}-error` : undefined;
+  const successId = success && htmlFor ? `${htmlFor}-success` : undefined;
   
   return (
     <div className={`mb-2 ${className} ${isHighlighted ? 'ring-1 ring-red-200 ring-opacity-50 rounded-md p-2 bg-red-50' : ''}`}>
@@ -64,19 +66,36 @@ export function FormField({
         {label}
         {required && <span className="text-red-600 ml-1">*</span>}
       </label>
-      {children}
+      {/* Clone children and add ARIA attributes for 508 compliance */}
+      {React.isValidElement(children)
+        ? React.cloneElement(children as React.ReactElement<any>, {
+            'aria-describedby': [errorId, successId].filter(Boolean).join(' ') || undefined,
+            'aria-invalid': error ? 'true' : undefined
+          })
+        : children
+      }
       {hasChanged && (
         <div className="mt-1 text-xs text-gray-600 font-medium flex items-center gap-1">
           Changed: {originalValue} <ArrowRight className="w-3 h-3" /> {currentValue}
         </div>
       )}
       {error && (
-        <span className="block text-red-600 text-xs mt-2 font-medium leading-tight">
+        <span 
+          id={errorId}
+          className="block text-red-600 text-xs mt-2 font-medium leading-tight"
+          role="alert"
+          aria-live="polite"
+        >
           {error}
         </span>
       )}
       {success && (
-        <span className="block text-green-600 text-xs mt-1.5 font-medium italic leading-tight">
+        <span 
+          id={successId}
+          className="block text-green-600 text-xs mt-1.5 font-medium italic leading-tight"
+          role="status"
+          aria-live="polite"
+        >
           {success}
         </span>
       )}
