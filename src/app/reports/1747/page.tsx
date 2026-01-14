@@ -15,6 +15,7 @@ interface Report1747Data {
   
   // New Error Inventory section
   newErrorInventoryBeginning?: number | null;
+  newErrorInventoryErrorsAdded?: number | null;
   newErrorInventoryResolved?: number | null;
   newErrorInventorySuspended?: number | null;
   newErrorInventoryDeleted?: number | null;
@@ -76,6 +77,7 @@ export default function Report1747Page() {
         
         // New Error Inventory
         newErrorInventoryBeginning: reportData?.newErrorInventoryBeginning || 0,
+        newErrorInventoryErrorsAdded: reportData?.newErrorInventoryErrorsAdded || 0,
         newErrorInventoryResolved: reportData?.newErrorInventoryResolved || 0,
         newErrorInventorySuspended: reportData?.newErrorInventorySuspended || 0,
         newErrorInventoryDeleted: reportData?.newErrorInventoryDeleted || 0,
@@ -139,6 +141,7 @@ export default function Report1747Page() {
         
         // New Error Inventory
         { Section: 'New Error Inventory', Item: 'Beginning', Value: data.newErrorInventoryBeginning || 0 },
+        { Section: 'New Error Inventory', Item: 'Errors Added', Value: data.newErrorInventoryErrorsAdded || 0 },
         { Section: 'New Error Inventory', Item: 'Resolved', Value: data.newErrorInventoryResolved || 0 },
         { Section: 'New Error Inventory', Item: 'Suspended', Value: data.newErrorInventorySuspended || 0 },
         { Section: 'New Error Inventory', Item: 'Deleted', Value: data.newErrorInventoryDeleted || 0 },
@@ -271,6 +274,7 @@ export default function Report1747Page() {
                 '2. New Error Inventory',
                 [
                   { key: 'newErrorInventoryBeginning', label: 'Beginning', value: data.newErrorInventoryBeginning },
+                  { key: 'newErrorInventoryErrorsAdded', label: 'Errors Added', value: data.newErrorInventoryErrorsAdded },
                   { key: 'newErrorInventoryResolved', label: 'Resolved', value: data.newErrorInventoryResolved },
                   { key: 'newErrorInventorySuspended', label: 'Suspended', value: data.newErrorInventorySuspended },
                   { key: 'newErrorInventoryDeleted', label: 'Deleted', value: data.newErrorInventoryDeleted },
