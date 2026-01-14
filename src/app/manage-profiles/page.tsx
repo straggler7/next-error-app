@@ -265,43 +265,50 @@ export default function RoleAssignmentPage() {
     fetchManagers();
   }, [currentUserSeid, selectedProxy]);
 
-  // Fetch team tax examiners for the active manager (current or proxy)
-  useEffect(() => {
+  // Reusable function to fetch tax examiners
+  const fetchTaxExaminers = useCallback(async (showLoading: boolean = true) => {
     if (!currentUserSeid) return;
 
     const managerSeid = selectedProxy || currentUserSeid;
 
-    const fetchTaxExaminers = async () => {
+    if (showLoading) {
       setIsLoadingExaminers(true);
-      try {
-        const response = await fetch(`/api/v1/era/users/${managerSeid}/getTaxExaminers`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'SEID': currentUserSeid,
-          },
-        });
+    }
+    
+    try {
+      const response = await fetch(`/api/v1/era/users/${managerSeid}/getTaxExaminers`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': currentUserSeid,
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        const examiners: UserProfile[] = await response.json();
-        const options: ComboBoxOption[] = examiners.map((examiner) => ({
-          value: examiner.seid,
-          label: `${examiner.userName} - ${examiner.seid}`,
-          seid: examiner.seid,
-        }));
-        setExaminerOptions(options);
-      } catch (error) {
-        console.error('Error fetching tax examiners:', error);
-      } finally {
+      const examiners: UserProfile[] = await response.json();
+      const options: ComboBoxOption[] = examiners.map((examiner) => ({
+        value: examiner.seid,
+        label: `${examiner.userName} - ${examiner.seid}`,
+        seid: examiner.seid,
+      }));
+      setExaminerOptions(options);
+      console.log('Tax examiners list fetched successfully');
+    } catch (error) {
+      console.error('Error fetching tax examiners:', error);
+    } finally {
+      if (showLoading) {
         setIsLoadingExaminers(false);
       }
-    };
-
-    fetchTaxExaminers();
+    }
   }, [currentUserSeid, selectedProxy]);
+
+  // Fetch tax examiners when proxy manager changes
+  useEffect(() => {
+    fetchTaxExaminers();
+  }, [fetchTaxExaminers]);
 
   // All hooks must be called before any conditional returns
   const handleExaminerSelect = useCallback((option: ComboBoxOption | null) => {
@@ -489,6 +496,9 @@ export default function RoleAssignmentPage() {
 
       addNotification('success', 'Role assignments have been saved successfully!', 'Save Complete');
       console.log('Saved assignments:', updatedProfile);
+      
+      // Refresh the tax examiners list to reflect any changes
+      await fetchTaxExaminers(false); // Don't show loading spinner for refresh
       
       // Scroll to top to show the notification
       window.scrollTo({ top: 0, behavior: 'smooth' });
