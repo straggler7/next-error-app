@@ -286,7 +286,10 @@ export default function Report1747Page() {
                   { key: 'expiredSuspenseResolved', label: 'Resolved', value: data.expiredSuspenseResolved },
                   { key: 'expiredSuspenseSuspended', label: 'Suspended', value: data.expiredSuspenseSuspended },
                   { key: 'expiredSuspenseDeleted', label: 'Deleted', value: data.expiredSuspenseDeleted },
-                  { key: 'expiredSuspenseQRhold', label: 'QR Hold', value: data.expiredSuspenseQRhold }
+                  { key: 'expiredSuspenseQRhold', label: 'QR Hold', value: data.expiredSuspenseQRhold },
+                  { key: 'expiredSuspenseEnding', label: 'Ending', value: data.expiredSuspenseEnding },
+                  { key: 'expiredSuspenseUnexpiredAdded', label: 'Unexpired Added', value: data.expiredSuspenseUnexpiredAdded },
+                  { key: 'expiredSuspenseDay0', label: 'Day 0', value: data.expiredSuspenseDay0 }
                 ]
               )}
 
@@ -299,7 +302,9 @@ export default function Report1747Page() {
                   // { key: 'unexpiredSuspenseDeleted', label: 'Deleted', value: data.unexpiredSuspenseDeleted },
                   // { key: 'unexpiredSuspenseQRhold', label: 'QR Hold', value: data.unexpiredSuspenseQRhold },
                   { key: 'unexpiredSuspenseWorkableAdded', label: 'Workable Added', value: data.unexpiredSuspenseWorkableAdded },
-                  { key: 'unexpiredSuspenseWorkableDeleted', label: 'Workable Deleted', value: data.unexpiredSuspenseWorkableDeleted }
+                  { key: 'unexpiredSuspenseWorkableDeleted', label: 'Workable Deleted', value: data.unexpiredSuspenseWorkableDeleted },
+                  { key: 'unexpiredSuspenseErrorInventory', label: 'Error Inventory', value: data.unexpiredSuspenseErrorInventory },
+                  { key: 'unexpiredSuspenseEnding', label: 'Ending', value: data.unexpiredSuspenseEnding }
                 ]
               )}
             </div>
