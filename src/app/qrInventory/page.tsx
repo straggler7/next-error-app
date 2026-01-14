@@ -302,7 +302,7 @@ function QRInventoryContent() {
         <Breadcrumbs items={createBreadcrumbs.qrInventory()} />
       </div>
       
-      <div className="main-container p-4 max-w-[1900px] mx-auto">
+      <div className="main-container p-4 mx-auto">
         <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
           {/* Header */}
           <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">

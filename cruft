@@ -3024,3 +3024,9 @@ The cards should be similar to the cards on the 1747 report and use the data bas
 The api call for the cards is same as the 7746 report
 Use 2 columns for the cards and the panel should be on the left side of the daily summary table, use 30% width for the panel
 There will be one card per program code 
+
+-- daily summary max width
+      <div className="main-container p-4 max-w-[2500px] mx-auto">
+src/app/daily-summary/page.tsx
+src/app/dln-search/page.tsx
+src/app/qrInventory/page.tsx
