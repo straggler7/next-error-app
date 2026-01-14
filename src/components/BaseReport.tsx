@@ -160,6 +160,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 
   if (reportType === '7742') {
     return [
+      { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpent', label: 'Total Hours Worked', visible: true, width: 150 },
@@ -189,6 +190,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 
   if (reportType === '7744') {
     return [
+      { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpent', label: 'Total Hours Worked', visible: true, width: 150 },
@@ -198,6 +200,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+      { key: 'suspendStatus', label: 'Suspend Status Code', visible: true, width: 130 },
     ];
   }
 
@@ -212,6 +215,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+      { key: 'suspendStatus', label: 'Suspend Status Code', visible: true, width: 130 },
     ];
   }
 
