@@ -231,12 +231,12 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
-      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
     ];
   }
 
   if (reportType === '7747') {
     return [
+      { key: 'teamCode', label: 'Team', visible: true, width: 100 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
@@ -246,7 +246,6 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
       { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
       { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
-      { key: 'daysInErs', label: 'Days In ERS', visible: true, width: 120 },
     ];
   }
   
@@ -500,6 +499,18 @@ export default function BaseReport({
     
     if (key === 'createdTime' || key === 'updatedDate') {
       return new Date(value).toLocaleDateString();
+    }
+
+    // Format updatedTime for report 1740 as mm/dd/yyyy hh:mm:ss
+    if (key === 'updatedTime' && reportType === '1740') {
+      const date = new Date(value);
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const seconds = date.getSeconds().toString().padStart(2, '0');
+      return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
     }
     
     if (key === 'serviceCenterId') {

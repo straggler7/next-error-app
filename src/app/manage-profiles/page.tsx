@@ -595,24 +595,28 @@ export default function RoleAssignmentPage() {
               ))}
             </select>
             
-            {/* Update Profile Checkbox */}
-            <div className="mt-4 flex items-center">
-              <input
-                type="checkbox"
-                id="updateProfile"
-                checked={updateProfile}
-                onChange={handleUpdateProfileChange}
-                disabled={isLoadingManagers}
-                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <label htmlFor="updateProfile" className="ml-2 text-sm font-medium text-orange-800">
-                Update profile
-              </label>
-            </div>
-            {updateProfile && (
-              <p className="mt-2 text-xs text-orange-600">
-                Tax examiner selection is disabled. Managing your own profile.
-              </p>
+            {/* Update Profile Checkbox - Only show if selected manager is current user */}
+            {selectedProxy === currentUserSeid && (
+              <>
+                <div className="mt-4 flex items-center">
+                  <input
+                    type="checkbox"
+                    id="updateProfile"
+                    checked={updateProfile}
+                    onChange={handleUpdateProfileChange}
+                    disabled={isLoadingManagers}
+                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <label htmlFor="updateProfile" className="ml-2 text-sm font-medium text-orange-800">
+                    Update profile
+                  </label>
+                </div>
+                {updateProfile && (
+                  <p className="mt-2 text-xs text-orange-600">
+                    Tax examiner selection is disabled. Managing your own profile.
+                  </p>
+                )}
+              </>
             )}
           </div>
 
