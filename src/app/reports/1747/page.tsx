@@ -19,6 +19,7 @@ interface Report1747Data {
   newErrorInventorySuspended?: number | null;
   newErrorInventoryDeleted?: number | null;
   newErrorInventoryQRhold?: number | null;
+  newErrorInventoryEnding?: number | null;
   
   // Expired Suspense Inventory section
   expiredSuspenseBeginning?: number | null;
@@ -26,6 +27,9 @@ interface Report1747Data {
   expiredSuspenseSuspended?: number | null;
   expiredSuspenseDeleted?: number | null;
   expiredSuspenseQRhold?: number | null;
+  expiredSuspenseEnding?: number | null;
+  expiredSuspenseUnexpiredAdded?: number | null;
+  expiredSuspenseDay0?: number | null;
   
   // Under Suspense section
   unexpiredSuspenseBeginning?: number | null;
@@ -33,8 +37,10 @@ interface Report1747Data {
   unexpiredSuspenseSuspended?: number | null;
   unexpiredSuspenseDeleted?: number | null;
   unexpiredSuspenseQRhold?: number | null;
+  unexpiredSuspenseEnding?: number | null;
   unexpiredSuspenseWorkableAdded?: number | null;
   unexpiredSuspenseWorkableDeleted?: number | null;
+  unexpiredSuspenseErrorInventory?: number | null;
 }
 
 export default function Report1747Page() {
@@ -81,15 +87,20 @@ export default function Report1747Page() {
         expiredSuspenseSuspended: reportData?.expiredSuspenseSuspended || 0,
         expiredSuspenseDeleted: reportData?.expiredSuspenseDeleted || 0,
         expiredSuspenseQRhold: reportData?.expiredSuspenseQRhold || 0,
+        expiredSuspenseEnding: reportData?.expiredSuspenseEnding || 0,
+        expiredSuspenseUnexpiredAdded: reportData?.expiredSuspenseUnexpiredAdded || 0,
+        expiredSuspenseDay0: reportData?.expiredSuspenseDay0 || 0,
         
         // Under Suspense
         unexpiredSuspenseBeginning: reportData?.unexpiredSuspenseBeginning || 0,
+        unexpiredSuspenseEnding: reportData?.unexpiredSuspenseEnding || 0,
         // unexpiredSuspenseResolved: reportData?.unexpiredSuspenseResolved || 0,
         // unexpiredSuspenseSuspended: reportData?.unexpiredSuspenseSuspended || 0,
-        // unexpiredSuspenseDeleted: reportData?.unexpiredSuspenseDeleted || 0,
+        unexpiredSuspenseDeleted: reportData?.unexpiredSuspenseDeleted || 0,
         // unexpiredSuspenseQRhold: reportData?.unexpiredSuspenseQRhold || 0,
         unexpiredSuspenseWorkableAdded: reportData?.unexpiredSuspenseWorkableAdded || 0,
-        unexpiredSuspenseWorkableDeleted: reportData?.unexpiredSuspenseWorkableDeleted || 0
+        unexpiredSuspenseWorkableDeleted: reportData?.unexpiredSuspenseWorkableDeleted || 0,
+        unexpiredSuspenseErrorInventory: reportData?.unexpiredSuspenseErrorInventory || 0
       };
       
       setData(validatedData);
@@ -132,6 +143,7 @@ export default function Report1747Page() {
         { Section: 'New Error Inventory', Item: 'Suspended', Value: data.newErrorInventorySuspended || 0 },
         { Section: 'New Error Inventory', Item: 'Deleted', Value: data.newErrorInventoryDeleted || 0 },
         { Section: 'New Error Inventory', Item: 'QR Hold', Value: data.newErrorInventoryQRhold || 0 },
+        { Section: 'New Error Inventory', Item: 'Ending', Value: data.newErrorInventoryEnding || 0 },
         
         // Expired Suspense
         { Section: 'Expired Suspense', Item: 'Beginning', Value: data.expiredSuspenseBeginning || 0 },
@@ -139,15 +151,20 @@ export default function Report1747Page() {
         { Section: 'Expired Suspense', Item: 'Suspended', Value: data.expiredSuspenseSuspended || 0 },
         { Section: 'Expired Suspense', Item: 'Deleted', Value: data.expiredSuspenseDeleted || 0 },
         { Section: 'Expired Suspense', Item: 'QR Hold', Value: data.expiredSuspenseQRhold || 0 },
-        
+        { Section: 'Expired Suspense', Item: 'Ending', Value: data.expiredSuspenseEnding || 0 },
+        { Section: 'Expired Suspense', Item: 'Unexpired Added', Value: data.expiredSuspenseUnexpiredAdded || 0 },
+        { Section: 'Expired Suspense', Item: 'Day 0', Value: data.expiredSuspenseDay0 || 0 },
+
         // Unexpired Suspense
         { Section: 'Unexpired Suspense', Item: 'Beginning', Value: data.unexpiredSuspenseBeginning || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Ending', Value: data.unexpiredSuspenseEnding || 0 },
         // { Section: 'Unexpired Suspense', Item: 'Resolved', Value: data.unexpiredSuspenseResolved || 0 },
         // { Section: 'Unexpired Suspense', Item: 'Suspended', Value: data.unexpiredSuspenseSuspended || 0 },
-        // { Section: 'Unexpired Suspense', Item: 'Deleted', Value: data.unexpiredSuspenseDeleted || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Deleted', Value: data.unexpiredSuspenseDeleted || 0 },
         // { Section: 'Unexpired Suspense', Item: 'QR Hold', Value: data.unexpiredSuspenseQRhold || 0 },
         { Section: 'Unexpired Suspense', Item: 'Workable Added', Value: data.unexpiredSuspenseWorkableAdded || 0 },
-        { Section: 'Unexpired Suspense', Item: 'Workable Deleted', Value: data.unexpiredSuspenseWorkableDeleted || 0 }
+        { Section: 'Unexpired Suspense', Item: 'Workable Deleted', Value: data.unexpiredSuspenseWorkableDeleted || 0 },
+        { Section: 'Unexpired Suspense', Item: 'Error Inventory', Value: data.unexpiredSuspenseErrorInventory || 0 }
       ];
 
       // Use ReportsService downloadCSV method
@@ -257,7 +274,8 @@ export default function Report1747Page() {
                   { key: 'newErrorInventoryResolved', label: 'Resolved', value: data.newErrorInventoryResolved },
                   { key: 'newErrorInventorySuspended', label: 'Suspended', value: data.newErrorInventorySuspended },
                   { key: 'newErrorInventoryDeleted', label: 'Deleted', value: data.newErrorInventoryDeleted },
-                  { key: 'newErrorInventoryQRhold', label: 'QR Hold', value: data.newErrorInventoryQRhold }
+                  { key: 'newErrorInventoryQRhold', label: 'QR Hold', value: data.newErrorInventoryQRhold },
+                  { key: 'newErrorInventoryEnding', label: 'Ending', value: data.newErrorInventoryEnding }
                 ]
               )}
 

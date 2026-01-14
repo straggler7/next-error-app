@@ -29,7 +29,8 @@ function DailySummaryContent() {
   const { user } = useAuth();
 
   // Check if user is tax examiner or analyst (should show Work Log panel)
-  const shouldShowWorkLog = user?.group === 'tax_examiners' || user?.group === 'analysts';
+  // const shouldShowWorkLog = user?.group === 'tax_examiners' || user?.group === 'analysts';
+  const shouldShowWorkLog = true;
 
   const [filters, setFilters] = useState<FilterState>({
     searchAll: '',

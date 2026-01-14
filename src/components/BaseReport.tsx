@@ -220,7 +220,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
-      { key: 'totalTimeSpent', label: 'Total Hours Worked', visible: true, width: 150 },
+      { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
       { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
@@ -235,7 +235,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
     return [
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
-      { key: 'totalTimeSpent', label: 'Total Hours Worked', visible: true, width: 150 },
+      { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
       { key: 'rateofProductionStr', label: 'Rate of Production', visible: true, width: 150 },
       { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
@@ -307,15 +307,16 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
       // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
-      { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
+      // { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
       { key: 'seid', label: 'Operator', visible: true, width: 150 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
       { key: 'formType', label: 'Form Type', visible: true, width: 100 },
       { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'source', label: 'Source', visible: true, width: 120 },
       { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
-      { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
-      { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 },
+      { key: 'updatedTime', label: 'Suspended Date', visible: true, width: 120 },
+      // { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
+      // { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 },
       { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 130 }
     ];
   }
