@@ -189,8 +189,8 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   if (reportType === '7744') {
     return [
       { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
-      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
-      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      // { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      // { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
       { key: 'rateOfProduction', label: 'Volume Per Hour', visible: true, width: 150 },
@@ -204,8 +204,8 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 
   if (reportType === '7745') {
     return [
-      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
-      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      // { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      // { key: 'programId', label: 'Program', visible: true, width: 100 },
       { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
       { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
       { key: 'rateOfProduction', label: 'Volume Per Hour', visible: true, width: 150 },
