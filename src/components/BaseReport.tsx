@@ -52,7 +52,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 
   if (reportType === '0341') {
     return [
-      { key: 'created', label: 'Created', visible: true, width: 120 },
+      // { key: 'created', label: 'Created', visible: true, width: 120 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 150 },
       { key: 'formType', label: 'Form Type', visible: true, width: 120 },
       { key: 'taxClass', label: 'Tax Class', visible: true, width: 120 },
@@ -78,7 +78,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 
   if (reportType === 'MERYRDT') {
     return [
-      { key: 'created', label: 'Created', visible: true, width: 120 },
+      // { key: 'created', label: 'Created', visible: true, width: 120 },
       { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 150 },
       { key: 'formType', label: 'Form Type', visible: true, width: 120 },
       { key: 'taxClass', label: 'Tax Class', visible: true, width: 120 },
