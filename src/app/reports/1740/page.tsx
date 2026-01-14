@@ -63,7 +63,7 @@ export default function Report1740Page() {
 
   return (
     <BaseReport
-      title="ERS1740 (ERS 17 PRC) - New Suspense List"
+      title="ERS1740 - New Suspense List"
       reportType="1740"
       data={data}
       loading={loading}

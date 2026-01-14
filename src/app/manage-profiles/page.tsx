@@ -97,6 +97,7 @@ export default function RoleAssignmentPage() {
   const [isLoadingExaminers, setIsLoadingExaminers] = useState(false);
   const [statusCodes, setStatusCodes] = useState<SuspenseCode[]>([]);
   const [isLoadingStatusCodes, setIsLoadingStatusCodes] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [programs, setPrograms] = useState<Program[]>(createPrograms());
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [updateProfile, setUpdateProfile] = useState(false);
@@ -317,7 +318,7 @@ export default function RoleAssignmentPage() {
       const examinerData: ExaminerData = {
         name: option.label,
         seid: option.seid,
-        teamCode: 'Team Alpha', // Default team, will be updated by API
+        teamCode: 'Team', // Default team, will be updated by API
         avatar: option.label.split(' ').map(n => n[0]).join('').toUpperCase(),
       };
       setSelectedExaminer(examinerData);
@@ -456,6 +457,7 @@ export default function RoleAssignmentPage() {
     //   return;
     // }
 
+    setIsSaving(true);
     try {
       // Build the payload in the same structure as userProfile.json
       const updatedProfile: UserProfile = {
@@ -509,6 +511,8 @@ export default function RoleAssignmentPage() {
       
       // Scroll to top to show the error notification
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -668,10 +672,10 @@ export default function RoleAssignmentPage() {
               </button>
               <button
                 onClick={handleSaveAssignments}
-                disabled={isLoadingProfile || isLoadingStatusCodes || !userProfile}
+                disabled={isLoadingProfile || isLoadingStatusCodes || !userProfile || isSaving}
                 className="px-7 py-3 bg-blue-600 text-white border-2 border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-all duration-200 text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Assignments
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
             </div>
           )}
