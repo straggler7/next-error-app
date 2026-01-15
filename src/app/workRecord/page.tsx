@@ -575,10 +575,15 @@ function Form4868ERSPageContent() {
       finalErrorItems = fieldErrors;
       console.log(`Showing ${fieldErrors.length} field errors`);
     } else if (nonFieldErrors.length > 0) {
-      // Show only the first non-field error from ersReasonCds
-      finalErrorItems = [nonFieldErrors[0]];
+      // Sort non-field errors by error code (numerically) and show the lowest priority error
+      const sortedNonFieldErrors = nonFieldErrors.sort((a, b) => {
+        const codeA = parseInt(a.code, 10);
+        const codeB = parseInt(b.code, 10);
+        return codeA - codeB; // Sort ascending (lowest first)
+      });
+      finalErrorItems = [sortedNonFieldErrors[0]];
       console.log(
-        `No field errors found, showing first non-field error: ${nonFieldErrors[0].code}`
+        `No field errors found, showing lowest priority non-field error: ${sortedNonFieldErrors[0].code}`
       );
     }
 
@@ -1088,6 +1093,11 @@ function Form4868ERSPageContent() {
 
     const errorConfigItem = (errorConfig as any)[currentNonFieldError.code];
     return errorConfigItem?.clearable === true;
+  }, [currentNonFieldError]);
+
+  // Reset clear code field when current error changes
+  useEffect(() => {
+    setClearCodesInput("");
   }, [currentNonFieldError]);
 
   // Helper function to check if user has delete permission for current program
