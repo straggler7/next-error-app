@@ -2479,7 +2479,7 @@ function Form4868ERSPageContent() {
               <button
                 type="button"
                 className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  submitting || hasAnyFieldErrors()
+                  submitting
                     ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                     : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 }`}
@@ -2487,7 +2487,7 @@ function Form4868ERSPageContent() {
                   clearFieldHighlight();
                   handleSubmit();
                 }}
-                disabled={submitting || hasAnyFieldErrors()}
+                disabled={submitting}
               >
                 {submitting ? "Submitting..." : "Submit"}
               </button>

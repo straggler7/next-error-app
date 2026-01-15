@@ -3122,3 +3122,21 @@ find dist/standalone -name "static" -type d
 - **Public Assets**: Served from `dist/standalone/public/`
 
 The server is now running with proper HTTPS encryption and the `dist` directory structure as requested.
+
+
+              <button
+                type="button"
+                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                  submitting || hasAnyFieldErrors()
+                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
+                }`}
+                onClick={() => {
+                  clearFieldHighlight();
+                  handleSubmit();
+                }}
+                // disabled={submitting || hasAnyFieldErrors()}
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </button>
