@@ -24,6 +24,12 @@ cp -r dist/static dist/standalone/
 node dist/standalone/server.js
 ##############
 
+cp -r .next/static .next/standalone/
+
+cp -r public .next/standalone/
+
+
+
 
 import React, { useState, useEffect } from 'react';
 import { parseString } from 'xml2js';
@@ -3058,3 +3064,61 @@ src/app/daily-summary/page.tsx
 src/app/dln-search/page.tsx
 src/app/qrInventory/page.tsx
 
+
+=================================
+
+Here's a comprehensive summary of all commands used to create the HTTPS server with `distDir: 'dist'`:
+
+## **SSL Certificate Generation**
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+```
+
+## **Next.js Configuration & Build**
+```bash
+# Updated next.config.ts to include distDir: 'dist'
+npm run build
+```
+
+## **Static Assets Setup**
+```bash
+# Copy static files to standalone build
+cp -r dist/static dist/standalone/
+
+# Copy public assets to standalone build  
+cp -r public dist/standalone/
+
+# Additional static files copy (as you just ran)
+cp -r dist/static dist/standalone/dist
+```
+
+## **Server Management**
+```bash
+# Kill existing HTTP servers
+pkill -f "http-server"
+
+# Start HTTPS server
+node https-server.js
+```
+
+## **File Structure Verification**
+```bash
+# Check directory structure
+ls -la dist/
+find dist/standalone -name "static" -type d
+```
+
+## **Key Files Created**
+1. **SSL Certificates**: `key.pem`, `cert.pem`
+2. **HTTPS Server**: [https-server.js](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/https-server.js:0:0-0:0)
+3. **Updated Config**: [next.config.ts](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/next.config.ts:0:0-0:0) (added `distDir: 'dist'`)
+
+## **Final Server Configuration**
+- **Protocol**: HTTPS with self-signed SSL certificates
+- **Port**: 8443
+- **URL**: `https://localhost:8443`
+- **Directory Structure**: Uses `dist/` instead of `.next/`
+- **Static Files**: Served from `dist/standalone/dist/static/`
+- **Public Assets**: Served from `dist/standalone/public/`
+
+The server is now running with proper HTTPS encryption and the `dist` directory structure as requested.
