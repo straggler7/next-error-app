@@ -49,7 +49,7 @@ export default function Report7740() {
         pageNumber: 1,
         pageSize: 25,
         reportId: '7740',
-        startDateStr: new Date().toLocaleDateString('en-US', { 
+        startDateStr: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
           month: '2-digit', 
           day: '2-digit', 
           year: 'numeric' 

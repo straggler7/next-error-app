@@ -49,12 +49,12 @@ export default function Report7747() {
         pageNumber: 1,
         pageSize: 25,
         reportId: '7747',
-        startDateStr: new Date().toLocaleDateString('en-US', { 
+        startDateStr: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
           month: '2-digit', 
           day: '2-digit', 
           year: 'numeric' 
         }),
-        endDateStr: new Date().toLocaleDateString('en-US', { 
+        endDateStr: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
           month: '2-digit', 
           day: '2-digit', 
           year: 'numeric' 
