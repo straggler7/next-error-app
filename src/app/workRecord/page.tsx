@@ -576,11 +576,14 @@ function Form4868ERSPageContent() {
       console.log(`Showing ${fieldErrors.length} field errors`);
     } else if (nonFieldErrors.length > 0) {
       // Sort non-field errors by error code (numerically) and show the lowest priority error
+      console.log("Non-field errors before sorting:", nonFieldErrors.map(e => e.code));
       const sortedNonFieldErrors = nonFieldErrors.sort((a, b) => {
         const codeA = parseInt(a.code, 10);
         const codeB = parseInt(b.code, 10);
+        console.log(`Comparing ${a.code} (${codeA}) vs ${b.code} (${codeB})`);
         return codeA - codeB; // Sort ascending (lowest first)
       });
+      console.log("Non-field errors after sorting:", sortedNonFieldErrors.map(e => e.code));
       finalErrorItems = [sortedNonFieldErrors[0]];
       console.log(
         `No field errors found, showing lowest priority non-field error: ${sortedNonFieldErrors[0].code}`
@@ -1084,7 +1087,11 @@ function Form4868ERSPageContent() {
   // Helper function to get the current non-field error being displayed
   const currentNonFieldError = useMemo(() => {
     if (hasFieldErrors) return null; // No non-field error when field errors present
-    return errorItems.toSorted().find((error) => !error.isFieldError) || null;
+    return errorItems.toSorted((a, b) => {
+      const codeA = parseInt(a.code, 10);
+      const codeB = parseInt(b.code, 10);
+      return codeA - codeB; // Sort ascending (lowest first)
+    }).find((error) => !error.isFieldError) || null;
   }, [errorItems, hasFieldErrors]);
 
   // Helper function to check if the currently displayed non-field error is clearable
