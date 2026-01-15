@@ -1,3 +1,30 @@
+##############
+next.config.ts
+
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+async rewrites() {
+  {
+    source: '/api/:path*',
+    destination: 'http://localhost:3000/api/:path*',
+  },
+  {
+    source: '/api2/:path*',
+    destination: 'http://localhost:3001/api/:path*',
+  },
+},
+output: 'standalone',
+distDir: 'dist',
+};
+
+export default nextConfig;
+
+cp -r dist/static dist/standalone/
+node dist/standalone/server.js
+##############
+
+
 import React, { useState, useEffect } from 'react';
 import { parseString } from 'xml2js';
 
@@ -3030,3 +3057,4 @@ There will be one card per program code
 src/app/daily-summary/page.tsx
 src/app/dln-search/page.tsx
 src/app/qrInventory/page.tsx
+
