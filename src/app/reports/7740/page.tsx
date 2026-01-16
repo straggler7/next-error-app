@@ -54,6 +54,11 @@ export default function Report7740() {
           day: '2-digit', 
           year: 'numeric' 
         }),
+        endDateStr: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
+          month: '2-digit', 
+          day: '2-digit', 
+          year: 'numeric' 
+        }),
       };
       handleRefresh(defaultPayload);
     }
