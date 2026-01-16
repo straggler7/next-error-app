@@ -477,7 +477,7 @@ function DailySummaryContent() {
               </button> */}
               <div>
                 <h2 className="card-title text-xl font-semibold text-[#003d6b]">
-                  Today's Worked Records
+                  Today&apos;s Worked Records
                 </h2>
                 <div className="text-sm text-gray-600 mt-1 space-y-1">
                   {seid && (
