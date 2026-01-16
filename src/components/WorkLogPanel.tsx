@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import WorkLogCard from './WorkLogCard';
+import DatePicker from './DatePicker';
 import { ReportsService, ReportPayload, ReportRecord } from '../services/reportsService';
 import { useSeid } from '../hooks/useSeid';
 
@@ -25,6 +26,14 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
   const [workLogData, setWorkLogData] = useState<WorkLogData>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Default to today's date
+    return new Date().toLocaleDateString('en-US', { 
+      month: '2-digit', 
+      day: '2-digit', 
+      year: 'numeric' 
+    });
+  });
   const seid = useSeid();
 
   const fetchWorkLogData = useCallback(async () => {
@@ -35,21 +44,12 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
 
     try {
       // Create payload for 7746 report (Tax Examiner Production Report)
-      const today = new Date();
       const payload: ReportPayload = {
         pageNumber: 1,
         pageSize: 100, // Get more records to ensure we capture all program codes
         reportId: '7746',
-        startDateStr: today.toLocaleDateString('en-US', { 
-          month: '2-digit', 
-          day: '2-digit', 
-          year: 'numeric' 
-        }),
-        endDateStr: today.toLocaleDateString('en-US', { 
-          month: '2-digit', 
-          day: '2-digit', 
-          year: 'numeric' 
-        }),
+        startDateStr: selectedDate,
+        endDateStr: selectedDate,
         seid: seid // Include the current user's SEID
       };
 
@@ -92,7 +92,7 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [seid]);
+  }, [seid, selectedDate]);
 
   useEffect(() => {
     fetchWorkLogData();
@@ -101,18 +101,43 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
   const programCodes = Object.keys(workLogData).sort();
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
+    <div className={`bg-white rounded-lg shadow-sm p-6 ${className} relative`}>
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+            <div className="text-sm text-gray-600">Loading work summary...</div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
-        <h2 className="card-title text-xl font-semibold text-[#003d6b]">Work Log</h2>
-        <button
-          onClick={fetchWorkLogData}
-          disabled={loading}
-          className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCw size={14} className={`mr-1 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
+      <div className="card-header mb-6 pb-2 border-b-2 border-gray-100">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="card-title text-xl font-semibold text-[#003d6b]">Work Summary</h2>
+          <button
+            onClick={fetchWorkLogData}
+            disabled={loading}
+            className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={14} className={`mr-1 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
+        </div>
+        
+        {/* Date Filter */}
+        <div className="flex items-center gap-4">
+          <div className="w-48">
+            <DatePicker
+              id="work-log-date-picker"
+              value={selectedDate}
+              onChange={setSelectedDate}
+              label="Status On"
+              placeholder="Select date..."
+            />
+          </div>
+        </div>
       </div>
 
       {/* Content */}
