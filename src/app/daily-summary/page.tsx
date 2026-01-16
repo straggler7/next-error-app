@@ -63,8 +63,14 @@ function DailySummaryContent() {
       return;
     }
 
+    // Don't make API calls if SEID is not available yet
+    if (!currentUserSeid) {
+      console.log('Daily Summary: SEID not available yet, skipping API call');
+      return;
+    }
+
     try {
-      console.log('Daily Summary: Starting loadDailySummaryRecords');
+      console.log('Daily Summary: Starting loadDailySummaryRecords with SEID:', currentUserSeid);
       setLoading(true);
       setError(null);
 
@@ -138,7 +144,7 @@ function DailySummaryContent() {
     } finally {
       setLoading(false);
     }
-  }, [filters.status, currentUserSeid, pagination.pageSize, pagination.currentPage]);
+  }, [currentUserSeid, filters.status, pagination.pageSize, pagination.currentPage]);
 
   // Separate function for Submit button that includes current seidFilter
   const handleSubmitWithSeidFilter = useCallback(async () => {
