@@ -404,7 +404,7 @@ export default function HomePage() {
       {/* <DevBanner /> */}
       <Header />
       
-      <div className="main-container flex flex-col p-4">
+      <div id="main-content" className="main-container flex flex-col p-4">
         <div className="content-layout flex flex-col items-center gap-2">
           
           {/* Welcome Section */}

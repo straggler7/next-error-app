@@ -80,8 +80,11 @@ export default function Header({ showBackButton = false, backHref = '/', disable
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="p-1 rounded hover:bg-white/10 transition-colors"
+                aria-label={isUserMenuOpen ? "Close user menu" : "Open user menu"}
+                aria-expanded={isUserMenuOpen}
+                aria-haspopup="menu"
               >
-                <ChevronDown size={16} />
+                <ChevronDown size={16} aria-hidden="true" />
               </button>
               
               {isUserMenuOpen && (

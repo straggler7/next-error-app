@@ -480,7 +480,7 @@ function DailySummaryContent() {
         </div>
       )}
       
-      <div className="main-container p-4 mx-auto">
+      <div id="main-content" className="main-container p-4 mx-auto">
         <div className={`grid gap-6 ${shouldShowWorkLog ? 'grid-cols-[30%_1fr]' : 'grid-cols-1'}`}>
           {/* Work Log Panel - 30% width, only for tax examiners and analysts */}
           {shouldShowWorkLog && (
