@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
+import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import Header from '../../components/Header';
 import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import FilterBar from '../../components/FilterBar';
@@ -69,10 +69,27 @@ function DailySummaryContent() {
       return;
     }
 
+    // Don't make API calls if user data is still loading (prevents incorrect isManager value)
+    if (!user) {
+      console.log('Daily Summary: User data not loaded yet, skipping API call');
+      return;
+    }
+
     try {
       console.log('Daily Summary: Starting loadDailySummaryRecords with SEID:', currentUserSeid);
+      console.log('Daily Summary: isManager:', isManager, 'seidFilter:', seidFilter);
       setLoading(true);
       setError(null);
+
+      const payload = {
+        pageNumber: pagination.currentPage,
+        pageSize: pagination.pageSize,
+        statuses: ['RESOLVED', 'SUSPEND'],
+        ...(isManager && { managerSearch: true }),
+        ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
+      };
+      
+      console.log('Daily Summary: API payload:', JSON.stringify(payload, null, 2));
 
       // Use the daily summary endpoint
       const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
@@ -81,13 +98,7 @@ function DailySummaryContent() {
           'Content-Type': 'application/json',
           'SEID': `${currentUserSeid}`
         },
-        body: JSON.stringify({
-          pageNumber: pagination.currentPage,
-          pageSize: pagination.pageSize,
-          statuses: ['RESOLVED', 'SUSPEND'],
-          ...(isManager && { managerSearch: true }),
-          ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
-        })
+        body: JSON.stringify(payload)
       });
 
       // if (!response.ok) {
@@ -144,7 +155,7 @@ function DailySummaryContent() {
     } finally {
       setLoading(false);
     }
-  }, [currentUserSeid, filters.status, pagination.pageSize, pagination.currentPage]);
+  }, [currentUserSeid, filters.status, pagination.pageSize, pagination.currentPage, isManager, user]);
 
   // Separate function for Submit button that includes current seidFilter
   const handleSubmitWithSeidFilter = useCallback(async () => {
@@ -154,12 +165,28 @@ function DailySummaryContent() {
       return;
     }
 
+    // Don't make API calls if user data is still loading (prevents incorrect isManager value)
+    if (!user) {
+      console.log('Daily Summary: User data not loaded yet, skipping API call');
+      return;
+    }
+
     try {
       console.log('Daily Summary: Starting handleSubmitWithSeidFilter with SEID:', seidFilter);
+      console.log('Daily Summary: isManager:', isManager, 'seidFilter:', seidFilter);
       setLoading(true);
       setError(null);
 
-      console.log('SEID FILTER: ', seidFilter);
+      const payload = {
+        pageNumber: pagination.currentPage,
+        pageSize: pagination.pageSize,
+        statuses: ['RESOLVED', 'SUSPEND'],
+        ...(isManager && { managerSearch: true }),
+        ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
+      };
+      
+      console.log('Daily Summary: Submit API payload:', JSON.stringify(payload, null, 2));
+
       // Use the daily summary endpoint
       const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
         method: 'POST',
@@ -167,13 +194,7 @@ function DailySummaryContent() {
           'Content-Type': 'application/json',
           'SEID': `${currentUserSeid}`
         },
-        body: JSON.stringify({
-          pageNumber: pagination.currentPage,
-          pageSize: pagination.pageSize,
-          statuses: ['RESOLVED', 'SUSPEND'],
-          ...(isManager && { managerSearch: true }),
-          ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -508,6 +529,19 @@ function DailySummaryContent() {
                   })()}
                 </div>
               </div>
+            </div>
+            
+            {/* Refresh Button */}
+            <div className="flex items-center">
+              <button
+                onClick={loadDailySummaryRecords}
+                disabled={loading}
+                className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh records"
+              >
+                <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
             </div>
           </div>
 
