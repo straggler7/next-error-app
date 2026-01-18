@@ -38,6 +38,7 @@ import {
 } from "../../services/suspenseCodesService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
+import { getServiceCenterName } from "../../utils/serviceCenters";
 // import DevBanner from "../../components/DevBanner";
 import newFieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
@@ -639,6 +640,16 @@ function Form4868ERSPageContent() {
       setEraDto(eraDtoData);
       setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
 
+      // Update landingSelectionData with values from eraDto
+      if (eraDtoData.serviceCenterId || eraDtoData.programId) {
+        const updatedSelectionData = {
+          ...landingSelectionData,
+          serviceCenter: eraDtoData.serviceCenterId ? getServiceCenterName(eraDtoData.serviceCenterId).toLowerCase() : landingSelectionData?.serviceCenter,
+          program: eraDtoData.programId || landingSelectionData?.program
+        };
+        setLandingSelectionData(updatedSelectionData);
+      }
+
       // Populate action code from stored DTO
       // Note: clearCodesInput is separate from eraDtoData.clearCodes
       // eraDtoData.clearCodes contains actual error codes like ["111", "103"]
@@ -755,6 +766,15 @@ function Form4868ERSPageContent() {
         // Update state with new ERA DTO
         setEraDto(eraDtoData);
         setInventoryId(eraDtoData.inventoryId || eraDtoData.id);
+
+        // Update landingSelectionData with values from new eraDto
+        if (eraDtoData.serviceCenterId || eraDtoData.programId) {
+          setLandingSelectionData((prevData: any) => ({
+            ...prevData,
+            serviceCenter: eraDtoData.serviceCenterId ? getServiceCenterName(eraDtoData.serviceCenterId).toLowerCase() : prevData?.serviceCenter,
+            program: eraDtoData.programId || prevData?.program
+          }));
+        }
 
         // Populate action code from new DTO
         // Note: clearCodesInput is separate from eraDtoData.clearCodes
@@ -2266,44 +2286,16 @@ function Form4868ERSPageContent() {
             <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
               Inventory ID: {inventoryId}
             </span>
-            {/* {landingSearchData && (
+            <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+              Service Center: {eraDto?.serviceCenterId && getServiceCenterName(eraDto.serviceCenterId)}
+            </span>
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+              Program XXXYYY: {eraDto?.programId}
+            </span>
+            {landingSelectionData.statusCode && (
               <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                Search:{" "}
-                {landingSearchData.dln ||
-                  landingSearchData.nameControl ||
-                  landingSearchData.tin ||
-                  landingSearchData.taxpayerName ||
-                  "Multiple criteria"}
+                Status Code: {landingSelectionData.statusCode}
               </span>
-            )} */}
-            {landingSelectionData && (
-              <>
-                {/* <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
-                  {landingSelectionData.program &&
-                    `Program: ${landingSelectionData.program}`}
-                  {landingSelectionData.statusCode &&
-                    `Status: ${landingSelectionData.statusCode}`}
-                  {landingSelectionData.serviceCenter &&
-                    ` | ${landingSelectionData.serviceCenter.toUpperCase()}`}
-                </span> */}
-                <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
-                  {landingSelectionData.program &&
-                    `Service Center: ${
-                      landingSelectionData.serviceCenter
-                        .charAt(0)
-                        .toUpperCase() +
-                      landingSelectionData.serviceCenter.slice(1)
-                    }`}
-                </span>
-                <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
-                  Program: {landingSelectionData.program}
-                </span>
-                {landingSelectionData.statusCode && (
-                  <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                    Status Code: {landingSelectionData.statusCode}
-                  </span>
-                )}
-              </>
             )}
           </div>
           {/* <button className="inline-flex items-center gap-2 px-6 py-2 bg-[#0f507e] text-white text-sm font-medium rounded-lg transition-all duration-200 hover:bg-[#0f507e] hover:-translate-y-0.5 shadow-sm">

@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 import ErrorAlert from "../../components/ErrorAlert";
 import { useAuth } from "../../contexts/AuthContext";
+import { useSeid } from "../../hooks/useSeid";
+import { getServiceCenterName, serviceCenters } from "../../utils/serviceCenters";
 import { landingSearchService } from "../../services/landingSearchService";
 import { DLNSearchService } from "../../services/dlnSearchService";
-import { useSeid } from "../../hooks/useSeid";
 import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
-import { serviceCenters, getServiceCenterName } from "../../utils/serviceCenters";
 
 interface SearchFormData {
   dln: string;
@@ -348,9 +348,9 @@ export default function HomePage() {
             // Store the ERA DTO data for the workRecord page (same as successful auto-assign)
             sessionStorage.setItem('eraDto', JSON.stringify(eraDto));
             sessionStorage.setItem('selectionData', JSON.stringify({
-              program: programForm.program,
+              program: eraDto.programId,
               statusCode: programForm.statusCode,
-              serviceCenter: programForm.serviceCenter,
+              serviceCenter: eraDto.serviceCenterId ? getServiceCenterName(eraDto.serviceCenterId).toLowerCase() : undefined,
               seid: programForm.seid
             }));
 
