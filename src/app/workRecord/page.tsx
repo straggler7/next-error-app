@@ -698,6 +698,11 @@ function Form4868ERSPageContent() {
     setFieldWithErrors([]);
   }, []);
 
+  // Set document title for the page
+  useEffect(() => {
+    document.title = "Work Record - IRS Error Resolution System";
+  }, []);
+
   useEffect(() => {
     setValues(initialValues);
     setOriginalValues(initialValues);
@@ -1567,15 +1572,15 @@ function Form4868ERSPageContent() {
             router.push("/daily-summary");
           }, 2000);
         } else {
-          setFlashMessage(
-            "Record closed out successfully. Returning to home..."
+          setInfoMessage(
+            "Record closed out successfully. You will be redirected to the home page in a few seconds."
           );
-          setShowFlash(true);
+          setShowInfo(true);
 
           // Navigate to home after a brief delay to show the message
           setTimeout(() => {
             router.push("/home");
-          }, 2000);
+          }, 3000);
         }
       } else {
         const errorText = await response.text();
@@ -2310,9 +2315,9 @@ function Form4868ERSPageContent() {
       {/* Error Badges Section - Only show if there are visible errors */}
       {errorItems.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
-          <div className="error-badges-title text-base font-semibold mb-4 text-gray-700">
+          <h2 className="error-badges-title text-base font-semibold mb-4 text-gray-700">
             Errors
-          </div>
+          </h2>
           <div className="error-badges-container flex flex-wrap gap-2">
             {errorItems.map((error) => (
               <div
@@ -2416,7 +2421,7 @@ function Form4868ERSPageContent() {
                     {/* Non-Editable Fields Section */}
                     {nonEditableFieldKeys.length > 0 && (
                       <div className="mt-2">
-                        <h4 className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2"></h4>
+                        <div className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2"></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {nonEditableFieldKeys.map((key) => (
                             <FormField
