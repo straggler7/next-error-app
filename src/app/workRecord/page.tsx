@@ -19,6 +19,7 @@ import InfoAlert from "../../components/InfoAlert";
 import FormSection, {
   FormField,
   FormInput,
+  FormSelect,
 } from "../../components/FormSection";
 // import NotesSection from "../../components/NotesSection";
 import { ErrorItem, Note } from "../../types";
@@ -2441,16 +2442,14 @@ function Form4868ERSPageContent() {
               <FormSection title="">
                 <div>
                   <FormField label="Action Code" required htmlFor="actionCodeSelect">
-                    <select
+                    <FormSelect
                       id="actionCodeSelect"
                       value={actionCode}
-                      onChange={(e) => {
-                        const value = e.target.value;
+                      onChange={(value) => {
                         setActionCode(value);
                         handleInputChange("suspendStatusCode", value);
                       }}
                       disabled={loadingSuspenseCodes}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-sm hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                     >
                       <option value="">
                         {loadingSuspenseCodes
@@ -2466,7 +2465,7 @@ function Form4868ERSPageContent() {
                           {suspenseCode.daysSuspended} days)
                         </option>
                       ))}
-                    </select>
+                    </FormSelect>
                   </FormField>
                 </div>
               </FormSection>
