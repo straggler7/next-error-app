@@ -170,7 +170,7 @@ function Form4868ERSPageContent() {
   const [originalFormElements, setOriginalFormElements] = useState<
     FormElement[]
   >([]);
-  const [landingSearchData, setLandingSearchData] = useState<any>(null);
+  // const [landingSearchData, setLandingSearchData] = useState<any>(null);
   const [landingSelectionData, setLandingSelectionData] = useState<any>(null);
 
   // Validation state
@@ -1426,7 +1426,14 @@ function Form4868ERSPageContent() {
           const updatedRecord = result.inventoryItem;
 
           if (updatedRecord) {
-            setEraDto(updatedRecord);
+            // Preserve programId and serviceCenterId from original eraDto if missing in response
+            const recordWithPreservedFields = {
+              ...updatedRecord,
+              programId: updatedRecord.programId || eraDto?.programId,
+              serviceCenterId: updatedRecord.serviceCenterId || eraDto?.serviceCenterId
+            };
+            
+            setEraDto(recordWithPreservedFields);
             setInventoryId(
               result.inventoryId ||
                 updatedRecord.inventoryId ||
@@ -1472,7 +1479,7 @@ function Form4868ERSPageContent() {
             }
 
             // Update sessionStorage
-            sessionStorage.setItem("eraDto", JSON.stringify(updatedRecord));
+            sessionStorage.setItem("eraDto", JSON.stringify(recordWithPreservedFields));
 
             // Show info alert for additional error correction needed
             setInfoMessage("Requires additional error correction");
@@ -1876,7 +1883,14 @@ function Form4868ERSPageContent() {
           const updatedRecord = result.inventoryItem;
 
           if (updatedRecord) {
-            setEraDto(updatedRecord);
+            // Preserve programId and serviceCenterId from original eraDto if missing in response
+            const recordWithPreservedFields = {
+              ...updatedRecord,
+              programId: updatedRecord.programId || eraDto?.programId,
+              serviceCenterId: updatedRecord.serviceCenterId || eraDto?.serviceCenterId
+            };
+            
+            setEraDto(recordWithPreservedFields);
             setInventoryId(
               result.inventoryId ||
                 updatedRecord.inventoryId ||
@@ -1922,7 +1936,7 @@ function Form4868ERSPageContent() {
             }
 
             // Update sessionStorage
-            sessionStorage.setItem("eraDto", JSON.stringify(updatedRecord));
+            sessionStorage.setItem("eraDto", JSON.stringify(recordWithPreservedFields));
 
             // Show info alert for additional error correction needed
             setInfoMessage("Requires additional error correction");
@@ -2290,7 +2304,7 @@ function Form4868ERSPageContent() {
               Service Center: {eraDto?.serviceCenterId && getServiceCenterName(eraDto.serviceCenterId)}
             </span>
             <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
-              Program XXXYYY: {eraDto?.programId}
+              Program: {eraDto?.programId}
             </span>
             {landingSelectionData.statusCode && (
               <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">

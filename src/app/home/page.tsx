@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 import ErrorAlert from "../../components/ErrorAlert";
+import InfoAlert from "../../components/InfoAlert";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid } from "../../hooks/useSeid";
 import { getServiceCenterName, serviceCenters } from "../../utils/serviceCenters";
@@ -85,8 +86,25 @@ export default function HomePage() {
   const [isSubmitButtonEnabled, setIsSubmitButtonEnabled] = useState(false);
   const [statusCodes, setStatusCodes] = useState<SuspenseCode[]>([]);
   const [loadingStatusCodes, setLoadingStatusCodes] = useState(false);
+  
+  // Info alert state
+  const [infoMessage, setInfoMessage] = useState<string>("");
+  const [showInfo, setShowInfo] = useState(false);
+  
+  // Ref for InfoAlert to focus on it when shown
+  const infoAlertRef = useRef<HTMLDivElement>(null);
 
   const currentUserSeid = useSeid();
+
+  // Focus on InfoAlert when it's shown
+  useEffect(() => {
+    if (showInfo && infoAlertRef.current) {
+      // Small delay to ensure the component is rendered
+      setTimeout(() => {
+        infoAlertRef.current?.focus();
+      }, 100);
+    }
+  }, [showInfo]);
 
   // Validation functions
   const validateDLN = (dln: string): boolean => {
@@ -345,6 +363,11 @@ export default function HomePage() {
           if (assignmentResponse.ok) {
             const eraDto = await assignmentResponse.json();
             
+            // Show info alert with program and service center details
+            const serviceCenterName = eraDto.serviceCenterId ? getServiceCenterName(eraDto.serviceCenterId) : 'Unknown';
+            setInfoMessage(`Assigned work record found Program: ${eraDto.programId}, Service Center: ${serviceCenterName}. Retrieving details.`);
+            setShowInfo(true);
+            
             // Store the ERA DTO data for the workRecord page (same as successful auto-assign)
             sessionStorage.setItem('eraDto', JSON.stringify(eraDto));
             sessionStorage.setItem('selectionData', JSON.stringify({
@@ -354,7 +377,11 @@ export default function HomePage() {
               seid: programForm.seid
             }));
 
-            router.push('/workRecord');
+            // Navigate after 5 seconds
+            setTimeout(() => {
+              setShowInfo(false);
+              router.push('/workRecord');
+            }, 5000);
           } else {
             const assignmentErrorText = await assignmentResponse.text();
             setProgramStatusError(`Error fetching existing assignment: ${assignmentErrorText}`);
@@ -416,6 +443,18 @@ export default function HomePage() {
               Search by DLN, Name Control, TIN, or Taxpayer Name, or select your program/status code and service center to begin error resolution processing.
             </p>
           </div>
+
+          {/* Info Alert */}
+          {showInfo && (
+            <div className="px-4 pt-6 pb-2 w-full max-w-6xl">
+              <InfoAlert
+                ref={infoAlertRef}
+                message={infoMessage}
+                onClose={() => setShowInfo(false)}
+                variant="info"
+              />
+            </div>
+          )}
 
           {/* Error Alerts Section */}
           <div className="error-alerts-section w-full max-w-6xl">
