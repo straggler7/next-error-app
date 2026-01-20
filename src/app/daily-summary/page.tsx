@@ -18,6 +18,7 @@ import { User, FilterState, PaginationState, ActionDropdownItem } from '../../ty
 import { InventoryRecord } from '../../types';
 import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
+import { formatISOTimestamp } from '../../utils/dateFormatters';
 import { useAuth } from '../../contexts/AuthContext';
 
 function DailySummaryContent() {
@@ -84,7 +85,7 @@ function DailySummaryContent() {
       const payload = {
         pageNumber: pagination.currentPage,
         pageSize: pagination.pageSize,
-        statuses: ['RESOLVED', 'SUSPEND'],
+        statuses: ['RESOLVED', 'SUSPEND', 'DELETED'],
         ...(isManager && { managerSearch: true }),
         ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
       };
@@ -417,9 +418,10 @@ function DailySummaryContent() {
       header: 'Control Day',
       size: 100,
     }),
-    columnHelper.accessor('updatedDate', {
-      header: 'Updated Date',
+    columnHelper.accessor('updatedTime', {
+      header: 'Updated At',
       size: 120,
+      cell: ({ getValue }) => formatISOTimestamp(getValue()),
     }),
     // Add Reopen button column
     columnHelper.display({
@@ -481,7 +483,7 @@ function DailySummaryContent() {
       )}
       
       <div id="main-content" className="main-container p-4 mx-auto">
-        <div className={`grid gap-6 ${shouldShowWorkLog ? 'grid-cols-[40%_1fr]' : 'grid-cols-1'}`}>
+        <div className={`grid gap-6 ${shouldShowWorkLog ? 'grid-cols-[35%_1fr]' : 'grid-cols-1'}`}>
           {/* Work Log Panel - 30% width, only for tax examiners and analysts */}
           {shouldShowWorkLog && (
             <div className="min-h-0">

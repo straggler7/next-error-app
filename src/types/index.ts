@@ -130,7 +130,7 @@ export interface InventoryRecord {
   taxPeriod: string;
   statusEventId: number;
   status: string;
-  updatedDate: string;
+  updatedTime: string;
   payloadId: number;
   seid: string;
   submissionTins: string;
