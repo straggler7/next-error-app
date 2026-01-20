@@ -161,6 +161,46 @@ export class ReportsService {
   }
 
   /**
+   * Fetch 1340_New report data (identical to 1340 report)
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async get1340NewReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      const response = await fetch('/api2/v1/era/reports/get-reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify({
+          ...payload,
+          status: 'NEW' // Always include status for 1340_New (same as 1340)
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading 1340_New report:", error);
+        throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching 1340_New report:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch 0540 report data (Deleted Records Report)
    * @param seid - Current user's SEID
    * @param payload - Report request payload

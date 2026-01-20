@@ -15,7 +15,7 @@ import ErrorAlert from './ErrorAlert';
 
 interface BaseReportProps {
   title: string;
-  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1341' | '1342' | '1343' | '1740' | '3141' | '7740' | '7741' | '7742' | '7743' | '7744' | '7745' | '7746' | '7747';
+  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1340_New' | '1341' | '1342' | '1343' | '1740' | '3141' | '7740' | '7741' | '7742' | '7743' | '7744' | '7745' | '7746' | '7747';
   data: ReportRecord[];
   loading: boolean;
   error?: string | null;
@@ -105,6 +105,21 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
   }
 
   if (reportType === '1340') {
+    return [
+      { key: 'dln', label: 'DLN', visible: true, width: 150 },
+      // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
+      { key: 'submissionNames', label: 'Name Control', visible: true, width: 150 },
+      { key: 'serviceCenterId', label: 'Service Center', visible: true, width: 120 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'source', label: 'Source', visible: true, width: 120 },
+      { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
+      { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
+      { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 }
+    ];
+  }
+
+  if (reportType === '1340_New') {
     return [
       { key: 'dln', label: 'DLN', visible: true, width: 150 },
       // { key: 'submissionTins', label: 'SSN', visible: true, width: 120 },
@@ -353,7 +368,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 const columnHelper = createColumnHelper<ReportRecord>();
 
 // Reports that support end date functionality
-const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1342', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747'] as const;
+const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747'] as const;
 
 // Helper function to check if a report supports end date
 const supportsEndDate = (reportType: string): boolean => {
@@ -578,8 +593,8 @@ export default function BaseReport({
         payload.seid = taxExaminerSeid.trim().toLowerCase();
       }
 
-      // Add status for 1340 and 0540 reports
-      if (reportType === '1340') {
+      // Add status for 1340, 1340_New and 0540 reports
+      if (reportType === '1340' || reportType === '1340_New') {
         payload.status = 'NEW';
       }
       
@@ -687,7 +702,7 @@ export default function BaseReport({
     }
 
     // Add status for specific report types
-    if (reportType === '1340' || reportType === '0040') {
+    if (reportType === '1340' || reportType === '1340_New' || reportType === '0040') {
       payload.status = 'NEW';
     } else if (reportType === '0540') {
       payload.status = 'DELETED';
