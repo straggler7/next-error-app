@@ -34,7 +34,23 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
       year: 'numeric' 
     });
   });
+  const [selectedEndDate, setSelectedEndDate] = useState<string>(() => {
+    // Default to today's date
+    return new Date().toLocaleDateString('en-US', { 
+      month: '2-digit', 
+      day: '2-digit', 
+      year: 'numeric' 
+    });
+  });
   const seid = useSeid();
+
+  // Validation function to check if end date is after start date
+  const isEndDateValid = (startDate: string, endDate: string): boolean => {
+    if (!endDate) return true; // End date is optional
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return end >= start;
+  };
 
   const fetchWorkLogData = useCallback(async () => {
     if (!seid) return;
@@ -49,7 +65,7 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
         pageSize: 100, // Get more records to ensure we capture all program codes
         reportId: '7746',
         startDateStr: selectedDate,
-        endDateStr: selectedDate,
+        endDateStr: selectedEndDate || selectedDate, // Use end date if provided, otherwise use start date
         seid: seid // Include the current user's SEID
       };
 
@@ -92,11 +108,16 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [seid, selectedDate]);
+  }, [seid, selectedDate, selectedEndDate]);
 
+  // Initial load on component mount only
   useEffect(() => {
     fetchWorkLogData();
-  }, [fetchWorkLogData]);
+  }, [seid]); // Only depend on seid, not fetchWorkLogData to prevent re-runs on date changes
+
+  const handleSubmit = () => {
+    fetchWorkLogData();
+  };
 
   const programCodes = Object.keys(workLogData).sort();
 
@@ -127,15 +148,36 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
         </div>
         
         {/* Date Filter */}
-        <div className="flex items-center gap-4">
-          <div className="w-48">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-end gap-4">
+          <div className="w-full sm:w-48 sm:min-w-0 sm:flex-shrink-0">
             <DatePicker
-              id="work-log-date-picker"
+              id="work-log-start-date-picker"
               value={selectedDate}
               onChange={setSelectedDate}
-              label="Status On"
-              placeholder="Select date..."
+              label="Start Date"
+              placeholder="Select start date..."
             />
+          </div>
+          <div className="w-full sm:w-48 sm:min-w-0 sm:flex-shrink-0">
+            <DatePicker
+              id="work-log-end-date-picker"
+              value={selectedEndDate}
+              onChange={setSelectedEndDate}
+              label="End Date"
+              placeholder="Select end date..."
+            />
+            {selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate) && (
+              <p className="text-red-500 text-xs mt-1">End date must be on or after start date</p>
+            )}
+          </div>
+          <div className="w-full sm:w-auto sm:min-w-0">
+            <button
+              onClick={handleSubmit}
+              disabled={loading || !isEndDateValid(selectedDate, selectedEndDate)}
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+            >
+              {loading ? 'Loading...' : 'Submit'}
+            </button>
           </div>
         </div>
       </div>
