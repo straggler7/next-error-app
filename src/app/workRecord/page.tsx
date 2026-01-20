@@ -419,13 +419,8 @@ function Form4868ERSPageContent() {
       ersReasonCds = errorSource.ersReasonCds || [];
     }
 
-    // Get current clear codes to filter out matching errors
-    const currentClearCodes = getClearCodesArray();
-
     // Process ERS reason codes
     if (errorSource && ersReasonCds.length > 0) {
-      // For new clear code system: filter out non-field errors if 'C' is entered and error is clearable
-      const clearCodeEntered = hasClearCode();
 
       const filteredErrors = ersReasonCds.filter((code: string) => {
         // Check if this is a field error
@@ -453,14 +448,6 @@ function Form4868ERSPageContent() {
         //   return false; // Hide this error
         // }
 
-        // Legacy support: also check old clear codes array
-        const isCleared = currentClearCodes.includes(code);
-        if (isCleared) {
-          console.log(
-            `Error ${code} is cleared by clear codes, hiding from display`
-          );
-          return false;
-        }
 
         return true; // Show this error
       });
@@ -468,8 +455,6 @@ function Form4868ERSPageContent() {
       console.log(
         "Original errors:",
         ersReasonCds,
-        "Clear codes:",
-        currentClearCodes,
         "Filtered errors:",
         filteredErrors
       );
@@ -1128,10 +1113,19 @@ function Form4868ERSPageContent() {
     return errorConfigItem?.clearable === true;
   }, [currentNonFieldError]);
 
-  // Reset clear code field when current error changes
+  // Track previous error code to only clear input when error actually changes
+  const prevErrorCodeRef = useRef<string | null>(null);
+  
+  // Reset clear code field when current error code actually changes
   useEffect(() => {
-    setClearCodesInput("");
-  }, [currentNonFieldError]);
+    const currentErrorCode = currentNonFieldError?.code || null;
+    
+    if (prevErrorCodeRef.current !== currentErrorCode) {
+      console.log("currentNonFieldError code changed, clearing input:", prevErrorCodeRef.current, "→", currentErrorCode);
+      setClearCodesInput("");
+      prevErrorCodeRef.current = currentErrorCode;
+    }
+  }, [currentNonFieldError?.code]);
 
   // Helper function to check if user has delete permission for current program
   const hasDeletePermission = useMemo(() => {
