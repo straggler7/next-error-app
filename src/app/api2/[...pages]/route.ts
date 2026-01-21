@@ -92,7 +92,7 @@ async function handleRequest(
       headers: forwardHeaders,
       body,
       // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(30000) // 30 second timeout
+      signal: AbortSignal.timeout(120000) // 120 second timeout (2 minutes)
     });
 
     console.log(`API2 Backend responded with status: ${response.status}`);

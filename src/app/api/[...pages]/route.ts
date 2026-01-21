@@ -124,7 +124,7 @@ async function handleRequest(
       headers: forwardHeaders,
       body,
       // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(30000) // 30 second timeout
+      signal: AbortSignal.timeout(120000) // 2 minutes timeout
     });
 
     console.log(`Backend responded with status: ${response.status}`);
