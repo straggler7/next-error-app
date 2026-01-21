@@ -1075,6 +1075,49 @@ export class ReportsService {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   }
+
+  /**
+   * Fetch Close Out report data
+   * @param seid - Current user's SEID
+   * @param payload - Report request payload
+   * @returns Promise<ReportRecord[]> - Array of report records
+   */
+  static async getCloseOutReport(seid: string, payload: ReportPayload): Promise<ReportRecord[]> {
+    try {
+      // For Close Out report, use startDateStr as default for endDateStr if not provided
+      const enhancedPayload = {
+        ...payload,
+        endDateStr: payload.endDateStr || payload.startDateStr,
+      };
+
+      const response = await fetch('/api2/v1/era/reports/assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'SEID': seid,
+        },
+        body: JSON.stringify(enhancedPayload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = JSON.parse(errorText);
+        console.error("Error loading Close Out report:", error);
+        throw new Error(error.message);
+      }
+
+      // Handle 204 No Content response
+      if (response.status === 204) {
+        return [];
+      }
+
+      const reportData: ReportRecord[] = await response.json();
+      return reportData;
+    } catch (error) {
+      console.error('Error fetching Close Out report:', error);
+      throw error;
+    }
+  }
 }
 
 export default ReportsService;

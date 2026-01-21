@@ -53,6 +53,12 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
       filter: { type: 'navigate', value: 'report1340_New' }
     },
     { 
+      id: 'reportCloseOut', 
+      label: 'Close Out', 
+      href: '/reports/close-out', 
+      filter: { type: 'navigate', value: 'reportCloseOut' }
+    },
+    { 
       id: 'report1341', 
       label: '1341', 
       href: '/reports/1341', 
@@ -191,6 +197,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     if (pathname === '/reports/0040' && itemId === 'report0040') return true;
     if (pathname === '/reports/1340' && itemId === 'report1340') return true;
     if (pathname === '/reports/1340_New' && itemId === 'report1340_New') return true;
+    if (pathname === '/reports/close-out' && itemId === 'reportCloseOut') return true;
     if (pathname === '/reports/1341' && itemId === 'report1341') return true;
     if (pathname === '/reports/1342' && itemId === 'report1342') return true;
     if (pathname === '/reports/1740' && itemId === 'report1740') return true;

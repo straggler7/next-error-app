@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Download, RefreshCw } from 'lucide-react';
 import { getServiceCenterName, serviceCenters } from '../utils/serviceCenters';
+import { formatISOTimestamp } from '../utils/dateFormatters';
 import { ReportRecord, ReportPayload } from '../services/reportsService';
 import ColumnSelector, { ColumnConfig } from './ColumnSelector';
 import DatePicker from './DatePicker';
@@ -15,7 +16,7 @@ import ErrorAlert from './ErrorAlert';
 
 interface BaseReportProps {
   title: string;
-  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1340_New' | '1341' | '1342' | '1343' | '1740' | '3141' | '7740' | '7741' | '7742' | '7743' | '7744' | '7745' | '7746' | '7747';
+  reportType: '0040' | '0340' | '0341' | 'MERDAIL' | 'MERYRDT' | '0540' | '1340' | '1340_New' | '1341' | '1342' | '1343' | '1740' | '3141' | '7740' | '7741' | '7742' | '7743' | '7744' | '7745' | '7746' | '7747' | 'close-out';
   data: ReportRecord[];
   loading: boolean;
   error?: string | null;
@@ -336,6 +337,23 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 130 }
     ];
   }
+
+  if (reportType === 'close-out') {
+    return [
+      { key: 'dln', label: 'DLN', visible: true, width: 150 },
+      { key: 'seid', label: 'Tax Examiner', visible: true, width: 120 },
+      { key: 'formType', label: 'Form Type', visible: true, width: 100 },
+      { key: 'programId', label: 'Program', visible: true, width: 100 },
+      { key: 'assignmentDate', label: 'Assignment Date', visible: true, width: 100 },
+      // { key: 'totalTimeSpentStr', label: 'Total Hours Worked', visible: true, width: 150 },
+      // { key: 'totalVolume', label: 'Total Volume Worked', visible: true, width: 150 },
+      // { key: 'volumePerHr', label: 'Volume Per Hour', visible: true, width: 150 },
+      // { key: 'resolvedQty', label: 'Resolved Quantity', visible: true, width: 130 },
+      // { key: 'deletedQty', label: 'Deleted Quantity', visible: true, width: 130 },
+      // { key: 'suspendedQty', label: 'Suspended Quantity', visible: true, width: 140 },
+      // { key: 'reWorkedQty', label: 'ReWorked Quantity', visible: true, width: 140 },
+    ];
+  }
   
   // Default columns for other reports
   return [
@@ -368,7 +386,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 const columnHelper = createColumnHelper<ReportRecord>();
 
 // Reports that support end date functionality
-const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747'] as const;
+const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747', 'close-out'] as const;
 
 // Helper function to check if a report supports end date
 const supportsEndDate = (reportType: string): boolean => {
@@ -516,14 +534,12 @@ export default function BaseReport({
 
     // Format updatedTime for report 1740 as mm/dd/yyyy hh:mm:ss
     if (key === 'updatedTime' && reportType === '1740') {
-      const date = new Date(value);
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      const year = date.getFullYear();
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-      const seconds = date.getSeconds().toString().padStart(2, '0');
-      return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+      return formatISOTimestamp(value);
+    }
+
+    // Format assignmentDate for close-out report as mm/dd/yyyy hh:mm:ss
+    if (key === 'assignmentDate' && reportType === 'close-out') {
+      return formatISOTimestamp(value);
     }
     
     if (key === 'serviceCenterId') {
@@ -576,11 +592,11 @@ export default function BaseReport({
       }
 
       // Add current filter parameters
-      if (searchTerm.trim() && reportType !== '0340' && reportType !== '0540' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745') {
+      if (searchTerm.trim() && reportType !== '0340' && reportType !== '0540' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== 'close-out') {
         payload.dln = searchTerm.trim();
       }
 
-      if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745') {
+      if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== 'close-out') {
         payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
       }
 
@@ -627,12 +643,12 @@ export default function BaseReport({
     }
 
     // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 1343, 7740, 7741, 7742, 7743, 7744, 7745 reports)
-    if (searchTerm.trim() && reportType !== '0340' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745') {
+    if (searchTerm.trim() && reportType !== '0340' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== 'close-out') {
       payload.dln = searchTerm.trim();
     }
 
-    // Add service center only for reports that support it (exclude 1343, 7740, 7741, 7742, 7743, 7744, 7745)
-    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745') {
+    // Add service center only for reports that support it (exclude 1343, 7740, 7741, 7742, 7743, 7744, 7745, close-out)
+    if (selectedServiceCenter && selectedServiceCenter !== 'All Service Centers' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== 'close-out') {
       payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
     }
 
@@ -681,13 +697,13 @@ export default function BaseReport({
     }
 
     // Add optional filter parameters if they have values (exclude DLN for 0340, 1341, 1343, 7740, 7741, 7742, 7743, 7744, 7745 reports)
-    const excludeDlnReports = ['0340', '1341', '1343', '7740', '7741', '7742', '7743', '7744', '7745'];
+    const excludeDlnReports = ['0340', '1341', '1343', '7740', '7741', '7742', '7743', '7744', '7745', 'close-out'];
     if (!excludeDlnReports.includes(reportType) && searchTerm.trim()) {
       payload.dln = searchTerm.trim();
     }
 
     // Add service center only for reports that support it (exclude 1343, 7740, 7741, 7742, 7743, 7744, 7745)
-    const excludeServiceCenterReports = ['1343', '7740', '7741', '7742', '7743', '7744', '7745'];
+    const excludeServiceCenterReports = ['1343', '7740', '7741', '7742', '7743', '7744', '7745', 'close-out'];
     if (!excludeServiceCenterReports.includes(reportType) && selectedServiceCenter && selectedServiceCenter !== 'All Service Centers') {
       payload.serviceCenterEnum = selectedServiceCenter.toUpperCase();
     }
@@ -760,7 +776,7 @@ export default function BaseReport({
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6 items-end">
           {/* DLN Search - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1341, 1343, 7740, 7741, 7742, 7743, 7744, 7745, 7746, and 7747 reports */}
-          {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== '7746' && reportType !== '7747' && (
+          {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1341' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== '7746' && reportType !== '7747' && reportType !== 'close-out' && (
             <div className="relative w-48">
               <label htmlFor="dln-input" className="block text-sm font-medium text-gray-700 mb-1">
                 DLN
@@ -806,7 +822,7 @@ export default function BaseReport({
           )}
 
             {/* Service Center Filter - Hidden for 0340, 0341, MERDAIL, MERYRDT, 1343, 7740, 7741, 7742, 7743, 7744, and 7745 reports */}
-            {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && (
+            {reportType !== '0040' && reportType !== '0340' && reportType !== '0341' && reportType !== 'MERDAIL' && reportType !== 'MERYRDT' && reportType !== '1343' && reportType !== '7740' && reportType !== '7741' && reportType !== '7742' && reportType !== '7743' && reportType !== '7744' && reportType !== '7745' && reportType !== 'close-out' && (
               <div className="w-48">
                 <label htmlFor="service-center-select" className="block text-sm font-medium text-gray-700 mb-1">
                   Service Center
