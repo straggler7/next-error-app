@@ -15,7 +15,7 @@
         "description": "Invalid Master File Tax Code"
     },
     "107": {
-        "description": "Tax Period later than the Current Year"
+        "description": "Tax Period"
     },
     "111": {
         "description": "Tax Period/Transaction Date",

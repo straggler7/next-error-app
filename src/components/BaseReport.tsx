@@ -386,7 +386,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
 const columnHelper = createColumnHelper<ReportRecord>();
 
 // Reports that support end date functionality
-const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747', 'CLOSE-OUT'] as const;
+const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1340_New', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747', 'CLOSE-OUT'] as const;
 
 // Helper function to check if a report supports end date
 const supportsEndDate = (reportType: string): boolean => {

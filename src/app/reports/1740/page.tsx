@@ -40,6 +40,7 @@ export default function Report1740Page() {
       pageSize: 20,
       reportId: '1740',
       startDateStr: `${month}/${day}/${year}`,
+      endDateStr: `${month}/${day}/${year}`,
       // No filters on initial load - user must submit to apply filters
     };
     
