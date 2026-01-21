@@ -67,7 +67,7 @@ export default function ReportCloseOut() {
   return (
     <BaseReport
       title="Close Out"
-      reportType="close-out"
+      reportType="CLOSE-OUT"
       data={data}
       loading={loading}
       onRefresh={handleRefresh}
