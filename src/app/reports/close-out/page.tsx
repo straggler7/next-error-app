@@ -35,7 +35,7 @@ export default function ReportCloseOut() {
       const exportData = await ReportsService.getCloseOutReport(seid, payload);
       
       // Download as CSV
-      ReportsService.downloadCSV(exportData, 'close-out', columns);
+      ReportsService.downloadCSV(exportData, 'CLOSE-OUT', columns);
     } catch (error) {
       console.error('Error exporting Close Out report:', error);
       alert('Failed to export report. Please try again.');
@@ -48,7 +48,7 @@ export default function ReportCloseOut() {
       const defaultPayload: ReportPayload = {
         pageNumber: 1,
         pageSize: 25,
-        reportId: 'close-out',
+        reportId: 'CLOSE-OUT',
         startDateStr: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
           month: '2-digit', 
           day: '2-digit', 
