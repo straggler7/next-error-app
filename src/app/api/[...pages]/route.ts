@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Force this API route to be dynamic
 export const dynamic = 'force-dynamic';
+// Set maximum execution time to 2 minutes (120 seconds)
+export const maxDuration = 120;
 // export const revalidate = 0;
 
 // Backend URL configurations

@@ -4,6 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 // export const revalidate = 0;
 
+// Set maximum execution time to 2 minutes (120 seconds)
+export const maxDuration = 120;
+
 // Backend URL for reports
 const REPORTS_BACKEND_URL = process.env.REPORTS_API_URL || 'http://localhost:8081';
 
