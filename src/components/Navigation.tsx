@@ -53,12 +53,6 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
       filter: { type: 'navigate', value: 'report1340_New' }
     },
     { 
-      id: 'reportCloseOut', 
-      label: 'Close Out', 
-      href: '/reports/close-out', 
-      filter: { type: 'navigate', value: 'reportCloseOut' }
-    },
-    { 
       id: 'report1341', 
       label: '1341', 
       href: '/reports/1341', 
@@ -171,6 +165,12 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
       label: 'MERYRDT', 
       href: '/reports/MERYRDT', 
       filter: { type: 'navigate', value: 'reportMERYRDT' }
+    },
+    { 
+      id: 'reportCloseOut', 
+      label: 'Close Out', 
+      href: '/reports/close-out', 
+      filter: { type: 'navigate', value: 'reportCloseOut' }
     },
   ];
 
