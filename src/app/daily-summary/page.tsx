@@ -181,7 +181,7 @@ function DailySummaryContent() {
       const payload = {
         pageNumber: pagination.currentPage,
         pageSize: pagination.pageSize,
-        statuses: ['RESOLVED', 'SUSPEND'],
+        statuses: ['RESOLVED', 'SUSPEND', 'DELETED'],
         ...(isManager && { managerSearch: true }),
         ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
       };
