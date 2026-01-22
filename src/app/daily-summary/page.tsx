@@ -468,11 +468,11 @@ function DailySummaryContent() {
   // };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
       
       {/* Breadcrumbs */}
-      <div className="px-4 pt-4 pb-2">
+      <div className="px-4 pt-4 pb-2 flex-shrink-0">
         <Breadcrumbs items={createBreadcrumbs.dailySummary()} />
       </div>
       
@@ -482,18 +482,20 @@ function DailySummaryContent() {
         </div>
       )}
       
-      <div id="main-content" className="main-container p-4 mx-auto">
-        <div className={`grid gap-6 ${shouldShowWorkLog ? 'grid-cols-[35%_1fr]' : 'grid-cols-1'}`}>
-          {/* Work Log Panel - 30% width, only for tax examiners and analysts */}
-          {shouldShowWorkLog && (
-            <div className="min-h-0">
-              <WorkLogPanel />
-            </div>
-          )}
-          
-          {/* Main Content Panel - remaining space when Work Log is shown, full width otherwise */}
-          <div className="min-h-0">
-            <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col min-h-0">
+      {/* Main scrollable container */}
+      <div className="flex-1 overflow-auto">
+        <div id="main-content" className="main-container p-4 mx-auto min-w-fit">
+          <div className={`grid gap-6 ${shouldShowWorkLog ? 'grid-cols-[35%_1fr]' : 'grid-cols-1'} min-w-fit`}>
+            {/* Work Log Panel - 30% width, only for tax examiners and analysts */}
+            {shouldShowWorkLog && (
+              <div className="min-h-0">
+                <WorkLogPanel />
+              </div>
+            )}
+            
+            {/* Main Content Panel - remaining space when Work Log is shown, full width otherwise */}
+            <div className="min-h-0 min-w-0">
+              <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col min-h-0 overflow-hidden">
           {/* Header */}
           <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
             <div className="flex items-center gap-4">
@@ -644,6 +646,7 @@ function DailySummaryContent() {
             pagination={pagination}
             onPaginationChange={handlePaginationChange}
           />
+              </div>
             </div>
           </div>
         </div>
