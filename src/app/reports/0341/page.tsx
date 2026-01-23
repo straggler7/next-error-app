@@ -63,7 +63,7 @@ export default function Report0341Page() {
 
   return (
     <BaseReport
-      title="Error Count Report"
+      title="Error Count Report (year to date)"
       reportType="0341"
       data={data}
       loading={loading}

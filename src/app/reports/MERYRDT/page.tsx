@@ -63,7 +63,7 @@ export default function ReportMERYRDTPage() {
 
   return (
     <BaseReport
-      title="Error Count Report"
+      title="Error Count Report (year to date)"
       reportType="MERYRDT"
       data={data}
       loading={loading}

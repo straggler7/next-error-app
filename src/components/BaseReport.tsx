@@ -388,9 +388,17 @@ const columnHelper = createColumnHelper<ReportRecord>();
 // Reports that support end date functionality
 const REPORTS_WITH_END_DATE = ['0540', '0340', 'MERDAIL', '1340_New', '1740', '7740', '7741', '7742', '7743', '7744', '7745', '7746', '7747', 'CLOSE-OUT'] as const;
 
+// Year-to-date reports that should use "Till Date" instead of "Status On"
+const YEAR_TO_DATE_REPORTS = ['0341', 'MERYRDT'] as const;
+
 // Helper function to check if a report supports end date
 const supportsEndDate = (reportType: string): boolean => {
   return REPORTS_WITH_END_DATE.includes(reportType as any);
+};
+
+// Helper function to check if a report is year-to-date
+const isYearToDateReport = (reportType: string): boolean => {
+  return YEAR_TO_DATE_REPORTS.includes(reportType as any);
 };
 
 export default function BaseReport({ 
@@ -695,8 +703,8 @@ export default function BaseReport({
         export: true, // Add export flag
       };
 
-    // Add end date for report 0540 if provided
-    if (reportType === '0540' && selectedEndDate) {
+    // Add end date for reports that support it
+    if (supportsEndDate(reportType) && selectedEndDate) {
       payload.endDateStr = selectedEndDate;
     }
 
@@ -810,8 +818,8 @@ export default function BaseReport({
               id="start-date-picker"
               value={selectedDate}
               onChange={setSelectedDate}
-              label={supportsEndDate(reportType) ? "Start Date" : "Status On"}
-              placeholder={supportsEndDate(reportType) ? "Select start date..." : "Select status date..."}
+              label={supportsEndDate(reportType) ? "Start Date" : isYearToDateReport(reportType) ? "Till Date" : "Status On"}
+              placeholder={supportsEndDate(reportType) ? "Select start date..." : isYearToDateReport(reportType) ? "Select till date..." : "Select status date..."}
             />
           </div>
 
