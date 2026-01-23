@@ -21,11 +21,11 @@ const InfoAlert = forwardRef<HTMLDivElement, InfoAlertProps>(({
   const isWarning = variant === 'warning';
   
   const containerClasses = isWarning 
-    ? `border rounded-lg p-4 bg-yellow-50 border-yellow-200 text-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${className}`
-    : `border rounded-lg p-4 bg-blue-50 border-blue-200 text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${className}`;
+    ? `border rounded-lg p-4 bg-yellow-50 border-yellow-200 text-yellow-900 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${className}`
+    : `border rounded-lg p-4 bg-blue-50 border-blue-200 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${className}`;
 
-  const iconClasses = isWarning ? "text-yellow-500" : "text-blue-500";
-  const textClasses = isWarning ? "text-yellow-700" : "text-blue-700";
+  const iconClasses = isWarning ? "text-yellow-600" : "text-blue-600";
+  const textClasses = isWarning ? "text-yellow-800" : "text-blue-800";
 
   return (
     <div 
@@ -49,8 +49,8 @@ const InfoAlert = forwardRef<HTMLDivElement, InfoAlertProps>(({
               onClick={onClose}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
                 isWarning 
-                  ? 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300' 
-                  : 'bg-blue-200 text-blue-800 hover:bg-blue-300'
+                  ? 'bg-yellow-200 text-yellow-900 hover:bg-yellow-300' 
+                  : 'bg-blue-200 text-blue-900 hover:bg-blue-300'
               }`}
             >
               {dismissButtonText}

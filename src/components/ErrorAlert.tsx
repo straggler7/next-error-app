@@ -27,28 +27,28 @@ export default function ErrorAlert({
 
   const styles = {
     error: {
-      container: 'bg-red-50 border-red-200 text-red-800',
-      icon: <AlertTriangle size={20} className="text-red-500" />,
-      title: 'text-red-800',
-      message: 'text-red-700'
+      container: 'bg-red-50 border-red-200 text-red-900',
+      icon: <AlertTriangle size={20} className="text-red-600" />,
+      title: 'text-red-900',
+      message: 'text-red-800'
     },
     success: {
-      container: 'bg-green-50 border-green-200 text-green-800',
-      icon: <CheckCircle size={20} className="text-green-500" />,
-      title: 'text-green-800',
-      message: 'text-green-700'
+      container: 'bg-green-50 border-green-200 text-green-900',
+      icon: <CheckCircle size={20} className="text-green-600" />,
+      title: 'text-green-900',
+      message: 'text-green-800'
     },
     info: {
-      container: 'bg-blue-50 border-blue-200 text-blue-800',
-      icon: <Info size={20} className="text-blue-500" />,
-      title: 'text-blue-800',
-      message: 'text-blue-700'
+      container: 'bg-blue-50 border-blue-200 text-blue-900',
+      icon: <Info size={20} className="text-blue-600" />,
+      title: 'text-blue-900',
+      message: 'text-blue-800'
     },
     warning: {
-      container: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-      icon: <AlertTriangle size={20} className="text-yellow-500" />,
-      title: 'text-yellow-800',
-      message: 'text-yellow-700'
+      container: 'bg-yellow-50 border-yellow-200 text-yellow-900',
+      icon: <AlertTriangle size={20} className="text-yellow-600" />,
+      title: 'text-yellow-900',
+      message: 'text-yellow-800'
     }
   };
 

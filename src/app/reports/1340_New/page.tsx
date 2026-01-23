@@ -64,7 +64,7 @@ export default function Report1340NewPage() {
 
   return (
     <BaseReport
-      title="Error Inventory"
+      title="New Error List"
       reportType="1340_New"
       data={data}
       loading={loading}

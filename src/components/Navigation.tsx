@@ -48,7 +48,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     },
     { 
       id: 'report1340_New', 
-      label: '1340_New', 
+      label: 'New Error List', 
       href: '/reports/1340_New', 
       filter: { type: 'navigate', value: 'report1340_New' }
     },
