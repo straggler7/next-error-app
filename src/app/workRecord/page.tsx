@@ -2358,10 +2358,8 @@ function Form4868ERSPageContent() {
         </div>
       )}
 
-      {/* Main Content */}
-      <main id="main-content" className="main-container">
-        {/* Main Content Grid - 60% Form / 40% Notes */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
+      {/* Main Content Grid - 60% Form / 40% Notes */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
         {/* Form Section (Left 60%) */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
@@ -2494,7 +2492,6 @@ function Form4868ERSPageContent() {
                   handleSubmit();
                 }}
                 disabled={submitting}
-                tabIndex={101}
               >
                 {submitting ? "Submitting..." : "Submit"}
               </button>
@@ -2516,7 +2513,6 @@ function Form4868ERSPageContent() {
                   suspending ||
                   Object.keys(validationErrors).length > 0
                 }
-                tabIndex={102}
               >
                 {suspending ? "Suspending..." : "Suspend"}
               </button>
@@ -2535,7 +2531,6 @@ function Form4868ERSPageContent() {
                   handleCloseout();
                 }}
                 disabled={closingOut}
-                tabIndex={103}
               >
                 {closingOut ? "Closing Out..." : "Close Out"}
               </button>
@@ -2552,7 +2547,6 @@ function Form4868ERSPageContent() {
                     handleDelete();
                   }}
                   disabled={deleting}
-                  tabIndex={104}
                 >
                   {deleting ? "Deleting..." : "Delete"}
                 </button>
@@ -2588,7 +2582,6 @@ function Form4868ERSPageContent() {
                 placeholder="Enter additional notes here..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
-                tabIndex={100}
               />
             </div>
 
@@ -2711,7 +2704,6 @@ function Form4868ERSPageContent() {
           </div>
         </div>
       </div>
-      </main>
     </div>
   );
 }
