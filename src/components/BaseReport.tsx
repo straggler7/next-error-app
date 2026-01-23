@@ -728,7 +728,7 @@ export default function BaseReport({
   };
 
   return (
-    <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
+    <div className="center-panel bg-white rounded-lg shadow-sm p-6 flex flex-col h-full overflow-hidden">
           {/* Screen reader live region for announcements */}
           <div 
             ref={liveRegionRef}
