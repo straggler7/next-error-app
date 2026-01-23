@@ -3140,3 +3140,42 @@ The server is now running with proper HTTPS encryption and the `dist` directory 
               >
                 {submitting ? "Submitting..." : "Submit"}
               </button>
+
+
+               // import NotesSection from "../../components/NotesSection";
+ import { ErrorItem, Note } from "../../types";
+@@ -2441,16 +2442,14 @@ function Form4868ERSPageContent() {
+               <FormSection title="">
+                 <div>
+                   <FormField label="Action Code" required htmlFor="actionCodeSelect">
+-                    <select
++                    <FormSelect
+                       id="actionCodeSelect"
+                       value={actionCode}
+-                      onChange={(e) => {
+-                        const value = e.target.value;
++                      onChange={(value) => {
+                         setActionCode(value);
+                         handleInputChange("suspendStatusCode", value);
+                       }}
+                       disabled={loadingSuspenseCodes}
+-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700 transition-all duration-150 focus:outline-none focus:border-blue-600 focus:bg-white focus:shadow-sm hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                     >
+                       <option value="">
+                         {loadingSuspenseCodes
+@@ -2466,7 +2465,7 @@ function Form4868ERSPageContent() {
+                           {suspenseCode.daysSuspended} days)
+                         </option>
+                       ))}
+-                    </select>
++                    </FormSelect>
+                   </FormField>
+                 </div>
+
+
+
+  create a new report. call it 'Close Out'
+the report get api endpoint will be const fetch('/api2/v1/era/reports/assignments', {
+headers will be similar to other reports using the assignments endpoint
+The report can columns similar to the 7742 report
+The report will have need to have Start Date, End Date, Program Code filters like 7742 report      

@@ -433,6 +433,7 @@ export default function BaseReport({
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
   const [dismissedError, setDismissedError] = useState<boolean>(false);
+  const [exporting, setExporting] = useState<boolean>(false);
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 25,
@@ -680,16 +681,19 @@ export default function BaseReport({
     handleSubmit(); // Use the same logic as submit
   };
 
-  const handleExport = () => {
-    if (!onExport) return;
+  const handleExport = async () => {
+    if (!onExport || exporting) return;
     
-    const payload: ReportPayload = {
-      pageNumber: 1,
-      pageSize: pagination.pageSize,
-      reportId: reportType,
-      startDateStr: selectedDate,
-      export: true, // Add export flag
-    };
+    setExporting(true);
+    
+    try {
+      const payload: ReportPayload = {
+        pageNumber: 1,
+        pageSize: pagination.pageSize,
+        reportId: reportType,
+        startDateStr: selectedDate,
+        export: true, // Add export flag
+      };
 
     // Add end date for report 0540 if provided
     if (reportType === '0540' && selectedEndDate) {
@@ -724,7 +728,13 @@ export default function BaseReport({
       payload.status = 'DELETED';
     }
 
-    onExport(payload, columns);
+      await onExport(payload, columns);
+    } catch (error) {
+      console.error('Export error:', error);
+      // Error handling is done in the individual report pages
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -763,10 +773,11 @@ export default function BaseReport({
               {onExport && (
                 <button
                   onClick={handleExport}
-                  className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5"
+                  disabled={exporting}
+                  className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-200 hover:border-gray-400 hover:text-gray-900 hover:-translate-y-0.5 disabled:opacity-50"
                 >
-                  <Download size={16} className="mr-2" />
-                  Export
+                  <Download size={16} className={`mr-2 ${exporting ? 'animate-spin' : ''}`} />
+                  {exporting ? 'Exporting...' : 'Export'}
                 </button>
             )}
             {/* <ColumnSelector columns={columns} onColumnsChange={setColumns} /> */}
