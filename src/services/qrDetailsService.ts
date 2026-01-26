@@ -25,7 +25,7 @@ export class QRDetailsService {
       // if (serviceCenter) headers['serviceCenter'] = serviceCenter;
       if (seid) headers['seid'] = seid;
 
-      console.log('QRDetailsService#getQRDetails headers:', headers);
+      // console.log('QRDetailsService#getQRDetails headers:', headers);
       
       // const response = await fetch(`/api/v1/era/qr-details.json`, {
       const response = await fetch(`/api/v1/era/qualityreview/${inventoryId}/review`, {
@@ -34,6 +34,24 @@ export class QRDetailsService {
       });
 
       if (!response.ok) {
+        if (response.status === 422) {
+          // Handle 422 - User already has assignment or similar conflict
+          const errorText = await response.text();
+          let errorMessage = 'Unprocessable Entity';
+          
+          try {
+            const error = JSON.parse(errorText);
+            errorMessage = error.message || errorMessage;
+          } catch {
+            errorMessage = errorText || errorMessage;
+          }
+          
+          // Create a specific error for 422 that can be caught and handled by the UI
+          const error422 = new Error(errorMessage);
+          (error422 as any).status = 422;
+          throw error422;
+        }
+        
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -41,6 +59,12 @@ export class QRDetailsService {
       return data;
     } catch (error) {
       console.error('Error fetching QR details:', error);
+      
+      // Re-throw 422 errors with their specific message intact
+      if (error && typeof error === 'object' && (error as any).status === 422) {
+        throw error;
+      }
+      
       throw new Error('Failed to fetch QR details');
     }
   }

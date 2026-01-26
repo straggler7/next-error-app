@@ -187,12 +187,13 @@ function QRDetailsPageContent() {
       }
     } catch (err) {
       console.error('Error fetching QR details:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load QR details');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load QR details';
       
-      // Load mock data as fallback
-      // console.log('Loading mock data as fallback...');
-      // const mockData = QRDetailsService.getMockQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, seid || undefined);
-      // setQRData(mockData);
+      // Store error message in sessionStorage for QR inventory page to display
+      sessionStorage.setItem('qrDetailsError', errorMessage);
+      
+      // Navigate back to QR inventory page
+      router.push('/qrInventory');
     } finally {
       setLoading(false);
       isLoadingRef.current = false;

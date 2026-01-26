@@ -127,6 +127,16 @@ function QRInventoryContent() {
     }
   }, [filters.status, pagination.currentPage, pagination.pageSize, currentUserSeid]);
 
+  // Check for error messages from QR details page on component mount
+  useEffect(() => {
+    const qrDetailsError = sessionStorage.getItem('qrDetailsError');
+    if (qrDetailsError) {
+      setError(qrDetailsError);
+      // Clear the error from sessionStorage after displaying it
+      sessionStorage.removeItem('qrDetailsError');
+    }
+  }, []);
+
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
     console.log('QR Inventory useEffect triggered, hasInitiallyLoaded:', hasInitiallyLoaded.current);
