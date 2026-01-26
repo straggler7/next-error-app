@@ -53,7 +53,7 @@ export default function Header({ showBackButton = false, backHref = '/', disable
       <div className="bg-color-irs-blue bg-gradient-to-r from-[#00599c] to-[#00599c] text-white px-4 sm:px-8 py-4 shadow-md">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
-            {showBackButton && (
+            {/* {showBackButton && (
               <Link 
                 href={backHref}
                 className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 hover:bg-white/20 hover:border-white/30 hover:-translate-y-0.5 whitespace-nowrap"
@@ -61,11 +61,11 @@ export default function Header({ showBackButton = false, backHref = '/', disable
                 <span className="hidden sm:inline">← Back</span>
                 <span className="sm:hidden">← Back</span>
               </Link>
-            )}
-            <div className="text-lg sm:text-2xl font-semibold truncate">
+            )} */}
+            <h1 className="text-lg sm:text-2xl font-semibold truncate">
               <span className="hidden sm:inline">IRS Error Resolution Application</span>
               <span className="sm:hidden">IRS ERS</span>
-            </div>
+            </h1>
           </div>
           
           <div className="flex items-center gap-3 relative">
