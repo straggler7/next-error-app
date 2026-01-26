@@ -105,16 +105,7 @@ function DLNSearchContent() {
         
         setRecords(records);
         setPagination(prev => {
-          // If API provides totalCount, use it for accurate pagination
-          if (response.totalCount !== undefined) {
-            return {
-              ...prev,
-              totalRecords: response.totalCount,
-              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
-            };
-          }
-          
-          // If no totalCount, determine pagination based on received records
+          // Always determine pagination based on received records
           const receivedRecords = records.length;
           const hasMorePages = receivedRecords === pagination.pageSize;
           
@@ -201,17 +192,7 @@ function DLNSearchContent() {
         
         setRecords(records);
         setPagination(prev => {
-          // If API provides totalCount, use it for accurate pagination
-          // if (response.totalCount !== undefined) {
-          //   return {
-          //     ...prev,
-          //     currentPage: 1,
-          //     totalRecords: response.totalCount,
-          //     totalPages: Math.ceil(response.totalCount / pagination.pageSize)
-          //   };
-          // }
-          
-          // If no totalCount, determine pagination based on received records
+          // Always determine pagination based on received records
           const receivedRecords = records.length;
           const hasMorePages = receivedRecords === pagination.pageSize;
           
