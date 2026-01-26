@@ -114,6 +114,8 @@ interface FormInputProps {
   className?: string;
   disabled?: boolean;
   id?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean | 'true' | 'false';
 }
 
 export function FormInput({ 
@@ -126,7 +128,9 @@ export function FormInput({
   error = false,
   className = '',
   disabled = false,
-  id
+  id,
+  'aria-describedby': ariaDescribedby,
+  'aria-invalid': ariaInvalid
 }: FormInputProps) {
   return (
     <input
@@ -138,6 +142,8 @@ export function FormInput({
       disabled={disabled}
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
+      aria-describedby={ariaDescribedby}
+      aria-invalid={ariaInvalid}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150
         ${disabled ? 'bg-gray-200 text-gray-600 border-gray-400 cursor-not-allowed opacity-90' : 'bg-white text-gray-700'}

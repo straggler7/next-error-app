@@ -2573,10 +2573,11 @@ function Form4868ERSPageContent() {
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Additional Notes Input */}
             <div className="additional-notes-input mb-4 flex-shrink-0">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="additionalNotesTextarea" className="block text-sm font-medium text-gray-700 mb-2">
                 Add Additional Notes:
               </label>
               <textarea
+                id="additionalNotesTextarea"
                 value={additionalNotes}
                 onChange={(e) => setAdditionalNotes(e.target.value)}
                 placeholder="Enter additional notes here..."
