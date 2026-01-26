@@ -417,7 +417,13 @@ export default function BaseReport({
   const [columns, setColumns] = useState<ColumnConfig[]>(() => getDefaultColumns(reportType));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>(() => {
-    // Default to yesterday's date
+    // For 0340 and MERDAIL reports, default to beginning of current year
+    // For other reports, default to yesterday's date
+    if (reportType === '0340' || reportType === 'MERDAIL') {
+      const currentYear = new Date().getFullYear();
+      return `01/01/${currentYear}`;
+    }
+    
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
@@ -439,6 +445,10 @@ export default function BaseReport({
   });
   const [selectedServiceCenter, setSelectedServiceCenter] = useState('');
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
+  const [selectedSource, setSelectedSource] = useState('');
+  const [daysInEraStart, setDaysInEraStart] = useState<string>('0');
+  const [daysInEraEnd, setDaysInEraEnd] = useState<string>('5');
+  const [daysInEraError, setDaysInEraError] = useState<string>('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
   const [dismissedError, setDismissedError] = useState<boolean>(false);
   const [exporting, setExporting] = useState<boolean>(false);
@@ -486,6 +496,13 @@ export default function BaseReport({
     'All Program Codes',
     '44720',
     '44730',
+  ];
+
+  // Source options for 1340 report
+  const sourceOptions = [
+    'All Sources',
+    'MeF-Electronic',
+    'MeF-SPR'
   ];
 
   // No client-side filtering - data comes filtered from API
@@ -613,6 +630,11 @@ export default function BaseReport({
         payload.programCode = selectedProgramCode;
       }
 
+      // Add Source for 1340_New report (only when not 'All Sources')
+      if (reportType === '1340_New' && selectedSource && selectedSource !== 'All Sources') {
+        payload.source = selectedSource;
+      }
+
       // Add Tax Examiner SEID for 7740 report
       if (reportType === '7740' && taxExaminerSeid.trim()) {
         payload.seid = taxExaminerSeid.trim().toLowerCase();
@@ -665,6 +687,17 @@ export default function BaseReport({
       payload.programCode = selectedProgramCode;
     }
 
+    // Add Source for 1340_New report (only when not 'All Sources')
+    if (reportType === '1340_New' && selectedSource && selectedSource !== 'All Sources') {
+      payload.source = selectedSource;
+    }
+
+    // Add Days in ERA filters for 1342 and 3141 reports
+    if (reportType === '1342' || reportType === '3141') {
+      payload.daysInEraStart = parseInt(daysInEraStart) || 0;
+      payload.daysInEraEnd = parseInt(daysInEraEnd) || 0;
+    }
+
     // Add Tax Examiner SEID for 7740 report
     if (reportType === '7740' && taxExaminerSeid.trim()) {
       payload.seid = taxExaminerSeid.trim().toLowerCase();
@@ -683,6 +716,18 @@ export default function BaseReport({
     const end = new Date(endDate);
     
     return end >= start;
+  };
+
+  // Validation function to check if Days in ERA end is greater than Days in ERA start
+  const isDaysInEraValid = (): boolean => {
+    const startNum = parseInt(daysInEraStart) || 0;
+    const endNum = parseInt(daysInEraEnd) || 0;
+    if (endNum <= startNum) {
+      setDaysInEraError('Days in ERA (end) must be greater than Days in ERA (start)');
+      return false;
+    }
+    setDaysInEraError('');
+    return true;
   };
 
   const handleRefresh = () => {
@@ -724,6 +769,17 @@ export default function BaseReport({
       payload.programCode = selectedProgramCode;
     }
 
+    // Add Source for 1340_New report (only when not 'All Sources')
+    if (reportType === '1340_New' && selectedSource && selectedSource !== 'All Sources') {
+      payload.source = selectedSource;
+    }
+
+    // Add Days in ERA filters for 1342 and 3141 reports
+    if (reportType === '1342' || reportType === '3141') {
+      payload.daysInEraStart = parseInt(daysInEraStart) || 0;
+      payload.daysInEraEnd = parseInt(daysInEraEnd) || 0;
+    }
+
     // Add Tax Examiner SEID for 7740 report
     if (reportType === '7740' && taxExaminerSeid.trim()) {
       payload.seid = taxExaminerSeid.trim().toLowerCase();
@@ -763,7 +819,8 @@ export default function BaseReport({
                 tabIndex={-1}
                 className="card-title text-xl font-semibold text-[#003d6b] focus:outline-none"
               >
-                Report {reportType}: {title}
+                {/* Report {reportType}: {title} */}
+                {title}
               </h2>
               {/* <div className="text-sm text-gray-600 mt-1">
                 <p>{loading ? 'Loading...' : `${filteredData.length} records found`}</p>
@@ -882,6 +939,116 @@ export default function BaseReport({
               </div>
             )}
 
+            {/* Source Filter - Only for 1340_New report */}
+            {reportType === '1340_New' && (
+              <div className="w-48">
+                <label htmlFor="source-select" className="block text-sm font-medium text-gray-700 mb-1">
+                  Source
+                </label>
+                <select
+                  id="source-select"
+                  value={selectedSource}
+                  onChange={(e) => setSelectedSource(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                >
+                  {sourceOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Days in ERA Start Filter - Only for 1342 and 3141 reports */}
+            {(reportType === '1342' || reportType === '3141') && (
+              <div className="w-48">
+                <label htmlFor="days-in-era-start-input" className="block text-sm font-medium text-gray-700 mb-1">
+                  Days in ERA (start)
+                </label>
+                <input
+                  id="days-in-era-start-input"
+                  type="number"
+                  min="0"
+                  max="500"
+                  placeholder="0"
+                  value={daysInEraStart}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    // Allow empty string for better user experience when clearing the field
+                    if (inputValue === '') {
+                      setDaysInEraStart('0');
+                      const endNum = parseInt(daysInEraEnd) || 0;
+                      if (endNum <= 0) {
+                        setDaysInEraError('Days in ERA (end) must be greater than Days in ERA (start)');
+                      } else {
+                        setDaysInEraError('');
+                      }
+                      return;
+                    }
+                    const newValue = Math.min(500, Math.max(0, parseInt(inputValue) || 0));
+                    setDaysInEraStart(newValue.toString());
+                    // Validate immediately with the new start value
+                    const endNum = parseInt(daysInEraEnd) || 0;
+                    if (endNum <= newValue) {
+                      setDaysInEraError('Days in ERA (end) must be greater than Days in ERA (start)');
+                    } else {
+                      setDaysInEraError('');
+                    }
+                  }}
+                  className={`w-full pl-3 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent text-sm ${
+                    daysInEraError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
+                />
+              </div>
+            )}
+
+            {/* Days in ERA End Filter - Only for 1342 and 3141 reports */}
+            {(reportType === '1342' || reportType === '3141') && (
+              <div className="w-48">
+                <label htmlFor="days-in-era-end-input" className="block text-sm font-medium text-gray-700 mb-1">
+                  Days in ERA (end)
+                </label>
+                <input
+                  id="days-in-era-end-input"
+                  type="number"
+                  min="0"
+                  max="500"
+                  placeholder="5"
+                  value={daysInEraEnd}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    // Allow empty string for better user experience when clearing the field
+                    if (inputValue === '') {
+                      setDaysInEraEnd('0');
+                      const startNum = parseInt(daysInEraStart) || 0;
+                      if (0 <= startNum) {
+                        setDaysInEraError('Days in ERA (end) must be greater than Days in ERA (start)');
+                      } else {
+                        setDaysInEraError('');
+                      }
+                      return;
+                    }
+                    const newValue = Math.min(500, Math.max(0, parseInt(inputValue) || 0));
+                    setDaysInEraEnd(newValue.toString());
+                    // Validate immediately with the new end value
+                    const startNum = parseInt(daysInEraStart) || 0;
+                    if (newValue <= startNum) {
+                      setDaysInEraError('Days in ERA (end) must be greater than Days in ERA (start)');
+                    } else {
+                      setDaysInEraError('');
+                    }
+                  }}
+                  className={`w-full pl-3 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent text-sm ${
+                    daysInEraError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
+                />
+                {daysInEraError && (
+                  <p className="mt-1 text-sm text-red-600">{daysInEraError}</p>
+                )}
+              </div>
+            )}
+
             {/* Tax Examiner SEID Filter - Only for 7740 report */}
             {reportType === '7740' && (
               <div className="w-48">
@@ -903,7 +1070,7 @@ export default function BaseReport({
             <div className="flex gap-2 items-end">
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={loading || daysInEraError !== ''}
                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Loading...' : 'Submit'}
@@ -913,6 +1080,10 @@ export default function BaseReport({
                   setSearchTerm('');
                   setSelectedServiceCenter('');
                   setSelectedProgramCode('');
+                  setSelectedSource('');
+                  setDaysInEraStart('0');
+                  setDaysInEraEnd('5');
+                  setDaysInEraError('');
                   setTaxExaminerSeid('');
                   setSelectedEndDate('');
                 }}

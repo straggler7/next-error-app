@@ -62,7 +62,7 @@ export default function Report1343Page() {
 
   return (
     <BaseReport
-      title="Suspense Summary Report"
+      title="Suspense Summary Report (1343)"
       reportType="1343"
       data={data}
       loading={loading}

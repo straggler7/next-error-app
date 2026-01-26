@@ -29,6 +29,8 @@ export default function ReportMERDAILPage() {
 
   useEffect(() => {
     // Initial load with default payload (no filters)
+    const today = new Date();
+    const currentYear = today.getFullYear();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
@@ -39,7 +41,7 @@ export default function ReportMERDAILPage() {
       pageNumber: 1,
       pageSize: 20,
       reportId: 'MERDAIL',
-      startDateStr: `${month}/${day}/${year}`,
+      startDateStr: `01/01/${currentYear}`,
       endDateStr: `${month}/${day}/${year}`,
       // No filters on initial load - user must submit to apply filters
     };
@@ -64,7 +66,7 @@ export default function ReportMERDAILPage() {
 
   return (
     <BaseReport
-      title="Error Count Report"
+      title="Error Count Report (MERDAIL / MERYRDT)"
       reportType="MERDAIL"
       data={data}
       loading={loading}

@@ -144,28 +144,28 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     },
     { 
       id: 'report0340', 
-      label: '0340', 
+      label: '0340 / 0341', 
       href: '/reports/0340', 
       filter: { type: 'navigate', value: 'report0340' }
     },
-    { 
-      id: 'report0341', 
-      label: '0341', 
-      href: '/reports/0341', 
-      filter: { type: 'navigate', value: 'report0341' }
-    },
+    // { 
+    //   id: 'report0341', 
+    //   label: '0341', 
+    //   href: '/reports/0341', 
+    //   filter: { type: 'navigate', value: 'report0341' }
+    // },
     { 
       id: 'reportMERDAIL', 
-      label: 'MERDAIL', 
+      label: 'MERDAIL / MERYRDT', 
       href: '/reports/MERDAIL', 
       filter: { type: 'navigate', value: 'reportMERDAIL' }
     },
-    { 
-      id: 'reportMERYRDT', 
-      label: 'MERYRDT', 
-      href: '/reports/MERYRDT', 
-      filter: { type: 'navigate', value: 'reportMERYRDT' }
-    },
+    // { 
+    //   id: 'reportMERYRDT', 
+    //   label: 'MERYRDT', 
+    //   href: '/reports/MERYRDT', 
+    //   filter: { type: 'navigate', value: 'reportMERYRDT' }
+    // },
     { 
       id: 'reportCloseOut', 
       label: 'Close Out', 

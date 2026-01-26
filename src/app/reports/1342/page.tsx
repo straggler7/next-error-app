@@ -41,6 +41,8 @@ export default function Report1342Page() {
       reportId: '1342',
       startDateStr: `${month}/${day}/${year}`,
       endDateStr: `${month}/${day}/${year}`,
+      daysInEraStart: 0,
+      daysInEraEnd: 5,
     };
     
     fetchReportData(defaultPayload);
@@ -63,7 +65,7 @@ export default function Report1342Page() {
 
   return (
     <BaseReport
-      title="Workable Suspense Inventory"
+      title="Workable Suspense Inventory (1342)"
       reportType="1342"
       data={data}
       loading={loading}

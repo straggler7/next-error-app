@@ -62,7 +62,7 @@ export default function Report1341Page() {
 
   return (
     <BaseReport
-      title="Error Inventory Summary"
+      title="Error Inventory Summary (1341)"
       reportType="1341"
       data={data}
       loading={loading}

@@ -40,6 +40,8 @@ export default function Report3141Page() {
       pageSize: 20,
       reportId: '3141',
       startDateStr: `${month}/${day}/${year}`,
+      daysInEraStart: 0,
+      daysInEraEnd: 5,
     };
     
     fetchReportData(defaultPayload);
@@ -62,7 +64,7 @@ export default function Report3141Page() {
 
   return (
     <BaseReport
-      title="Workable Suspense Inventory"
+      title="Workable Suspense Inventory (3141)"
       reportType="3141"
       data={data}
       loading={loading}

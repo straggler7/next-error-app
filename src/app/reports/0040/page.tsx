@@ -64,7 +64,7 @@ export default function Report0040Page() {
 
   return (
     <BaseReport
-      title="Suspended Records Report"
+      title="Suspended Records Report (0040)"
       reportType="0040"
       data={data}
       loading={loading}

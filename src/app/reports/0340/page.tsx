@@ -29,6 +29,8 @@ export default function Report0340Page() {
 
   useEffect(() => {
     // Initial load with default payload
+    const today = new Date();
+    const currentYear = today.getFullYear();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
@@ -39,10 +41,10 @@ export default function Report0340Page() {
       pageNumber: 1,
       pageSize: 20,
       reportId: '0340',
-      startDateStr: `${month}/${day}/${year}`,
+      startDateStr: `01/01/${currentYear}`,
       endDateStr: `${month}/${day}/${year}`,
     };
-    
+    console.log('Default payload:', defaultPayload);
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
@@ -63,7 +65,7 @@ export default function Report0340Page() {
 
   return (
     <BaseReport
-      title="Error Count Report"
+      title="Error Count Report (0340 / 0341)"
       reportType="0340"
       data={data}
       loading={loading}

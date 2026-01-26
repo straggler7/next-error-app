@@ -62,6 +62,9 @@ export interface ReportPayload {
   serviceCenter?: string;
   serviceCenterEnum?: string; // Service center name in uppercase
   programCode?: string;
+  source?: string; // Source filter for 1340 report
+  daysInEraStart?: number; // Days in ERA start filter for 1342 and 3141 reports
+  daysInEraEnd?: number; // Days in ERA end filter for 1342 and 3141 reports
   seid?: string; // Tax Examiner SEID for 7740 report
   export?: boolean; // For export functionality
 }
