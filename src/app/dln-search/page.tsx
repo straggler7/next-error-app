@@ -136,7 +136,7 @@ function DLNSearchContent() {
           
           return {
             ...prev,
-            totalRecords: hasMorePages ? prev.totalRecords : receivedRecords,
+            totalRecords: receivedRecords,
             totalPages: newTotalPages
           };
         });
@@ -248,7 +248,7 @@ function DLNSearchContent() {
           return {
             ...prev,
             currentPage: 1,
-            totalRecords: hasMorePages ? Math.max(receivedRecords, prev.totalRecords) : receivedRecords,
+            totalRecords: receivedRecords,
             totalPages: newTotalPages
           };
         });
