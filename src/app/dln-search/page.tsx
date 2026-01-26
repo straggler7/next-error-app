@@ -120,8 +120,8 @@ function DLNSearchContent() {
           
           return {
             ...prev,
-            totalRecords: hasMorePages ? (prev.currentPage * pagination.pageSize) + receivedRecords : (prev.currentPage - 1) * pagination.pageSize + receivedRecords,
-            totalPages: hasMorePages ? prev.currentPage + 1 : prev.currentPage
+            totalRecords: receivedRecords,
+            totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
           };
         });
       } else {
@@ -218,8 +218,8 @@ function DLNSearchContent() {
           return {
             ...prev,
             currentPage: 1,
-            totalRecords: hasMorePages ? receivedRecords : receivedRecords,
-            totalPages: hasMorePages ? 2 : 1
+            totalRecords: receivedRecords,
+            totalPages: hasMorePages ? Math.max(2, prev.totalPages) : 1
           };
         });
         // Mark as initially loaded so pagination will work
