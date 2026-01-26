@@ -95,12 +95,28 @@ function DLNSearchContent() {
       );
 
       if (response) {
-        setRecords(response.records);
-        setPagination(prev => ({
-          ...prev,
-          totalRecords: response.totalCount,
-          totalPages: response.totalPages
-        }));
+        const records = response.records || response;
+        setRecords(records);
+        setPagination(prev => {
+          // If API provides totalCount, use it for accurate pagination
+          if (response.totalCount !== undefined) {
+            return {
+              ...prev,
+              totalRecords: response.totalCount,
+              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
+            };
+          }
+          
+          // If no totalCount, determine pagination based on received records
+          const receivedRecords = records.length;
+          const hasMorePages = receivedRecords === pagination.pageSize;
+          
+          return {
+            ...prev,
+            totalRecords: receivedRecords,
+            totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
+          };
+        });
       } else {
         setRecords([]);
         setPagination(prev => ({
@@ -169,13 +185,30 @@ function DLNSearchContent() {
       );
 
       if (response) {
-        setRecords(response.records);
-        setPagination(prev => ({
-          ...prev,
-          currentPage: 1,
-          totalRecords: response.totalCount,
-          totalPages: response.totalPages
-        }));
+        const records = response.records || response;
+        setRecords(records);
+        setPagination(prev => {
+          // If API provides totalCount, use it for accurate pagination
+          if (response.totalCount !== undefined) {
+            return {
+              ...prev,
+              currentPage: 1,
+              totalRecords: response.totalCount,
+              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
+            };
+          }
+          
+          // If no totalCount, determine pagination based on received records
+          const receivedRecords = records.length;
+          const hasMorePages = receivedRecords === pagination.pageSize;
+          
+          return {
+            ...prev,
+            currentPage: 1,
+            totalRecords: receivedRecords,
+            totalPages: hasMorePages ? Math.max(1, prev.totalPages) : 1
+          };
+        });
         // Mark as initially loaded so pagination will work
         hasInitiallyLoaded.current = true;
       } else {
