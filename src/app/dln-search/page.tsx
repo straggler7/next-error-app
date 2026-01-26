@@ -107,37 +107,21 @@ function DLNSearchContent() {
         setPagination(prev => {
           // If API provides totalCount, use it for accurate pagination
           if (response.totalCount !== undefined) {
-            const calculatedTotalPages = Math.ceil(response.totalCount / prev.pageSize);
-            console.log('Using API totalCount:', { 
-              totalCount: response.totalCount, 
-              pageSize: prev.pageSize,
-              calculatedTotalPages 
-            });
             return {
               ...prev,
               totalRecords: response.totalCount,
-              totalPages: calculatedTotalPages
+              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
             };
           }
           
           // If no totalCount, determine pagination based on received records
           const receivedRecords = records.length;
-          const hasMorePages = receivedRecords === prev.pageSize;
-          const newTotalPages = hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage;
-          
-          console.log('Fallback pagination logic:', { 
-            receivedRecords, 
-            pageSize: prev.pageSize,
-            hasMorePages, 
-            currentPage: prev.currentPage,
-            oldTotalPages: prev.totalPages,
-            newTotalPages 
-          });
+          const hasMorePages = receivedRecords === pagination.pageSize;
           
           return {
             ...prev,
             totalRecords: receivedRecords,
-            totalPages: newTotalPages
+            totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
           };
         });
       } else {
@@ -219,37 +203,23 @@ function DLNSearchContent() {
         setPagination(prev => {
           // If API provides totalCount, use it for accurate pagination
           if (response.totalCount !== undefined) {
-            const calculatedTotalPages = Math.ceil(response.totalCount / prev.pageSize);
-            console.log('Submit - Using API totalCount:', { 
-              totalCount: response.totalCount, 
-              pageSize: prev.pageSize,
-              calculatedTotalPages 
-            });
             return {
               ...prev,
               currentPage: 1,
               totalRecords: response.totalCount,
-              totalPages: calculatedTotalPages
+              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
             };
           }
           
           // If no totalCount, determine pagination based on received records
           const receivedRecords = records.length;
-          const hasMorePages = receivedRecords === prev.pageSize;
-          const newTotalPages = hasMorePages ? Math.max(2, prev.totalPages) : 1; // At least 2 pages if more records exist
-          
-          console.log('Submit - Fallback pagination logic:', { 
-            receivedRecords, 
-            pageSize: prev.pageSize,
-            hasMorePages, 
-            newTotalPages 
-          });
+          const hasMorePages = receivedRecords === pagination.pageSize;
           
           return {
             ...prev,
             currentPage: 1,
             totalRecords: receivedRecords,
-            totalPages: newTotalPages
+            totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
           };
         });
         // Mark as initially loaded so pagination will work
