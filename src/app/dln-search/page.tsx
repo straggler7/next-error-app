@@ -96,25 +96,48 @@ function DLNSearchContent() {
 
       if (response) {
         const records = response.records || response;
+        console.log('DLN Search API Response:', { 
+          totalCount: response.totalCount, 
+          recordsLength: records.length, 
+          currentPage: pagination.currentPage,
+          pageSize: pagination.pageSize 
+        });
+        
         setRecords(records);
         setPagination(prev => {
           // If API provides totalCount, use it for accurate pagination
           if (response.totalCount !== undefined) {
+            const calculatedTotalPages = Math.ceil(response.totalCount / prev.pageSize);
+            console.log('Using API totalCount:', { 
+              totalCount: response.totalCount, 
+              pageSize: prev.pageSize,
+              calculatedTotalPages 
+            });
             return {
               ...prev,
               totalRecords: response.totalCount,
-              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
+              totalPages: calculatedTotalPages
             };
           }
           
           // If no totalCount, determine pagination based on received records
           const receivedRecords = records.length;
-          const hasMorePages = receivedRecords === pagination.pageSize;
+          const hasMorePages = receivedRecords === prev.pageSize;
+          const newTotalPages = hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage;
+          
+          console.log('Fallback pagination logic:', { 
+            receivedRecords, 
+            pageSize: prev.pageSize,
+            hasMorePages, 
+            currentPage: prev.currentPage,
+            oldTotalPages: prev.totalPages,
+            newTotalPages 
+          });
           
           return {
             ...prev,
-            totalRecords: receivedRecords,
-            totalPages: hasMorePages ? Math.max(prev.currentPage + 1, prev.totalPages) : prev.currentPage
+            totalRecords: hasMorePages ? prev.totalRecords : receivedRecords,
+            totalPages: newTotalPages
           };
         });
       } else {
@@ -186,27 +209,47 @@ function DLNSearchContent() {
 
       if (response) {
         const records = response.records || response;
+        console.log('DLN Search Submit API Response:', { 
+          totalCount: response.totalCount, 
+          recordsLength: records.length, 
+          pageSize: pagination.pageSize 
+        });
+        
         setRecords(records);
         setPagination(prev => {
           // If API provides totalCount, use it for accurate pagination
           if (response.totalCount !== undefined) {
+            const calculatedTotalPages = Math.ceil(response.totalCount / prev.pageSize);
+            console.log('Submit - Using API totalCount:', { 
+              totalCount: response.totalCount, 
+              pageSize: prev.pageSize,
+              calculatedTotalPages 
+            });
             return {
               ...prev,
               currentPage: 1,
               totalRecords: response.totalCount,
-              totalPages: Math.ceil(response.totalCount / pagination.pageSize)
+              totalPages: calculatedTotalPages
             };
           }
           
           // If no totalCount, determine pagination based on received records
           const receivedRecords = records.length;
-          const hasMorePages = receivedRecords === pagination.pageSize;
+          const hasMorePages = receivedRecords === prev.pageSize;
+          const newTotalPages = hasMorePages ? Math.max(2, prev.totalPages) : 1; // At least 2 pages if more records exist
+          
+          console.log('Submit - Fallback pagination logic:', { 
+            receivedRecords, 
+            pageSize: prev.pageSize,
+            hasMorePages, 
+            newTotalPages 
+          });
           
           return {
             ...prev,
             currentPage: 1,
-            totalRecords: receivedRecords,
-            totalPages: hasMorePages ? Math.max(1, prev.totalPages) : 1
+            totalRecords: hasMorePages ? Math.max(receivedRecords, prev.totalRecords) : receivedRecords,
+            totalPages: newTotalPages
           };
         });
         // Mark as initially loaded so pagination will work
