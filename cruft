@@ -3174,8 +3174,14 @@ The server is now running with proper HTTPS encryption and the `dist` directory 
 
 
 
-  create a new report. call it 'Close Out'
+create a new report. call it 'Close Out'
 the report get api endpoint will be const fetch('/api2/v1/era/reports/assignments', {
 headers will be similar to other reports using the assignments endpoint
 The report can columns similar to the 7742 report
 The report will have need to have Start Date, End Date, Program Code filters like 7742 report      
+
+Updated Placeholder Color
+Changed from: #4a5568 (darker gray)
+Changed to: #6b7280 (slightly lighter gray)
+
+This color still meets accessibility standards while being more visually comfortable. The change applies globally across all input fields in the application, including forms, search fields, and any other input elements throughout the IRS Error Resolution System.
