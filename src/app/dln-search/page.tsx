@@ -390,15 +390,20 @@ function DLNSearchContent() {
   }, [currentUserSeid]);
 
   // Handle button click based on record status
-  const handleButtonClick = useCallback((record: DLNSearchRecord) => {
-    const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED'];
+  // const handleButtonClick = useCallback((record: DLNSearchRecord) => {
+  //   const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED'];
     
-    if (record.status === 'DELETED') {
-      handleUndelete(record);
-    } else if (assignableStatuses.includes(record.status)) {
-      handleAssign(record);
-    }
-  }, [handleAssign, handleUndelete]);
+  //   if (record.status === 'DELETED') {
+  //     handleUndelete(record);
+  //   } else if (assignableStatuses.includes(record.status)) {
+  //     handleAssign(record);
+  //   }
+  // }, [handleAssign, handleUndelete]);
+
+  // using handleAssign for both assign and undelete
+  const handleButtonClick = useCallback((record: DLNSearchRecord) => {
+    handleAssign(record);
+  }, [handleAssign]);
 
   const columnHelper = createColumnHelper<DLNSearchRecord>();
 
