@@ -2288,20 +2288,20 @@ function Form4868ERSPageContent() {
       <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mt-4 mb-6 border border-gray-100">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200" aria-label="Document Locator Number">
               DLN: {getDLN()}
             </span>
-            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200" aria-label="Inventory Identifier">
               Inventory ID: {inventoryId}
             </span>
-            <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200">
+            <span className="info-badge inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium border border-purple-200" aria-label="Service Center Location">
               Service Center: {eraDto?.serviceCenterId && getServiceCenterName(eraDto.serviceCenterId)}
             </span>
-            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200">
+            <span className="info-badge inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium border border-green-200" aria-label="Program Identifier">
               Program: {eraDto?.programId}
             </span>
             {landingSelectionData.statusCode && (
-              <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
+              <span className="info-badge inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium border border-blue-200" aria-label="Current Status Code">
                 Status Code: {landingSelectionData.statusCode}
               </span>
             )}
@@ -2359,7 +2359,7 @@ function Form4868ERSPageContent() {
       )}
 
       {/* Main Content Grid - 60% Form / 40% Notes */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
+      <div id="main-content" className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
         {/* Form Section (Left 60%) */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
@@ -2477,83 +2477,6 @@ function Form4868ERSPageContent() {
             </form>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between pt-4 border-t border-gray-200 mt-4">
-            <div className="flex gap-4">
-              <button
-                type="button"
-                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  submitting
-                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
-                }`}
-                onClick={() => {
-                  clearFieldHighlight();
-                  handleSubmit();
-                }}
-                disabled={submitting}
-              >
-                {submitting ? "Submitting..." : "Submit"}
-              </button>
-              <button
-                type="button"
-                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  !actionCode.trim() ||
-                  suspending ||
-                  Object.keys(validationErrors).length > 0
-                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
-                }`}
-                onClick={() => {
-                  clearFieldHighlight();
-                  handleSuspend();
-                }}
-                disabled={
-                  !actionCode.trim() ||
-                  suspending ||
-                  Object.keys(validationErrors).length > 0
-                }
-              >
-                {suspending ? "Suspending..." : "Suspend"}
-              </button>
-            </div>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                  closingOut
-                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                    : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
-                }`}
-                onClick={() => {
-                  console.log("Close Out button clicked");
-                  clearFieldHighlight();
-                  handleCloseout();
-                }}
-                disabled={closingOut}
-              >
-                {closingOut ? "Closing Out..." : "Close Out"}
-              </button>
-              {hasDeletePermission && (
-                <button
-                  type="button"
-                  className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
-                    deleting
-                      ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                      : "bg-orange-600 text-white hover:bg-orange-700 hover:-translate-y-0.5"
-                  }`}
-                  onClick={() => {
-                    clearFieldHighlight();
-                    handleDelete();
-                  }}
-                  disabled={deleting}
-                >
-                  {deleting ? "Deleting..." : "Delete"}
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Field Error Warning Message */}
           {hasAnyFieldErrors() && (
             <div className="mt-3 text-left">
@@ -2565,7 +2488,7 @@ function Form4868ERSPageContent() {
         </div>
 
         {/* Notes Section (Right 40%) */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col max-h-[600px] min-w-0 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col h-full min-w-0 overflow-hidden">
           <div className="notes-title text-lg font-semibold mb-4 pb-2 border-b border-gray-200 text-gray-700 flex-shrink-0">
             Notes
           </div>
@@ -2586,7 +2509,7 @@ function Form4868ERSPageContent() {
               />
             </div>
 
-            <div className="notes-content overflow-y-auto flex-1 space-y-4">
+            <div className="notes-content flex-1 space-y-4">
               {notes.length === 0 ? (
                 <div className="text-gray-500 text-sm">No notes available</div>
               ) : (
@@ -2704,6 +2627,94 @@ function Form4868ERSPageContent() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Action Buttons - Positioned after notes for proper tab order */}
+      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mx-4 mb-4">
+        <div className="flex justify-between">
+          <div className="flex gap-4">
+            <button
+              type="button"
+              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                submitting
+                  ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                  : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
+              }`}
+              onClick={() => {
+                clearFieldHighlight();
+                handleSubmit();
+              }}
+              disabled={submitting}
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </button>
+            <button
+              type="button"
+              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                !actionCode.trim() ||
+                suspending ||
+                Object.keys(validationErrors).length > 0
+                  ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                  : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
+              }`}
+              onClick={() => {
+                clearFieldHighlight();
+                handleSuspend();
+              }}
+              disabled={
+                !actionCode.trim() ||
+                suspending ||
+                Object.keys(validationErrors).length > 0
+              }
+            >
+              {suspending ? "Suspending..." : "Suspend"}
+            </button>
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                closingOut
+                  ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                  : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
+              }`}
+              onClick={() => {
+                console.log("Close Out button clicked");
+                clearFieldHighlight();
+                handleCloseout();
+              }}
+              disabled={closingOut}
+            >
+              {closingOut ? "Closing Out..." : "Close Out"}
+            </button>
+            {hasDeletePermission && (
+              <button
+                type="button"
+                className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                  deleting
+                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                    : "bg-orange-600 text-white hover:bg-orange-700 hover:-translate-y-0.5"
+                }`}
+                onClick={() => {
+                  clearFieldHighlight();
+                  handleDelete();
+                }}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Field Error Warning Message */}
+        {hasAnyFieldErrors() && (
+          <div className="mt-3 text-left">
+            <p className="text-sm text-red-600 font-medium">
+              Field errors need to be fixed for submission
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
