@@ -31,6 +31,7 @@ export const mockEraDto = {
 export const mockUserProfile = {
   seid: 'TEST123',
   name: 'Test User',
+  role: 'Tax Examiner',
   team: 'Test Team',
   group: 'tax_examiners' as const,
   profile: {
