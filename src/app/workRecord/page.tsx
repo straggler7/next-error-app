@@ -42,6 +42,7 @@ import { getServiceCenterName } from "../../utils/serviceCenters";
 // import DevBanner from "../../components/DevBanner";
 import newFieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
+import errorIrmGuidance from "../../data/errorIrmGuidance.json";
 
 // Convert new field config array to lookup object for compatibility
 const fieldConfig = newFieldConfig.reduce((acc: any, field: any) => {
@@ -362,6 +363,8 @@ function Form4868ERSPageContent() {
   );
   const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
   const [selectedErrorId, setSelectedErrorId] = useState<string | null>(null);
+  const [showErrorInfo, setShowErrorInfo] = useState<boolean>(false);
+  const [selectedErrorForInfo, setSelectedErrorForInfo] = useState<ErrorItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [clearCodesInput, setClearCodesInput] = useState<string>("");
   const [actionCode, setActionCode] = useState<string>("");
@@ -912,13 +915,121 @@ function Form4868ERSPageContent() {
     setSelectedErrorId(null);
   };
 
+  // Handle automated error correction
+  const handleAllowAgentToFix = async (error: ErrorItem) => {
+    if (!error || !selectedErrorForInfo) return;
+
+    const errorCode = error.code;
+    const guidance = (errorIrmGuidance as any)[errorCode];
+    
+    if (!guidance?.automationRules?.canAutoFix) {
+      alert('This error cannot be automatically fixed and requires manual review.');
+      return;
+    }
+
+    try {
+      // Get the automation rules for this error
+      const { fixableFields, autoFixLogic } = guidance.automationRules;
+      
+      // Apply automated fixes to the form fields
+      const updatedValues = { ...values };
+      let hasChanges = false;
+
+      for (const fieldKey of fixableFields) {
+        if (autoFixLogic[fieldKey]) {
+          const currentValue = values[fieldKey] || '';
+          let fixedValue = currentValue;
+
+          // Apply specific fix logic based on field and error type
+          switch (errorCode) {
+            case '004':
+            case '005':
+              if (fieldKey === 'primaryNameCtrl') {
+                // Standardize name control format
+                fixedValue = currentValue.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 4);
+                if (fixedValue.length < 4) {
+                  fixedValue = fixedValue.padEnd(4, 'X');
+                }
+              } else if (fieldKey === 'primarySSN') {
+                // Format SSN with proper dashes
+                const ssnDigits = currentValue.replace(/\D/g, '');
+                if (ssnDigits.length === 9) {
+                  fixedValue = `${ssnDigits.substring(0, 3)}-${ssnDigits.substring(3, 5)}-${ssnDigits.substring(5)}`;
+                }
+              }
+              break;
+            case '011':
+            case '111':
+              if (fieldKey === 'taxPrd') {
+                // Format tax period as YYYYMM
+                const digits = currentValue.replace(/\D/g, '');
+                if (digits.length >= 6) {
+                  fixedValue = digits.substring(0, 6);
+                }
+              } else if (fieldKey === 'MeFReceiptDate') {
+                // Format date as YYYY-MM-DD
+                const dateStr = currentValue.replace(/\D/g, '');
+                if (dateStr.length >= 8) {
+                  fixedValue = `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
+                }
+              }
+              break;
+            case '107':
+              if (fieldKey === 'MeFReceiptDate') {
+                // Ensure date is not in future and properly formatted
+                const today = new Date();
+                const inputDate = new Date(currentValue);
+                if (inputDate > today) {
+                  fixedValue = today.toISOString().split('T')[0];
+                } else if (currentValue && !currentValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                  const dateStr = currentValue.replace(/\D/g, '');
+                  if (dateStr.length >= 8) {
+                    fixedValue = `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
+                  }
+                }
+              }
+              break;
+          }
+
+          if (fixedValue !== currentValue) {
+            updatedValues[fieldKey] = fixedValue;
+            hasChanges = true;
+          }
+        }
+      }
+
+      if (hasChanges) {
+        setValues(updatedValues);
+        
+        // Show success message
+        alert(`AI Agent has automatically corrected the following fields: ${fixableFields.join(', ')}`);
+        
+        // Close the error info section
+        setShowErrorInfo(false);
+        setSelectedErrorForInfo(null);
+        setSelectedErrorId(null);
+        setHighlightedFields([]);
+      } else {
+        alert('No corrections were needed for this error.');
+      }
+
+    } catch (error) {
+      console.error('Error during automated fix:', error);
+      alert('An error occurred while attempting to fix the issue automatically.');
+    }
+  };
+
   const handleErrorClick = (error: ErrorItem) => {
     if (selectedErrorId === error.id) {
       setHighlightedFields([]);
       setSelectedErrorId(null);
+      setShowErrorInfo(false);
+      setSelectedErrorForInfo(null);
     } else {
       setHighlightedFields(error.errorFields || []);
       setSelectedErrorId(error.id);
+      setShowErrorInfo(true);
+      setSelectedErrorForInfo(error);
 
       // Only focus on fields for field errors, not other errors
       if (
@@ -2486,6 +2597,127 @@ function Form4868ERSPageContent() {
             </div>
           )}
         </div>
+
+        {/* Error Information Section (appears above Notes when error is selected) */}
+        {showErrorInfo && selectedErrorForInfo && (
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-4">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    ERROR CODE {selectedErrorForInfo.code}
+                  </span>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    {(errorIrmGuidance as any)[selectedErrorForInfo.code]?.status || 'ACTIVE'}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowErrorInfo(false);
+                  setSelectedErrorForInfo(null);
+                  setSelectedErrorId(null);
+                  setHighlightedFields([]);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                title="Close error information"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {(() => {
+              const guidance = (errorIrmGuidance as any)[selectedErrorForInfo.code];
+              if (!guidance) {
+                return (
+                  <div className="text-gray-500 text-sm">
+                    No IRM guidance available for error code {selectedErrorForInfo.code}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  {/* Error Title */}
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {guidance.title}
+                  </h3>
+
+                  {/* IRM Guidance Section */}
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="font-semibold text-gray-800 mb-2">IRM Guidance</h4>
+                    
+                    {/* Description */}
+                    <div className="mb-4">
+                      <h5 className="font-medium text-gray-700 mb-1">Description</h5>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {guidance.irmGuidance.description}
+                      </p>
+                    </div>
+
+                    {/* Resolution Steps */}
+                    <div className="mb-4">
+                      <h5 className="font-medium text-gray-700 mb-2">Resolution Steps</h5>
+                      <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                        {guidance.irmGuidance.resolutionSteps.map((step: string, index: number) => (
+                          <li key={index} className="leading-relaxed">{step}</li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    {/* IRM Reference */}
+                    <div className="bg-white rounded p-3 border border-blue-100">
+                      <h5 className="font-medium text-gray-700 mb-1">IRM Reference</h5>
+                      <p className="text-xs text-gray-500">
+                        {guidance.irmGuidance.irmReference}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Allow Agent To Fix Button */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div className="text-xs text-gray-500">
+                      {guidance.automationRules?.canAutoFix 
+                        ? `Can be automatically fixed in fields: ${guidance.automationRules.fixableFields?.join(', ')}`
+                        : 'This error requires manual review and cannot be automatically fixed.'
+                      }
+                    </div>
+                    <button
+                      onClick={() => handleAllowAgentToFix(selectedErrorForInfo)}
+                      disabled={!guidance.automationRules?.canAutoFix}
+                      className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        guidance.automationRules?.canAutoFix
+                          ? 'bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                      title={guidance.automationRules?.canAutoFix ? 'Allow AI Agent to automatically fix this error' : 'This error cannot be automatically fixed'}
+                    >
+                      <span className="text-sm mr-2">⚡</span>
+                      Allow Agent To Fix
+                    </button>
+                  </div>
+
+                  {/* Mark Updated Button */}
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        setShowErrorInfo(false);
+                        setSelectedErrorForInfo(null);
+                        setSelectedErrorId(null);
+                        setHighlightedFields([]);
+                      }}
+                      className="inline-flex items-center px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors"
+                    >
+                      MARK UPDATED
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Notes Section (Right 40%) */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col h-full min-w-0 overflow-hidden">

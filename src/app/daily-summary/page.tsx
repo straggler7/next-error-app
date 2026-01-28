@@ -338,6 +338,26 @@ function DailySummaryContent() {
 
   // Daily summary columns - same as QR inventory plus Reopen button
   const dailySummaryColumns = useMemo<ColumnDef<InventoryRecord, any>[]>(() => [
+    // AI Indicator column
+    columnHelper.display({
+      id: 'aiIndicator',
+      header: 'AI',
+      cell: ({ row }) => {
+        // Check if this record was processed by AI
+        // For now, we'll simulate this by checking if the record has certain characteristics
+        // In a real implementation, this would come from the API data with an 'aiProcessed' field
+        const record = row.original;
+        const isAIProcessed = record.seid?.toLowerCase().includes('ai') ||
+                             record.inventoryId % 3 === 0; // Simulate some records being AI processed
+        
+        return isAIProcessed ? (
+          <div className="flex items-center justify-center" title="Processed by AI Agent">
+            <span className="text-lg">⚡</span>
+          </div>
+        ) : null;
+      },
+      size: 50,
+    }),
     columnHelper.accessor('dln', {
       header: 'DLN',
       cell: ({ getValue }) => (

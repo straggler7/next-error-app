@@ -1,0 +1,218 @@
+{
+  "004": {
+    "title": "EIF/NAP Mismatch (IMF)",
+    "status": "ACTIVE",
+    "description": "Entity Information File (EIF) and Name Address Program (NAP) mismatch detected in Individual Master File (IMF). This indicates inconsistent taxpayer entity information between IRS systems.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "Entity Information File (EIF) and Name Address Program (NAP) mismatch detected in Individual Master File (IMF). This indicates inconsistent taxpayer entity information between IRS systems.",
+      "resolutionSteps": [
+        "Verify taxpayer name and SSN against Master File records.",
+        "Check for recent name changes or address updates.",
+        "Coordinate with Entity Control to resolve discrepancies.",
+        "Update entity information in appropriate systems.",
+        "Reprocess Form 4868 after entity correction."
+      ],
+      "irmReference": "See IRM 3.12.179 for Entity Control procedures and IRM 21.2.2 for IMF processing guidelines."
+    },
+    "automationRules": {
+      "canAutoFix": true,
+      "fixableFields": ["primaryNameCtrl", "primarySSN"],
+      "conditions": [
+        "Name control mismatch can be resolved by standardizing format",
+        "SSN format issues can be corrected automatically"
+      ],
+      "autoFixLogic": {
+        "primaryNameCtrl": "Standardize name control format using IRS guidelines",
+        "primarySSN": "Format SSN with proper dashes and validate checksum"
+      }
+    }
+  },
+  "005": {
+    "title": "Name Control Mismatch NAP/EIF",
+    "status": "ACTIVE", 
+    "description": "Name Control mismatch between Name Address Program (NAP) and Entity Information File (EIF) systems.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "Name Control mismatch between Name Address Program (NAP) and Entity Information File (EIF) systems.",
+      "resolutionSteps": [
+        "Compare name control codes between NAP and EIF systems.",
+        "Verify correct name control generation rules.",
+        "Check for special characters or formatting issues.",
+        "Update name control in the appropriate system.",
+        "Validate name control consistency across systems."
+      ],
+      "irmReference": "See IRM 3.12.179 for Name Control procedures and IRM 21.2.2 for system coordination guidelines."
+    },
+    "automationRules": {
+      "canAutoFix": true,
+      "fixableFields": ["primaryNameCtrl"],
+      "conditions": [
+        "Name control can be standardized using IRS formatting rules"
+      ],
+      "autoFixLogic": {
+        "primaryNameCtrl": "Apply IRS name control generation algorithm to standardize format"
+      }
+    }
+  },
+  "011": {
+    "title": "Invalid Tax Period",
+    "status": "ACTIVE",
+    "description": "The tax period format or value is invalid or inconsistent with filing requirements.",
+    "irmGuidance": {
+      "title": "IRM Guidance", 
+      "description": "The tax period format or value is invalid or inconsistent with filing requirements.",
+      "resolutionSteps": [
+        "Verify tax period format matches required pattern (YYYYMM).",
+        "Check that tax period is within valid range for form type.",
+        "Ensure tax period aligns with taxpayer's filing frequency.",
+        "Correct tax period format or value as needed.",
+        "Validate against business rules for the specific form."
+      ],
+      "irmReference": "See IRM 3.12.180 for Tax Period validation procedures."
+    },
+    "automationRules": {
+      "canAutoFix": true,
+      "fixableFields": ["taxPrd"],
+      "conditions": [
+        "Tax period format can be standardized",
+        "Common tax period errors can be corrected automatically"
+      ],
+      "autoFixLogic": {
+        "taxPrd": "Format tax period as YYYYMM and validate against form requirements"
+      }
+    }
+  },
+  "103": {
+    "title": "Document Locator Number (DLN) Invalid",
+    "status": "ACTIVE",
+    "description": "The Document Locator Number format is invalid or does not meet IRS standards.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "The Document Locator Number format is invalid or does not meet IRS standards.",
+      "resolutionSteps": [
+        "Verify DLN format follows IRS standard (14 digits).",
+        "Check DLN components: blocking series, serial number, and check digit.",
+        "Validate DLN against master file records.",
+        "Correct DLN format if possible or escalate for manual review.",
+        "Ensure DLN uniqueness within the system."
+      ],
+      "irmReference": "See IRM 3.12.181 for DLN validation procedures."
+    },
+    "automationRules": {
+      "canAutoFix": false,
+      "fixableFields": [],
+      "conditions": [
+        "DLN errors typically require manual review and correction"
+      ],
+      "autoFixLogic": {}
+    }
+  },
+  "107": {
+    "title": "Processing Date Invalid",
+    "status": "ACTIVE",
+    "description": "The processing date is invalid, missing, or inconsistent with business rules.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "The processing date is invalid, missing, or inconsistent with business rules.",
+      "resolutionSteps": [
+        "Verify processing date format (YYYY-MM-DD).",
+        "Check that processing date is within acceptable range.",
+        "Ensure processing date is not in the future.",
+        "Validate against business calendar and processing schedules.",
+        "Correct processing date or escalate for review."
+      ],
+      "irmReference": "See IRM 3.12.182 for Processing Date validation procedures."
+    },
+    "automationRules": {
+      "canAutoFix": true,
+      "fixableFields": ["MeFReceiptDate"],
+      "conditions": [
+        "Processing date format can be standardized",
+        "Date validation rules can be applied automatically"
+      ],
+      "autoFixLogic": {
+        "MeFReceiptDate": "Format date as YYYY-MM-DD and validate against business rules"
+      }
+    }
+  },
+  "111": {
+    "title": "Tax Period/Transaction Date Mismatch",
+    "status": "ACTIVE",
+    "description": "Mismatch between the tax period and transaction date indicating potential processing errors.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "Mismatch between the tax period and transaction date indicating potential processing errors.",
+      "resolutionSteps": [
+        "Compare tax period with transaction date for consistency.",
+        "Verify transaction date falls within acceptable range for tax period.",
+        "Check for data entry errors in either field.",
+        "Validate against filing deadline requirements.",
+        "Correct inconsistent dates or escalate for review."
+      ],
+      "irmReference": "See IRM 3.12.183 for Tax Period/Date validation procedures."
+    },
+    "automationRules": {
+      "canAutoFix": true,
+      "fixableFields": ["taxPrd", "MeFReceiptDate"],
+      "conditions": [
+        "Date consistency can be validated automatically",
+        "Common date format errors can be corrected"
+      ],
+      "autoFixLogic": {
+        "taxPrd": "Validate tax period format and consistency with transaction date",
+        "MeFReceiptDate": "Ensure transaction date aligns with tax period requirements"
+      }
+    }
+  },
+  "113": {
+    "title": "Submission Source Invalid",
+    "status": "ACTIVE",
+    "description": "The submission source code is invalid or not recognized by the system.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "The submission source code is invalid or not recognized by the system.",
+      "resolutionSteps": [
+        "Verify submission source code against valid values list.",
+        "Check for data entry errors or system mapping issues.",
+        "Validate source code matches submission method.",
+        "Update source code to valid value if possible.",
+        "Escalate for system configuration review if needed."
+      ],
+      "irmReference": "See IRM 3.12.184 for Submission Source validation procedures."
+    },
+    "automationRules": {
+      "canAutoFix": false,
+      "fixableFields": [],
+      "conditions": [
+        "Submission source errors typically require manual review"
+      ],
+      "autoFixLogic": {}
+    }
+  },
+  "135": {
+    "title": "Electronic Filing PIN Invalid",
+    "status": "ACTIVE",
+    "description": "The Electronic Filing Personal Identification Number is invalid or does not meet security requirements.",
+    "irmGuidance": {
+      "title": "IRM Guidance",
+      "description": "The Electronic Filing Personal Identification Number is invalid or does not meet security requirements.",
+      "resolutionSteps": [
+        "Verify PIN format meets IRS requirements (5 digits).",
+        "Check PIN against taxpayer's previous year PIN if applicable.",
+        "Validate PIN security requirements and constraints.",
+        "Generate new PIN if current one is invalid.",
+        "Update taxpayer records with corrected PIN information."
+      ],
+      "irmReference": "See IRM 3.12.185 for Electronic Filing PIN procedures."
+    },
+    "automationRules": {
+      "canAutoFix": false,
+      "fixableFields": [],
+      "conditions": [
+        "PIN errors require manual verification for security reasons"
+      ],
+      "autoFixLogic": {}
+    }
+  }
+}

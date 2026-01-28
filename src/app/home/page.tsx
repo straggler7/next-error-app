@@ -78,6 +78,9 @@ export default function HomePage() {
     qualityReview: false
   });
   
+  // AI Agent state
+  const [allowAIAgent, setAllowAIAgent] = useState(false);
+  
   // UI state
   const [searchError, setSearchError] = useState("");
   const [programStatusError, setProgramStatusError] = useState("");
@@ -594,6 +597,30 @@ export default function HomePage() {
                         ))
                       )}
                     </select>
+                  </div>
+                )}
+
+                {/* AI Agent Checkbox - Show only when program and service center are selected */}
+                {programForm.program && programForm.serviceCenter && !programForm.qualityReview && (
+                  <div className="checkbox-container flex items-center gap-2 mb-2">
+                    <input 
+                      type="checkbox" 
+                      id="aiAgentCheckbox" 
+                      className="w-5 h-5 accent-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1"
+                      checked={allowAIAgent}
+                      onChange={(e) => {
+                        setAllowAIAgent(e.target.checked);
+                        if (e.target.checked) {
+                          // Show alert when AI Agent is enabled
+                          setInfoMessage("AI Agent is working on the queue. Updates can be found on Daily Summary.");
+                          setShowInfo(true);
+                        }
+                      }}
+                    />
+                    <label className="checkbox-label font-semibold text-gray-800 text-sm cursor-pointer flex items-center gap-1" htmlFor="aiAgentCheckbox">
+                      <span className="text-lg">⚡</span>
+                      Allow AI Agent to Work
+                    </label>
                   </div>
                 )}
 
