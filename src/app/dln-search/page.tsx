@@ -489,6 +489,18 @@ function DLNSearchContent() {
     }),
     columnHelper.accessor('seid', {
       header: 'Assigned To',
+      cell: ({ getValue, row }) => {
+        const seid = getValue();
+        const status = row.original.status;
+        
+        // Only show SEID if status is 'ASSIGNED'
+        if (status === 'ASSIGNED') {
+          return <span className="font-mono text-xs">{seid || ''}</span>;
+        }
+        
+        // Return empty for all other statuses
+        return <span></span>;
+      },
       size: 100,
     }),
     columnHelper.accessor('controlDay', {
