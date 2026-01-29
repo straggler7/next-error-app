@@ -66,7 +66,7 @@ export default function Report7740() {
 
   return (
     <BaseReport
-      title="Tax Examiner Production Report"
+      title="Tax Examiner Production Report (7740)"
       reportType="7740"
       data={data}
       loading={loading}
