@@ -144,7 +144,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     },
     { 
       id: 'report0340', 
-      label: '0340 / 0341', 
+      label: 'MER0340 / MER0341', 
       href: '/reports/0340', 
       filter: { type: 'navigate', value: 'report0340' }
     },

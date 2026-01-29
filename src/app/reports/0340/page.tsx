@@ -65,7 +65,7 @@ export default function Report0340Page() {
 
   return (
     <BaseReport
-      title="Error Count Report (0340 / 0341)"
+      title="Error Count Report (MER0340 / MER0341)"
       reportType="0340"
       data={data}
       loading={loading}
