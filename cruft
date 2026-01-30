@@ -3433,3 +3433,88 @@ mkdir -p src/__tests__/utils src/__tests__/services src/__tests__/components src
 npm test -- src/__tests__/pages/home.integration.test.tsx
 
 
+
+===============================
+// Browser navigation event handlers for closeout
+useEffect(() => {
+  let isClosingOut = false;
+
+  // Create a synchronous closeout function for browser events
+  const performSyncCloseout = () => {
+    if (isClosingOut || !inventoryId || !currentUserSeid) {
+      return;
+    }
+    
+    isClosingOut = true;
+    console.log("Performing sync closeout due to browser navigation");
+
+    // Use sendBeacon for reliable delivery during page unload
+    const payload = JSON.stringify({ eventStatus: "CLOSEOUT" });
+    const url = `/api/v1/era/inventories/${inventoryId}/event`;
+    
+    // Try sendBeacon first (most reliable for page unload)
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      const success = navigator.sendBeacon(url, blob);
+      console.log("sendBeacon closeout result:", success);
+      
+      if (success) {
+        return;
+      }
+    }
+
+    // Fallback to synchronous fetch with keepalive
+    try {
+      fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          SEID: `${currentUserSeid}`,
+        },
+        body: payload,
+        keepalive: true, // Ensures request continues even if page unloads
+      }).catch(error => {
+        console.error("Sync closeout fetch failed:", error);
+      });
+    } catch (error) {
+      console.error("Sync closeout error:", error);
+    }
+  };
+
+  // Handle browser close, tab close, refresh, navigation away
+  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    console.log("beforeunload event triggered");
+    performSyncCloseout();
+    
+    // Optional: Show confirmation dialog (commented out as it may be intrusive)
+    // event.preventDefault();
+    // event.returnValue = 'Are you sure you want to leave? Your work will be closed out.';
+    // return event.returnValue;
+  };
+
+  // Handle tab switching, browser minimization, window focus loss
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      console.log("Page became hidden (tab switch/minimize)");
+      performSyncCloseout();
+    }
+  };
+
+  // Handle navigation away from page (fallback)
+  const handlePageHide = (event: PageTransitionEvent) => {
+    console.log("pagehide event triggered");
+    performSyncCloseout();
+  };
+
+  // Add event listeners
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('pagehide', handlePageHide);
+
+  // Cleanup function
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('pagehide', handlePageHide);
+  };
+}, [inventoryId, currentUserSeid]); // Dependencies: only re-run if these change
