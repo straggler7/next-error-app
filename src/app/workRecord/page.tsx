@@ -2126,6 +2126,107 @@ function Form4868ERSPageContent() {
     };
   }, [handleCloseout]); // Include handleCloseout as dependency
 
+  // Ref to track if closeout has been sent (persists across renders)
+  const closeoutSentRef = useRef(false);
+
+  // Unified closeout function used by all event handlers
+  const performCloseout = useCallback((source: string) => {
+    if (closeoutSentRef.current || !inventoryId || !currentUserSeid) {
+      console.log(`⚠️ Skipping closeout from ${source}:`, { 
+        alreadySent: closeoutSentRef.current, 
+        hasInventoryId: !!inventoryId, 
+        hasSeid: !!currentUserSeid 
+      });
+      return;
+    }
+    
+    closeoutSentRef.current = true;
+    console.log(`✅ TRIGGERING CLOSEOUT from ${source}`, {
+      inventoryId,
+      currentUserSeid,
+      url: `/api/v1/era/inventories/${inventoryId}/event`
+    });
+
+    const payload = JSON.stringify({ eventStatus: "CLOSEOUT" });
+    const url = `/api/v1/era/inventories/${inventoryId}/event`;
+    
+    // Use fetch with keepalive - supports headers unlike sendBeacon
+    // keepalive ensures request continues even if page unloads
+    try {
+      fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "SEID": currentUserSeid,
+        },
+        body: payload,
+        keepalive: true,
+      })
+        .then(response => {
+          console.log(`📡 Closeout response from ${source}:`, response.status, response.statusText);
+          return response.text();
+        })
+        .then(data => {
+          console.log(`📡 Closeout response body from ${source}:`, data);
+        })
+        .catch(error => {
+          console.error(`❌ Closeout fetch failed from ${source}:`, error);
+        });
+    } catch (error) {
+      console.error(`❌ Closeout error from ${source}:`, error);
+    }
+  }, [inventoryId, currentUserSeid]);
+
+  // Browser event handlers for closeout (browser close, refresh, tab close)
+  useEffect(() => {
+    console.log("🔵 Installing browser event handlers");
+
+    // Handle browser close, tab close, refresh
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      console.log("🔴 beforeunload event triggered");
+      performCloseout("beforeunload");
+    };
+
+    // Handle tab switching, browser minimization, window focus loss
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        console.log("🔴 Page became hidden (tab switch/minimize)");
+        performCloseout("visibilitychange");
+      }
+    };
+
+    // Handle navigation away from page (fallback)
+    const handlePageHide = (event: PageTransitionEvent) => {
+      console.log("🔴 pagehide event triggered");
+      performCloseout("pagehide");
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
+    // Cleanup function
+    return () => {
+      console.log("🔵 Removing browser event handlers");
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [performCloseout]);
+
+  // Component unmount handler for back button navigation
+  // This is needed because Next.js App Router unmounts the component before popstate fires
+  useEffect(() => {
+    console.log("🔵 Navigation closeout handler installed");
+
+    // Cleanup function runs when component unmounts (including back button navigation)
+    return () => {
+      console.log("🔴 Component unmounting - triggering closeout");
+      performCloseout("unmount");
+    };
+  }, [performCloseout]);
+
   // Function to dismiss timeout warning
   const dismissTimeoutWarning = () => {
     setTimeoutWarning(false);
