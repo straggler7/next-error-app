@@ -928,87 +928,87 @@ function Form4868ERSPageContent() {
     }
 
     try {
-      // Get the automation rules for this error
-      const { fixableFields, autoFixLogic } = guidance.automationRules;
-      
-      // Apply automated fixes to the form fields
+      // Always update these specific fields when AI agent is triggered
       const updatedValues = { ...values };
-      let hasChanges = false;
-
-      for (const fieldKey of fixableFields) {
-        if (autoFixLogic[fieldKey]) {
-          const currentValue = values[fieldKey] || '';
-          let fixedValue = currentValue;
-
-          // Apply specific fix logic based on field and error type
-          switch (errorCode) {
-            case '004':
-            case '005':
-              if (fieldKey === 'primaryNameCtrl') {
-                // Standardize name control format
-                fixedValue = currentValue.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 4);
-                if (fixedValue.length < 4) {
-                  fixedValue = fixedValue.padEnd(4, 'X');
-                }
-              } else if (fieldKey === 'primarySSN') {
-                // Format SSN with proper dashes
-                const ssnDigits = currentValue.replace(/\D/g, '');
-                if (ssnDigits.length === 9) {
-                  fixedValue = `${ssnDigits.substring(0, 3)}-${ssnDigits.substring(3, 5)}-${ssnDigits.substring(5)}`;
-                }
-              }
-              break;
-            case '011':
-            case '111':
-              if (fieldKey === 'taxPrd') {
-                // Format tax period as YYYYMM
-                const digits = currentValue.replace(/\D/g, '');
-                if (digits.length >= 6) {
-                  fixedValue = digits.substring(0, 6);
-                }
-              } else if (fieldKey === 'MeFReceiptDate') {
-                // Format date as YYYY-MM-DD
-                const dateStr = currentValue.replace(/\D/g, '');
-                if (dateStr.length >= 8) {
-                  fixedValue = `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
-                }
-              }
-              break;
-            case '107':
-              if (fieldKey === 'MeFReceiptDate') {
-                // Ensure date is not in future and properly formatted
-                const today = new Date();
-                const inputDate = new Date(currentValue);
-                if (inputDate > today) {
-                  fixedValue = today.toISOString().split('T')[0];
-                } else if (currentValue && !currentValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                  const dateStr = currentValue.replace(/\D/g, '');
-                  if (dateStr.length >= 8) {
-                    fixedValue = `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
-                  }
-                }
-              }
-              break;
-          }
-
-          if (fixedValue !== currentValue) {
-            updatedValues[fieldKey] = fixedValue;
-            hasChanges = true;
-          }
-        }
+      const correctedFields: string[] = [];
+      
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      
+      // Always update meFReceiptDate to today's date
+      if (formElements.some(el => el.name === 'meFReceiptDate') || values.hasOwnProperty('meFReceiptDate')) {
+        updatedValues['meFReceiptDate'] = todayStr;
+        correctedFields.push('meFReceiptDate');
+        console.log('Setting meFReceiptDate to:', todayStr);
+      }
+      
+      // Always update taxPrd to 202512
+      if (formElements.some(el => el.name === 'taxPrd') || values.hasOwnProperty('taxPrd')) {
+        updatedValues['taxPrd'] = '202512';
+        correctedFields.push('taxPrd');
+        console.log('Setting taxPrd to: 202512');
       }
 
+      const hasChanges = correctedFields.length > 0;
+
       if (hasChanges) {
+        console.log('AI Agent applying corrections:', correctedFields);
+        console.log('Updated values:', updatedValues);
+        console.log('Current formElements before update:', formElements.map(el => ({ name: el.name, value: el.value })));
+        
+        // Update values state
         setValues(updatedValues);
         
+        // Update form elements - create a new array with updated values
+        if (formElements.length > 0) {
+          const newFormElements = formElements.map(element => {
+            if (correctedFields.includes(element.name)) {
+              console.log(`Updating form element ${element.name} from "${element.value}" to "${updatedValues[element.name]}"`);
+              return { ...element, value: updatedValues[element.name] };
+            }
+            return element;
+          });
+          
+          console.log('Updated formElements:', newFormElements.map(el => ({ name: el.name, value: el.value })));
+          setFormElements(newFormElements);
+        } else {
+          console.log('No formElements to update, using values state only');
+        }
+        
+        // Mark corrected fields as edited
+        setFieldWithErrors((prev) => {
+          const newFields = [...prev];
+          correctedFields.forEach(fieldKey => {
+            if (!newFields.includes(fieldKey)) {
+              newFields.push(fieldKey);
+            }
+          });
+          return newFields;
+        });
+        
+        // Highlight the corrected fields
+        setHighlightedFields(correctedFields);
+        
         // Show success message
-        alert(`AI Agent has automatically corrected the following fields: ${fixableFields.join(', ')}`);
+        const fieldLabels = correctedFields.map(key => {
+          const element = formElements.find(el => el.name === key);
+          return element?.label || key;
+        }).join(', ');
+        
+        setInfoMessage(`AI Agent corrected: ${fieldLabels}`);
+        setShowInfo(true);
+        setTimeout(() => setShowInfo(false), 5000);
         
         // Close the error info section
         setShowErrorInfo(false);
         setSelectedErrorForInfo(null);
         setSelectedErrorId(null);
-        setHighlightedFields([]);
+        
+        // Keep fields highlighted for 5 seconds, then clear
+        setTimeout(() => {
+          setHighlightedFields([]);
+        }, 5000);
       } else {
         alert('No corrections were needed for this error.');
       }
@@ -2427,7 +2427,7 @@ function Form4868ERSPageContent() {
       {errorItems.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
           <h2 className="error-badges-title text-base font-semibold mb-4 text-gray-700">
-            Errors
+            Errors (<span className="text-lg">⚡</span><span className="text-gray-500">click an error for AI assistance</span>)
           </h2>
           <div className="error-badges-container flex flex-wrap gap-2">
             {errorItems.map((error) => (
@@ -2700,7 +2700,7 @@ function Form4868ERSPageContent() {
                   </div>
 
                   {/* Mark Updated Button */}
-                  <div className="pt-2">
+                  <div className="pt-2" style={{ display: 'none' }}>
                     <button
                       onClick={() => {
                         setShowErrorInfo(false);
