@@ -2770,8 +2770,6 @@ function Form4868ERSPageContent() {
             >
               {suspending ? "Suspending..." : "Suspend"}
             </button>
-          </div>
-          <div className="flex gap-4">
             <button
               type="button"
               className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
@@ -2788,6 +2786,8 @@ function Form4868ERSPageContent() {
             >
               {closingOut ? "Closing Out..." : "Close Out"}
             </button>
+          </div>
+          <div className="flex gap-4">
             {hasDeletePermission && (
               <button
                 type="button"
