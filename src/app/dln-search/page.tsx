@@ -16,6 +16,7 @@ import { User, FilterState, PaginationState, ActionDropdownItem } from '../../ty
 import { DLNSearchService, DLNSearchRecord, DLNSearchFilters } from '../../services/dlnSearchService';
 import { useSeid } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
+import { getStatusDisplay } from '../../utils/statusMapping';
 
 function DLNSearchContent() {
   const router = useRouter();
@@ -481,7 +482,7 @@ function DLNSearchContent() {
         const status = getValue();
         return (
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {status}
+            {getStatusDisplay(status)}
           </span>
         );
       },
@@ -517,8 +518,8 @@ function DLNSearchContent() {
       header: 'Actions',
       cell: ({ row }) => {
         const record = row.original;
-        // const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED'];
-        const assignableStatuses = ['NEW', 'SUSPENDED', 'WORKABLE_SUSPENSE'];
+        const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED', 'WORKABLE_SUSPENSE'];
+        // const assignableStatuses = ['NEW', 'SUSPENDED', 'WORKABLE_SUSPENSE'];
         const isAssignable = assignableStatuses.includes(record.status);
         const isDeleted = record.status === 'DELETED';
         const showButton = isAssignable || isDeleted;

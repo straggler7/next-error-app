@@ -19,6 +19,7 @@ import { InventoryRecord } from '../../types';
 import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
 import { formatISOTimestamp } from '../../utils/dateFormatters';
+import { getStatusDisplay } from '../../utils/statusMapping';
 import { useAuth } from '../../contexts/AuthContext';
 
 function DailySummaryContent() {
@@ -404,7 +405,7 @@ function DailySummaryContent() {
         const status = getValue();
         return (
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {status}
+            {getStatusDisplay(status)}
           </span>
         );
       },
