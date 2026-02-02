@@ -518,7 +518,8 @@ function DLNSearchContent() {
       header: 'Actions',
       cell: ({ row }) => {
         const record = row.original;
-        const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED', 'WORKABLE_SUSPENSE'];
+        // const assignableStatuses = ['NEW', 'SUSPENDED', 'QR_HOLD', 'SUSPEND', 'HOLD', 'RESOLVED', 'WORKABLE_SUSPENSE'];
+        const assignableStatuses = ['NEW', 'RESOLVED', 'SUSPENDED', 'SUSPEND', 'SUSPEND_HOLD', 'QR_HOLD', 'WORKABLE_SUSPENSE'];
         // const assignableStatuses = ['NEW', 'SUSPENDED', 'WORKABLE_SUSPENSE'];
         const isAssignable = assignableStatuses.includes(record.status);
         const isDeleted = record.status === 'DELETED';
