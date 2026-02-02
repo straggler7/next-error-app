@@ -40,6 +40,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
 import { getServiceCenterName } from "../../utils/serviceCenters";
 // import DevBanner from "../../components/DevBanner";
+import AIFloatingButton from "../../components/AIFloatingButton";
+import AIAssistantDialog from "../../components/AIAssistantDialog";
 import newFieldConfig from "../../data/fieldConfig4868.json";
 import errorConfig from "../../data/errorConfig4868.json";
 
@@ -275,6 +277,7 @@ function Form4868ERSPageContent() {
   const [loading, setLoading] = useState(true);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>("");
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
 
   const editableFieldKeys: string[] = useMemo(() => {
     if (formElements.length > 0) {
@@ -2817,6 +2820,51 @@ function Form4868ERSPageContent() {
           </div>
         )}
       </div>
+
+      {/* AI Floating Button */}
+      <AIFloatingButton onClick={() => setIsAIDialogOpen(true)} />
+
+      {/* AI Assistant Dialog */}
+      <AIAssistantDialog
+        isOpen={isAIDialogOpen}
+        onClose={() => setIsAIDialogOpen(false)}
+        formData={eraDto}
+        currentError={currentNonFieldError ? {
+          code: currentNonFieldError.code,
+          description: currentNonFieldError.description,
+          fieldMappings: currentNonFieldError.errorFields
+        } : undefined}
+        allErrors={errorItems.map(error => ({
+          code: error.code,
+          description: error.description,
+          fieldMappings: error.errorFields
+        }))}
+        onApplyFixes={(fixes) => {
+          // Apply AI-suggested fixes to form fields
+          fixes.forEach(fix => {
+            fix.proposedFix.forEach(change => {
+              // Update form data with suggested values
+              if (eraDto?.displayFields?.[change.field]) {
+                setEraDto((prev: any) => ({
+                  ...prev,
+                  displayFields: {
+                    ...prev?.displayFields,
+                    [change.field]: {
+                      ...prev?.displayFields?.[change.field],
+                      value: change.suggestedValue
+                    }
+                  }
+                }));
+              }
+            });
+          });
+          
+          // Show success message
+          setInfoMessage(`AI applied ${fixes.length} fix${fixes.length > 1 ? 'es' : ''} to the form`);
+          setShowInfo(true);
+          setTimeout(() => setShowInfo(false), 5000);
+        }}
+      />
     </div>
   );
 }
