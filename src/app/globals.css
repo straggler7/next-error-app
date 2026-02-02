@@ -46,6 +46,22 @@ body {
   animation: slide-in-right 0.3s ease-out;
 }
 
+/* AI Dialog slide-up animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
 .info-badge {
   display: inline-block;
   background: rgb(15, 80, 126);
