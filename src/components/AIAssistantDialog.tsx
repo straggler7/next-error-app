@@ -11,6 +11,14 @@ interface Message {
   feedbackComment?: string;
 }
 
+interface FieldChange {
+  field: string;
+  currentValue: string;
+  proposedValue: string;
+  confidenceScore: number;
+  selected?: boolean;
+}
+
 interface ErrorFix {
   errorCode: string;
   errorDescription: string;
@@ -60,6 +68,10 @@ export default function AIAssistantDialog({
   const [proposedFixes, setProposedFixes] = useState<ErrorFix[] | null>(null);
   const [feedbackMessageIndex, setFeedbackMessageIndex] = useState<number | null>(null);
   const [feedbackComment, setFeedbackComment] = useState("");
+  const [fieldChanges, setFieldChanges] = useState<FieldChange[]>([]);
+  const [showDenyModal, setShowDenyModal] = useState(false);
+  const [denyFeedback, setDenyFeedback] = useState("");
+  const [isReworking, setIsReworking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -77,25 +89,62 @@ export default function AIAssistantDialog({
     }
   }, [isOpen]);
 
-  // Initialize welcome message based on mode
+  // Auto-analyze errors when switching to Agent Mode
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && mode === "agent" && messages.length === 0 && fieldChanges.length === 0) {
+      // Automatically analyze errors when entering Agent Mode
+      setIsLoading(true);
+      
+      const analysisMessage: Message = {
+        role: "assistant",
+        content: "🔍 **Analyzing Form Errors**\n\nI'm examining the form data and errors to identify fields that need correction. This will take just a moment...",
+        timestamp: new Date(),
+      };
+      setMessages([analysisMessage]);
+      
+      // Simulate analysis
+      setTimeout(() => {
+        const changes = simulateAgentResponse("analyze all");
+        
+        if (changes.length > 0) {
+          setFieldChanges(changes);
+          const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
+          const highConfidence = changes.filter(c => c.confidenceScore >= 0.9).length;
+          
+          const summaryMessage: Message = {
+            role: "assistant",
+            content: `✅ **Analysis Complete**\n\nI've identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction:\n\n**Summary:**\n- Average confidence: ${avgConfidence}%\n- High confidence fields (≥90%): ${highConfidence}\n- Fields requiring review: ${changes.length - highConfidence}\n\n**Proposed Changes:**\nPlease review the table below and select which changes to apply. You can:\n- **Apply**: Apply selected changes to the form\n- **Deny**: Reject changes and provide feedback\n- **Rework**: Request re-analysis with enhanced validation\n\nFeel free to ask me questions about any of the proposed changes!`,
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, summaryMessage]);
+        } else {
+          const noErrorsMessage: Message = {
+            role: "assistant",
+            content: "✅ **Analysis Complete**\n\nI couldn't identify any field-level corrections needed at this time. The form appears to be in good shape!\n\nIf you have specific questions or need guidance on particular errors, feel free to ask.",
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, noErrorsMessage]);
+        }
+        setIsLoading(false);
+      }, 1500);
+    } else if (isOpen && mode === "plan" && messages.length === 0) {
+      // Plan mode welcome message
       const welcomeMessage: Message = {
         role: "assistant",
-        content: mode === "plan"
-          ? `Hello! I'm your AI assistant in **Plan Mode**. I can help you understand and resolve errors.\n\n**I can help with:**\n- Explain current error: "${currentError?.code || 'error code'}"\n- Show IRM guidance\n- Provide step-by-step resolution instructions\n- List all errors on the form\n\nSwitch to **Agent Mode** for automatic error fixes.`
-          : `Hello! I'm your AI assistant in **Agent Mode**. I can automatically analyze and fix errors.\n\n**Available commands:**\n- "Fix the current error"\n- "Fix all errors on this form"\n- "Analyze all errors"\n\nI'll show you proposed fixes with confidence scores before applying any changes.`,
+        content: `Hello! I'm your AI assistant in **Plan Mode**. I can help you understand and resolve errors.\n\n**I can help with:**\n- Explain current error: "${currentError?.code || 'error code'}"\n- Show IRM guidance\n- Provide step-by-step resolution instructions\n- List all errors on the form\n\nSwitch to **Agent Mode** for automatic error analysis and fixes.`,
         timestamp: new Date(),
       };
       setMessages([welcomeMessage]);
     }
-  }, [isOpen, mode, currentError, messages.length]);
+  }, [isOpen, mode, currentError, messages.length, fieldChanges.length]);
 
   // Reset messages when mode changes
   const handleModeChange = (newMode: AIMode) => {
     setMode(newMode);
     setMessages([]);
     setProposedFixes(null);
+    setFieldChanges([]);
+    setIsReworking(false);
   };
 
   // Simulate Plan Mode response
@@ -116,47 +165,68 @@ export default function AIAssistantDialog({
     return `I understand you're asking about: "${userMessage}"\n\nIn Plan Mode, I provide guidance and instructions. For automatic fixes, switch to Agent Mode.\n\n**Need help with:**\n- Understanding specific errors\n- IRM documentation\n- Resolution procedures`;
   };
 
-  // Simulate Agent Mode response with fixes
-  const simulateAgentResponse = (userMessage: string): ErrorFix[] => {
+  // Simulate Agent Mode response with field changes
+  const simulateAgentResponse = (userMessage: string): FieldChange[] => {
     const lowerMessage = userMessage.toLowerCase();
     
     if (lowerMessage.includes("fix all") || lowerMessage.includes("analyze all")) {
-      return allErrors.slice(0, 3).map(error => ({
-        errorCode: error.code,
-        errorDescription: error.description,
-        proposedFix: [
-          {
-            field: error.fieldMappings?.[0] || "primarySSN",
-            currentValue: formData?.[error.fieldMappings?.[0] || "primarySSN"] || "123456789",
-            suggestedValue: "987654321",
-            reason: "Corrected based on source document analysis"
-          }
-        ],
-        confidenceScore: Math.random() * 0.3 + 0.7, // 70-100%
-        requiresManualReview: Math.random() > 0.6
-      }));
+      return allErrors.slice(0, 3).flatMap(error => {
+        const fields = error.fieldMappings || ["primarySSN"];
+        return fields.map(field => ({
+          field: field,
+          currentValue: formData?.[field] || "123456789",
+          proposedValue: "987654321",
+          confidenceScore: Math.random() * 0.3 + 0.7, // 70-100%
+          selected: true
+        }));
+      });
     }
     
     if (lowerMessage.includes("fix current") || lowerMessage.includes("fix the error")) {
       if (!currentError) return [];
       
-      return [{
-        errorCode: currentError.code,
-        errorDescription: currentError.description,
-        proposedFix: [
-          {
-            field: currentError.fieldMappings?.[0] || "primarySSN",
-            currentValue: formData?.[currentError.fieldMappings?.[0] || "primarySSN"] || "123456789",
-            suggestedValue: "987654321",
-            reason: "Corrected to match EIF record"
-          }
-        ],
+      const fields = currentError.fieldMappings || ["primarySSN"];
+      return fields.map(field => ({
+        field: field,
+        currentValue: formData?.[field] || "123456789",
+        proposedValue: "987654321",
         confidenceScore: 0.92,
-        requiresManualReview: false
-      }];
+        selected: true
+      }));
     }
     
     return [];
+  };
+
+  // Simulate rework with improved confidence scores
+  const simulateRework = (changes: FieldChange[]): FieldChange[] => {
+    return changes.map(change => ({
+      ...change,
+      confidenceScore: Math.min(0.99, change.confidenceScore + 0.1 + Math.random() * 0.05),
+      proposedValue: change.proposedValue // Could be updated with better analysis
+    }));
+  };
+
+  // Generate contextual responses for Agent Mode chat
+  const generateAgentResponse = (userMessage: string, changes: FieldChange[], error?: { code: string; description: string }): string => {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    if (lowerMessage.includes("why") || lowerMessage.includes("explain")) {
+      if (changes.length > 0) {
+        return `**Explanation of Proposed Changes**\n\nThe changes I've identified are based on:\n- Cross-referencing form data with source documents\n- Validation against IRS business rules\n- Pattern analysis from similar cases\n\nEach field has a confidence score indicating how certain I am about the correction. Higher scores (≥90%) indicate strong confidence based on clear validation rules.\n\nWould you like me to explain a specific field change?`;
+      }
+      return `I analyze errors by examining the form data, comparing it with expected values, and applying IRS validation rules. Currently, there are no proposed changes in the table.`;
+    }
+    
+    if (lowerMessage.includes("confidence") || lowerMessage.includes("sure")) {
+      return `**About Confidence Scores**\n\nConfidence scores reflect:\n- **90-100%**: High confidence - validated against multiple sources\n- **75-89%**: Medium confidence - likely correct but review recommended\n- **Below 75%**: Lower confidence - manual review required\n\nThe scores help you prioritize which changes to apply first. You can always select only high-confidence changes and review others manually.`;
+    }
+    
+    if (lowerMessage.includes("help") || lowerMessage.includes("what can")) {
+      return `**I can help you with:**\n\n- Explain why specific changes are proposed\n- Provide details about confidence scores\n- Re-analyze with different approaches (Rework button)\n- Answer questions about the current error\n- Guide you through the correction process\n\nJust ask me anything about the proposed changes or the errors!`;
+    }
+    
+    return `I understand you're asking about: "${userMessage}"\n\nI'm here to help with the proposed changes shown in the table. You can:\n- Ask me to explain specific changes\n- Request information about confidence scores\n- Get guidance on which changes to apply\n\nWhat would you like to know?`;
   };
 
   const handleSendMessage = async () => {
@@ -185,23 +255,36 @@ export default function AIAssistantDialog({
         setMessages((prev) => [...prev, assistantMessage]);
         setIsLoading(false);
       } else {
-        // Agent mode - generate fixes
-        const fixes = simulateAgentResponse(userMessage.content);
+        // Agent mode - handle user questions and commands
+        const lowerMessage = userMessage.content.toLowerCase();
         
-        if (fixes.length > 0) {
-          // Initialize all fixes as selected by default
-          const fixesWithSelection = fixes.map(fix => ({ ...fix, selected: true, rejected: false }));
-          setProposedFixes(fixesWithSelection);
-          const assistantMessage: Message = {
-            role: "assistant",
-            content: `I've analyzed the errors and prepared ${fixes.length} fix${fixes.length > 1 ? 'es' : ''}. Please review the proposed changes below.`,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
+        // Check if user is asking for new analysis
+        if (lowerMessage.includes("analyze") || lowerMessage.includes("fix") || lowerMessage.includes("check")) {
+          const changes = simulateAgentResponse(userMessage.content);
+          
+          if (changes.length > 0) {
+            setFieldChanges(changes);
+            const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
+            const assistantMessage: Message = {
+              role: "assistant",
+              content: `I've analyzed the form and identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction with an average confidence of ${avgConfidence}%. Please review the proposed changes in the table below.`,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+          } else {
+            const assistantMessage: Message = {
+              role: "assistant",
+              content: "I couldn't identify any specific field corrections for that request. The current analysis shows all available corrections in the table above.",
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+          }
         } else {
+          // Answer questions about current analysis or provide guidance
+          const responseContent = generateAgentResponse(userMessage.content, fieldChanges, currentError);
           const assistantMessage: Message = {
             role: "assistant",
-            content: "I couldn't find any errors to fix. Please try commands like:\n- \"Fix the current error\"\n- \"Fix all errors on this form\"",
+            content: responseContent,
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, assistantMessage]);
@@ -211,79 +294,112 @@ export default function AIAssistantDialog({
     }, 1000);
   };
 
-  const handleToggleFixSelection = (fixIndex: number) => {
-    setProposedFixes(prev => {
-      if (!prev) return prev;
-      return prev.map((fix, idx) => {
-        if (idx === fixIndex) {
-          // Toggle selection - if rejected, clear rejected and select
-          if (fix.rejected) {
-            return { ...fix, selected: true, rejected: false };
-          }
-          // Otherwise just toggle selected
-          return { ...fix, selected: !fix.selected };
-        }
-        return fix;
-      });
-    });
+  const handleToggleFieldSelection = (fieldIndex: number) => {
+    setFieldChanges(prev => 
+      prev.map((change, idx) => 
+        idx === fieldIndex ? { ...change, selected: !change.selected } : change
+      )
+    );
   };
 
-  const handleRejectFix = (fixIndex: number) => {
-    setProposedFixes(prev => {
-      if (!prev) return prev;
-      return prev.map((fix, idx) => 
-        idx === fixIndex ? { ...fix, rejected: true, selected: false } : fix
-      );
-    });
-  };
-
-  const handleApplySelectedFixes = () => {
-    if (proposedFixes && onApplyFixes) {
-      const selectedFixes = proposedFixes.filter(fix => fix.selected && !fix.rejected);
-      
-      if (selectedFixes.length === 0) {
-        const warningMessage: Message = {
-          role: "assistant",
-          content: "⚠️ No fixes selected. Please select at least one fix to apply.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, warningMessage]);
-        return;
-      }
-      
-      onApplyFixes(selectedFixes);
-      const confirmMessage: Message = {
+  const handleApplyChanges = () => {
+    const selectedChanges = fieldChanges.filter(change => change.selected);
+    
+    if (selectedChanges.length === 0) {
+      const warningMessage: Message = {
         role: "assistant",
-        content: `✅ Applied ${selectedFixes.length} fix${selectedFixes.length > 1 ? 'es' : ''} successfully! The form has been updated.`,
+        content: "⚠️ **No changes selected**\n\nPlease select at least one field change using the checkboxes before applying. If you'd like me to re-analyze, click the Rework button.",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, confirmMessage]);
+      setMessages((prev) => [...prev, warningMessage]);
+      return;
     }
-    setProposedFixes(null);
-  };
-
-  const handleSelectAllFixes = () => {
-    setProposedFixes(prev => {
-      if (!prev) return prev;
-      return prev.map(fix => ({ ...fix, selected: true, rejected: false }));
-    });
-  };
-
-  const handleDeselectAllFixes = () => {
-    setProposedFixes(prev => {
-      if (!prev) return prev;
-      return prev.map(fix => ({ ...fix, selected: false }));
-    });
-  };
-
-  const handleCancelFixes = () => {
-    setProposedFixes(null);
-    const cancelMessage: Message = {
+    
+    // Apply changes to form via callback
+    if (onApplyFixes) {
+      // Convert field changes to ErrorFix format for compatibility
+      const fixesToApply: ErrorFix[] = selectedChanges.map(change => ({
+        errorCode: currentError?.code || "MULTI",
+        errorDescription: currentError?.description || "Multiple field corrections",
+        proposedFix: [{
+          field: change.field,
+          currentValue: change.currentValue,
+          suggestedValue: change.proposedValue,
+          reason: "AI-suggested correction"
+        }],
+        confidenceScore: change.confidenceScore,
+        requiresManualReview: change.confidenceScore < 0.9,
+        selected: true
+      }));
+      onApplyFixes(fixesToApply);
+    }
+    
+    const avgConfidence = (selectedChanges.reduce((sum, c) => sum + c.confidenceScore, 0) / selectedChanges.length * 100).toFixed(0);
+    const successMessage: Message = {
       role: "assistant",
-      content: "Fixes cancelled. No changes were made to the form.",
+      content: `✅ **Changes Applied Successfully**\n\nI've updated ${selectedChanges.length} field${selectedChanges.length > 1 ? 's' : ''} on the form with an average confidence of ${avgConfidence}%.\n\n**Next Steps:**\n- Review the updated fields to ensure accuracy\n- Verify the changes resolve the associated errors\n- Submit the form when ready\n\nIf you need further assistance, feel free to ask!`,
       timestamp: new Date(),
     };
-    setMessages((prev) => [...prev, cancelMessage]);
+    setMessages((prev) => [...prev, successMessage]);
+    setFieldChanges([]);
+  };
+
+  const handleDenyChanges = () => {
+    setShowDenyModal(true);
+  };
+
+  const handleSubmitDeny = () => {
+    const deniedCount = fieldChanges.length;
+    
+    // Log feedback for AI improvement (replace with API call)
+    console.log("User denied changes:", {
+      changes: fieldChanges,
+      feedback: denyFeedback,
+      timestamp: new Date()
+    });
+    
+    const feedbackMessage: Message = {
+      role: "assistant",
+      content: `📝 **Feedback Received**\n\nThank you for providing feedback on the ${deniedCount} proposed change${deniedCount > 1 ? 's' : ''}. Your input helps me improve my analysis and recommendations.\n\n**What I'll do:**\n- Review your feedback to understand the concerns\n- Refine my analysis approach for similar cases\n- Learn from this interaction to provide better suggestions\n\nNo changes have been applied to the form. Would you like me to:\n- Rework the analysis with a different approach?\n- Focus on specific fields?\n- Provide guidance instead of automatic fixes?`,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, feedbackMessage]);
+    setFieldChanges([]);
+    setShowDenyModal(false);
+    setDenyFeedback("");
+  };
+
+  const handleCancelDeny = () => {
+    setShowDenyModal(false);
+    setDenyFeedback("");
+  };
+
+  const handleRework = async () => {
+    setIsReworking(true);
+    
+    const reworkMessage: Message = {
+      role: "assistant",
+      content: "🔄 **Reworking Analysis**\n\nI'm re-analyzing the form data with enhanced context and cross-referencing additional knowledge sources. This may take a moment...",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, reworkMessage]);
+    
+    // Simulate rework process
+    setTimeout(() => {
+      const reworkedChanges = simulateRework(fieldChanges);
+      setFieldChanges(reworkedChanges);
+      
+      const avgConfidence = (reworkedChanges.reduce((sum, c) => sum + c.confidenceScore, 0) / reworkedChanges.length * 100).toFixed(0);
+      const improvement = reworkedChanges.filter(c => c.confidenceScore >= 0.9).length;
+      
+      const resultMessage: Message = {
+        role: "assistant",
+        content: `✨ **Analysis Complete**\n\nI've reworked the analysis with enhanced validation and cross-referencing:\n\n**Improvements:**\n- Average confidence increased to ${avgConfidence}%\n- ${improvement} field${improvement !== 1 ? 's' : ''} now have high confidence (≥90%)\n- Validated against additional data sources\n\n**Updated Recommendations:**\nPlease review the updated table below. The confidence scores reflect improved analysis based on deeper context evaluation.`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, resultMessage]);
+      setIsReworking(false);
+    }, 2000);
   };
 
   const getConfidenceColor = (score: number) => {
@@ -503,148 +619,103 @@ export default function AIAssistantDialog({
           </div>
         ))}
         
-        {/* Fix Summary Panel */}
-        {proposedFixes && proposedFixes.length > 0 && (
+        {/* Field Changes Table */}
+        {fieldChanges.length > 0 && (
           <div className="bg-white border border-blue-200 rounded-lg p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Info className="w-5 h-5 text-blue-600" />
-                <h4 className="font-semibold text-gray-800">Proposed Fixes</h4>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSelectAllFixes}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Select All
-                </button>
-                <span className="text-gray-300">|</span>
-                <button
-                  onClick={handleDeselectAllFixes}
-                  className="text-xs text-gray-600 hover:text-gray-700 font-medium"
-                >
-                  Deselect All
-                </button>
-              </div>
+            <div className="flex items-center gap-2 mb-3">
+              <Info className="w-5 h-5 text-blue-600" />
+              <h4 className="font-semibold text-gray-800">Proposed Changes</h4>
             </div>
             
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {proposedFixes.map((fix, idx) => (
-                <div
-                  key={idx}
-                  className={`border rounded-lg p-3 transition-all ${
-                    fix.rejected 
-                      ? 'bg-gray-100 border-gray-300 opacity-60' 
-                      : fix.selected
-                      ? getConfidenceBgColor(fix.confidenceScore)
-                      : 'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-start gap-3 mb-2">
-                    {/* Selection Checkbox */}
-                    <div className="flex items-center pt-0.5">
+            {/* Table */}
+            <div className="overflow-x-auto max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
                       <input
                         type="checkbox"
-                        checked={fix.selected && !fix.rejected}
-                        onChange={() => handleToggleFixSelection(idx)}
-                        disabled={fix.rejected}
+                        checked={fieldChanges.every(c => c.selected)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFieldChanges(prev => prev.map(c => ({ ...c, selected: checked })));
+                        }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        title="Select/Deselect All"
                       />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-1">
-                        <div>
-                          <p className={`font-medium text-sm ${fix.rejected ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
-                            Error {fix.errorCode}
-                          </p>
-                          <p className={`text-xs ${fix.rejected ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {fix.errorDescription}
-                          </p>
-                        </div>
-                        <div className="text-right ml-2">
-                          <p className={`text-sm font-semibold ${fix.rejected ? 'text-gray-400' : getConfidenceColor(fix.confidenceScore)}`}>
-                            {(fix.confidenceScore * 100).toFixed(0)}%
-                          </p>
-                          <p className="text-xs text-gray-500">confidence</p>
-                        </div>
-                      </div>
-                      
-                      {fix.requiresManualReview && !fix.rejected && (
-                        <div className="flex items-center gap-1 mb-2 text-xs text-orange-700">
-                          <AlertCircle className="w-3 h-3" />
-                          <span>Requires manual review</span>
-                        </div>
-                      )}
-                      
-                      {fix.rejected && (
-                        <div className="flex items-center gap-1 mb-2 text-xs text-red-600">
-                          <X className="w-3 h-3" />
-                          <span>Rejected</span>
-                        </div>
-                      )}
-                      
-                      <div className="space-y-2">
-                        {fix.proposedFix.map((change, changeIdx) => (
-                          <div key={changeIdx} className="bg-white bg-opacity-50 rounded p-2">
-                            <p className="text-xs font-medium text-gray-700 mb-1">{change.field}</p>
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className={`${fix.rejected ? 'text-gray-400' : 'text-red-600'} line-through`}>
-                                {change.currentValue}
-                              </span>
-                              <span className="text-gray-400">→</span>
-                              <span className={`font-medium ${fix.rejected ? 'text-gray-400' : 'text-green-600'}`}>
-                                {change.suggestedValue}
-                              </span>
-                            </div>
-                            <p className={`text-xs mt-1 italic ${fix.rejected ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {change.reason}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {/* Individual Action Buttons */}
-                      <div className="flex gap-2 mt-2">
-                        {!fix.rejected && (
-                          <button
-                            onClick={() => handleRejectFix(idx)}
-                            className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
-                          >
-                            <X className="w-3 h-3" />
-                            Reject
-                          </button>
-                        )}
-                        {fix.rejected && (
-                          <button
-                            onClick={() => handleToggleFixSelection(idx)}
-                            className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                          >
-                            <CheckCircle2 className="w-3 h-3" />
-                            Undo Reject
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">Field Name</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">Current</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">Proposed</th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldChanges.map((change, idx) => (
+                    <tr key={idx} className={`border-b hover:bg-gray-50 ${change.selected ? 'bg-blue-50' : ''}`}>
+                      <td className="px-3 py-2">
+                        <input
+                          type="checkbox"
+                          checked={change.selected}
+                          onChange={() => handleToggleFieldSelection(idx)}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-3 py-2 font-medium text-gray-800">{change.field}</td>
+                      <td className="px-3 py-2 text-gray-600">
+                        <span className="px-2 py-1 bg-red-50 text-red-700 rounded border border-red-200">
+                          {change.currentValue}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-gray-600">
+                        <span className="px-2 py-1 bg-green-50 text-green-700 rounded border border-green-200">
+                          {change.proposedValue}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={`font-semibold ${getConfidenceColor(change.confidenceScore)}`}>
+                          {(change.confidenceScore * 100).toFixed(0)}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             
+            {/* Action Buttons */}
             <div className="flex gap-2 mt-4">
               <button
-                onClick={handleApplySelectedFixes}
+                onClick={handleApplyChanges}
+                disabled={isReworking || !fieldChanges.some(c => c.selected)}
                 className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
-                disabled={!proposedFixes.some(fix => fix.selected && !fix.rejected)}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                Apply Selected ({proposedFixes.filter(fix => fix.selected && !fix.rejected).length})
+                Apply ({fieldChanges.filter(c => c.selected).length})
               </button>
               <button
-                onClick={handleCancelFixes}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                onClick={handleDenyChanges}
+                disabled={isReworking}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                Cancel
+                Deny
+              </button>
+              <button
+                onClick={handleRework}
+                disabled={isReworking}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isReworking ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Reworking...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    Rework
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -693,6 +764,47 @@ export default function AIAssistantDialog({
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>
+
+      {/* Deny Feedback Modal */}
+      {showDenyModal && (
+        // <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-[61]">
+           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[61]">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-300 p-6 w-[450px] max-w-[90vw]">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+              <h3 className="text-lg font-semibold text-gray-800">Deny Proposed Changes</h3>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">
+              Help me improve by explaining why you're denying these changes. Your feedback is valuable for enhancing future recommendations.
+            </p>
+            
+            <textarea
+              value={denyFeedback}
+              onChange={(e) => setDenyFeedback(e.target.value)}
+              placeholder="Please describe why these changes are not appropriate (e.g., incorrect values, wrong fields, missing context...)"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              rows={4}
+              autoFocus
+            />
+            
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleSubmitDeny}
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+              >
+                Submit & Deny
+              </button>
+              <button
+                onClick={handleCancelDeny}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
