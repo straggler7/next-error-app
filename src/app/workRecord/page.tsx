@@ -1207,6 +1207,7 @@ function Form4868ERSPageContent() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
+  const visibilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
@@ -2173,6 +2174,11 @@ function Form4868ERSPageContent() {
       })
         .then(response => {
           console.log(`📡 Closeout response from ${source}:`, response.status, response.statusText);
+          if (response.status === 200) {
+            console.log(`✅ Closeout successful from ${source} - navigating back`);
+            // Navigate back to previous page after successful closeout
+            router.back();
+          }
           return response.text();
         })
         .then(data => {
@@ -2184,7 +2190,7 @@ function Form4868ERSPageContent() {
     } catch (error) {
       console.error(`❌ Closeout error from ${source}:`, error);
     }
-  }, [inventoryId, currentUserSeid]);
+  }, [inventoryId, currentUserSeid, router]);
 
   // Browser event handlers for closeout (browser close, refresh, tab close)
   useEffect(() => {
@@ -2199,8 +2205,19 @@ function Form4868ERSPageContent() {
     // Handle tab switching, browser minimization, window focus loss
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        console.log("🔴 Page became hidden (tab switch/minimize)");
-        performCloseout("visibilitychange");
+        console.log("🔴 Page became hidden (tab switch/minimize) - starting timeout timer");
+        // Start a timer to closeout after TIMEOUT_DURATION
+        visibilityTimeoutRef.current = setTimeout(() => {
+          console.log("🔴 Visibility timeout reached - triggering closeout");
+          performCloseout("visibilitychange");
+        }, TIMEOUT_DURATION);
+      } else {
+        // Page became visible again - cancel the timeout
+        console.log("🟢 Page became visible again - cancelling timeout timer");
+        if (visibilityTimeoutRef.current) {
+          clearTimeout(visibilityTimeoutRef.current);
+          visibilityTimeoutRef.current = null;
+        }
       }
     };
 
@@ -2212,7 +2229,7 @@ function Form4868ERSPageContent() {
 
     // Add event listeners
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pagehide', handlePageHide);
 
     // Cleanup function
