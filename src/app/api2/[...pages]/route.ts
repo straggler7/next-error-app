@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 // export const revalidate = 0;
 
 // Set maximum execution time to 2 minutes (120 seconds)
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 // Backend URL for reports
 const REPORTS_BACKEND_URL = process.env.REPORTS_API_URL || 'http://localhost:8081';
@@ -95,7 +95,7 @@ async function handleRequest(
       headers: forwardHeaders,
       body,
       // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(120000) // 120 second timeout (2 minutes)
+      signal: AbortSignal.timeout(300000) // (5 minutes)
     });
 
     console.log(`API2 Backend responded with status: ${response.status}`);

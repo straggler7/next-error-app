@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Force this API route to be dynamic
 export const dynamic = 'force-dynamic';
 // Set maximum execution time to 2 minutes (120 seconds)
-export const maxDuration = 120;
+export const maxDuration = 300;
 // export const revalidate = 0;
 
 // Backend URL configurations
@@ -126,7 +126,7 @@ async function handleRequest(
       headers: forwardHeaders,
       body,
       // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(120000) // 2 minutes timeout
+      signal: AbortSignal.timeout(300000) // 5 minutes timeout
     });
 
     console.log(`Backend responded with status: ${response.status}`);

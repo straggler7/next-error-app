@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   // Override default timeouts
   serverRuntimeConfig: {
     // API routes timeout in milliseconds (2 minutes)
-    apiTimeout: 120000,
+    apiTimeout: 300000,
   },
 };
 
