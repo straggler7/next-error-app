@@ -1237,7 +1237,7 @@ function Form4868ERSPageContent() {
   };
 
   // Helper function to generate notes with field changes
-  const generateNotesWithChanges = () => {
+  const generateNotesWithChanges = (action?: string) => {
     const fieldChanges: any[] = [];
     const storedSelectionData = sessionStorage.getItem("selectionData");
     const selectionData = JSON.parse(storedSelectionData || "{}");
@@ -1286,9 +1286,18 @@ function Form4868ERSPageContent() {
     // Get current errors being corrected
     const errorsBeingCorrected = errorItems.map(error => error.code);
 
-    // Create new note if there are changes or additional notes
-    if (fieldChanges.length > 0 || additionalNotes.trim()) {
+    // Build action-specific note text
+    let actionNote = "";
+    if (action === "DELETED") {
+      actionNote = "Record Deleted";
+    } else if (action === "CLOSEOUT") {
+      actionNote = "Record Closed Out";
+    }
+
+    // Create new note if there are changes, additional notes, or action-specific note
+    if (fieldChanges.length > 0 || additionalNotes.trim() || actionNote) {
       const commentsObj = {
+        ...(actionNote && { action: actionNote }),
         ...(fieldChanges.length > 0 && { fieldChanges: fieldChanges }),
         ...(additionalNotes.trim() && { additionalComments: additionalNotes }),
         ...(errorsBeingCorrected.length > 0 && { errorsBeingCorrected: errorsBeingCorrected }),
@@ -1667,7 +1676,7 @@ function Form4868ERSPageContent() {
               inventoryId: inventoryId,
               workRecord: updatedEraDto.workRecord,
               clearCodes: getPayloadClearCodes(),
-              notes: generateNotesWithChanges(),
+              notes: generateNotesWithChanges("DELETED"),
               fieldWithErrors: fieldWithErrors,
             },
           }),
