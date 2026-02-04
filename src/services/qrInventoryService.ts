@@ -19,6 +19,7 @@ export interface QRInventoryRecord {
   dln: string;
   formType: string;
   controlDay: string;
+  programId: string;
   serviceCenterId: number;
   // Computed fields for display
   serviceCenter?: string;

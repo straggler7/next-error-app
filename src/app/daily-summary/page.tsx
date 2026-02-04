@@ -353,20 +353,25 @@ function DailySummaryContent() {
       },
       size: 120,
     }),
-    columnHelper.display({
-      id: 'programCode',
+    columnHelper.accessor('programId', {
       header: 'Program Code',
-      cell: () => {
-        // Get program code from session storage (client-side only)
-        if (typeof window !== 'undefined') {
-          const selectionData = sessionStorage.getItem('selectionData');
-          const parsedData = selectionData ? JSON.parse(selectionData) : {};
-          return <span>{parsedData.program || 'N/A'}</span>;
-        }
-        return <span>N/A</span>;
-      },
+      cell: ({ getValue }) => getValue(),
       size: 120,
     }),
+    // columnHelper.display({
+    //   id: 'programCode',
+    //   header: 'Program Code',
+    //   cell: () => {
+    //     // Get program code from session storage (client-side only)
+    //     if (typeof window !== 'undefined') {
+    //       const selectionData = sessionStorage.getItem('selectionData');
+    //       const parsedData = selectionData ? JSON.parse(selectionData) : {};
+    //       return <span>{parsedData.program || 'N/A'}</span>;
+    //     }
+    //     return <span>N/A</span>;
+    //   },
+    //   size: 120,
+    // }),
     columnHelper.accessor('formType', {
       header: 'Form Type',
       size: 100,

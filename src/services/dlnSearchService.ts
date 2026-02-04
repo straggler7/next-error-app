@@ -20,6 +20,7 @@ export interface DLNSearchRecord {
   formType: string;
   controlDay: string;
   serviceCenterId: number;
+  programId: string;
   // Computed fields for display
   serviceCenter?: string;
   returnType?: string;
