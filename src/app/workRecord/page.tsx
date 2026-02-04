@@ -2690,6 +2690,14 @@ function Form4868ERSPageContent() {
                           // Handle case where parsedComments is an object with properties
                           return (
                             <div className="note-comments">
+                              {parsedComments.action && (
+                                <div className="action-note mb-3">
+                                  <div className="text-sm font-semibold text-red-600">
+                                    {parsedComments.action}
+                                  </div>
+                                </div>
+                              )}
+
                               {parsedComments.fieldChanges &&
                                 parsedComments.fieldChanges.length > 0 && (
                                   <div className="field-changes mb-3">
