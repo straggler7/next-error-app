@@ -54,12 +54,12 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 4,
-      "pattern": "^[A-Z]{1,4}$",
+      "pattern": "^[A-Z0-9 &-]{1,4}$",
       "messages": {
         "required": "Name Control is required",
         "minLength": "Name Control must be at least 1 character",
         "maxLength": "Name Control cannot exceed 4 characters",
-        "pattern": "Name Control must contain only uppercase letters (A-Z)"
+        "pattern": "Invalid Name Control"
       }
     }
   },
