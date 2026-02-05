@@ -64,7 +64,7 @@ export default function Report3141Page() {
 
   return (
     <BaseReport
-      title="Workable Suspense Inventory (3141)"
+      title="Workable Suspense Inventory (3141 - EOD)"
       reportType="3141"
       data={data}
       loading={loading}

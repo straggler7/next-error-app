@@ -66,7 +66,7 @@ export default function ReportMERDAILPage() {
 
   return (
     <BaseReport
-      title="Error Count Report (MERDAIL / MERYRDT)"
+      title="Error Count Report (MERDAIL / MERYRDT - INC)"
       reportType="MERDAIL"
       data={data}
       loading={loading}

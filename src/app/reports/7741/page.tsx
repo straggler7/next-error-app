@@ -66,7 +66,7 @@ export default function Report7741() {
 
   return (
     <BaseReport
-      title="Program Production Summary Report (7741)"
+      title="Program Production Summary Report (7741 - INC)"
       reportType="7741"
       data={data}
       loading={loading}

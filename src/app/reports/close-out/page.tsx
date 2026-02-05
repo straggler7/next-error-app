@@ -66,7 +66,7 @@ export default function ReportCloseOut() {
 
   return (
     <BaseReport
-      title="Close Out"
+      title="Close Out (EOD)"
       reportType="CLOSE-OUT"
       data={data}
       loading={loading}

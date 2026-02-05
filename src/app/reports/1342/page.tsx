@@ -65,7 +65,7 @@ export default function Report1342Page() {
 
   return (
     <BaseReport
-      title="Workable Suspense Inventory (1342)"
+      title="Workable Suspense Inventory (1342 - EOD)"
       reportType="1342"
       data={data}
       loading={loading}

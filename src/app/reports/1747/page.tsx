@@ -49,12 +49,11 @@ export default function Report1747Page() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
-    // Default to yesterday's date
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
-    const day = yesterday.getDate().toString().padStart(2, '0');
-    const year = yesterday.getFullYear();
+    // Default to today's date
+    const today = new Date();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    const year = today.getFullYear();
     return `${month}/${day}/${year}`;
   });
   const currentUserSeid = useSeid();
@@ -64,7 +63,16 @@ export default function Report1747Page() {
     
     setLoading(true);
     try {
-      const reportData = await ReportsService.get1747Report(currentUserSeid, selectedDate);
+      // Subtract 1 day from the selected date for the API call
+      const [month, day, year] = selectedDate.split('/');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      date.setDate(date.getDate() - 1);
+      const adjustedMonth = (date.getMonth() + 1).toString().padStart(2, '0');
+      const adjustedDay = date.getDate().toString().padStart(2, '0');
+      const adjustedYear = date.getFullYear();
+      const adjustedDate = `${adjustedMonth}/${adjustedDay}/${adjustedYear}`;
+      
+      const reportData = await ReportsService.get1747Report(currentUserSeid, adjustedDate);
       console.log('1747 Report API Response:', reportData);
       
       // Validate and provide fallback structure
@@ -205,7 +213,7 @@ export default function Report1747Page() {
         <div className="card-header flex justify-between items-center mb-6 pb-2 border-b-2 border-gray-100">
           <div>
             <h2 className="card-title text-xl font-semibold text-[#003d6b]">
-              Report 1747: Error Resolution Inventory Control
+              Error Resolution Inventory Control (1747 - SOD)
             </h2>
           </div>
           <div className="flex items-center gap-4">

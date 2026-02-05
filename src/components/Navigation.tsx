@@ -36,115 +36,115 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
   const allReports = [
     { 
       id: 'report0040', 
-      label: '0040', 
+      label: '0040 (EOD)', 
       href: '/reports/0040', 
       filter: { type: 'navigate', value: 'report0040' }
     },
     { 
       id: 'report1340', 
-      label: '1340', 
+      label: '1340 (EOD)', 
       href: '/reports/1340', 
       filter: { type: 'navigate', value: 'report1340' }
     },
     { 
       id: 'report1340_New', 
-      label: 'New Error List', 
+      label: 'New Error List (INC)', 
       href: '/reports/1340_New', 
       filter: { type: 'navigate', value: 'report1340_New' }
     },
     { 
       id: 'report1341', 
-      label: '1341', 
+      label: '1341 (SOD)', 
       href: '/reports/1341', 
       filter: { type: 'navigate', value: 'report1341' }
     },
     { 
       id: 'report1342', 
-      label: '1342', 
+      label: '1342 (EOD)', 
       href: '/reports/1342', 
       filter: { type: 'navigate', value: 'report1342' }
     },
     { 
       id: 'report3141', 
-      label: '3141', 
+      label: '3141 (EOD)', 
       href: '/reports/3141', 
       filter: { type: 'navigate', value: 'report3141' }
     },
     { 
       id: 'report1343', 
-      label: '1343', 
+      label: '1343 (EOD)', 
       href: '/reports/1343', 
       filter: { type: 'navigate', value: 'report1343' }
     },
     { 
       id: 'report1740', 
-      label: '1740', 
+      label: '1740 (INC)', 
       href: '/reports/1740', 
       filter: { type: 'navigate', value: 'report1740' }
     },
     { 
       id: 'report1747', 
-      label: '1747', 
+      label: '1747 (SOD)', 
       href: '/reports/1747', 
       filter: { type: 'navigate', value: 'report1747' }
     },
     { 
       id: 'report0540', 
-      label: '0540', 
+      label: '0540 (EOD)', 
       href: '/reports/0540', 
       filter: { type: 'navigate', value: 'report0540' }
     },
     { 
       id: 'report7740', 
-      label: '7740', 
+      label: '7740 (INC)', 
       href: '/reports/7740', 
       filter: { type: 'navigate', value: 'report7740' }
     },
     { 
       id: 'report7741', 
-      label: '7741', 
+      label: '7741 (INC)', 
       href: '/reports/7741', 
       filter: { type: 'navigate', value: 'report7741' }
     },
     { 
       id: 'report7742', 
-      label: '7742', 
+      label: '7742 (INC)', 
       href: '/reports/7742', 
       filter: { type: 'navigate', value: 'report7742' }
     },
     { 
       id: 'report7743', 
-      label: '7743', 
+      label: '7743 (INC)', 
       href: '/reports/7743', 
       filter: { type: 'navigate', value: 'report7743' }
     },
     { 
       id: 'report7744', 
-      label: '7744', 
+      label: '7744 (INC)', 
       href: '/reports/7744', 
       filter: { type: 'navigate', value: 'report7744' }
     },
     { 
       id: 'report7745', 
-      label: '7745', 
+      label: '7745 (INC)', 
       href: '/reports/7745', 
       filter: { type: 'navigate', value: 'report7745' }
     },
     { 
       id: 'report7746', 
-      label: '7746', 
+      label: '7746 (INC)', 
       href: '/reports/7746', 
       filter: { type: 'navigate', value: 'report7746' }
     },
     { 
       id: 'report7747', 
-      label: '7747', 
+      label: '7747 (INC)', 
       href: '/reports/7747', 
       filter: { type: 'navigate', value: 'report7747' }
     },
     { 
       id: 'report0340', 
-      label: 'MER0340 / MER0341', 
+      label: 'MER0340 / MER0341 (INC)', 
       href: '/reports/0340', 
       filter: { type: 'navigate', value: 'report0340' }
     },
@@ -156,7 +156,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     // },
     { 
       id: 'reportMERDAIL', 
-      label: 'MERDAIL / MERYRDT', 
+      label: 'MERDAIL / MERYRDT (INC)', 
       href: '/reports/MERDAIL', 
       filter: { type: 'navigate', value: 'reportMERDAIL' }
     },
@@ -168,7 +168,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     // },
     { 
       id: 'reportCloseOut', 
-      label: 'Close Out', 
+      label: 'Close Out (EOD)', 
       href: '/reports/close-out', 
       filter: { type: 'navigate', value: 'reportCloseOut' }
     },

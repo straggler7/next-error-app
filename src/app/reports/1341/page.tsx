@@ -11,12 +11,29 @@ export default function Report1341Page() {
   const [loading, setLoading] = useState(false);
   const currentUserSeid = useSeid();
 
+  // Helper function to subtract 1 day from date string
+  const adjustDateMinusOne = (dateStr: string): string => {
+    const [month, day, year] = dateStr.split('/');
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    date.setDate(date.getDate() - 1);
+    const adjustedMonth = (date.getMonth() + 1).toString().padStart(2, '0');
+    const adjustedDay = date.getDate().toString().padStart(2, '0');
+    const adjustedYear = date.getFullYear();
+    return `${adjustedMonth}/${adjustedDay}/${adjustedYear}`;
+  };
+
   const fetchReportData = useCallback(async (payload: ReportPayload) => {
     if (!currentUserSeid) return;
     
     setLoading(true);
     try {
-      const reportData = await ReportsService.get1341Report(currentUserSeid, payload);
+      // Subtract 1 day from the selected date for the API payload
+      const adjustedPayload = { ...payload };
+      if (adjustedPayload.startDateStr) {
+        adjustedPayload.startDateStr = adjustDateMinusOne(adjustedPayload.startDateStr);
+      }
+      
+      const reportData = await ReportsService.get1341Report(currentUserSeid, adjustedPayload);
       setData(reportData);
     } catch (error) {
       console.error('Error fetching 1341 report:', error);
@@ -29,11 +46,10 @@ export default function Report1341Page() {
 
   useEffect(() => {
     // Initial load with default payload
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
-    const day = yesterday.getDate().toString().padStart(2, '0');
-    const year = yesterday.getFullYear();
+    const today = new Date();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    const year = today.getFullYear();
     
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
@@ -49,8 +65,14 @@ export default function Report1341Page() {
     if (!currentUserSeid) return;
     
     try {
+      // Subtract 1 day from the selected date for the API payload
+      const adjustedPayload = { ...payload };
+      if (adjustedPayload.startDateStr) {
+        adjustedPayload.startDateStr = adjustDateMinusOne(adjustedPayload.startDateStr);
+      }
+      
       // Make API call with export flag
-      const exportData = await ReportsService.get1341Report(currentUserSeid, payload);
+      const exportData = await ReportsService.get1341Report(currentUserSeid, adjustedPayload);
       
       // Download as CSV
       ReportsService.downloadCSV(exportData, '1341', columns);
@@ -62,7 +84,7 @@ export default function Report1341Page() {
 
   return (
     <BaseReport
-      title="Error Inventory Summary (1341)"
+      title="Error Inventory Summary (1341 - SOD)"
       reportType="1341"
       data={data}
       loading={loading}

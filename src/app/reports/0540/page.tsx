@@ -64,7 +64,7 @@ export default function Report0540Page() {
 
   return (
     <BaseReport
-      title="Deleted Records Report (0540)"
+      title="Deleted Records Report (0540 - EOD)"
       reportType="0540"
       data={data}
       loading={loading}
