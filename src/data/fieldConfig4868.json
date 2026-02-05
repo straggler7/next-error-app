@@ -54,7 +54,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 4,
-      "pattern": "^[A-Z0-9 &-]{1,4}$",
+      "pattern": "^[A-Z0-9][A-Z0-9 &-]{0,3}$",
       "messages": {
         "required": "Name Control is required",
         "minLength": "Name Control must be at least 1 character",
