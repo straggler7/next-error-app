@@ -418,25 +418,33 @@ export default function BaseReport({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     // For 0340 and MERDAIL reports, default to beginning of current year
-    // For other reports, default to today's date
     if (reportType === '0340' || reportType === 'MERDAIL') {
       const currentYear = new Date().getFullYear();
       return `01/01/${currentYear}`;
     }
     
-    const today = new Date();
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    const year = today.getFullYear();
+    // For 1341 report, default to today's date
+    // For all other reports, default to yesterday's date
+    const date = new Date();
+    if (reportType !== '1341') {
+      date.setDate(date.getDate() - 1);
+    }
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   });
   const [selectedEndDate, setSelectedEndDate] = useState<string>(() => {
-    // For reports that support end date, default to same date as start date (today)
+    // For reports that support end date, default to same date as start date
     if (REPORTS_WITH_END_DATE.includes(reportType as any)) {
-      const today = new Date();
-      const month = (today.getMonth() + 1).toString().padStart(2, '0');
-      const day = today.getDate().toString().padStart(2, '0');
-      const year = today.getFullYear();
+      const date = new Date();
+      // For 1341 report, use today's date; for others, use yesterday's date
+      if (reportType !== '1341') {
+        date.setDate(date.getDate() - 1);
+      }
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const year = date.getFullYear();
       return `${month}/${day}/${year}`;
     }
     return '';
