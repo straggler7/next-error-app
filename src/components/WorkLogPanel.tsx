@@ -66,7 +66,7 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
         reportId: '7746',
         startDateStr: selectedDate,
         endDateStr: selectedEndDate || selectedDate, // Use end date if provided, otherwise use start date
-        seid: seid // Include the current user's SEID
+        assignmentSeid: seid // Include the current user's SEID
       };
 
       const reportData = await ReportsService.get7746Report(seid, payload);

@@ -66,6 +66,7 @@ export interface ReportPayload {
   daysInEraStart?: number; // Days in ERA start filter for 1342 and 3141 reports
   daysInEraEnd?: number; // Days in ERA end filter for 1342 and 3141 reports
   seid?: string; // Tax Examiner SEID for 7740 report
+  assignmentSeid?: string; // Tax Examiner SEID for 7746 report
   export?: boolean; // For export functionality
 }
 
