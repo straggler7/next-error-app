@@ -112,6 +112,7 @@ function QRDetailsPageContent() {
   const lastActivityRef = useRef<number>(Date.now());
   const visibilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const closeoutSentRef = useRef(false);
+  const navigatingToWorkRecordRef = useRef(false);
 
   // Helper function to get field value from eraDto-like object
   const getFieldValue = (data: any, fieldKey: string): string => {
@@ -292,6 +293,9 @@ function QRDetailsPageContent() {
         // Clear additional notes after successful operation
         setAdditionalNotes('');
         
+        // Set flag to prevent closeout on navigation
+        navigatingToWorkRecordRef.current = true;
+        
         setFlashMessage('QR Review completed successfully! Returning to inventory...');
         setShowFlash(true);
         
@@ -342,6 +346,9 @@ function QRDetailsPageContent() {
         if (workRecord) {
           // Store the entire inventory item as eraDto in sessionStorage for the workRecord page
           sessionStorage.setItem('eraDto', JSON.stringify(inventoryItem));
+          
+          // Set flag to prevent closeout on navigation to work record
+          navigatingToWorkRecordRef.current = true;
           
           // Navigate to workRecord page with qrReviewer flag
           const searchParams = new URLSearchParams({
@@ -609,6 +616,11 @@ function QRDetailsPageContent() {
 
     // Cleanup function runs when component unmounts (including back button navigation)
     return () => {
+      // Skip closeout if navigating to work record page
+      if (navigatingToWorkRecordRef.current) {
+        console.log("🟢 Component unmounting - skipping closeout (navigating to work record)");
+        return;
+      }
       console.log("🔴 Component unmounting - triggering closeout");
       performCloseout("unmount");
     };
