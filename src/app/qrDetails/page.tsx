@@ -5,10 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, User, AlertCircle } from "lucide-react";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
+import InfoAlert from "../../components/InfoAlert";
 import newFieldConfig from "../../data/fieldConfig4868.json";
 import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
 import { QRInventoryRecord } from "../../services/qrInventoryService";
 import { useSeid } from "@/hooks/useSeid";
+
+// Timeout constants for auto-closeout functionality
+const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+const WARNING_DURATION = 2 * 60 * 1000; // Show warning 2 minutes before timeout
 
 // Helper to prettify labels from keys like "primarySSN" -> "Primary SSN"
 const toLabel = (key: string) =>
@@ -93,9 +98,20 @@ function QRDetailsPageContent() {
   const [flashMessage, setFlashMessage] = useState<string>("");
   const [showFlash, setShowFlash] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [closingOut, setClosingOut] = useState(false);
   const isLoadingRef = useRef(false);
   const [parsedNotes, setParsedNotes] = useState<any[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState<string>('');
+  
+  // Timeout state for auto-closeout
+  const [timeoutWarning, setTimeoutWarning] = useState(false);
+  const [infoMessage, setInfoMessage] = useState<string>("");
+  const [showInfo, setShowInfo] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const visibilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const closeoutSentRef = useRef(false);
 
   // Helper function to get field value from eraDto-like object
   const getFieldValue = (data: any, fieldKey: string): string => {
@@ -348,6 +364,285 @@ function QRDetailsPageContent() {
     }
   };
 
+  const handleCloseout = useCallback(async () => {
+    console.log("handleCloseout called");
+    console.log("inventoryId:", inventoryId);
+
+    if (!inventoryId) {
+      setFlashMessage("No inventory ID available.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+      return;
+    }
+
+    setClosingOut(true);
+    try {
+      console.log(
+        "Making PATCH request to:",
+        `/api/v1/era/inventories/${inventoryId}/event`
+      );
+      console.log("Request body:", { eventStatus: "CLOSEOUT" });
+
+      const response = await fetch(
+        `/api/v1/era/inventories/${inventoryId}/event`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            SEID: `${currentUserSeid}`,
+          },
+          body: JSON.stringify({ eventStatus: "CLOSEOUT" }),
+        }
+      );
+
+      console.log("Response status:", response.status);
+      console.log("Response statusText:", response.statusText);
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("Closeout successful:", responseData);
+        
+        setFlashMessage("Record closed out successfully! Returning to QR inventory...");
+        setShowFlash(true);
+        
+        setTimeout(() => {
+          router.push('/qrInventory');
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        console.error("Closeout failed:", errorText);
+        setFlashMessage(errorText || "Failed to close out record");
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
+      }
+    } catch (error) {
+      console.error("Error closing out record:", error);
+      setFlashMessage("Error closing out record. Please try again.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 3000);
+    } finally {
+      setClosingOut(false);
+    }
+  }, [inventoryId, currentUserSeid, router]);
+
+
+  // Auto-closeout timeout functionality
+  useEffect(() => {
+    const resetTimeout = () => {
+      lastActivityRef.current = Date.now();
+      setTimeoutWarning(false);
+
+      // Clear existing timeouts
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+
+      // Set warning timeout (8 minutes)
+      warningTimeoutRef.current = setTimeout(() => {
+        setTimeoutWarning(true);
+        setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
+        setShowInfo(true);
+        console.log("Timeout warning shown - 2 minutes remaining");
+      }, TIMEOUT_DURATION - WARNING_DURATION);
+
+      // Set main timeout (10 minutes)
+      timeoutRef.current = setTimeout(() => {
+        console.log("Auto-closeout triggered after timeout duration:", TIMEOUT_DURATION);
+        setInfoMessage("Session timed out due to inactivity. Closing out record...");
+        setShowInfo(true);
+        
+        // Trigger closeout after a brief delay to show the message
+        setTimeout(() => {
+          console.log("About to call handleCloseout...");
+          handleCloseout();
+        }, 1000);
+      }, TIMEOUT_DURATION);
+    };
+
+    const handleUserActivity = (event: Event) => {
+      // Only reset timeout for meaningful user interactions
+      const target = event.target as HTMLElement;
+      
+      // Ignore activity on timeout warning elements
+      if (target?.closest('[data-timeout-warning]')) {
+        return;
+      }
+
+      resetTimeout();
+    };
+
+    // Activity event listeners
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'focus', 'blur'];
+    
+    // Add event listeners for user activity
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity, true);
+    });
+
+    // Initialize timeout on component mount
+    resetTimeout();
+
+    // Cleanup on unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+      
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity, true);
+      });
+    };
+  }, [handleCloseout]);
+
+  // Unified closeout function used by all event handlers
+  const performCloseout = useCallback((source: string) => {
+    if (closeoutSentRef.current || !inventoryId || !currentUserSeid) {
+      console.log(`⚠️ Skipping closeout from ${source}:`, { 
+        alreadySent: closeoutSentRef.current, 
+        hasInventoryId: !!inventoryId, 
+        hasSeid: !!currentUserSeid 
+      });
+      return;
+    }
+    
+    closeoutSentRef.current = true;
+    console.log(`✅ TRIGGERING CLOSEOUT from ${source}`, {
+      inventoryId,
+      currentUserSeid,
+      url: `/api/v1/era/inventories/${inventoryId}/event`
+    });
+
+    const payload = JSON.stringify({ eventStatus: "CLOSEOUT" });
+    const url = `/api/v1/era/inventories/${inventoryId}/event`;
+    
+    // Use fetch with keepalive - supports headers unlike sendBeacon
+    // keepalive ensures request continues even if page unloads
+    try {
+      fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "SEID": currentUserSeid,
+        },
+        body: payload,
+        keepalive: true,
+      })
+        .then(response => {
+          console.log(`📡 Closeout response from ${source}:`, response.status, response.statusText);
+          if (response.status === 200) {
+            console.log(`✅ Closeout successful from ${source} - navigating back`);
+            // Navigate back to QR inventory after successful closeout
+            router.push('/qrInventory');
+          }
+          return response.text();
+        })
+        .then(data => {
+          console.log(`📡 Closeout response body from ${source}:`, data);
+        })
+        .catch(error => {
+          console.error(`❌ Closeout fetch failed from ${source}:`, error);
+        });
+    } catch (error) {
+      console.error(`❌ Closeout error from ${source}:`, error);
+    }
+  }, [inventoryId, currentUserSeid, router]);
+
+  // Browser event handlers for closeout (browser close, refresh, tab close)
+  useEffect(() => {
+    console.log("🔵 Installing browser event handlers");
+
+    // Handle browser close, tab close, refresh
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      console.log("🔴 beforeunload event triggered");
+      performCloseout("beforeunload");
+    };
+
+    // Handle tab switching, browser minimization, window focus loss
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        console.log("🔴 Page became hidden (tab switch/minimize) - starting timeout timer");
+        // Start a timer to closeout after TIMEOUT_DURATION
+        visibilityTimeoutRef.current = setTimeout(() => {
+          console.log("🔴 Visibility timeout reached - triggering closeout");
+          performCloseout("visibilitychange");
+        }, TIMEOUT_DURATION);
+      } else {
+        // Page became visible again - cancel the timeout
+        console.log("🟢 Page became visible again - cancelling timeout timer");
+        if (visibilityTimeoutRef.current) {
+          clearTimeout(visibilityTimeoutRef.current);
+          visibilityTimeoutRef.current = null;
+        }
+      }
+    };
+
+    // Handle navigation away from page (fallback)
+    const handlePageHide = (event: PageTransitionEvent) => {
+      console.log("🔴 pagehide event triggered");
+      performCloseout("pagehide");
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
+    // Cleanup function
+    return () => {
+      console.log("🔵 Removing browser event handlers");
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [performCloseout]);
+
+  // Component unmount handler for back button navigation
+  // This is needed because Next.js App Router unmounts the component before popstate fires
+  useEffect(() => {
+    console.log("🔵 Navigation closeout handler installed");
+
+    // Cleanup function runs when component unmounts (including back button navigation)
+    return () => {
+      console.log("🔴 Component unmounting - triggering closeout");
+      performCloseout("unmount");
+    };
+  }, [performCloseout]);
+
+  // Function to dismiss timeout warning
+  const dismissTimeoutWarning = () => {
+    setTimeoutWarning(false);
+    setShowInfo(false);
+
+    // Reset timeouts when user dismisses warning
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+
+    // Set new warning timeout (8 minutes from now)
+    warningTimeoutRef.current = setTimeout(() => {
+      setTimeoutWarning(true);
+      setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
+      setShowInfo(true);
+    }, TIMEOUT_DURATION - WARNING_DURATION);
+
+    timeoutRef.current = setTimeout(() => {
+      console.log("Auto-closeout triggered after timeout warning dismissal");
+      setInfoMessage("Session timed out due to inactivity. Closing out record...");
+      setShowInfo(true);
+      setTimeout(() => {
+        handleCloseout();
+      }, 1000);
+    }, TIMEOUT_DURATION);
+  };
 
   if (loading) {
     return (
@@ -387,6 +682,16 @@ function QRDetailsPageContent() {
         <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in-right">
           <span>{flashMessage}</span>
         </div>
+      )}
+      
+      {showInfo && (
+        <InfoAlert
+          message={infoMessage}
+          onClose={timeoutWarning ? dismissTimeoutWarning : () => setShowInfo(false)}
+          variant={timeoutWarning ? 'warning' : 'info'}
+          showDismissButton={timeoutWarning}
+          dismissButtonText="Continue Working"
+        />
       )}
       <div className="flex flex-col p-4 mx-auto w-full">
         {/* Top Toolbar */}
@@ -458,21 +763,35 @@ function QRDetailsPageContent() {
             <div className="border-t-2 border-gray-200 pt-4 mt-4">
               <div className="flex gap-4">
                 <button
+                  type="button"
                   onClick={handleQRComplete}
                   disabled={completing}
-                  className={`px-6 py-3 rounded text-sm font-medium transition-colors duration-200 ${
+                  className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
                     completing
-                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                      : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
                   }`}
                 >
                   {completing ? 'Completing...' : 'QR Complete'}
                 </button>
                 <button
+                  type="button"
                   onClick={handleRework}
-                  className="bg-blue-600 text-white px-6 py-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
+                  className="px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
                 >
                   Rework
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCloseout}
+                  disabled={closingOut}
+                  className={`px-6 py-2 font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                    closingOut
+                      ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                      : 'bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5'
+                  }`}
+                >
+                  {closingOut ? 'Closing Out...' : 'Close Out'}
                 </button>
               </div>
             </div>
