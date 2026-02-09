@@ -51,8 +51,6 @@ interface AIAssistantDialogProps {
   onApplyFixes?: (fixes: ErrorFix[]) => void;
 }
 
-type AIMode = "plan" | "agent";
-
 export default function AIAssistantDialog({
   isOpen,
   onClose,
@@ -61,7 +59,6 @@ export default function AIAssistantDialog({
   allErrors = [],
   onApplyFixes,
 }: AIAssistantDialogProps) {
-  const [mode, setMode] = useState<AIMode>("plan");
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -89,10 +86,18 @@ export default function AIAssistantDialog({
     }
   }, [isOpen]);
 
-  // Auto-analyze errors when switching to Agent Mode
+  // Auto-show welcome message and analyze errors when opening
   useEffect(() => {
-    if (isOpen && mode === "agent" && messages.length === 0 && fieldChanges.length === 0) {
-      // Automatically analyze errors when entering Agent Mode
+    if (isOpen && messages.length === 0 && fieldChanges.length === 0) {
+      // Show welcome message
+      const welcomeMessage: Message = {
+        role: "assistant",
+        content: `Hello! I'm your AI assistant. I can help you understand and resolve errors.\n\n**I can help with:**\n- Explain current error: "${currentError?.code || 'error code'}"\n- Show IRM guidance\n- Provide step-by-step resolution instructions\n- List all errors on the form\n\nLet me analyze the form for you...`,
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+      
+      // Automatically analyze errors
       setIsLoading(true);
       
       const analysisMessage: Message = {
@@ -100,7 +105,7 @@ export default function AIAssistantDialog({
         content: "🔍 **Analyzing Form Errors**\n\nI'm examining the form data and errors to identify fields that need correction. This will take just a moment...",
         timestamp: new Date(),
       };
-      setMessages([analysisMessage]);
+      setMessages(prev => [...prev, analysisMessage]);
       
       // Simulate analysis
       setTimeout(() => {
@@ -126,26 +131,10 @@ export default function AIAssistantDialog({
           setMessages(prev => [...prev, noErrorsMessage]);
         }
         setIsLoading(false);
-      }, 1500);
-    } else if (isOpen && mode === "plan" && messages.length === 0) {
-      // Plan mode welcome message
-      const welcomeMessage: Message = {
-        role: "assistant",
-        content: `Hello! I'm your AI assistant in **Plan Mode**. I can help you understand and resolve errors.\n\n**I can help with:**\n- Explain current error: "${currentError?.code || 'error code'}"\n- Show IRM guidance\n- Provide step-by-step resolution instructions\n- List all errors on the form\n\nSwitch to **Agent Mode** for automatic error analysis and fixes.`,
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+      }, 5000);
     }
-  }, [isOpen, mode, currentError, messages.length, fieldChanges.length]);
+  }, [isOpen, currentError, messages.length, fieldChanges.length]);
 
-  // Reset messages when mode changes
-  const handleModeChange = (newMode: AIMode) => {
-    setMode(newMode);
-    setMessages([]);
-    setProposedFixes(null);
-    setFieldChanges([]);
-    setIsReworking(false);
-  };
 
   // Simulate Plan Mode response
   const simulatePlanResponse = (userMessage: string): string => {
@@ -207,8 +196,8 @@ export default function AIAssistantDialog({
     }));
   };
 
-  // Generate contextual responses for Agent Mode chat
-  const generateAgentResponse = (userMessage: string, changes: FieldChange[], error?: { code: string; description: string }): string => {
+  // Generate combined responses for all types of questions
+  const generateCombinedResponse = (userMessage: string, changes: FieldChange[], error?: { code: string; description: string }, errors?: Array<{ code: string; description: string }>): string => {
     const lowerMessage = userMessage.toLowerCase();
     
     if (lowerMessage.includes("why") || lowerMessage.includes("explain")) {
@@ -223,10 +212,21 @@ export default function AIAssistantDialog({
     }
     
     if (lowerMessage.includes("help") || lowerMessage.includes("what can")) {
-      return `**I can help you with:**\n\n- Explain why specific changes are proposed\n- Provide details about confidence scores\n- Re-analyze with different approaches (Rework button)\n- Answer questions about the current error\n- Guide you through the correction process\n\nJust ask me anything about the proposed changes or the errors!`;
+      return `**I can help you with:**\n\n- Explain why specific changes are proposed\n- Provide details about confidence scores\n- Re-analyze with different approaches (Rework button)\n- Answer questions about the current error\n- Show IRM guidance and documentation\n- Provide step-by-step resolution instructions\n- Guide you through the correction process\n\nJust ask me anything about the proposed changes or the errors!`;
     }
     
-    return `I understand you're asking about: "${userMessage}"\n\nI'm here to help with the proposed changes shown in the table. You can:\n- Ask me to explain specific changes\n- Request information about confidence scores\n- Get guidance on which changes to apply\n\nWhat would you like to know?`;
+    if (lowerMessage.includes("current error") || lowerMessage.includes("resolve")) {
+      return `**Current Error: ${error?.code || "N/A"}**\n\n${error?.description || "No error description available"}\n\n**IRM Guidance:**\nThis error indicates a mismatch that needs to be corrected. Follow these steps:\n\n1. Review the field values\n2. Compare with source documents\n3. Make necessary corrections\n4. Verify all related fields\n\nI've already analyzed the form and proposed corrections in the table above. Would you like me to explain any specific change?`;
+    }
+    
+    if (lowerMessage.includes("all errors") || lowerMessage.includes("list errors")) {
+      const errorList = errors && errors.length > 0
+        ? errors.map(e => `- **${e.code}**: ${e.description}`).join("\n")
+        : "No errors found on this form.";
+      return `**All Errors on Form:**\n\n${errorList}\n\nI can provide detailed guidance for any of these errors. Just ask!`;
+    }
+    
+    return `I understand you're asking about: "${userMessage}"\n\nI'm here to help with:\n- The proposed changes shown in the table\n- IRM guidance and documentation\n- Step-by-step resolution instructions\n- Specific error explanations\n\nWhat would you like to know?`;
   };
 
   const handleSendMessage = async () => {
@@ -243,54 +243,42 @@ export default function AIAssistantDialog({
     setIsLoading(true);
     setProposedFixes(null);
 
-    // Simulate AI response based on mode
+    // Simulate AI response
     setTimeout(() => {
-      if (mode === "plan") {
-        const response = simulatePlanResponse(userMessage.content);
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: response,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-        setIsLoading(false);
-      } else {
-        // Agent mode - handle user questions and commands
-        const lowerMessage = userMessage.content.toLowerCase();
+      const lowerMessage = userMessage.content.toLowerCase();
+      
+      // Check if user is asking for new analysis
+      if (lowerMessage.includes("analyze") || lowerMessage.includes("fix") || lowerMessage.includes("check")) {
+        const changes = simulateAgentResponse(userMessage.content);
         
-        // Check if user is asking for new analysis
-        if (lowerMessage.includes("analyze") || lowerMessage.includes("fix") || lowerMessage.includes("check")) {
-          const changes = simulateAgentResponse(userMessage.content);
-          
-          if (changes.length > 0) {
-            setFieldChanges(changes);
-            const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
-            const assistantMessage: Message = {
-              role: "assistant",
-              content: `I've analyzed the form and identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction with an average confidence of ${avgConfidence}%. Please review the proposed changes in the table below.`,
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, assistantMessage]);
-          } else {
-            const assistantMessage: Message = {
-              role: "assistant",
-              content: "I couldn't identify any specific field corrections for that request. The current analysis shows all available corrections in the table above.",
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, assistantMessage]);
-          }
-        } else {
-          // Answer questions about current analysis or provide guidance
-          const responseContent = generateAgentResponse(userMessage.content, fieldChanges, currentError);
+        if (changes.length > 0) {
+          setFieldChanges(changes);
+          const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
           const assistantMessage: Message = {
             role: "assistant",
-            content: responseContent,
+            content: `I've analyzed the form and identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction with an average confidence of ${avgConfidence}%. Please review the proposed changes in the table below.`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+        } else {
+          const assistantMessage: Message = {
+            role: "assistant",
+            content: "I couldn't identify any specific field corrections for that request. The current analysis shows all available corrections in the table above.",
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, assistantMessage]);
         }
-        setIsLoading(false);
+      } else {
+        // Answer questions - combine both plan and agent responses
+        const responseContent = generateCombinedResponse(userMessage.content, fieldChanges, currentError, allErrors);
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: responseContent,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
       }
+      setIsLoading(false);
     }, 1000);
   };
 
@@ -399,7 +387,7 @@ export default function AIAssistantDialog({
       };
       setMessages((prev) => [...prev, resultMessage]);
       setIsReworking(false);
-    }, 2000);
+    }, 5000);
   };
 
   const getConfidenceColor = (score: number) => {
@@ -465,7 +453,7 @@ export default function AIAssistantDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 right-6 w-[480px] h-[650px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50 animate-slide-up">
+    <div className="fixed bottom-24 right-6 w-[560px] h-[650px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50 animate-slide-up">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-t-lg">
         <div className="flex items-center justify-between mb-2">
@@ -482,35 +470,6 @@ export default function AIAssistantDialog({
           </button>
         </div>
         
-        {/* Mode Toggle */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleModeChange("plan")}
-            className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              mode === "plan"
-                ? "bg-white text-blue-700"
-                : "bg-blue-800 text-white hover:bg-blue-900"
-            }`}
-          >
-            <div className="flex items-center justify-center gap-1">
-              <Sparkles className="w-4 h-4" />
-              <span>Plan Mode</span>
-            </div>
-          </button>
-          <button
-            onClick={() => handleModeChange("agent")}
-            className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              mode === "agent"
-                ? "bg-white text-blue-700"
-                : "bg-blue-800 text-white hover:bg-blue-900"
-            }`}
-          >
-            <div className="flex items-center justify-center gap-1">
-              <Zap className="w-4 h-4" />
-              <span>Agent Mode</span>
-            </div>
-          </button>
-        </div>
       </div>
 
       {/* Messages Area */}
