@@ -398,7 +398,10 @@ function QRDetailsPageContent() {
                   DLN: {inventoryRecord?.dln || dln}
                 </span>
                 <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
-                  Service Center: {inventoryRecord?.serviceCenter || serviceCenter}
+                  Inventory ID: {inventoryRecord?.inventoryId}
+                </span>
+                <span className="inline-block bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium border border-blue-200">
+                  Service Center: {inventoryRecord?.serviceCenter}
                 </span>
                 {inventoryRecord && (
                   <>

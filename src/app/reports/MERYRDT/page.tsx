@@ -37,7 +37,7 @@ export default function ReportMERYRDTPage() {
     
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
-      pageSize: 20,
+      pageSize: 25,
       reportId: 'MERYRDT',
       startDateStr: `${month}/${day}/${year}`,
       // No filters on initial load - user must submit to apply filters

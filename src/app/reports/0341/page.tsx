@@ -37,7 +37,7 @@ export default function Report0341Page() {
     
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
-      pageSize: 20,
+      pageSize: 25,
       reportId: '0341',
       startDateStr: `${month}/${day}/${year}`,
       // No filters on initial load - user must submit to apply filters

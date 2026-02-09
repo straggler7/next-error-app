@@ -68,49 +68,4 @@ export class QRDetailsService {
       throw new Error('Failed to fetch QR details');
     }
   }
-
-  // Mock data for development/fallback
-  static getMockQRDetails(inventoryId: string, dln?: string, serviceCenter?: string, seid?: string): QRDetailsData {
-    return {
-      NEW: {
-        workRecord: {
-          primaryNameControlTxt: "JOHN",
-          nameLine1Txt: "Johnson, Michael R",
-          primarySSN: "",
-          TaxPeriodEndDt: "2025-12-31",
-          transDt: "2025-01-15",
-          napEifTaxPrdUndrprt: "N",
-          napAccessInd: "Y",
-          masterFileSystemIdCode: "MF01",
-          transCd: "405",
-          secondaryTransCd: "405",
-          tertiaryTransCd: "409"
-        }
-      },
-      QR_HOLD: {
-        workRecord: {
-          primaryNameControlTxt: "JOHN",
-          nameLine1Txt: "Johnson, Michael R",
-          primarySSN: "123-45-6789",
-          TaxPeriodEndDt: "2025-12-31",
-          transDt: "2025-01-16",
-          napEifTaxPrdUndrprt: "Y",
-          napAccessInd: "Y",
-          masterFileSystemIdCode: "MF01",
-          transCd: "405",
-          secondaryTransCd: "405",
-          tertiaryTransCd: "409"
-        }
-      },
-      metadata: {
-        dln: dln || `00217-102-05701-${inventoryId}`,
-        serviceCenter: serviceCenter || "Austin",
-        taxPeriod: "2025",
-        submissionAge: 2,
-        lastModifiedBy: seid ? `${seid} (Sarah Thompson)` : "1ABCD (Sarah Thompson)",
-        lastModifiedDate: "2025-01-03 14:30:15",
-        errors: ["01ED - Extended Due Date", "01TIN - Missing TIN"]
-      }
-    };
-  }
 }

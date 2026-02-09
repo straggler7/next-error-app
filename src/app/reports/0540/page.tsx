@@ -37,7 +37,7 @@ export default function Report0540Page() {
     
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
-      pageSize: 20,
+      pageSize: 25,
       reportId: '0540',
       startDateStr: `${month}/${day}/${year}`,
       endDateStr: `${month}/${day}/${year}`,

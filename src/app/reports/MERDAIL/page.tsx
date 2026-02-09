@@ -39,7 +39,7 @@ export default function ReportMERDAILPage() {
     
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
-      pageSize: 20,
+      pageSize: 25,
       reportId: 'MERDAIL',
       startDateStr: `01/01/${currentYear}`,
       endDateStr: `${month}/${day}/${year}`,
