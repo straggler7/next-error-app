@@ -3518,3 +3518,42 @@ useEffect(() => {
     window.removeEventListener('pagehide', handlePageHide);
   };
 }, [inventoryId, currentUserSeid]); // Dependencies: only re-run if these change
+
+// "pattern": "Name Control must contain only uppercase letters (A-Z), numbers (0-9), spaces, hyphens (-), or ampersands (&)"
+
+
+src/app/reports/0040/page.tsx
+src/app/reports/0340/page.tsx
+src/app/reports/0540/page.tsx
+src/app/reports/1340/page.tsx
+src/app/reports/1340_New/page.tsx
+src/app/reports/1341/page.tsx
+src/app/reports/1342/page.tsx
+src/app/reports/1343/page.tsx
+src/app/reports/1740/page.tsx
+src/app/reports/1747/page.tsx
+src/app/reports/3141/page.tsx
+src/app/reports/7740/page.tsx
+src/app/reports/7741/page.tsx
+src/app/reports/7742/page.tsx
+src/app/reports/7743/page.tsx
+src/app/reports/7744/page.tsx
+src/app/reports/7745/page.tsx
+src/app/reports/7746/page.tsx
+src/app/reports/7747/page.tsx
+src/app/reports/MERDAIL/page.tsx
+src/app/reports/close-out/page.tsx
+src/components/BaseReport.tsx
+src/components/Navigation.tsx
+
+                              {parsedComments.errorsBeingCorrected &&
+                                parsedComments.errorsBeingCorrected.length > 0 && (
+                                  <div className="errors-being-corrected">
+                                    <div className="text-sm font-medium text-gray-600 mb-1">
+                                      Errors Displayed:
+                                    </div>
+                                    <div className="text-sm text-gray-700 ml-4">
+                                      {parsedComments.errorsBeingCorrected.join(", ")}
+                                    </div>
+                                  </div>
+                                )}

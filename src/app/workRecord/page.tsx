@@ -2698,6 +2698,18 @@ function Form4868ERSPageContent() {
                                 </div>
                               )}
 
+                              {parsedComments.errorsBeingCorrected &&
+                                parsedComments.errorsBeingCorrected.length > 0 && (
+                                  <div className="errors-being-corrected">
+                                    <div className="text-sm font-medium text-gray-600 mb-1">
+                                      Error(s) Shown:
+                                    </div>
+                                    <div className="text-sm text-gray-700 ml-4">
+                                      {parsedComments.errorsBeingCorrected.join(", ")}
+                                    </div>
+                                  </div>
+                                )}
+
                               {parsedComments.fieldChanges &&
                                 parsedComments.fieldChanges.length > 0 && (
                                   <div className="field-changes mb-3">
@@ -2734,17 +2746,6 @@ function Form4868ERSPageContent() {
                                 </div>
                               )}
 
-                              {parsedComments.errorsBeingCorrected &&
-                                parsedComments.errorsBeingCorrected.length > 0 && (
-                                  <div className="errors-being-corrected">
-                                    <div className="text-sm font-medium text-gray-600 mb-1">
-                                      Errors Being Corrected:
-                                    </div>
-                                    <div className="text-sm text-gray-700 ml-4">
-                                      {parsedComments.errorsBeingCorrected.join(", ")}
-                                    </div>
-                                  </div>
-                                )}
                             </div>
                           );
                         } catch (error) {
