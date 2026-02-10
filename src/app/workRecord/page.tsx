@@ -2841,28 +2841,67 @@ function Form4868ERSPageContent() {
         }))}
         onApplyFixes={(fixes) => {
           // Apply AI-suggested fixes to form fields
-          fixes.forEach(fix => {
-            fix.proposedFix.forEach(change => {
-              // Update form data with suggested values
-              if (eraDto?.displayFields?.[change.field]) {
-                setEraDto((prev: any) => ({
-                  ...prev,
-                  displayFields: {
-                    ...prev?.displayFields,
-                    [change.field]: {
-                      ...prev?.displayFields?.[change.field],
+          setEraDto((prev: any) => {
+            const updated = { ...prev };
+            
+            fixes.forEach(fix => {
+              fix.proposedFix.forEach(change => {
+                const fieldKey = change.field;
+                
+                // Update the workRecord data (the actual form values)
+                if (updated.workRecord) {
+                  updated.workRecord = {
+                    ...updated.workRecord,
+                    [fieldKey]: change.suggestedValue
+                  };
+                }
+                
+                // Also update the root level if it exists there
+                if (prev[fieldKey] !== undefined) {
+                  updated[fieldKey] = change.suggestedValue;
+                }
+                
+                // Update displayFields if it exists
+                if (updated.displayFields?.[fieldKey]) {
+                  updated.displayFields = {
+                    ...updated.displayFields,
+                    [fieldKey]: {
+                      ...updated.displayFields[fieldKey],
                       value: change.suggestedValue
                     }
-                  }
-                }));
-              }
+                  };
+                }
+              });
             });
+            
+            return updated;
+          });
+          
+          // Update formElements to reflect the changes in the UI
+          setFormElements((prev) => {
+            const updated = [...prev];
+            
+            fixes.forEach(fix => {
+              fix.proposedFix.forEach(change => {
+                const fieldKey = change.field;
+                const elementIndex = updated.findIndex(el => el.name === fieldKey);
+                
+                if (elementIndex !== -1) {
+                  updated[elementIndex] = {
+                    ...updated[elementIndex],
+                    value: change.suggestedValue
+                  };
+                }
+              });
+            });
+            
+            return updated;
           });
           
           // Show success message
           setInfoMessage(`AI applied ${fixes.length} fix${fixes.length > 1 ? 'es' : ''} to the form`);
           setShowInfo(true);
-          setTimeout(() => setShowInfo(false), 5000);
+          setTimeout(() => setShowInfo(false), 10000);
         }}
       />
     </div>

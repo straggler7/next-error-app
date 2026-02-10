@@ -118,7 +118,7 @@ export default function AIAssistantDialog({
           
           const summaryMessage: Message = {
             role: "assistant",
-            content: `✅ **Analysis Complete**\n\nI've identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction:\n\n**Summary:**\n- Average confidence: ${avgConfidence}%\n- High confidence fields (≥90%): ${highConfidence}\n- Fields requiring review: ${changes.length - highConfidence}\n\n**Proposed Changes:**\nPlease review the table below and select which changes to apply. You can:\n- **Apply**: Apply selected changes to the form\n- **Deny**: Reject changes and provide feedback\n- **Rework**: Request re-analysis with enhanced validation\n\nFeel free to ask me questions about any of the proposed changes!`,
+            content: `✅ **Analysis Complete**\n\nI've identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction:\n\n**Summary:**\n- Average confidence: ${avgConfidence}%\n- High confidence fields (≥90%): ${highConfidence}\n- Fields requiring review: ${changes.length - highConfidence}\n\n**IRM Guidance - Error 111 (Tax Period/Transaction Date):**\n\nPer IRM 3.12.179-8, Form 4868 (Application for Automatic Extension of Time to File) requires consistency between:\n- **Tax Period (01TXP)**: The tax year for which the extension is requested\n- **Transaction Date (01TDT)**: The MeF receipt date when the extension was filed\n\nThe error occurs when there's a mismatch between these dates. The correction ensures:\n1. The tax period reflects the correct tax year being extended\n2. The transaction date aligns with the filing year\n3. Both dates are consistent with the extension request timeline\n\n**Resolution Applied:**\nBased on the MeF receipt date and filing patterns, both fields have been updated to tax year 2024 to maintain consistency and comply with IRM requirements.\n\n**Proposed Changes:**\nPlease review the table below and select which changes to apply. You can:\n- **Apply**: Apply selected changes to the form\n- **Deny**: Reject changes and provide feedback\n- **Rework**: Request re-analysis with enhanced validation\n\nFeel free to ask me questions about any of the proposed changes!`,
             timestamp: new Date(),
           };
           setMessages(prev => [...prev, summaryMessage]);
@@ -131,7 +131,7 @@ export default function AIAssistantDialog({
           setMessages(prev => [...prev, noErrorsMessage]);
         }
         setIsLoading(false);
-      }, 5000);
+      }, 10000);
     }
   }, [isOpen, currentError, messages.length, fieldChanges.length]);
 
@@ -159,21 +159,67 @@ export default function AIAssistantDialog({
     const lowerMessage = userMessage.toLowerCase();
     
     if (lowerMessage.includes("fix all") || lowerMessage.includes("analyze all")) {
-      return allErrors.slice(0, 3).flatMap(error => {
-        const fields = error.fieldMappings || ["primarySSN"];
-        return fields.map(field => ({
-          field: field,
-          currentValue: formData?.[field] || "123456789",
-          proposedValue: "987654321",
-          confidenceScore: Math.random() * 0.3 + 0.7, // 70-100%
+      // Simulate resolution for error 111 (Tax Period/Transaction Date) on form 4868
+      const changes: FieldChange[] = [];
+      
+      // Check if error 111 exists in allErrors
+      const error111 = allErrors.find(e => e.code === "111");
+      
+      if (error111 || currentError?.code === "111") {
+        // Read actual current values from form data
+        const currentTaxPrd = formData?.taxPrd || formData?.workRecord?.taxPrd || "";
+        const currentMeFDate = formData?.meFReceiptDate || formData?.workRecord?.meFReceiptDate || "";
+        
+        // Tax Period field correction
+        changes.push({
+          field: "Tax Period (01TXP)",
+          currentValue: currentTaxPrd,
+          proposedValue: "202412",
+          confidenceScore: 0.95,
           selected: true
-        }));
-      });
+        });
+        
+        // Transaction Date field correction
+        changes.push({
+          field: "Transaction Date (01TDT)",
+          currentValue: currentMeFDate,
+          proposedValue: "2024-12-15",
+          confidenceScore: 0.93,
+          selected: true
+        });
+      }
+      
+      return changes;
     }
     
     if (lowerMessage.includes("fix current") || lowerMessage.includes("fix the error")) {
       if (!currentError) return [];
       
+      // Handle error 111 specifically
+      if (currentError.code === "111") {
+        // Read actual current values from form data
+        const currentTaxPrd = formData?.taxPrd || formData?.workRecord?.taxPrd || "";
+        const currentMeFDate = formData?.meFReceiptDate || formData?.workRecord?.meFReceiptDate || "";
+        
+        return [
+          {
+            field: "Tax Period (01TXP)",
+            currentValue: currentTaxPrd,
+            proposedValue: "202412",
+            confidenceScore: 0.95,
+            selected: true
+          },
+          {
+            field: "Transaction Date (01TDT)",
+            currentValue: currentMeFDate,
+            proposedValue: "2024-12-15",
+            confidenceScore: 0.93,
+            selected: true
+          }
+        ];
+      }
+      
+      // Fallback for other errors
       const fields = currentError.fieldMappings || ["primarySSN"];
       return fields.map(field => ({
         field: field,
@@ -303,22 +349,35 @@ export default function AIAssistantDialog({
       return;
     }
     
+    // Map user-friendly field labels back to technical field names
+    const fieldLabelToKey: Record<string, string> = {
+      "Tax Period (01TXP)": "taxPrd",
+      "Transaction Date (01TDT)": "meFReceiptDate",
+      "Taxpayer Identification Number (01TIN)": "primarySSN",
+      "Taxpayer Name Control (01NC)": "primaryNameCtrl"
+    };
+    
     // Apply changes to form via callback
     if (onApplyFixes) {
       // Convert field changes to ErrorFix format for compatibility
-      const fixesToApply: ErrorFix[] = selectedChanges.map(change => ({
-        errorCode: currentError?.code || "MULTI",
-        errorDescription: currentError?.description || "Multiple field corrections",
-        proposedFix: [{
-          field: change.field,
-          currentValue: change.currentValue,
-          suggestedValue: change.proposedValue,
-          reason: "AI-suggested correction"
-        }],
-        confidenceScore: change.confidenceScore,
-        requiresManualReview: change.confidenceScore < 0.9,
-        selected: true
-      }));
+      const fixesToApply: ErrorFix[] = selectedChanges.map(change => {
+        // Map the display label back to the actual field key
+        const actualFieldKey = fieldLabelToKey[change.field] || change.field;
+        
+        return {
+          errorCode: currentError?.code || "MULTI",
+          errorDescription: currentError?.description || "Multiple field corrections",
+          proposedFix: [{
+            field: actualFieldKey,
+            currentValue: change.currentValue,
+            suggestedValue: change.proposedValue,
+            reason: "AI-suggested correction based on IRM guidance"
+          }],
+          confidenceScore: change.confidenceScore,
+          requiresManualReview: change.confidenceScore < 0.9,
+          selected: true
+        };
+      });
       onApplyFixes(fixesToApply);
     }
     
@@ -387,7 +446,7 @@ export default function AIAssistantDialog({
       };
       setMessages((prev) => [...prev, resultMessage]);
       setIsReworking(false);
-    }, 5000);
+    }, 10000);
   };
 
   const getConfidenceColor = (score: number) => {
