@@ -3,7 +3,7 @@ import React from 'react';
 interface WorkLogCardData {
   programCode: string;
   totalTimeSpentStr?: string;
-  rateOfProduction?: number;
+  rateofProduction?: number;
   resolvedQty?: number;
   deletedQty?: number;
   suspendedQty?: number;
@@ -54,7 +54,7 @@ export default function WorkLogCard({ data }: WorkLogCardProps) {
         
         <div className="flex justify-between items-center py-1 border-b border-gray-100">
           <span className="text-gray-700 font-medium text-sm">Volume Per Hour:</span>
-          <span className="text-gray-900 font-semibold text-sm">{formatNumber(data.rateOfProduction)}</span>
+          <span className="text-gray-900 font-semibold text-sm">{formatNumber(data.rateofProduction)}</span>
         </div>
         
         <div className="flex justify-between items-center py-1 border-b border-gray-100">

@@ -34,7 +34,7 @@ export interface ReportRecord {
   deletedQty?: number; // Deleted quantity for reports 7740/7741
   suspendedQty?: number; // Suspended quantity for reports 7740/7741
   reWorkedQty?: number; // ReWorked quantity for reports 7740/7741
-  rateOfProductionStr?: string; // Rate of production for reports 7740/7741
+  rateofProductionStr?: string; // Rate of production for reports 7740/7741
   totalInventory?: number; // Total inventory for report 0340
   day0Inventory?: number; // Day 0 inventory for report 0340
   day1Inventory?: number; // Day 1 inventory for report 0340
