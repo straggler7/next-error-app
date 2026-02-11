@@ -19,6 +19,7 @@ interface WorkLogData {
     suspendedQty?: number;
     reWorkedQty?: number;
     totalVolume?: number;
+    rateofProduction?: number;
   };
 }
 
@@ -86,7 +87,8 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
             deletedQty: 0,
             suspendedQty: 0,
             reWorkedQty: 0,
-            totalVolume: 0
+            totalVolume: 0,
+            rateofProduction: 0,
           };
         }
 

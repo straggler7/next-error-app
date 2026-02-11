@@ -34,6 +34,7 @@ export interface ReportRecord {
   deletedQty?: number; // Deleted quantity for reports 7740/7741
   suspendedQty?: number; // Suspended quantity for reports 7740/7741
   reWorkedQty?: number; // ReWorked quantity for reports 7740/7741
+  rateofProduction?: number;
   rateofProductionStr?: string; // Rate of production for reports 7740/7741
   totalInventory?: number; // Total inventory for report 0340
   day0Inventory?: number; // Day 0 inventory for report 0340
@@ -67,6 +68,7 @@ export interface ReportPayload {
   daysInEraEnd?: number; // Days in ERA end filter for 1342 and 3141 reports
   seid?: string; // Tax Examiner SEID for 7740 report
   assignmentSeid?: string; // Tax Examiner SEID for 7746 report
+  rateofProduction?: number;
   export?: boolean; // For export functionality
 }
 
