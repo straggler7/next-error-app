@@ -71,7 +71,7 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
       };
 
       const reportData = await ReportsService.get7746Report(seid, payload);
-      
+
       // Group data by program code
       const groupedData: WorkLogData = {};
       
@@ -95,6 +95,7 @@ export default function WorkLogPanel({ className = '' }: WorkLogPanelProps) {
         // Aggregate the data for this program code
         const existing = groupedData[programCode];
         existing.totalTimeSpentStr = record.totalTimeSpentStr || existing.totalTimeSpentStr;
+        existing.rateofProduction = record.rateofProduction || existing.rateofProduction;
         existing.volumePerHr = (existing.volumePerHr || 0) + (record.volumePerHr || 0);
         existing.resolvedQty = (existing.resolvedQty || 0) + (record.resolvedQty || 0);
         existing.deletedQty = (existing.deletedQty || 0) + (record.deletedQty || 0);
