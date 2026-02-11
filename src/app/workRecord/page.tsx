@@ -1058,6 +1058,22 @@ function Form4868ERSPageContent() {
     return Object.keys(errors).length === 0;
   };
 
+  // Helper function to validate only fields that have been changed by the user
+  const validateChangedFields = (): Record<string, string> => {
+    const changedFieldErrors: Record<string, string> = {};
+    editableFieldKeys.forEach((fieldKey) => {
+      // Only validate if field was changed by user
+      if (fieldWithErrors.includes(fieldKey)) {
+        const value = getFormElementValue(fieldKey);
+        const error = validateField(fieldKey, value);
+        if (error) {
+          changedFieldErrors[fieldKey] = error;
+        }
+      }
+    });
+    return changedFieldErrors;
+  };
+
   // Helper function to check if there are any field errors (validation or original)
   const hasAnyFieldErrors = (): boolean => {
     // Check for validation errors
@@ -1329,8 +1345,12 @@ function Form4868ERSPageContent() {
       return;
     }
 
+    // Validate only fields that have been changed by the user
+    const changedFieldErrors = validateChangedFields();
+
     // Check for validation errors before suspending
-    if (Object.keys(validationErrors).length > 0) {
+    if (Object.keys(changedFieldErrors).length > 0) {
+      setValidationErrors(changedFieldErrors);
       setFlashMessage("Please fix validation errors before suspending.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -1640,6 +1660,18 @@ function Form4868ERSPageContent() {
       return;
     }
 
+    // Validate only fields that have been changed by the user
+    const changedFieldErrors = validateChangedFields();
+
+    // Check for validation errors before deleting
+    if (Object.keys(changedFieldErrors).length > 0) {
+      setValidationErrors(changedFieldErrors);
+      setFlashMessage("Please fix validation errors before deleting.");
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 5000);
+      return;
+    }
+
     // Clear any highlighted fields on delete
     setHighlightedFields([]);
 
@@ -1758,15 +1790,8 @@ function Form4868ERSPageContent() {
       return;
     }
 
-    // Validate all editable fields before submission
-    const validationErrors: Record<string, string> = {};
-    editableFieldKeys.forEach((fieldKey) => {
-      const value = getFormElementValue(fieldKey);
-      const error = validateField(fieldKey, value);
-      if (error) {
-        validationErrors[fieldKey] = error;
-      }
-    });
+    // Validate only fields that have been changed by the user
+    const validationErrors = validateChangedFields();
 
     // If there are validation errors, prevent submission and show errors
     if (Object.keys(validationErrors).length > 0) {
@@ -2603,15 +2628,6 @@ function Form4868ERSPageContent() {
               </FormSection>
             </form>
           </div>
-
-          {/* Field Error Warning Message */}
-          {hasAnyFieldErrors() && (
-            <div className="mt-3 text-left">
-              <p className="text-sm text-red-600 font-medium">
-                Field errors need to be fixed for submission
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Notes Section (Right 40%) */}
