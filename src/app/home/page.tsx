@@ -36,7 +36,7 @@ export default function HomePage() {
     if (!user?.profile?.profile?.profiles) return false;
     
     // Analysts should not have access to quality review
-    if (user.group === 'analysts') return false;
+    if (user.group === 'analysts' || user.group === 'managers') return false;
     
     // If a program is selected, check that specific program
     if (programForm.program) {

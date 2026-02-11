@@ -53,14 +53,19 @@ interface Notification {
 }
 
 // Function to create programs dynamically with status codes
-const createPrograms = (statusCodes: SuspenseCode[] = []): Program[] => {
-  const standardRoles = [
+const createPrograms = (statusCodes: SuspenseCode[] = [], excludeQrReview: boolean = false): Program[] => {
+  let standardRoles = [
     { id: 'lead', name: 'lead', label: 'Lead' },
     { id: 'reject', name: 'reject', label: 'Reject' },
     { id: 'qr-review', name: 'qr-review', label: 'QR Review' },
     { id: 'delete', name: 'delete', label: 'Delete' },
     { id: 'dln-search', name: 'dln-search', label: 'DLN Search' },
   ];
+
+  // Filter out QR Review role when managing a manager's profile
+  if (excludeQrReview) {
+    standardRoles = standardRoles.filter(role => role.id !== 'qr-review');
+  }
 
   // Use the real status code objects directly
   const formattedStatusCodes = statusCodes;
@@ -202,7 +207,7 @@ export default function RoleAssignmentPage() {
         setStatusCodes(codesWithDetails);
         
         // Update programs with fetched status codes
-        const updatedPrograms = createPrograms(codesWithDetails);
+        const updatedPrograms = createPrograms(codesWithDetails, updateProfile);
         setPrograms(updatedPrograms);
         
         // Show success notification for status codes
@@ -214,7 +219,7 @@ export default function RoleAssignmentPage() {
         // addNotification('warning', 'Failed to load status codes. Using default configuration.', 'Status Codes Warning');
         // Fallback to empty data if fetch fails
         setStatusCodes([]);
-        setPrograms(createPrograms());
+        setPrograms(createPrograms([], updateProfile));
       } finally {
         setIsLoadingStatusCodes(false);
       }
@@ -382,6 +387,10 @@ export default function RoleAssignmentPage() {
   const handleUpdateProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     setUpdateProfile(isChecked);
+    
+    // Update programs to exclude QR Review when managing manager's profile
+    const updatedPrograms = createPrograms(statusCodes, isChecked);
+    setPrograms(updatedPrograms);
     
     if (isChecked) {
       // Clear current examiner selection and fetch manager's own profile
