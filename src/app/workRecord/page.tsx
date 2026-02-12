@@ -1507,15 +1507,15 @@ function Form4868ERSPageContent() {
             sessionStorage.setItem("eraDto", JSON.stringify(recordWithPreservedFields));
 
             // Show info alert for additional error correction needed
-            setInfoMessage("Requires additional error correction");
+            setInfoMessage(result.message || "Requires additional error correction");
             setShowInfo(true);
             setTimeout(() => setShowInfo(false), 10000);
 
             setFlashMessage(
-              "Record suspended and submitted for validation. Record updated"
+              "Record sumbmitted for suspension"
             );
           } else {
-            setFlashMessage("Record suspended and submitted for validation");
+            setFlashMessage("Record submitted for suspension");
           }
 
           setShowFlash(true);
