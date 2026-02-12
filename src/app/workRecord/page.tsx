@@ -2211,9 +2211,8 @@ function Form4868ERSPageContent() {
         .then(response => {
           console.log(`📡 Closeout response from ${source}:`, response.status, response.statusText);
           if (response.status === 200) {
-            console.log(`✅ Closeout successful from ${source} - navigating back`);
-            // Navigate back to previous page after successful closeout
-            router.back();
+            console.log(`✅ Closeout successful from ${source}`);
+            // Don't navigate here - the browser event (beforeunload/pagehide/unmount) is already handling navigation
           }
           return response.text();
         })
