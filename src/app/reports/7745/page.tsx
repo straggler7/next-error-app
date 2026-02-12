@@ -66,7 +66,7 @@ export default function Report7745() {
 
   return (
     <BaseReport
-      title="Program Production Summary Report (7745 - INC)"
+      title="Suspense Status Correction Production Summary by Action Code (7745 - INC)"
       reportType="7745"
       data={data}
       loading={loading}
