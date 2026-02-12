@@ -1385,7 +1385,7 @@ function Form4868ERSPageContent() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            SEID: currentUserSeid || "X1000",
+            SEID: `${currentUserSeid}`,
           },
           body: JSON.stringify({
             event: {
