@@ -1224,6 +1224,7 @@ function Form4868ERSPageContent() {
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
   const visibilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handleCloseoutRef = useRef<(() => Promise<void>) | null>(null);
 
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
@@ -1549,6 +1550,9 @@ function Form4868ERSPageContent() {
       return;
     }
 
+    // Set flag to prevent duplicate closeout calls from navigation events
+    closeoutSentRef.current = true;
+
     // Validate all editable fields before closing out
     // if (!validateAllFields()) {
     //   setFlashMessage("Please fix validation errors before closing out.");
@@ -1651,6 +1655,11 @@ function Form4868ERSPageContent() {
       setClosingOut(false);
     }
   }, [inventoryId, formElements, eraDto, landingSelectionData, currentUserSeid, router]);
+
+  // Update the ref whenever handleCloseout changes
+  useEffect(() => {
+    handleCloseoutRef.current = handleCloseout;
+  }, [handleCloseout]);
 
   const handleDelete = async () => {
     if (!inventoryId) {
@@ -2111,14 +2120,16 @@ function Form4868ERSPageContent() {
       // Set main timeout (10 minutes)
       timeoutRef.current = setTimeout(() => {
         console.log("Auto-closeout triggered after timeout duration:", TIMEOUT_DURATION);
-        console.log("handleCloseout function:", typeof handleCloseout);
+        console.log("handleCloseout function:", typeof handleCloseoutRef.current);
         setInfoMessage("Session timed out due to inactivity. Closing out record...");
         setShowInfo(true);
         
         // Trigger closeout after a brief delay to show the message
         setTimeout(() => {
           console.log("About to call handleCloseout...");
-          handleCloseout();
+          if (handleCloseoutRef.current) {
+            handleCloseoutRef.current();
+          }
         }, 1000);
       }, TIMEOUT_DURATION);
     };
@@ -2159,7 +2170,7 @@ function Form4868ERSPageContent() {
         document.removeEventListener(event, handleUserActivity, true);
       });
     };
-  }, [handleCloseout]); // Include handleCloseout as dependency
+  }, []); // Empty dependency array - timeout logic should not reset on re-renders
 
   // Ref to track if closeout has been sent (persists across renders)
   const closeoutSentRef = useRef(false);
@@ -2306,7 +2317,9 @@ function Form4868ERSPageContent() {
       setInfoMessage("Session timed out due to inactivity. Closing out record...");
       setShowInfo(true);
       setTimeout(() => {
-        handleCloseout();
+        if (handleCloseoutRef.current) {
+          handleCloseoutRef.current();
+        }
       }, 1000);
     }, TIMEOUT_DURATION);
   };
