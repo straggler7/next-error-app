@@ -179,7 +179,7 @@ export default function Navigation({ className = '', onFilterChange }: Navigatio
     if (user?.group === 'tax_examiners') {
       // Only show 7746 and 7747 reports for tax_examiners
       return allReports.filter(report => 
-        report.id === 'report7746' || report.id === 'report7747'
+        report.id === 'report7746'
       );
     }
     // For all other groups (managers, analysts, etc.), show all reports
