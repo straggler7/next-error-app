@@ -589,7 +589,8 @@ export default function HomePage() {
                       ) : (
                         statusCodes.map((statusCode) => (
                           <option key={statusCode.code} value={statusCode.code}>
-                            {statusCode.code} - {statusCode.description}
+                            {statusCode.code} - {statusCode.description} (
+                            {statusCode.daysSuspended} days)
                           </option>
                         ))
                       )}
