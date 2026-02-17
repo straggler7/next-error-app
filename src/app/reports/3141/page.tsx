@@ -41,7 +41,7 @@ export default function Report3141Page() {
       reportId: '3141',
       startDateStr: `${month}/${day}/${year}`,
       daysInEraStart: 0,
-      daysInEraEnd: 5,
+      daysInEraEnd: 500,
     };
     
     fetchReportData(defaultPayload);

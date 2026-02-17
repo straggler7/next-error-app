@@ -292,7 +292,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
       { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
       // { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 },
-      { key: 'daysInSuspense', label: 'Days in Suspense', visible: true, width: 130 },
+      { key: 'daysInSuspense', label: 'Days Since Expired', visible: true, width: 130 },
       { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 130 }
     ];
   }
