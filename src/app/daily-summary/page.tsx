@@ -325,7 +325,21 @@ function DailySummaryContent() {
         }
       } else {
         const errorText = await response.text();
-        throw new Error(`Failed to retrieve inventory item: ${errorText}`);
+        let errorMessage = 'Error retrieving work record for reopen. Please try again.';
+        try {
+          const error = JSON.parse(errorText);
+          if (error.message) {
+            errorMessage = error.message;
+          }
+        } catch (parseError) {
+          // If parsing fails, use the raw error text or default message
+          errorMessage = errorText || errorMessage;
+        }
+        console.error('Error reopening record:', errorMessage);
+        setFlashMessage(errorMessage);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 3000);
+        return;
       }
     } catch (error) {
       console.error('Error reopening record:', error);
