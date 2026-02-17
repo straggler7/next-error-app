@@ -14,7 +14,6 @@ import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinn
 import ErrorAlert from '../../components/ErrorAlert';
 import WorkLogPanel from '../../components/WorkLogPanel';
 import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
-// import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { InventoryRecord } from '../../types';
 import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
@@ -49,7 +48,6 @@ function DailySummaryContent() {
     totalPages: 0
   });
 
-  // const [records, setRecords] = useState<QRInventoryRecord[]>([]);
   const [records, setRecords] = useState<InventoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -286,9 +284,7 @@ function DailySummaryContent() {
     const inventoryId = record.inventoryId;
     
     if (!inventoryId) {
-      setFlashMessage("No inventory ID available.");
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 3000);
+      setError("No inventory ID available.");
       return;
     }
 
@@ -336,18 +332,14 @@ function DailySummaryContent() {
           errorMessage = errorText || errorMessage;
         }
         console.error('Error reopening record:', errorMessage);
-        setFlashMessage(errorMessage);
-        setShowFlash(true);
-        setTimeout(() => setShowFlash(false), 3000);
+        setError(errorMessage);
         return;
       }
     } catch (error) {
       console.error('Error reopening record:', error);
-      setFlashMessage('Error retrieving work record for reopen. Please try again.');
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 3000);
+      setError('Error retrieving work record for reopen. Please try again.');
     }
-  }, [currentUserSeid, router, setFlashMessage, setShowFlash]);
+  }, [currentUserSeid, router]);
 
   const columnHelper = createColumnHelper<InventoryRecord>();
 
@@ -372,33 +364,10 @@ function DailySummaryContent() {
       cell: ({ getValue }) => getValue(),
       size: 120,
     }),
-    // columnHelper.display({
-    //   id: 'programCode',
-    //   header: 'Program Code',
-    //   cell: () => {
-    //     // Get program code from session storage (client-side only)
-    //     if (typeof window !== 'undefined') {
-    //       const selectionData = sessionStorage.getItem('selectionData');
-    //       const parsedData = selectionData ? JSON.parse(selectionData) : {};
-    //       return <span>{parsedData.program || 'N/A'}</span>;
-    //     }
-    //     return <span>N/A</span>;
-    //   },
-    //   size: 120,
-    // }),
     columnHelper.accessor('formType', {
       header: 'Form Type',
       size: 100,
     }),
-    // columnHelper.accessor('formType', {
-    //   id: 'returnType',
-    //   header: 'Return Type',
-    //   cell: ({ getValue }) => {
-    //     const formType = getValue();
-    //     return formType?.includes('Electronic') ? 'Electronic' : 'Paper';
-    //   },
-    //   size: 100,
-    // }),
     columnHelper.accessor('taxPeriod', {
       header: 'Tax Period',
       size: 100,

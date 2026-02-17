@@ -1020,7 +1020,7 @@ export default function BaseReport({
                   type="number"
                   min="0"
                   max="500"
-                  placeholder="5"
+                  placeholder="500"
                   value={daysInEraEnd}
                   onChange={(e) => {
                     const inputValue = e.target.value;
