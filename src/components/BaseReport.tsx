@@ -453,7 +453,7 @@ export default function BaseReport({
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [selectedSource, setSelectedSource] = useState('');
   const [daysInEraStart, setDaysInEraStart] = useState<string>('0');
-  const [daysInEraEnd, setDaysInEraEnd] = useState<string>('5');
+  const [daysInEraEnd, setDaysInEraEnd] = useState<string>(reportType === '3141' ? '500' : '5');
   const [daysInEraError, setDaysInEraError] = useState<string>('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
   const [dismissedError, setDismissedError] = useState<boolean>(false);
@@ -1020,7 +1020,7 @@ export default function BaseReport({
                   type="number"
                   min="0"
                   max="500"
-                  placeholder="500"
+                  placeholder="5"
                   value={daysInEraEnd}
                   onChange={(e) => {
                     const inputValue = e.target.value;
