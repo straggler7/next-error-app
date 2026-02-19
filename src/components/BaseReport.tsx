@@ -275,7 +275,7 @@ const getDefaultColumns = (reportType: string): ColumnConfig[] => {
       { key: 'controlDay', label: 'Control Day', visible: true, width: 120 },
       { key: 'daysAged', label: 'Days In Inventory', visible: true, width: 120 },
       { key: 'submissionErrorCodes', label: 'Submission Errors', visible: true, width: 150 },
-      { key: 'daysInSuspense', label: 'Days in Suspense', visible: true, width: 130 },
+      { key: 'daysInSuspense', label: 'Days Since Expired', visible: true, width: 130 },
       { key: 'suspendedStatusCode', label: 'Suspended Status Code', visible: true, width: 130 }
     ];
   }
@@ -453,7 +453,7 @@ export default function BaseReport({
   const [selectedProgramCode, setSelectedProgramCode] = useState('');
   const [selectedSource, setSelectedSource] = useState('');
   const [daysInEraStart, setDaysInEraStart] = useState<string>('0');
-  const [daysInEraEnd, setDaysInEraEnd] = useState<string>(reportType === '3141' ? '500' : '5');
+  const [daysInEraEnd, setDaysInEraEnd] = useState<string>('500');
   const [daysInEraError, setDaysInEraError] = useState<string>('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
   const [dismissedError, setDismissedError] = useState<boolean>(false);
@@ -700,6 +700,7 @@ export default function BaseReport({
 
     // Add Days in ERA filters for 1342 and 3141 reports
     if (reportType === '1342' || reportType === '3141') {
+      payload.reportId = '3141';
       payload.daysInEraStart = parseInt(daysInEraStart) || 0;
       payload.daysInEraEnd = parseInt(daysInEraEnd) || 0;
     }
@@ -782,6 +783,7 @@ export default function BaseReport({
 
     // Add Days in ERA filters for 1342 and 3141 reports
     if (reportType === '1342' || reportType === '3141') {
+      payload.reportId = '3141';
       payload.daysInEraStart = parseInt(daysInEraStart) || 0;
       payload.daysInEraEnd = parseInt(daysInEraEnd) || 0;
     }

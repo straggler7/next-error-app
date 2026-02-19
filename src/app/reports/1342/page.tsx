@@ -38,7 +38,7 @@ export default function Report1342Page() {
     const defaultPayload: ReportPayload = {
       pageNumber: 1,
       pageSize: 25,
-      reportId: '1342',
+      reportId: '3141',
       startDateStr: `${month}/${day}/${year}`,
       endDateStr: `${month}/${day}/${year}`,
       daysInEraStart: 0,
