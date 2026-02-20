@@ -641,6 +641,13 @@ export default function BaseReport({
         payload.source = selectedSource;
       }
 
+      // Add Days in ERA filters for 1342 and 3141 reports
+      if (reportType === '1342' || reportType === '3141') {
+        payload.reportId = '3141';
+        payload.daysInEraStart = parseInt(daysInEraStart) || 0;
+        payload.daysInEraEnd = parseInt(daysInEraEnd) || 0;
+      }
+
       // Add Tax Examiner SEID for 7740 report
       if (reportType === '7740' && taxExaminerSeid.trim()) {
         payload.seid = taxExaminerSeid.trim().toLowerCase();
