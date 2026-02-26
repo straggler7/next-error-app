@@ -675,7 +675,8 @@ export default function BaseReport({
     
     // Validate start date is not in the future
     if (isDateInFuture(selectedDate)) {
-      setStartDateError('Start date cannot be in the future');
+      const dateLabel = supportsEndDate(reportType) ? "Start date" : isYearToDateReport(reportType) ? "Till date" : "Status date";
+      setStartDateError(`${dateLabel} cannot be in the future`);
       return;
     }
     
@@ -911,6 +912,7 @@ export default function BaseReport({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
+              <div className="h-5 mt-1"></div>
             </div>
           )}
 
@@ -926,14 +928,16 @@ export default function BaseReport({
               label={supportsEndDate(reportType) ? "Start Date" : isYearToDateReport(reportType) ? "Till Date" : "Status On"}
               placeholder={supportsEndDate(reportType) ? "Select start date..." : isYearToDateReport(reportType) ? "Select till date..." : "Select status date..."}
             />
-            {startDateError && (
-              <p className="text-red-500 text-xs mt-1">{startDateError}</p>
-            )}
-            {!startDateError && selectedDate && isDateInFuture(selectedDate) && (
-              <p className="text-red-500 text-xs mt-1">
-                {supportsEndDate(reportType) ? "Start date" : isYearToDateReport(reportType) ? "Till date" : "Status date"} cannot be in the future
-              </p>
-            )}
+            <div className="h-5 mt-1">
+              {startDateError && (
+                <p className="text-red-500 text-xs">{startDateError}</p>
+              )}
+              {!startDateError && selectedDate && isDateInFuture(selectedDate) && (
+                <p className="text-red-500 text-xs">
+                  {supportsEndDate(reportType) ? "Start date" : isYearToDateReport(reportType) ? "Till date" : "Status date"} cannot be in the future
+                </p>
+              )}
+            </div>
           </div>
 
           {/* End Date Picker - For reports that support it */}
@@ -950,15 +954,17 @@ export default function BaseReport({
                 label="End Date"
                 placeholder="Select end date..."
               />
-              {endDateError && (
-                <p className="text-red-500 text-xs mt-1">{endDateError}</p>
-              )}
-              {!endDateError && selectedEndDate && isDateInFuture(selectedEndDate) && (
-                <p className="text-red-500 text-xs mt-1">End date cannot be in the future</p>
-              )}
-              {!endDateError && selectedEndDate && !isDateInFuture(selectedEndDate) && !isEndDateValid(selectedDate, selectedEndDate) && (
-                <p className="text-red-500 text-xs mt-1">End date must be on or after start date</p>
-              )}
+              <div className="h-5 mt-1">
+                {endDateError && (
+                  <p className="text-red-500 text-xs">{endDateError}</p>
+                )}
+                {!endDateError && selectedEndDate && isDateInFuture(selectedEndDate) && (
+                  <p className="text-red-500 text-xs">End date cannot be in the future</p>
+                )}
+                {!endDateError && selectedEndDate && !isDateInFuture(selectedEndDate) && !isEndDateValid(selectedDate, selectedEndDate) && (
+                  <p className="text-red-500 text-xs">End date must be on or after start date</p>
+                )}
+              </div>
             </div>
           )}
 
@@ -980,6 +986,7 @@ export default function BaseReport({
                     </option>
                   ))}
                 </select>
+                <div className="h-5 mt-1"></div>
               </div>
             )}
 
@@ -1001,6 +1008,7 @@ export default function BaseReport({
                     </option>
                   ))}
                 </select>
+                <div className="h-5 mt-1"></div>
               </div>
             )}
 
@@ -1022,6 +1030,7 @@ export default function BaseReport({
                     </option>
                   ))}
                 </select>
+                <div className="h-5 mt-1"></div>
               </div>
             )}
 
@@ -1065,6 +1074,7 @@ export default function BaseReport({
                     daysInEraError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                   }`}
                 />
+                <div className="h-5 mt-1"></div>
               </div>
             )}
 
@@ -1108,9 +1118,11 @@ export default function BaseReport({
                     daysInEraError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                   }`}
                 />
-                {daysInEraError && (
-                  <p className="mt-1 text-sm text-red-600">{daysInEraError}</p>
-                )}
+                <div className="h-5 mt-1">
+                  {daysInEraError && (
+                    <p className="text-red-500 text-xs">{daysInEraError}</p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1128,37 +1140,42 @@ export default function BaseReport({
                   onChange={(e) => setTaxExaminerSeid(e.target.value)}
                   className="w-full pl-3 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+                <div className="h-5 mt-1"></div>
               </div>
             )}
 
             {/* Submit Button */}
-            <div className="flex gap-2 items-end">
-              <button
-                onClick={handleSubmit}
-                disabled={loading || daysInEraError !== ''}
-                className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Loading...' : 'Submit'}
-              </button>
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedServiceCenter('');
-                  setSelectedProgramCode('');
-                  setSelectedSource('');
-                  setDaysInEraStart('0');
-                  setDaysInEraEnd('5');
-                  setDaysInEraError('');
-                  setTaxExaminerSeid('');
-                  setSelectedEndDate('');
-                  setStartDateError('');
-                  setEndDateError('');
-                }}
-                className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                title="Clear Filters"
-              >
-                Clear
-              </button>
+            <div>
+              <div className="h-6 mb-1"></div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading || daysInEraError !== '' || startDateError !== '' || endDateError !== ''}
+                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Loading...' : 'Submit'}
+                </button>
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedServiceCenter('');
+                    setSelectedProgramCode('');
+                    setSelectedSource('');
+                    setDaysInEraStart('0');
+                    setDaysInEraEnd('5');
+                    setDaysInEraError('');
+                    setTaxExaminerSeid('');
+                    setSelectedEndDate('');
+                    setStartDateError('');
+                    setEndDateError('');
+                  }}
+                  className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  title="Clear Filters"
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="h-5 mt-1"></div>
             </div>
           </div>
 
