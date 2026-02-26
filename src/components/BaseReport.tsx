@@ -457,6 +457,8 @@ export default function BaseReport({
   const [daysInEraError, setDaysInEraError] = useState<string>('');
   const [taxExaminerSeid, setTaxExaminerSeid] = useState('');
   const [dismissedError, setDismissedError] = useState<boolean>(false);
+  const [startDateError, setStartDateError] = useState<string>('');
+  const [endDateError, setEndDateError] = useState<string>('');
   const [exporting, setExporting] = useState<boolean>(false);
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
@@ -668,10 +670,25 @@ export default function BaseReport({
 
   const handleSubmit = () => {
     setDismissedError(false);
-    // Validate end date if it's provided for reports that support it
-    if (supportsEndDate(reportType) && selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate)) {
-      alert('End date must be on or after the start date.');
+    setStartDateError('');
+    setEndDateError('');
+    
+    // Validate start date is not in the future
+    if (isDateInFuture(selectedDate)) {
+      setStartDateError('Start date cannot be in the future');
       return;
+    }
+    
+    // Validate end date if it's provided for reports that support it
+    if (supportsEndDate(reportType) && selectedEndDate) {
+      if (isDateInFuture(selectedEndDate)) {
+        setEndDateError('End date cannot be in the future');
+        return;
+      }
+      if (!isEndDateValid(selectedDate, selectedEndDate)) {
+        setEndDateError('End date must be on or after the start date');
+        return;
+      }
     }
 
     const payload: ReportPayload = {
@@ -720,6 +737,19 @@ export default function BaseReport({
     // Reset pagination to first page
     setPagination(prev => ({ ...prev, currentPage: 1 }));
     onRefresh(payload);
+  };
+
+  // Validation function to check if a date is in the future
+  const isDateInFuture = (dateString: string): boolean => {
+    if (!dateString) return false;
+    
+    const selectedDate = new Date(dateString);
+    const today = new Date();
+    // Set time to midnight for accurate date comparison
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    return selectedDate > today;
   };
 
   // Validation function to check if end date is after start date
@@ -889,10 +919,21 @@ export default function BaseReport({
             <DatePicker
               id="start-date-picker"
               value={selectedDate}
-              onChange={setSelectedDate}
+              onChange={(value) => {
+                setSelectedDate(value);
+                setStartDateError('');
+              }}
               label={supportsEndDate(reportType) ? "Start Date" : isYearToDateReport(reportType) ? "Till Date" : "Status On"}
               placeholder={supportsEndDate(reportType) ? "Select start date..." : isYearToDateReport(reportType) ? "Select till date..." : "Select status date..."}
             />
+            {startDateError && (
+              <p className="text-red-500 text-xs mt-1">{startDateError}</p>
+            )}
+            {!startDateError && selectedDate && isDateInFuture(selectedDate) && (
+              <p className="text-red-500 text-xs mt-1">
+                {supportsEndDate(reportType) ? "Start date" : isYearToDateReport(reportType) ? "Till date" : "Status date"} cannot be in the future
+              </p>
+            )}
           </div>
 
           {/* End Date Picker - For reports that support it */}
@@ -901,12 +942,21 @@ export default function BaseReport({
               <DatePicker
                 id="end-date-picker"
                 value={selectedEndDate}
-                onChange={setSelectedEndDate}
+                onChange={(value) => {
+                  setSelectedEndDate(value);
+                  setEndDateError('');
+                }}
                 // label={reportType === '0340' || reportType === 'MERDAIL' ? "End Date" : "End Date (Optional)"}
                 label="End Date"
                 placeholder="Select end date..."
               />
-              {selectedEndDate && !isEndDateValid(selectedDate, selectedEndDate) && (
+              {endDateError && (
+                <p className="text-red-500 text-xs mt-1">{endDateError}</p>
+              )}
+              {!endDateError && selectedEndDate && isDateInFuture(selectedEndDate) && (
+                <p className="text-red-500 text-xs mt-1">End date cannot be in the future</p>
+              )}
+              {!endDateError && selectedEndDate && !isDateInFuture(selectedEndDate) && !isEndDateValid(selectedDate, selectedEndDate) && (
                 <p className="text-red-500 text-xs mt-1">End date must be on or after start date</p>
               )}
             </div>
@@ -1101,6 +1151,8 @@ export default function BaseReport({
                   setDaysInEraError('');
                   setTaxExaminerSeid('');
                   setSelectedEndDate('');
+                  setStartDateError('');
+                  setEndDateError('');
                 }}
                 className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 title="Clear Filters"
