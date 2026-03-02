@@ -3584,3 +3584,25 @@ src/components/Navigation.tsx
     "dev:no-auth": "BYPASS_AUTH=true npm run dev",
     "dev:with-auth": "npm run dev"
   },
+
+  git branch: mvp-december-dln-no-auto-assign
+
+  apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: irs-error-resolution
+spec:
+  replicas: 3  # This creates 3 pods
+  selector:
+    matchLabels:
+      app: irs-error-resolution
+  template:
+    metadata:
+      labels:
+        app: irs-error-resolution
+    spec:
+      containers:
+      - name: app
+        image: your-image:tag
+        ports:
+        - containerPort: 8443
