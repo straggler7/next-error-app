@@ -3606,3 +3606,19 @@ spec:
         image: your-image:tag
         ports:
         - containerPort: 8443
+
+
+# Example deployment configuration
+replicas: 3
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
