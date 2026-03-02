@@ -288,8 +288,8 @@ function DLNSearchContent() {
         // Store the eraDto in sessionStorage for the workRecord page
         sessionStorage.setItem('eraDto', JSON.stringify(result));
         
-        // Navigate to workRecord page
-        router.push('/workRecord');
+        // Navigate to workRecord page with dlnSearch parameter
+        router.push('/workRecord?dlnSearch=true');
       } else {
         const errorText = await response.text();
         let errorMessage = 'Failed to assign record';

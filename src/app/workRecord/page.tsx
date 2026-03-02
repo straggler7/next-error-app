@@ -89,54 +89,6 @@ const createZodSchema = (fieldKey: string) => {
     schema = schema.regex(new RegExp(config.pattern), config.messages.pattern);
   }
 
-  // Add custom validation for taxPrd field to ensure date is not in the future
-  // if (fieldKey === 'taxPrd') {
-  //   schema = schema.refine((value) => {
-  //     // Check if value matches YYYYMM format
-  //     const match = value.match(/^(\d{4})(\d{2})$/);
-  //     if (!match) return true; // Let pattern validation handle format errors
-      
-  //     const year = parseInt(match[1], 10);
-  //     const month = parseInt(match[2], 10);
-      
-  //     // Create date object for the entered month (using last day of month to be inclusive)
-  //     const enteredDate = new Date(year, month - 1, 1); // month is 0-indexed
-  //     const currentDate = new Date();
-      
-  //     // Compare year and month only (ignore day)
-  //     const enteredYearMonth = year * 100 + month;
-  //     const currentYearMonth = currentDate.getFullYear() * 100 + (currentDate.getMonth() + 1);
-      
-  //     return enteredYearMonth <= currentYearMonth;
-  //   }, {
-  //     message: "Tax Period cannot be in the future"
-  //   });
-  // }
-
-  // Add custom validation for meFReceiptDate field to ensure date is not in the future
-  // if (fieldKey === 'meFReceiptDate') {
-  //   schema = schema.refine((value) => {
-  //     // Check if value matches YYYY-MM-DD format
-  //     const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  //     if (!match) return true; // Let pattern validation handle format errors
-      
-  //     const year = parseInt(match[1], 10);
-  //     const month = parseInt(match[2], 10);
-  //     const day = parseInt(match[3], 10);
-      
-  //     // Create date object for the entered date
-  //     const enteredDate = new Date(year, month - 1, day); // month is 0-indexed
-  //     const currentDate = new Date();
-      
-  //     // Set current date to end of day for comparison
-  //     currentDate.setHours(23, 59, 59, 999);
-      
-  //     return enteredDate <= currentDate;
-  //   }, {
-  //     message: "Transaction Date cannot be in the future"
-  //   });
-  // }
-
   return schema;
 };
 
@@ -162,6 +114,7 @@ function Form4868ERSPageContent() {
   const userGroup = useUserGroup();
   const isQrReviewer = searchParams.get("qrReviewer") === "true";
   const isReopen = searchParams.get("reopen") === "true";
+  const isDlnSearch = searchParams.get("dlnSearch") === "true";
   const [assignedWork, setAssignedWork] = useState<AssignedWork | null>(null);
   const [jsonWorkRecord, setJsonWorkRecord] = useState<any>(null);
   const [eraDto, setEraDto] = useState<any>(null);
@@ -180,24 +133,6 @@ function Form4868ERSPageContent() {
 
   // Track fields that have been edited
   const [fieldWithErrors, setFieldWithErrors] = useState<string[]>([]);
-
-  // Convert JSON work record to form elements based on editableFields
-  // const convertJsonWorkRecordToFormElements = (jsonRecord: any): FormElement[] => {
-  //   if (!jsonRecord?.workRecord?.editableFields) return [];
-
-  //   const editableFields = jsonRecord.workRecord.editableFields;
-  //   const workRecord = jsonRecord.workRecord;
-
-  //   return Object.keys(editableFields).map((fieldKey, index) => ({
-  //     id: fieldKey,
-  //     name: fieldKey,
-  //     label: toLabel(fieldKey),
-  //     value: workRecord[fieldKey] || '',
-  //     type: 'text',
-  //     editable: true,
-  //     hasFieldError: false
-  //   }));
-  // };
 
   // Convert ERA DTO to form elements using displayFields structure
   const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
@@ -441,13 +376,6 @@ function Form4868ERSPageContent() {
           );
           return false;
         }
-
-        // For non-field errors, check if clear code is entered and error is clearable
-        // if (clearCodeEntered && errorConfigItem?.clearable === true) {
-        //   console.log(`Non-field error ${code} is cleared by clear code 'C'`);
-        //   return false; // Hide this error
-        // }
-
 
         return true; // Show this error
       });
@@ -1894,6 +1822,14 @@ function Form4868ERSPageContent() {
             setShowFlash(true);
             setTimeout(() => {
               router.push("/daily-summary");
+            }, 2000);
+          } else if (isDlnSearch) {
+            setFlashMessage(
+              "Form submitted successfully. Returning to DLN search..."
+            );
+            setShowFlash(true);
+            setTimeout(() => {
+              router.push("/dln-search");
             }, 2000);
           } else {
             setFlashMessage(
