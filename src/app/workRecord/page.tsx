@@ -1829,7 +1829,8 @@ function Form4868ERSPageContent() {
             );
             setShowFlash(true);
             setTimeout(() => {
-              router.push("/dln-search");
+              const dln = eraDto?.dln || '';
+              router.push(`/dln-search${dln ? `?dln=${encodeURIComponent(dln)}` : ''}`);
             }, 2000);
           } else {
             setFlashMessage(
