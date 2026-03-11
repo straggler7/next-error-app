@@ -19,7 +19,6 @@ export default function Report0340Page() {
       const reportData = await ReportsService.get0340Report(currentUserSeid, payload);
       setData(reportData);
     } catch (error) {
-      console.error('Error fetching 0340 report:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch 0340 report');
       setData([]);
     } finally {
@@ -44,7 +43,6 @@ export default function Report0340Page() {
       startDateStr: `01/01/${currentYear}`,
       endDateStr: `${month}/${day}/${year}`,
     };
-    console.log('Default payload:', defaultPayload);
     fetchReportData(defaultPayload);
   }, [currentUserSeid, fetchReportData]);
 
@@ -58,8 +56,6 @@ export default function Report0340Page() {
       // Download as CSV
       ReportsService.downloadCSV(exportData, '0340', columns);
     } catch (error) {
-      console.error('Error exporting 0340 report:', error);
-      alert('Failed to export report. Please try again.');
     }
   };
 

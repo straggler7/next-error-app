@@ -17,7 +17,6 @@ const BACKEND_URLS = {
 };
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
-  console.log('GET request received');
   const resolvedParams = await params;
   return handleRequest(request, resolvedParams, 'GET');
 }
@@ -43,8 +42,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 function getBackendUrl(path: string[], originalUrl: string): string {
-    console.log('Path segments ------------- :', path);
-    console.log('Original URL ------------- :', originalUrl);
   
   // Check the original URL to determine routing
   // Since we're in /api/[...pages], we need to check what came before
@@ -88,7 +85,6 @@ async function handleRequest(
     const searchParams = request.nextUrl.searchParams.toString();
     const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
-    console.log(`Proxying ${method} request to: ${fullUrl}`);
 
     // Prepare headers - forward important ones and exclude problematic ones
     const forwardHeaders = new Headers();
@@ -116,7 +112,6 @@ async function handleRequest(
         const requestBody = await request.text();
         body = requestBody || undefined;
       } catch (error) {
-        console.warn('Could not read request body:', error);
       }
     }
 
@@ -129,7 +124,6 @@ async function handleRequest(
       signal: AbortSignal.timeout(300000) // 5 minutes timeout
     });
 
-    console.log(`Backend responded with status: ${response.status}`);
 
     // Handle 204 No Content - return empty response with status
     if (response.status === 204) {
@@ -175,7 +169,6 @@ async function handleRequest(
     }
 
   } catch (error) {
-    console.error('Proxy error:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(

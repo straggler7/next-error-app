@@ -23,27 +23,18 @@ export default function DevBanner() {
   const availableRoles = ['managers', 'tax_examiners'];
 
   const handleRoleChange = (newRole: string) => {
-    console.log('🔄 DevBanner: Role change requested to:', newRole);
-    // This would require a page reload to change the environment variable effect
-    // For now, we'll just show a message
-    alert(`To change role to ${newRole}, set NEXT_PUBLIC_DEV_ROLE=${newRole} in your .env.local file and restart the dev server.`);
+    // Note: Role change requires environment variable update and restart
     setIsRoleDropdownOpen(false);
   };
 
   const handleUserSelect = async (selectedSeid: string) => {
-    console.log('🔄 DevBanner: User selected:', selectedSeid);
-    
     // Store selected SEID in localStorage to persist across page reloads
     localStorage.setItem('dev-selected-seid', selectedSeid);
-    console.log('🔄 DevBanner: Stored SEID in localStorage');
     
     // Refresh auth context without page reload
     if (refreshAuth) {
-      console.log('🔄 DevBanner: Calling refreshAuth');
       await refreshAuth();
-      console.log('🔄 DevBanner: refreshAuth completed');
     } else {
-      console.log('🔄 DevBanner: refreshAuth not available, reloading page');
       // Fallback to page reload if refreshAuth is not available
       window.location.reload();
     }

@@ -1,20 +1,6 @@
 import { User } from '../types';
 
-/**
- * Extract SEID from various possible header formats
- */
-// export function extractSeidFromHeaders(headers: Headers): string | null {
-//   console.log('Extracting SEID from headers: ', headers);
-//   return headers.get('seid') || 
-//          headers.get('uid') || 
-//          headers.get('x-seid') || 
-//          headers.get('X-SEID') || 
-//          headers.get('x-user-seid') ||
-//          null;
-// }
-
 export function extractSeidFromHeaders(headers: Headers): string | null {
-  console.log('Extracting SEID from headers: ', headers);
   return headers.get('employeeId') || 
          headers.get('REMOTE_USER') || 
          null;
@@ -80,11 +66,9 @@ function createDevUser(seid: string): User | null {
   const devRole = process.env.NEXT_PUBLIC_DEV_ROLE;
   
   if (!devRole || (devRole !== 'managers' && devRole !== 'tax_examiners')) {
-    console.log('🔧 DEV_ROLE not set or invalid:', devRole);
     return null;
   }
   
-  console.log('🔧 Creating dev user with role:', devRole, 'for SEID:', seid);
   
   const user: User = {
     name: `Dev User (${seid})`,
@@ -130,7 +114,6 @@ function createDevUser(seid: string): User | null {
  */
 export async function getUserFromSeid(seid: string): Promise<User | null> {
   try {
-    console.log('Fetching user profile for SEID:', seid);
     
     const response = await fetch('/api/v1/era/users/profile', {
       method: 'GET',
@@ -141,12 +124,10 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     });
 
     if (!response.ok) {
-      console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
       
       // Check if DEV_ROLE is set and return dev user
       const devUser = createDevUser(seid);
       if (devUser) {
-        console.log('🔧 Using dev user due to API failure:', devUser);
         return devUser;
       }
       
@@ -164,16 +145,13 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       profile: userProfile // Include the entire user profile
     };
 
-    console.log('Successfully fetched user profile:', user);
     return user;
     
   } catch (error) {
-    console.error('Error fetching user from SEID:', error);
     
     // Check if DEV_ROLE is set and return dev user
     const devUser = createDevUser(seid);
     if (devUser) {
-      console.log('🔧 Using dev user due to API error:', devUser);
       return devUser;
     }
     
@@ -201,38 +179,9 @@ function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers
 }
 
 /**
- * Fallback function for development/testing when API is not available
- */
-// function getFallbackUser(seid: string): User | null {
-//   const mockUsers: Record<string, User> = {
-//     'u1000': {
-//       name: 'Test User u1000',
-//       role: 'Tax Examiner',
-//       group: 'tax_examiners',
-//       seid: 'u1000'
-//     },
-//     'f3wpb': {
-//       name: 'Test User f3wpb',
-//       role: 'Manager',
-//       group: 'managers',
-//       seid: 'f3wpb'
-//     }
-//   };
-
-//   console.log('Using fallback user data for SEID:', seid);
-//   return mockUsers[seid] || {
-//     name: 'Unknown User',
-//     role: 'Tax Examiner',
-//     group: 'tax_examiners',
-//     seid: seid
-//   };
-// }
-
-/**
  * Check if user is authenticated based on SEID
  */
 export function isAuthenticated(seid: string | null): boolean {
-  console.log('Authenticating user with SEID ----------- :', seid);
   return seid !== null && validateSeid(seid);
 }
 

@@ -32,7 +32,6 @@ class LandingSearchService {
    */
   async searchRecords(criteria: SearchCriteria): Promise<SearchResult> {
     try {
-      console.log('Searching records with criteria:', criteria);
       
       // In a real implementation, this would make an HTTP request
       // For now, we'll simulate a successful search and store the criteria
@@ -58,7 +57,6 @@ class LandingSearchService {
         }
       };
     } catch (error) {
-      console.error('Error searching records:', error);
       return {
         success: false,
         message: 'Failed to search records. Please try again.'
@@ -71,7 +69,6 @@ class LandingSearchService {
    */
   async selectProgramAndServiceCenter(selection: ProgramSelection): Promise<SelectionResult> {
     try {
-      console.log('Selecting program and service center:', selection);
       
       // In a real implementation, this would make an HTTP request
       // For now, we'll simulate a successful selection and store the data
@@ -104,7 +101,6 @@ class LandingSearchService {
         }
       };
     } catch (error) {
-      console.error('Error selecting program and service center:', error);
       return {
         success: false,
         message: 'Failed to process selection. Please try again.'
@@ -122,7 +118,6 @@ class LandingSearchService {
       const searchData = sessionStorage.getItem('searchData');
       return searchData ? JSON.parse(searchData) : null;
     } catch (error) {
-      console.error('Error retrieving stored search data:', error);
       return null;
     }
   }
@@ -146,7 +141,6 @@ class LandingSearchService {
         serviceCenter
       };
     } catch (error) {
-      console.error('Error retrieving stored selection data:', error);
       return null;
     }
   }

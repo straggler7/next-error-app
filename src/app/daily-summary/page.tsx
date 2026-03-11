@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import Header from '../../components/Header';
 import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import FilterBar from '../../components/FilterBar';
@@ -13,7 +13,7 @@ import Pagination from '../../components/Pagination';
 import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import WorkLogPanel from '../../components/WorkLogPanel';
-import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
+import { FilterState, PaginationState } from '../../types';
 import { InventoryRecord } from '../../types';
 import { useSeid, useIsManager } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
@@ -59,25 +59,20 @@ function DailySummaryContent() {
   const loadDailySummaryRecords = useCallback(async () => {
     // Prevent duplicate calls if already loading
     if (loading) {
-      console.log('Daily Summary: Already loading, skipping duplicate call');
       return;
     }
 
     // Don't make API calls if SEID is not available yet
     if (!currentUserSeid) {
-      console.log('Daily Summary: SEID not available yet, skipping API call');
       return;
     }
 
     // Don't make API calls if user data is still loading (prevents incorrect isManager value)
     if (!user) {
-      console.log('Daily Summary: User data not loaded yet, skipping API call');
       return;
     }
 
     try {
-      console.log('Daily Summary: Starting loadDailySummaryRecords with SEID:', currentUserSeid);
-      console.log('Daily Summary: isManager:', isManager, 'seidFilter:', seidFilter);
       setLoading(true);
       setError(null);
 
@@ -89,7 +84,6 @@ function DailySummaryContent() {
         ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
       };
       
-      console.log('Daily Summary: API payload:', JSON.stringify(payload, null, 2));
 
       // Use the daily summary endpoint
       const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
@@ -108,7 +102,6 @@ function DailySummaryContent() {
       if (!response.ok) {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
-        console.error("Error loading daily summary records:", error);
         setError(error.message);
         throw new Error(error.message);
       }
@@ -151,29 +144,24 @@ function DailySummaryContent() {
     } catch (err) {
       // Clear records on error
       setRecords([]);
-      console.error('Daily Summary: Error loading daily summary records:', err);
     } finally {
       setLoading(false);
     }
-  }, [currentUserSeid, filters.status, pagination.pageSize, pagination.currentPage, isManager, user]);
+  }, [currentUserSeid, pagination.pageSize, pagination.currentPage, isManager, user, loading, seidFilter]);
 
   // Separate function for Submit button that includes current seidFilter
   const handleSubmitWithSeidFilter = useCallback(async () => {
     // Prevent duplicate calls if already loading
     if (loading) {
-      console.log('Daily Summary: Already loading, skipping duplicate call');
       return;
     }
 
     // Don't make API calls if user data is still loading (prevents incorrect isManager value)
     if (!user) {
-      console.log('Daily Summary: User data not loaded yet, skipping API call');
       return;
     }
 
     try {
-      console.log('Daily Summary: Starting handleSubmitWithSeidFilter with SEID:', seidFilter);
-      console.log('Daily Summary: isManager:', isManager, 'seidFilter:', seidFilter);
       setLoading(true);
       setError(null);
 
@@ -185,7 +173,6 @@ function DailySummaryContent() {
         ...(seidFilter.trim() && { seid: seidFilter.trim().toLowerCase() })
       };
       
-      console.log('Daily Summary: Submit API payload:', JSON.stringify(payload, null, 2));
 
       // Use the daily summary endpoint
       const response = await fetch('/api/v1/era/inventories/inventory-search/daily-summary', {
@@ -200,7 +187,6 @@ function DailySummaryContent() {
       if (!response.ok) {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
-        console.error("Error loading daily summary records:", error);
         setError(error.message);
         throw new Error(error.message);
       }
@@ -243,15 +229,13 @@ function DailySummaryContent() {
     } catch (err) {
       // Clear records on error
       setRecords([]);
-      console.error('Daily Summary: Error loading daily summary records:', err);
     } finally {
       setLoading(false);
     }
-  }, [currentUserSeid, pagination.currentPage, pagination.pageSize, seidFilter, isManager, loading]);
+  }, [currentUserSeid, pagination.currentPage, pagination.pageSize, seidFilter, isManager, loading, user]);
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
-    console.log('Daily Summary useEffect triggered, hasInitiallyLoaded:', hasInitiallyLoaded.current);
     
     // On first mount, always load
     if (!hasInitiallyLoaded.current) {
@@ -263,7 +247,7 @@ function DailySummaryContent() {
         loadDailySummaryRecords();
       }
     }
-  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize, loadDailySummaryRecords]);
+  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize, loadDailySummaryRecords, loading]);
 
   // Filter the records based on current filters
   const filteredRecords = records;
@@ -300,7 +284,6 @@ function DailySummaryContent() {
 
       if (response.ok) {
         const inventoryItem = await response.json();
-        console.log('Retrieved inventory item for reopen:', inventoryItem);
         
         // Extract workRecord from the inventory item response
         const workRecord = inventoryItem.workRecord;
@@ -331,12 +314,10 @@ function DailySummaryContent() {
           // If parsing fails, use the raw error text or default message
           errorMessage = errorText || errorMessage;
         }
-        console.error('Error reopening record:', errorMessage);
         setError(errorMessage);
         return;
       }
     } catch (error) {
-      console.error('Error reopening record:', error);
       setError('Error retrieving work record for reopen. Please try again.');
     }
   }, [currentUserSeid, router]);

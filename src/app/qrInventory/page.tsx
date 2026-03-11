@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
 import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import FilterBar from '../../components/FilterBar';
@@ -15,7 +15,7 @@ import ActionDropdown from '../../components/ActionDropdown';
 import Pagination from '../../components/Pagination';
 import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
+import { FilterState, PaginationState } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { useSeid } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
@@ -28,14 +28,7 @@ function QRInventoryContent() {
   const currentUserSeid = useSeid();
   const { user, isAuthenticated, isLoading, seid: authSeid } = useAuth();
   
-  console.log('QR Inventory: Auth Debug:', {
-    currentUserSeid,
-    authSeid,
-    seidFromUrl,
-    user,
-    isAuthenticated,
-    isLoading
-  });
+  
 
   const [filters, setFilters] = useState<FilterState>({
     searchAll: '',
@@ -60,12 +53,10 @@ function QRInventoryContent() {
   const loadQRRecords = useCallback(async () => {
     // Prevent duplicate calls if already loading
     if (loading) {
-      console.log('QR Inventory: Already loading, skipping duplicate call');
       return;
     }
 
     try {
-      console.log('QR Inventory: Starting loadQRRecords');
       setLoading(true);
       setError(null);
 
@@ -73,9 +64,7 @@ function QRInventoryContent() {
       let parsedSelectionData: any = {};
       if (typeof window !== 'undefined') {
         const selectionData = sessionStorage.getItem('selectionData');
-        console.log('QR Inventory - Raw selectionData from sessionStorage:', selectionData);
         parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
-        console.log('QR Inventory - Parsed selectionData:', parsedSelectionData);
       }
 
       const qrFilters: QRInventoryFilters = {
@@ -88,7 +77,6 @@ function QRInventoryContent() {
         serviceCenter: parsedSelectionData.serviceCenter
       };
 
-      console.log('QR Inventory: currentUserSeid before call:', currentUserSeid);
       const response = await QRInventoryService.getQRRecords(
         qrFilters,
         pagination.currentPage,
@@ -120,12 +108,10 @@ function QRInventoryContent() {
     } catch (err) {
       // setError('Failed to load QR records');
       setError(err instanceof Error ? err.message : 'Failed to load QR records');
-      console.error('QR Inventory: Error loading QR records:', err);
-      console.error(err instanceof Error ? err.message : 'Failed to load QR records');
     } finally {
       setLoading(false);
     }
-  }, [filters.status, pagination.currentPage, pagination.pageSize, currentUserSeid]);
+  }, [filters.status, pagination.currentPage, pagination.pageSize, currentUserSeid, loading]);
 
   // Check for error messages from QR details page on component mount
   useEffect(() => {
@@ -139,7 +125,6 @@ function QRInventoryContent() {
 
   // Load data on component mount and when filters/pagination change
   useEffect(() => {
-    console.log('QR Inventory useEffect triggered, hasInitiallyLoaded:', hasInitiallyLoaded.current);
     
     // On first mount, always load
     if (!hasInitiallyLoaded.current) {
@@ -151,7 +136,7 @@ function QRInventoryContent() {
         loadQRRecords();
       }
     }
-  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize, loadQRRecords]); // Use specific filter properties instead of entire object
+  }, [filters.searchAll, filters.assignedTo, filters.status, pagination.currentPage, pagination.pageSize, loadQRRecords, loading]); // Use specific filter properties instead of entire object
 
   // Filter the records based on current filters
   const filteredRecords = qrRecords;

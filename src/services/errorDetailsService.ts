@@ -258,7 +258,6 @@ class ErrorDetailsService {
     // For now, we'll simulate the submission
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
     
-    console.log('Submitting XML data:', xmlData);
     
     // Simulate successful submission
     return {

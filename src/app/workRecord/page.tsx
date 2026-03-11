@@ -135,7 +135,7 @@ function Form4868ERSPageContent() {
   const [fieldWithErrors, setFieldWithErrors] = useState<string[]>([]);
 
   // Convert ERA DTO to form elements using displayFields structure
-  const convertEraDtoToFormElements = (eraData: any): FormElement[] => {
+  const convertEraDtoToFormElements = useCallback((eraData: any): FormElement[] => {
     if (!eraData) return [];
 
     // Get the data source (workRecord or root)
@@ -206,7 +206,7 @@ function Form4868ERSPageContent() {
 
     // Return editable fields first, then non-editable fields
     return [...editableFields, ...nonEditableFields];
-  };
+  }, []);
   const [loading, setLoading] = useState(true);
   const [noWorkAvailable, setNoWorkAvailable] = useState(false);
   const [noWorkMessage, setNoWorkMessage] = useState<string>("");
@@ -316,10 +316,7 @@ function Form4868ERSPageContent() {
 
   // Helper function to parse clear codes from comma-separated input (for error filtering)
   const getClearCodesArray = useCallback(() => {
-    console.log(
-      "getting clear codes array from clearCodesInput:",
-      clearCodesInput
-    );
+    
 
     if (!clearCodesInput.trim()) {
       return [];
@@ -331,7 +328,6 @@ function Form4868ERSPageContent() {
       .map((code) => code.trim())
       .filter((code) => code.length > 0);
 
-    console.log("final clear codes array:", result);
     return result;
   }, [clearCodesInput]);
 
@@ -371,21 +367,14 @@ function Form4868ERSPageContent() {
         // Check if error is already cleared in the loaded eraDto.clearCodes
         const eraDtoClearCodes = eraDto?.clearCodes || [];
         if (eraDtoClearCodes.includes(code)) {
-          console.log(
-            `Error ${code} is already cleared in eraDto.clearCodes, hiding from display`
-          );
+          
           return false;
         }
 
         return true; // Show this error
       });
 
-      console.log(
-        "Original errors:",
-        ersReasonCds,
-        "Filtered errors:",
-        filteredErrors
-      );
+      
 
       filteredErrors.forEach((code: string) => {
         // Look up error configuration
@@ -488,36 +477,23 @@ function Form4868ERSPageContent() {
     if (fieldErrors.length > 0) {
       // Show all field errors
       finalErrorItems = fieldErrors;
-      console.log(`Showing ${fieldErrors.length} field errors`);
     } else if (nonFieldErrors.length > 0) {
       // Sort non-field errors by error code (numerically) and show the lowest priority error
-      console.log("Non-field errors before sorting:", nonFieldErrors.map(e => e.code));
       const sortedNonFieldErrors = nonFieldErrors.sort((a, b) => {
         const codeA = parseInt(a.code, 10);
         const codeB = parseInt(b.code, 10);
-        console.log(`Comparing ${a.code} (${codeA}) vs ${b.code} (${codeB})`);
         return codeA - codeB; // Sort ascending (lowest first)
       });
-      console.log("Non-field errors after sorting:", sortedNonFieldErrors.map(e => e.code));
       finalErrorItems = [sortedNonFieldErrors[0]];
-      console.log(
-        `No field errors found, showing lowest priority non-field error: ${sortedNonFieldErrors[0].code}`
-      );
+      
     }
 
     if (finalErrorItems.length === 0) {
-      console.log(
-        "No errors found. ErrorSource:",
-        errorSource,
-        "ersReasonCds:",
-        ersReasonCds,
-        "displayFields:",
-        displayFields
-      );
+      
     }
 
     return finalErrorItems;
-  }, [eraDto, jsonWorkRecord, getClearCodesArray]);
+  }, [eraDto, jsonWorkRecord]);
 
   // Fetch suspense codes on component mount
   useEffect(() => {
@@ -532,7 +508,6 @@ function Form4868ERSPageContent() {
           );
         setSuspenseCodes(codesWithDetails);
       } catch (error) {
-        console.error("Error fetching suspense codes:", error);
         // Fallback to empty array if fetch fails
         setSuspenseCodes([]);
       } finally {
@@ -589,9 +564,7 @@ function Form4868ERSPageContent() {
               }))
             : [];
           setNotes(normalizedNotes);
-          console.log("Notes parsed from new record:", parsedNotes);
         } catch (error) {
-          console.error("Error parsing notes from new record:", error);
           setNotes([]);
         }
       } else {
@@ -603,24 +576,18 @@ function Form4868ERSPageContent() {
       setFormElements(elements);
       setOriginalFormElements([...elements]);
 
-      console.log("ERA DTO loaded from sessionStorage:", eraDtoData);
-      console.log("Form elements created:", elements);
-      console.log("ERA DTO workRecord:", eraDtoData.workRecord);
-      console.log("Clear codes populated:", eraDtoData.clearCodes);
-      console.log("Action code populated:", eraDtoData.suspendStatusCode);
     }
 
     if (storedSelectionData) {
       const selectionData = JSON.parse(storedSelectionData);
       setLandingSelectionData(selectionData);
-      console.log("Selection data loaded:", selectionData);
     }
 
     setLoading(false);
 
     // Reset fieldWithErrors when component initializes
     setFieldWithErrors([]);
-  }, []);
+  }, [landingSelectionData, convertEraDtoToFormElements]);
 
   // Set document title for the page
   useEffect(() => {
@@ -633,7 +600,7 @@ function Form4868ERSPageContent() {
   }, [initialValues]);
 
   // Load next work record from auto-assign endpoint
-  const loadNextWorkRecord = async () => {
+  const loadNextWorkRecord = useCallback(async () => {
     try {
       setLoading(true);
       setActionCode("");
@@ -652,7 +619,6 @@ function Form4868ERSPageContent() {
       }
 
       const selectionData = JSON.parse(storedSelectionData);
-      console.log("Selection data:", selectionData);
 
       // Build headers for auto-assign request
       const headers: Record<string, string> = {
@@ -715,9 +681,7 @@ function Form4868ERSPageContent() {
                 }))
               : [];
             setNotes(normalizedNotes);
-            console.log("Notes parsed from new record:", parsedNotes);
           } catch (error) {
-            console.error("Error parsing notes from new record:", error);
             setNotes([]);
           }
         } else {
@@ -733,7 +697,6 @@ function Form4868ERSPageContent() {
         sessionStorage.setItem("eraDto", JSON.stringify(eraDtoData));
 
         setNoWorkAvailable(false);
-        console.log("New work record loaded:", eraDtoData);
 
         // Show info alert for new work record
         const dln = eraDtoData?.dln || eraDtoData?.workRecord?.dln || "N/A";
@@ -749,19 +712,17 @@ function Form4868ERSPageContent() {
         );
       }
     } catch (error) {
-      console.error("Error loading next work record:", error);
       setNoWorkAvailable(true);
       setNoWorkMessage("Error loading work record. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUserSeid, convertEraDtoToFormElements]);
 
   const getDLN = () =>
     eraDto?.workRecord?.dln || jsonWorkRecord?.workRecord?.dln || "N/A";
 
   const handleInputChange = (fieldKey: string, val: string) => {
-    console.log(`handleInputChange called: ${fieldKey} = "${val}"`);
 
     // Convert primaryNameCtrl to uppercase automatically
     if (fieldKey === 'primaryNameCtrl') {
@@ -789,7 +750,6 @@ function Form4868ERSPageContent() {
     setFieldWithErrors((prev) => {
       if (!prev.includes(fieldKey)) {
         const updated = [...prev, fieldKey];
-        console.log("Updated fieldWithErrors:", updated);
         return updated;
       }
       return prev;
@@ -797,10 +757,7 @@ function Form4868ERSPageContent() {
 
     // Validate the field value
     const validationError = validateField(fieldKey, val);
-    console.log(
-      `Validation result for ${fieldKey}:`,
-      validationError || "Valid"
-    );
+    
 
     // Update validation errors state
     setValidationErrors((prev) => {
@@ -810,7 +767,6 @@ function Form4868ERSPageContent() {
       } else {
         delete newErrors[fieldKey];
       }
-      console.log("Updated validation errors:", newErrors);
       return newErrors;
     });
 
@@ -822,15 +778,10 @@ function Form4868ERSPageContent() {
           fieldKey,
           val
         );
-        console.log(
-          `Updated formElements for ${fieldKey}:`,
-          updated.find((el) => el.name === fieldKey)
-        );
         return updated;
       });
     } else {
       // Update local values if using ersDto fallback
-      console.log(`Updating local values for ${fieldKey}`);
       setValues((prev) => ({ ...prev, [fieldKey]: val }));
     }
   };
@@ -870,7 +821,7 @@ function Form4868ERSPageContent() {
   };
 
   // Helper function to get form element value by name
-  const getFormElementValue = (name: string): string => {
+  const getFormElementValue = useCallback((name: string): string => {
     if (formElements.length > 0) {
       const element = workAssignmentService.getFormElementByName(
         formElements,
@@ -879,7 +830,7 @@ function Form4868ERSPageContent() {
       return element?.value || "";
     }
     return values[name] || "";
-  };
+  }, [formElements, values]);
 
   // Helper function to get form element label by name
   const getFormElementLabel = (name: string): string => {
@@ -905,7 +856,7 @@ function Form4868ERSPageContent() {
   };
 
   // Helper function to get original value
-  const getOriginalValue = (name: string): string => {
+  const getOriginalValue = useCallback((name: string): string => {
     if (originalFormElements.length > 0) {
       const element = workAssignmentService.getFormElementByName(
         originalFormElements,
@@ -914,7 +865,7 @@ function Form4868ERSPageContent() {
       return element?.value || "";
     }
     return originalValues[name] || "";
-  };
+  }, [originalFormElements, originalValues]);
 
   // Helper function to check if field has error (includes validation errors)
   const getFieldHasError = (name: string): boolean => {
@@ -987,7 +938,7 @@ function Form4868ERSPageContent() {
   };
 
   // Helper function to validate only fields that have been changed by the user
-  const validateChangedFields = (): Record<string, string> => {
+  const validateChangedFields = useCallback((): Record<string, string> => {
     const changedFieldErrors: Record<string, string> = {};
     editableFieldKeys.forEach((fieldKey) => {
       // Only validate if field was changed by user
@@ -1000,10 +951,10 @@ function Form4868ERSPageContent() {
       }
     });
     return changedFieldErrors;
-  };
+  }, [editableFieldKeys, fieldWithErrors, getFormElementValue]);
 
   // Helper function to check if there are any field errors (validation or original)
-  const hasAnyFieldErrors = (): boolean => {
+  const hasAnyFieldErrors = useCallback((): boolean => {
     // Check for validation errors
     if (Object.keys(validationErrors).length > 0) {
       return true;
@@ -1025,7 +976,7 @@ function Form4868ERSPageContent() {
       }
       return false;
     });
-  };
+  }, [validationErrors, editableFieldKeys, nonEditableFieldKeys, formElements, getFormElementValue, getOriginalValue]);
 
   const mockNotes: Note[] = [];
 
@@ -1065,7 +1016,6 @@ function Form4868ERSPageContent() {
     const currentErrorCode = currentNonFieldError?.code || null;
     
     if (prevErrorCodeRef.current !== currentErrorCode) {
-      console.log("currentNonFieldError code changed, clearing input:", prevErrorCodeRef.current, "→", currentErrorCode);
       setClearCodesInput("");
       prevErrorCodeRef.current = currentErrorCode;
     }
@@ -1094,20 +1044,14 @@ function Form4868ERSPageContent() {
 
   // Helper function to generate clear codes array for payload
   const getPayloadClearCodes = useCallback(() => {
-    console.log(
-      "generating payload clear codes from clearCodesInput:",
-      clearCodesInput
-    );
+    
 
     // Start with existing clear codes from eraDto
     const existingClearCodes = eraDto?.clearCodes || [];
 
     if (!clearCodesInput.trim()) {
       // If no new clear codes input, return existing clear codes
-      console.log(
-        "No new clear codes input, returning existing:",
-        existingClearCodes
-      );
+      
       return existingClearCodes;
     }
 
@@ -1115,14 +1059,12 @@ function Form4868ERSPageContent() {
     const trimmed = clearCodesInput.trim().toLowerCase();
     if (trimmed === "c" && currentNonFieldError) {
       const clearCode = currentNonFieldError.code;
-      console.log(`Converting 'C' input to clear code: ${clearCode}`);
 
       // Add new clear code to existing ones if not already present
       const updatedClearCodes = existingClearCodes.includes(clearCode)
         ? existingClearCodes
         : [...existingClearCodes, clearCode];
 
-      console.log("Updated clear codes with new code:", updatedClearCodes);
       return updatedClearCodes;
     }
 
@@ -1137,7 +1079,6 @@ function Form4868ERSPageContent() {
       ...new Set([...existingClearCodes, ...newClearCodes]),
     ];
 
-    console.log("final payload clear codes array:", combinedClearCodes);
     return combinedClearCodes;
   }, [clearCodesInput, currentNonFieldError, eraDto?.clearCodes]);
 
@@ -1183,7 +1124,7 @@ function Form4868ERSPageContent() {
   };
 
   // Helper function to generate notes with field changes
-  const generateNotesWithChanges = (action?: string) => {
+  const generateNotesWithChanges = useCallback((action?: string) => {
     const fieldChanges: any[] = [];
     const storedSelectionData = sessionStorage.getItem("selectionData");
     const selectionData = JSON.parse(storedSelectionData || "{}");
@@ -1264,7 +1205,7 @@ function Form4868ERSPageContent() {
     // Return existing notes as string if no changes (notes are already normalized)
     // return notes.length > 0 ? JSON.stringify(notes) : JSON.stringify([]);
     return notes.length > 0 ? notes : [];
-  };
+  }, [currentUserSeid, formElements, originalFormElements, eraDto, getPayloadClearCodes, actionCode, errorItems, additionalNotes, notes]);
 
   const handleSuspend = async () => {
     if (!inventoryId || !actionCode.trim()) {
@@ -1366,7 +1307,6 @@ function Form4868ERSPageContent() {
                 "Record suspended successfully and new record retrieved"
               );
             } catch (fetchError) {
-              console.error("Error fetching next work record:", fetchError);
               setFlashMessage(
                 "Record suspended successfully but failed to fetch new record"
               );
@@ -1416,10 +1356,7 @@ function Form4868ERSPageContent() {
                     }))
                   : [];
                 setNotes(normalizedNotes);
-                console.log(
-                  "Notes updated from API response:",
-                  normalizedNotes
-                );
+                
               } catch (error) {
                 console.error(
                   "Error parsing notes from updated record:",
@@ -1452,13 +1389,11 @@ function Form4868ERSPageContent() {
       } else {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
-        console.error("Error suspending record:", error);
         setFlashMessage(error.message);
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 3000);
       }
     } catch (error) {
-      console.error("Error suspending record:", error);
       // setFlashMessage("Error suspending record. Please try again.");
       // setShowFlash(true);
       // setTimeout(() => setShowFlash(false), 3000);
@@ -1468,8 +1403,6 @@ function Form4868ERSPageContent() {
   };
 
   const handleCloseout = useCallback(async () => {
-    console.log("handleCloseout called");
-    console.log("inventoryId:", inventoryId);
 
     if (!inventoryId) {
       setFlashMessage("No inventory ID available. Please return to home page.");
@@ -1493,7 +1426,6 @@ function Form4868ERSPageContent() {
     setHighlightedFields([]);
 
     setClosingOut(true);
-    console.log("Setting closingOut to true");
     try {
       // Create updated ERA DTO with form changes
       const updatedEraDto = JSON.parse(JSON.stringify(eraDto)); // Deep clone
@@ -1511,11 +1443,7 @@ function Form4868ERSPageContent() {
       const storedSelectionData = sessionStorage.getItem("selectionData");
       const selectionData = JSON.parse(storedSelectionData || "{}");
 
-      console.log(
-        "Making PATCH request to:",
-        `/api/v1/era/inventories/${inventoryId}/event`
-      );
-      console.log("Request body:", { eventStatus: "CLOSEOUT" });
+      
 
       const response = await fetch(
         `/api/v1/era/inventories/${inventoryId}/event`,
@@ -1529,8 +1457,6 @@ function Form4868ERSPageContent() {
         }
       );
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
 
       if (response.status === 200) {
         const result = await response.json();
@@ -1568,21 +1494,19 @@ function Form4868ERSPageContent() {
       } else {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
-        console.error("Error closing out record:", error);
         setFlashMessage(error.message);
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 3000);
         // throw new Error(`Closeout failed: ${errorText}`);
       }
     } catch (error) {
-      console.error("Error closing out record:", error);
       setFlashMessage("Error closing out record. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
       setClosingOut(false);
     }
-  }, [inventoryId, formElements, eraDto, landingSelectionData, currentUserSeid, router]);
+  }, [inventoryId, formElements, eraDto, currentUserSeid, router, isQrReviewer, isReopen]);
 
   // Update the ref whenever handleCloseout changes
   useEffect(() => {
@@ -1688,7 +1612,6 @@ function Form4868ERSPageContent() {
                 "Record deleted successfully and new record retrieved"
               );
             } catch (fetchError) {
-              console.error("Error fetching next work record:", fetchError);
               setFlashMessage(
                 "Record deleted successfully but failed to fetch new record"
               );
@@ -1703,14 +1626,12 @@ function Form4868ERSPageContent() {
       } else {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
-        console.error("Error deleting record:", error);
         setFlashMessage(error.message);
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 3000);
         // throw new Error(`Delete failed: ${errorText}`);
       }
     } catch (error) {
-      console.error("Error deleting record:", error);
       setFlashMessage("Error deleting record. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
@@ -1719,7 +1640,7 @@ function Form4868ERSPageContent() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!inventoryId) {
       setFlashMessage("No inventory ID available. Please return to home page.");
       setShowFlash(true);
@@ -1728,11 +1649,12 @@ function Form4868ERSPageContent() {
     }
 
     // Validate only fields that have been changed by the user
-    const validationErrors = validateChangedFields();
+    // const validationErrors = validateChangedFields();
+    const currentValidationErrors = validateChangedFields();
 
     // If there are validation errors, prevent submission and show errors
-    if (Object.keys(validationErrors).length > 0) {
-      setValidationErrors(validationErrors);
+    if (Object.keys(currentValidationErrors).length > 0) {
+      setValidationErrors(currentValidationErrors);
       setFlashMessage("Please fix validation errors before submitting.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -1754,27 +1676,12 @@ function Form4868ERSPageContent() {
 
       // Update form element values in the workRecord section
       formElements.forEach((element) => {
-        console.log(`Updating field ${element.name}: "${element.value}"`);
         updatedEraDto.workRecord[element.name] = element.value;
       });
 
-      console.log("Original ERA DTO:", eraDto);
-      console.log("Updated ERA DTO being sent:", updatedEraDto);
-      console.log("Form elements being applied:", formElements);
-      console.log("WorkRecord after updates:", updatedEraDto.workRecord);
 
       const storedSelectionData = sessionStorage.getItem("selectionData");
       const selectionData = JSON.parse(storedSelectionData || "{}");
-
-      // POST to revalidate endpoint
-      // const response = await fetch(`/api/v1/era/inventories/${inventoryId}/revalidate`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'SEID': selectionData.seid || 'u1000'
-      //   },
-      //   body: JSON.stringify(updatedEraDto)
-      // });
 
       const response = await fetch(
         `/api/v1/era/inventories/items/${inventoryId}/event`,
@@ -1844,7 +1751,6 @@ function Form4868ERSPageContent() {
                 "Form submitted successfully and new record retrieved"
               );
             } catch (fetchError) {
-              console.error("Error fetching next work record:", fetchError);
               setFlashMessage(
                 "Form submitted successfully but failed to fetch new record"
               );
@@ -1854,7 +1760,6 @@ function Form4868ERSPageContent() {
           }
         } else {
           // Assignment not complete - update current record with workRecord from inventoryItem
-          // const updatedRecord = result.inventoryItem?.workRecord;
           const updatedRecord = result.inventoryItem;
 
           if (updatedRecord) {
@@ -1895,10 +1800,7 @@ function Form4868ERSPageContent() {
                     }))
                   : [];
                 setNotes(normalizedNotes);
-                console.log(
-                  "Notes updated from API response:",
-                  normalizedNotes
-                );
+                
               } catch (error) {
                 console.error(
                   "Error parsing notes from updated record:",
@@ -1959,7 +1861,6 @@ function Form4868ERSPageContent() {
               "Form submitted successfully and new record retrieved"
             );
           } catch (fetchError) {
-            console.error("Error fetching next work record:", fetchError);
             setFlashMessage(
               "Form submitted successfully but failed to fetch new record"
             );
@@ -1970,20 +1871,18 @@ function Form4868ERSPageContent() {
       } else {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
-        console.error("Error submitting form:", error);
         setFlashMessage(error.message);
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 3000);
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       setFlashMessage("Error submitting form. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [inventoryId, eraDto, formElements, currentUserSeid, getPayloadClearCodes, generateNotesWithChanges, fieldWithErrors, isQrReviewer, isReopen, isDlnSearch, router, loadNextWorkRecord, convertEraDtoToFormElements, validateChangedFields]);
 
   // Add keyboard event handler for Page Up key to trigger handleSubmit
   useEffect(() => {
@@ -1991,27 +1890,21 @@ function Form4868ERSPageContent() {
       // Check if Page Up key is pressed (key code 33 or key name 'PageUp')
       if (event.key === "PageUp" || event.keyCode === 33) {
         event.preventDefault();
-        console.log(
-          "Page Up key pressed - checking if handleSubmit can be called"
-        );
+        
 
         // Only call handleSubmit if inventoryId is available and there are no field errors
         if (!inventoryId) {
-          console.log("inventoryId not available - ignoring Page Up key");
           return;
         }
 
         if (hasAnyFieldErrors()) {
-          console.log("Field errors present - ignoring Page Up key");
           setFlashMessage("Field errors need to be fixed for submission");
           setShowFlash(true);
           setTimeout(() => setShowFlash(false), 3000);
           return;
         }
 
-        console.log(
-          "inventoryId available and no field errors - triggering handleSubmit"
-        );
+        
         handleSubmit();
       }
     };
@@ -2029,6 +1922,8 @@ function Form4868ERSPageContent() {
     formElements,
     editableFieldKeys,
     nonEditableFieldKeys,
+    handleSubmit,
+    hasAnyFieldErrors
   ]); // Include all dependencies for hasAnyFieldErrors()
 
   // Auto-closeout timeout functionality
@@ -2051,19 +1946,15 @@ function Form4868ERSPageContent() {
         setTimeoutWarning(true);
         setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
         setShowInfo(true);
-        console.log("Timeout warning shown - 2 minutes remaining");
       }, TIMEOUT_DURATION - WARNING_DURATION);
 
       // Set main timeout (10 minutes)
       timeoutRef.current = setTimeout(() => {
-        console.log("Auto-closeout triggered after timeout duration:", TIMEOUT_DURATION);
-        console.log("handleCloseout function:", typeof handleCloseoutRef.current);
         setInfoMessage("Session timed out due to inactivity. Closing out record...");
         setShowInfo(true);
         
         // Trigger closeout after a brief delay to show the message
         setTimeout(() => {
-          console.log("About to call handleCloseout...");
           if (handleCloseoutRef.current) {
             handleCloseoutRef.current();
           }
@@ -2115,20 +2006,12 @@ function Form4868ERSPageContent() {
   // Unified closeout function used by all event handlers
   const performCloseout = useCallback((source: string) => {
     if (closeoutSentRef.current || !inventoryId || !currentUserSeid) {
-      console.log(`⚠️ Skipping closeout from ${source}:`, { 
-        alreadySent: closeoutSentRef.current, 
-        hasInventoryId: !!inventoryId, 
-        hasSeid: !!currentUserSeid 
-      });
+      
       return;
     }
     
     closeoutSentRef.current = true;
-    console.log(`✅ TRIGGERING CLOSEOUT from ${source}`, {
-      inventoryId,
-      currentUserSeid,
-      url: `/api/v1/era/inventories/${inventoryId}/event`
-    });
+    
 
     const payload = JSON.stringify({ eventStatus: "CLOSEOUT" });
     const url = `/api/v1/era/inventories/${inventoryId}/event`;
@@ -2146,46 +2029,36 @@ function Form4868ERSPageContent() {
         keepalive: true,
       })
         .then(response => {
-          console.log(`📡 Closeout response from ${source}:`, response.status, response.statusText);
           if (response.status === 200) {
-            console.log(`✅ Closeout successful from ${source}`);
             // Don't navigate here - the browser event (beforeunload/pagehide/unmount) is already handling navigation
           }
           return response.text();
         })
         .then(data => {
-          console.log(`📡 Closeout response body from ${source}:`, data);
         })
         .catch(error => {
-          console.error(`❌ Closeout fetch failed from ${source}:`, error);
         });
     } catch (error) {
-      console.error(`❌ Closeout error from ${source}:`, error);
     }
-  }, [inventoryId, currentUserSeid, router]);
+  }, [inventoryId, currentUserSeid]);
 
   // Browser event handlers for closeout (browser close, refresh, tab close)
   useEffect(() => {
-    console.log("🔵 Installing browser event handlers");
 
     // Handle browser close, tab close, refresh
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      console.log("🔴 beforeunload event triggered");
       performCloseout("beforeunload");
     };
 
     // Handle tab switching, browser minimization, window focus loss
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        console.log("🔴 Page became hidden (tab switch/minimize) - starting timeout timer");
         // Start a timer to closeout after TIMEOUT_DURATION
         visibilityTimeoutRef.current = setTimeout(() => {
-          console.log("🔴 Visibility timeout reached - triggering closeout");
           performCloseout("visibilitychange");
         }, TIMEOUT_DURATION);
       } else {
         // Page became visible again - cancel the timeout
-        console.log("🟢 Page became visible again - cancelling timeout timer");
         if (visibilityTimeoutRef.current) {
           clearTimeout(visibilityTimeoutRef.current);
           visibilityTimeoutRef.current = null;
@@ -2195,7 +2068,6 @@ function Form4868ERSPageContent() {
 
     // Handle navigation away from page (fallback)
     const handlePageHide = (event: PageTransitionEvent) => {
-      console.log("🔴 pagehide event triggered");
       performCloseout("pagehide");
     };
 
@@ -2206,7 +2078,6 @@ function Form4868ERSPageContent() {
 
     // Cleanup function
     return () => {
-      console.log("🔵 Removing browser event handlers");
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
@@ -2216,11 +2087,9 @@ function Form4868ERSPageContent() {
   // Component unmount handler for back button navigation
   // This is needed because Next.js App Router unmounts the component before popstate fires
   useEffect(() => {
-    console.log("🔵 Navigation closeout handler installed");
 
     // Cleanup function runs when component unmounts (including back button navigation)
     return () => {
-      console.log("🔴 Component unmounting - triggering closeout");
       performCloseout("unmount");
     };
   }, [performCloseout]);
@@ -2249,7 +2118,6 @@ function Form4868ERSPageContent() {
     }, TIMEOUT_DURATION - WARNING_DURATION);
 
     timeoutRef.current = setTimeout(() => {
-      console.log("Auto-closeout triggered after timeout warning dismissal");
       setInfoMessage("Session timed out due to inactivity. Closing out record...");
       setShowInfo(true);
       setTimeout(() => {
@@ -2638,8 +2506,6 @@ function Form4868ERSPageContent() {
                             }
                           }
 
-                          console.log("note.comments", note.comments);
-                          console.log("parsedComments", parsedComments);
 
                           // Handle case where parsedComments is a plain string
                           if (typeof parsedComments === "string") {
@@ -2714,7 +2580,6 @@ function Form4868ERSPageContent() {
                             </div>
                           );
                         } catch (error) {
-                          console.error("Error parsing comments:", error);
                           return (
                             <div className="text-xs text-red-500">
                               Error displaying comments
@@ -2778,7 +2643,6 @@ function Form4868ERSPageContent() {
                   : "bg-[#0f507e] text-white hover:bg-[#0f507e] hover:-translate-y-0.5"
               }`}
               onClick={() => {
-                console.log("Close Out button clicked");
                 clearFieldHighlight();
                 handleCloseout();
               }}

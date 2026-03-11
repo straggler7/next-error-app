@@ -9,43 +9,24 @@ const PROTECTED_ROUTES = ['/home', '/workRecord', '/qrInventory', '/qrDetails', 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Log the specific headers you mentioned
-  console.log('🔍 Middleware Headers Debug:', JSON.stringify({
-    pathname,
-    displayName: request.headers.get('displayName'),
-    mail: request.headers.get('mail'),
-    memberof: request.headers.get('memberof'),
-    employeeId: request.headers.get('employeeId'),
-    REMOTE_USER: request.headers.get('REMOTE_USER')
-  }));
-  
   // Development bypass - check environment variables at runtime
   const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;
   const bypassAuth = process.env.BYPASS_AUTH === 'true';
-  console.log('Bypass auth middleware: ', bypassAuth);
-  console.log('isDevelopment: ', isDevelopment);
-  
-  // TEMPORARY: Force bypass for development (remove this line when env vars work)
-  // const forceBypass = true; // Set to false to disable
-  
-  console.log('🔍 Middleware Debug:', JSON.stringify({
-    pathname,
-    NODE_ENV: process.env.NODE_ENV,
-    BYPASS_AUTH: process.env.BYPASS_AUTH,
-    isDevelopment,
-    bypassAuth,
-    shouldBypass: isDevelopment && bypassAuth
-  }));
-  
-  // Development bypass - skip authentication entirely
-  // if ((isDevelopment && bypassAuth) || forceBypass) {
+
+  // Performance Mode or Development bypass
   if (isDevelopment && bypassAuth) {
-    console.log('Middleware - Development mode: Authentication bypassed for ', pathname);
+    // If it's a public route or build asset, just proceed
+    if (PUBLIC_ROUTES.some(route => pathname.startsWith(route)) || pathname.startsWith('/_next')) {
+      return NextResponse.next();
+    }
+
     const response = NextResponse.next();
-    // Set a mock SEID for development
-    // response.headers.set('x-user-seid', 'u1000');
-    // response.headers.set('seid', 'u1000');
-    console.log('SEID in middleware: ', response.headers.get('seid'));
+    
+    // Use default mock SEID for bypass mode
+    const activeSeid = 'u1000';
+    
+    response.headers.set('x-user-seid', activeSeid);
+    response.headers.set('seid', activeSeid);
     return response;
   }
   
@@ -57,13 +38,11 @@ export function middleware(request: NextRequest) {
   // Check for SEID header from SSO server
   // const seid = request.headers.get('seid') || request.headers.get('x-seid') || request.headers.get('X-SEID');
   const seid = request.headers.get('REMOTE_USER') || request.headers.get('employeeId');
-  console.log('SEID in middleware, from headers: ', seid);
   
   // If accessing protected routes
   if (PROTECTED_ROUTES.some(route => pathname.startsWith(route)) || pathname === '/') {
     if (!seid) {
       // No SEID header found - redirect to unauthorized page
-      console.log('Middleware - No SEID header found - redirecting to unauthorized page');
       const url = request.nextUrl.clone();
       url.pathname = '/unauthorized';
       return NextResponse.redirect(url);
@@ -80,7 +59,6 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.next();
     response.headers.set('x-user-seid', seid);
     response.headers.set('seid', seid);
-    console.log('SEID in middleware, from headers: ', seid);
     return response;
   }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, User, AlertCircle } from "lucide-react";
+import { User } from "lucide-react";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
 import InfoAlert from "../../components/InfoAlert";
@@ -165,19 +165,16 @@ function QRDetailsPageContent() {
 
     // Prevent duplicate calls using ref instead of state
     if (isLoadingRef.current) {
-      console.log('Already loading, skipping duplicate call');
       return;
     }
 
     isLoadingRef.current = true;
 
     try {
-      console.log('Starting loadQRDetails with inventoryId:', inventoryId);
       setLoading(true);
       setError(null);
 
       const data = await QRDetailsService.getQRDetails(inventoryId, dln || undefined, serviceCenter || undefined, currentUserSeid || undefined);
-      console.log('API response data:', data);
       setQRData(data);
       
       // Parse and set notes from QR_HOLD data
@@ -194,16 +191,13 @@ function QRDetailsPageContent() {
               }))
             : [];
           setParsedNotes(normalizedNotes);
-          console.log('Notes parsed from QR_HOLD:', notesData);
         } catch (error) {
-          console.error('Error parsing notes from QR_HOLD:', error);
           setParsedNotes([]);
         }
       } else {
         setParsedNotes([]);
       }
     } catch (err) {
-      console.error('Error fetching QR details:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load QR details';
       
       // Store error message in sessionStorage for QR inventory page to display
@@ -215,7 +209,7 @@ function QRDetailsPageContent() {
       setLoading(false);
       isLoadingRef.current = false;
     }
-  }, [inventoryId, dln, serviceCenter, currentUserSeid]); // Add dependencies for useCallback
+  }, [inventoryId, dln, serviceCenter, currentUserSeid, router]); // Add dependencies for useCallback
 
   // Load inventory record from sessionStorage
   useEffect(() => {
@@ -224,15 +218,12 @@ function QRDetailsPageContent() {
       try {
         const parsedRecord = JSON.parse(storedRecord);
         setInventoryRecord(parsedRecord);
-        console.log('Loaded inventory record from sessionStorage:', parsedRecord);
       } catch (error) {
-        console.error('Error parsing stored inventory record:', error);
       }
     }
   }, []);
 
   useEffect(() => {
-    console.log('QR Details useEffect triggered with params:', { inventoryId, dln, serviceCenter, seid });
     if (inventoryId) {
       loadQRDetails();
     }
@@ -308,7 +299,6 @@ function QRDetailsPageContent() {
         throw new Error(`QR Complete failed: ${errorText}`);
       }
     } catch (error) {
-      console.error('Error completing QR:', error);
       setFlashMessage('Error completing QR review. Please try again.');
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
@@ -338,7 +328,6 @@ function QRDetailsPageContent() {
 
       if (response.ok) {
         const inventoryItem = await response.json();
-        console.log('Retrieved inventory item for rework:', inventoryItem);
         
         // Extract workRecord from the inventory item response
         const workRecord = inventoryItem.workRecord;
@@ -364,7 +353,6 @@ function QRDetailsPageContent() {
         throw new Error(`Failed to retrieve inventory item: ${errorText}`);
       }
     } catch (error) {
-      console.error('Error reworking QR:', error);
       setFlashMessage('Error retrieving work record for rework. Please try again.');
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
@@ -372,8 +360,6 @@ function QRDetailsPageContent() {
   };
 
   const handleCloseout = useCallback(async () => {
-    console.log("handleCloseout called");
-    console.log("inventoryId:", inventoryId);
 
     if (!inventoryId) {
       setFlashMessage("No inventory ID available.");
@@ -384,11 +370,7 @@ function QRDetailsPageContent() {
 
     setClosingOut(true);
     try {
-      console.log(
-        "Making PATCH request to:",
-        `/api/v1/era/inventories/${inventoryId}/event`
-      );
-      console.log("Request body:", { eventStatus: "CLOSEOUT" });
+      
 
       const response = await fetch(
         `/api/v1/era/inventories/${inventoryId}/event`,
@@ -402,12 +384,9 @@ function QRDetailsPageContent() {
         }
       );
 
-      console.log("Response status:", response.status);
-      console.log("Response statusText:", response.statusText);
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Closeout successful:", responseData);
         
         setFlashMessage("Record closed out successfully! Returning to QR inventory...");
         setShowFlash(true);
@@ -417,13 +396,11 @@ function QRDetailsPageContent() {
         }, 2000);
       } else {
         const errorText = await response.text();
-        console.error("Closeout failed:", errorText);
         setFlashMessage(errorText || "Failed to close out record");
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 3000);
       }
     } catch (error) {
-      console.error("Error closing out record:", error);
       setFlashMessage("Error closing out record. Please try again.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
@@ -452,18 +429,15 @@ function QRDetailsPageContent() {
         setTimeoutWarning(true);
         setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
         setShowInfo(true);
-        console.log("Timeout warning shown - 2 minutes remaining");
       }, TIMEOUT_DURATION - WARNING_DURATION);
 
       // Set main timeout (10 minutes)
       timeoutRef.current = setTimeout(() => {
-        console.log("Auto-closeout triggered after timeout duration:", TIMEOUT_DURATION);
         setInfoMessage("Session timed out due to inactivity. Closing out record...");
         setShowInfo(true);
         
         // Trigger closeout after a brief delay to show the message
         setTimeout(() => {
-          console.log("About to call handleCloseout...");
           handleCloseout();
         }, 1000);
       }, TIMEOUT_DURATION);
@@ -510,20 +484,12 @@ function QRDetailsPageContent() {
   // Unified closeout function used by all event handlers
   const performCloseout = useCallback((source: string) => {
     if (closeoutSentRef.current || !inventoryId || !currentUserSeid) {
-      console.log(`⚠️ Skipping closeout from ${source}:`, { 
-        alreadySent: closeoutSentRef.current, 
-        hasInventoryId: !!inventoryId, 
-        hasSeid: !!currentUserSeid 
-      });
+      
       return;
     }
     
     closeoutSentRef.current = true;
-    console.log(`✅ TRIGGERING CLOSEOUT from ${source}`, {
-      inventoryId,
-      currentUserSeid,
-      url: `/api/v1/era/inventories/${inventoryId}/event`
-    });
+    
 
     const payload = JSON.stringify({ eventStatus: "CLOSEOUT" });
     const url = `/api/v1/era/inventories/${inventoryId}/event`;
@@ -541,47 +507,37 @@ function QRDetailsPageContent() {
         keepalive: true,
       })
         .then(response => {
-          console.log(`📡 Closeout response from ${source}:`, response.status, response.statusText);
           if (response.status === 200) {
-            console.log(`✅ Closeout successful from ${source} - navigating back`);
             // Navigate back to QR inventory after successful closeout
             router.push('/qrInventory');
           }
           return response.text();
         })
         .then(data => {
-          console.log(`📡 Closeout response body from ${source}:`, data);
         })
         .catch(error => {
-          console.error(`❌ Closeout fetch failed from ${source}:`, error);
         });
     } catch (error) {
-      console.error(`❌ Closeout error from ${source}:`, error);
     }
   }, [inventoryId, currentUserSeid, router]);
 
   // Browser event handlers for closeout (browser close, refresh, tab close)
   useEffect(() => {
-    console.log("🔵 Installing browser event handlers");
 
     // Handle browser close, tab close, refresh
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      console.log("🔴 beforeunload event triggered");
       performCloseout("beforeunload");
     };
 
     // Handle tab switching, browser minimization, window focus loss
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        console.log("🔴 Page became hidden (tab switch/minimize) - starting timeout timer");
         // Start a timer to closeout after TIMEOUT_DURATION
         visibilityTimeoutRef.current = setTimeout(() => {
-          console.log("🔴 Visibility timeout reached - triggering closeout");
           performCloseout("visibilitychange");
         }, TIMEOUT_DURATION);
       } else {
         // Page became visible again - cancel the timeout
-        console.log("🟢 Page became visible again - cancelling timeout timer");
         if (visibilityTimeoutRef.current) {
           clearTimeout(visibilityTimeoutRef.current);
           visibilityTimeoutRef.current = null;
@@ -591,7 +547,6 @@ function QRDetailsPageContent() {
 
     // Handle navigation away from page (fallback)
     const handlePageHide = (event: PageTransitionEvent) => {
-      console.log("🔴 pagehide event triggered");
       performCloseout("pagehide");
     };
 
@@ -602,7 +557,6 @@ function QRDetailsPageContent() {
 
     // Cleanup function
     return () => {
-      console.log("🔵 Removing browser event handlers");
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
@@ -612,16 +566,13 @@ function QRDetailsPageContent() {
   // Component unmount handler for back button navigation
   // This is needed because Next.js App Router unmounts the component before popstate fires
   useEffect(() => {
-    console.log("🔵 Navigation closeout handler installed");
 
     // Cleanup function runs when component unmounts (including back button navigation)
     return () => {
       // Skip closeout if navigating to work record page
       if (navigatingToWorkRecordRef.current) {
-        console.log("🟢 Component unmounting - skipping closeout (navigating to work record)");
         return;
       }
-      console.log("🔴 Component unmounting - triggering closeout");
       performCloseout("unmount");
     };
   }, [performCloseout]);
@@ -647,7 +598,6 @@ function QRDetailsPageContent() {
     }, TIMEOUT_DURATION - WARNING_DURATION);
 
     timeoutRef.current = setTimeout(() => {
-      console.log("Auto-closeout triggered after timeout warning dismissal");
       setInfoMessage("Session timed out due to inactivity. Closing out record...");
       setShowInfo(true);
       setTimeout(() => {
@@ -898,7 +848,6 @@ function QRDetailsPageContent() {
                             </div>
                           );
                         } catch (error) {
-                          console.error('Error parsing comments:', error);
                           return (
                             <div className="text-xs text-red-500">
                               Error displaying comments

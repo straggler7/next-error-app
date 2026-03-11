@@ -8,8 +8,6 @@ import InfoAlert from "../../components/InfoAlert";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSeid } from "../../hooks/useSeid";
 import { getServiceCenterName, serviceCenters } from "../../utils/serviceCenters";
-import { landingSearchService } from "../../services/landingSearchService";
-import { DLNSearchService } from "../../services/dlnSearchService";
 import { SuspenseCodesService, SuspenseCode } from "../../services/suspenseCodesService";
 
 interface SearchFormData {
@@ -30,7 +28,6 @@ interface ProgramFormData {
 export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, seid } = useAuth();
-  console.log("user in home", user, seid)
   // Helper functions to check user permissions for selected program
   const hasQualityReviewEnabled = () => {
     if (!user?.profile?.profile?.profiles) return false;
@@ -176,7 +173,6 @@ export default function HomePage() {
         const codesWithDetails = await SuspenseCodesService.getSuspenseCodesWithDetails(currentUserSeid);
         setStatusCodes(codesWithDetails);
       } catch (error) {
-        console.error('Error fetching status codes:', error);
         // Fallback to empty array if fetch fails
         setStatusCodes([]);
       } finally {
@@ -199,7 +195,6 @@ export default function HomePage() {
           ...prev, 
           serviceCenter: serviceCenterName.toLowerCase() 
         }));
-        console.log(`Default service center set to: ${serviceCenterName} (code: ${serviceCenterCode})`);
       }
     }
   }, [user?.profile?.serviceCenterId, programForm.serviceCenter]);
@@ -280,7 +275,6 @@ export default function HomePage() {
         router.push(`/dln-search?${queryParams.toString()}`);
       }
     } catch (error) {
-      console.error('Search error:', error);
       // setSearchError("An error occurred during search. Please try again.");
       setSearchError(error instanceof Error ? error.message : "An error occurred during search. Please try again.");
     }
@@ -292,8 +286,6 @@ export default function HomePage() {
     
     if (!isSubmitButtonEnabled) return;
 
-    console.log('programForm.qualityReview:', programForm.qualityReview);
-    console.log('programForm:', programForm);
     
     if (hasQualityReviewEnabled() && programForm.qualityReview) {
       const selectionData = {
@@ -303,12 +295,10 @@ export default function HomePage() {
         seid: programForm.seid.toLowerCase(),
       };
       
-      console.log('Storing selectionData:', selectionData);
       sessionStorage.setItem('selectionData', JSON.stringify(selectionData));
       
       // Verify it was stored
       const stored = sessionStorage.getItem('selectionData');
-      console.log('Stored data verification:', stored);
 
       router.push('/qrInventory');
       return;
@@ -352,7 +342,6 @@ export default function HomePage() {
         const error = JSON.parse(errorText);
         
         if (error.message === "User already has assigned inventory") {
-          console.log('User already has assignment, fetching existing assignment...');
           
           // Make fallback call to get existing assignment
           const assignmentResponse = await fetch('/api/v1/era/inventories/assignment', {
@@ -385,20 +374,16 @@ export default function HomePage() {
           } else {
             const assignmentErrorText = await assignmentResponse.text();
             setProgramStatusError(`Error fetching existing assignment: ${assignmentErrorText}`);
-            console.error('Assignment fetch error:', assignmentErrorText);
           }
         } else {
           setProgramStatusError(`Error: ${error.message}`);
-          console.error('Work record assignment error:', errorText);
         }
       } else {
         const errorText = await response.text();
         const error = JSON.parse(errorText);
         setProgramStatusError(`Error: ${error.message}`);
-        console.error('Work record assignment error:', errorText);
       }
     } catch (error) {
-      console.error('Program selection error:', error);
       setProgramStatusError("An error occurred while getting work assignment. Please try again.");
     }
   };

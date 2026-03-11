@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckSquare, Square, FileText, UserCheck, XCircle, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
 import Breadcrumbs, { createBreadcrumbs } from '../../components/Breadcrumbs';
 import FilterBar from '../../components/FilterBar';
@@ -12,7 +12,7 @@ import ActionDropdown from '../../components/ActionDropdown';
 import Pagination from '../../components/Pagination';
 import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import { User, FilterState, PaginationState, ActionDropdownItem } from '../../types';
+import { PaginationState } from '../../types';
 import { DLNSearchService, DLNSearchRecord, DLNSearchFilters } from '../../services/dlnSearchService';
 import { useSeid } from '../../hooks/useSeid';
 import { getServiceCenterName } from '../../utils/serviceCenters';
@@ -53,7 +53,6 @@ function DLNSearchContent() {
   const loadDLNSearchRecords = useCallback(async () => {
     // Prevent duplicate calls if already loading
     if (loading) {
-      console.log('DLN Search: Already loading, skipping duplicate call');
       return;
     }
 
@@ -65,7 +64,6 @@ function DLNSearchContent() {
     }
 
     try {
-      console.log('DLN Search: Starting loadDLNSearchRecords for DLN:', dlnQuery);
       setLoading(true);
       setError(null);
 
@@ -74,9 +72,7 @@ function DLNSearchContent() {
       
       if (!programCode && typeof window !== 'undefined') {
         const selectionData = sessionStorage.getItem('selectionData');
-        console.log('DLN Search - Raw selectionData from sessionStorage:', selectionData);
         const parsedSelectionData = selectionData ? JSON.parse(selectionData) : {};
-        console.log('DLN Search - Parsed selectionData:', parsedSelectionData);
         programCode = parsedSelectionData.program;
       }
 
@@ -97,12 +93,7 @@ function DLNSearchContent() {
 
       if (response) {
         const records = response.records || response;
-        console.log('DLN Search API Response:', { 
-          totalCount: response.totalCount, 
-          recordsLength: records.length, 
-          currentPage: pagination.currentPage,
-          pageSize: pagination.pageSize 
-        });
+        
         
         setRecords(records);
         setPagination(prev => {
@@ -126,15 +117,13 @@ function DLNSearchContent() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load DLN search records');
-      console.error('DLN Search: Error loading DLN search records:', err);
     } finally {
       setLoading(false);
     }
-  }, [searchFilters.dln, searchFilters.tin, searchFilters.nameControl, currentUserSeid, pagination.currentPage, pagination.pageSize]);
+  }, [searchFilters.dln, searchFilters.tin, searchFilters.nameControl, currentUserSeid, pagination.currentPage, pagination.pageSize, loading, programQuery]);
 
   // Load data on component mount and when pagination changes
   useEffect(() => {
-    console.log('DLN Search useEffect triggered, hasInitiallyLoaded:', hasInitiallyLoaded.current);
     
     // On first mount, always load
     if (!hasInitiallyLoaded.current) {
@@ -142,10 +131,9 @@ function DLNSearchContent() {
       loadDLNSearchRecords();
     } else if (records.length > 0) {
       // On subsequent pagination changes, only load if we have existing records
-      console.log('DLN Search pagination change, reloading...');
       loadDLNSearchRecords();
     }
-  }, [pagination.currentPage, pagination.pageSize]);
+  }, [pagination.currentPage, pagination.pageSize, loadDLNSearchRecords, records.length]);
 
   // Filter the records based on 
   const filteredRecords = useMemo(() => {
@@ -185,11 +173,7 @@ function DLNSearchContent() {
 
       if (response) {
         const records = response.records || response;
-        console.log('DLN Search Submit API Response:', { 
-          totalCount: response.totalCount, 
-          recordsLength: records.length, 
-          pageSize: pagination.pageSize 
-        });
+        
         
         setRecords(records);
         setPagination(prev => {
@@ -218,7 +202,6 @@ function DLNSearchContent() {
         hasInitiallyLoaded.current = true;
       }
     } catch (error) {
-      console.error('Error performing DLN search:', error);
       setError('Error performing search. Please try again.');
       setRecords([]);
     } finally {
@@ -268,7 +251,6 @@ function DLNSearchContent() {
     setLoadingStates(prev => ({ ...prev, [inventoryId]: true }));
 
     try {
-      console.log('Making PATCH request to assign record:', inventoryId);
       
       const response = await fetch(`/api/v1/era/inventories/${inventoryId}/to-items/event`, {
         method: 'PATCH',
@@ -279,11 +261,9 @@ function DLNSearchContent() {
         body: JSON.stringify({ eventStatus: 'ASSIGN_TO_SELF_EVENT' })
       });
 
-      console.log('Assign response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Assign response:', result);
         
         // Store the eraDto in sessionStorage for the workRecord page
         sessionStorage.setItem('eraDto', JSON.stringify(result));
@@ -301,7 +281,6 @@ function DLNSearchContent() {
           errorMessage = errorText || errorMessage;
         }
         
-        console.error('Error assigning record:', errorMessage);
         setError(errorMessage);
         throw new Error(errorMessage);
         // setFlashMessage(errorMessage);
@@ -309,7 +288,6 @@ function DLNSearchContent() {
         // setTimeout(() => setShowFlash(false), 5000);
       }
     } catch (error) {
-      console.error('Error assigning record:', error);
       setFlashMessage('Error assigning record. Please try again.');
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
@@ -334,7 +312,6 @@ function DLNSearchContent() {
     setLoadingStates(prev => ({ ...prev, [inventoryId]: true }));
 
     try {
-      console.log('Making PATCH request to undelete record:', inventoryId);
       
       const response = await fetch(`/api/v1/era/inventories/${inventoryId}/event`, {
         method: 'PATCH',
@@ -345,11 +322,9 @@ function DLNSearchContent() {
         body: JSON.stringify({ eventStatus: 'UNDO_DELETE_EVENT' })
       });
 
-      console.log('Undelete response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Undelete response:', result);
         
         // Update the record status in the local state
         setRecords(prevRecords => 
@@ -374,13 +349,11 @@ function DLNSearchContent() {
           errorMessage = errorText || errorMessage;
         }
         
-        console.error('Error undeleting record:', errorMessage);
         setFlashMessage(errorMessage);
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 5000);
       }
     } catch (error) {
-      console.error('Error undeleting record:', error);
       setFlashMessage('Error undeleting record. Please try again.');
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, AuthContext as AuthContextType, UserProfile } from '../types';
-import { extractSeidFromHeaders, getUserFromSeid, validateSeid } from '../lib/auth';
+import { User, AuthContext as AuthContextType } from '../types';
+import { getUserFromSeid, validateSeid } from '../lib/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -21,14 +21,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         // Check if we're in the browser or during build
         if (typeof window === 'undefined') {
-          console.log('🔍 AuthContext: Server-side or build environment detected, skipping auth initialization');
           setIsLoading(false);
           return;
         }
 
         // Additional check for build environment
         if (process.env.NODE_ENV === 'production' && !window.location) {
-          console.log('🔍 AuthContext: Build environment detected, skipping auth initialization');
           setIsLoading(false);
           return;
         }
@@ -37,7 +35,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Check if this is a page refresh by looking for a session flag
         const isPageRefresh = !sessionStorage.getItem('auth-initialized');
         if (isPageRefresh) {
-          console.log('🧹 AuthContext: Clearing localStorage user on page refresh');
           localStorage.removeItem('dev-selected-user'); // Legacy cleanup
           localStorage.removeItem('dev-selected-seid');
           sessionStorage.setItem('auth-initialized', 'true');
@@ -49,7 +46,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // First, check for dev selected SEID in localStorage (development only)
         const devSelectedSeid = localStorage.getItem('dev-selected-seid');
         if (devSelectedSeid) {
-          console.log('🔍 AuthContext: Found dev selected SEID:', devSelectedSeid);
           userSeid = devSelectedSeid;
         }
 
@@ -64,8 +60,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // If not found, try to get from API endpoint (only in browser environment)
         if (!userSeid && typeof window !== 'undefined') {
           try {
-            console.log('🔍 AuthContext: Fetching SEID from API...');
-            
             // Add timeout to prevent hanging during builds
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
@@ -77,36 +71,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
             
             clearTimeout(timeoutId);
-            console.log('🔍 AuthContext: API response status:', response.status);
             
             if (response.ok) {
               const data = await response.json();
-              console.log('🔍 AuthContext: API response data:', data);
               userSeid = data.seid;
-            } else {
-              const errorData = await response.json();
-              console.log('🔍 AuthContext: API error:', errorData);
             }
           } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-              console.warn('AuthContext: API request timed out');
-            } else {
-              console.warn('Could not fetch SEID from API:', error);
-            }
+            // Silent failure for fallback
           }
         }
 
-        console.log('🔍 AuthContext: Final SEID check:', { userSeid, isValid: userSeid && validateSeid(userSeid) });
-        
         if (userSeid && validateSeid(userSeid)) {
           setSeid(userSeid);
           const userData = await getUserFromSeid(userSeid);
-          console.log('🔍 AuthContext: User data with profile:', userData);
-          
           setUser(userData);
         } else {
           // No valid SEID found - user should be redirected by middleware
-          console.log('🔍 AuthContext: No valid SEID found');
           setSeid(null);
           setUser(null);
         }
@@ -128,18 +108,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const devSelectedSeid = localStorage.getItem('dev-selected-seid');
       if (devSelectedSeid && validateSeid(devSelectedSeid)) {
-        console.log('🔄 AuthContext: Refreshing with dev selected SEID:', devSelectedSeid);
         setSeid(devSelectedSeid);
         const userData = await getUserFromSeid(devSelectedSeid);
-        console.log('🔄 AuthContext: Refreshed user data:', userData);
         setUser(userData);
       } else {
-        console.log('🔄 AuthContext: No valid dev SEID found during refresh');
         setSeid(null);
         setUser(null);
       }
     } catch (error) {
-      console.error('Error during auth refresh:', error);
       setSeid(null);
       setUser(null);
     }

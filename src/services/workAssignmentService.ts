@@ -144,16 +144,13 @@ class WorkAssignmentService {
       }
       
       const data = await response.json();
-      console.log('Fetching assigned work...');
       
       return {
         hasWork: true,
         work: data
       };
     } catch (error) {
-      console.error('Error fetching assigned work:', error);
       // Fallback to mock data if API fails
-      console.log('Falling back to mock data');
       return {
         hasWork: true,
         work: { ...this.mockAssignedWork }
@@ -169,11 +166,8 @@ class WorkAssignmentService {
     const response = await fetch(`/api/era/inventory/workrecords/documents/${payloadId}`);
     const data = await response.text();
     
-    console.log(`Fetching JSON work record for payloadId: ${payloadId}`);
     
     const jsonData = JSON.parse(data);
-    console.log('parsed json data -------------')
-    console.log(jsonData);
     return jsonData;
   }
 
@@ -187,7 +181,6 @@ class WorkAssignmentService {
     const response = await fetch(`/api/era/inventory/workrecords/documents/${payloadId}`);
     const data = await response.text();
     
-    console.log(`Fetching work record for payloadId: ${payloadId}`);
     
     const parsedData = this.parseGMFXml(data);
     return {
@@ -337,8 +330,6 @@ class WorkAssignmentService {
       body: xmlData
     });
     
-    console.log(`Updating work record for processId: ${processId}`);
-    console.log('XML Data:', xmlData);
     
     // Simulate successful submission
     return {
@@ -378,8 +369,6 @@ class WorkAssignmentService {
         body: JSON.stringify(updatedJsonWorkRecord)
       });
       
-      console.log(`Updating JSON work record for processId: ${processId}`);
-      console.log('Updated JSON Work Record:', updatedJsonWorkRecord);
       
       // Simulate successful submission
       return {
@@ -387,7 +376,6 @@ class WorkAssignmentService {
         message: 'JSON work record updated successfully'
       };
     } catch (error) {
-      console.error('Error updating JSON work record:', error);
       return {
         success: false,
         message: 'Failed to update JSON work record'

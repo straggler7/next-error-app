@@ -73,7 +73,6 @@ export default function Report1747Page() {
       const adjustedDate = `${adjustedMonth}/${adjustedDay}/${adjustedYear}`;
       
       const reportData = await ReportsService.get1747Report(currentUserSeid, adjustedDate);
-      console.log('1747 Report API Response:', reportData);
       
       // Validate and provide fallback structure
       const validatedData: Report1747Data = {
@@ -115,7 +114,6 @@ export default function Report1747Page() {
       
       setData(validatedData);
     } catch (error) {
-      console.error('Error fetching 1747 report:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch 1747 report');
       setData(null);
     } finally {
@@ -181,8 +179,6 @@ export default function Report1747Page() {
       // Use ReportsService downloadCSV method
       ReportsService.downloadCSV(exportData as any, '1747');
     } catch (error) {
-      console.error('Error exporting 1747 report:', error);
-      alert('Failed to export report. Please try again.');
     }
   };
 

@@ -11,7 +11,6 @@ export const maxDuration = 300;
 const REPORTS_BACKEND_URL = process.env.REPORTS_API_URL || 'http://localhost:8081';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ pages: string[] }> }) {
-  console.log('API2 GET request received');
   const resolvedParams = await params;
   return handleRequest(request, resolvedParams, 'GET');
 }
@@ -46,8 +45,6 @@ async function handleRequest(
     const path = params.pages;
     const originalUrl = request.nextUrl.pathname;
     
-    console.log('API2 Path segments ------------- :', path);
-    console.log('API2 Original URL ------------- :', originalUrl);
     
     // Reconstruct the full path with api2 prefix
     const apiPath = `api/${path.join('/')}`;
@@ -57,7 +54,6 @@ async function handleRequest(
     const searchParams = request.nextUrl.searchParams.toString();
     const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
-    console.log(`API2 Proxying ${method} request to: ${fullUrl}`);
 
     // Prepare headers - forward important ones and exclude problematic ones
     const forwardHeaders = new Headers();
@@ -85,7 +81,6 @@ async function handleRequest(
         const requestBody = await request.text();
         body = requestBody || undefined;
       } catch (error) {
-        console.warn('Could not read request body:', error);
       }
     }
 
@@ -98,7 +93,6 @@ async function handleRequest(
       signal: AbortSignal.timeout(300000) // (5 minutes)
     });
 
-    console.log(`API2 Backend responded with status: ${response.status}`);
 
     // Handle 204 No Content - return empty response with status
     if (response.status === 204) {
@@ -144,7 +138,6 @@ async function handleRequest(
     }
 
   } catch (error) {
-    console.error('API2 Proxy error:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(

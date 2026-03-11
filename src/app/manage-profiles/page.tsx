@@ -189,7 +189,6 @@ export default function RoleAssignmentPage() {
       // addNotification('info', `Profile loaded for ${profileData.userName}`, 'Profile Loaded');
 
     } catch (error) {
-      console.error('Error fetching user profile:', error);
       addNotification('error', 'Failed to fetch user profile. Please try again.', 'Profile Load Error');
     } finally {
       setIsLoadingProfile(false);
@@ -215,7 +214,6 @@ export default function RoleAssignmentPage() {
           // addNotification('info', `Loaded ${codesWithDetails.length} status codes successfully`, 'Status Codes Loaded');
         }
       } catch (error) {
-        console.error('Error fetching status codes:', error);
         // addNotification('warning', 'Failed to load status codes. Using default configuration.', 'Status Codes Warning');
         // Fallback to empty data if fetch fails
         setStatusCodes([]);
@@ -262,7 +260,6 @@ export default function RoleAssignmentPage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching managers:', error);
       } finally {
         setIsLoadingManagers(false);
       }
@@ -301,9 +298,7 @@ export default function RoleAssignmentPage() {
         seid: examiner.seid,
       }));
       setExaminerOptions(options);
-      console.log('Tax examiners list fetched successfully');
     } catch (error) {
-      console.error('Error fetching tax examiners:', error);
     } finally {
       if (showLoading) {
         setIsLoadingExaminers(false);
@@ -349,12 +344,7 @@ export default function RoleAssignmentPage() {
   }, [user, userGroup, isLoading, router]);
 
   // Debug logging
-  console.log('🔍 Role Assignment Debug:', {
-    user,
-    userGroup,
-    isLoading,
-    isManager: userGroup === 'managers'
-  });
+  
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -506,7 +496,6 @@ export default function RoleAssignmentPage() {
       }
 
       addNotification('success', 'Role assignments have been saved successfully!', 'Save Complete');
-      console.log('Saved assignments:', updatedProfile);
       
       // Refresh the tax examiners list to reflect any changes
       await fetchTaxExaminers(false); // Don't show loading spinner for refresh
@@ -515,7 +504,6 @@ export default function RoleAssignmentPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
     } catch (error) {
-      console.error('Error saving assignments:', error);
       addNotification('error', `Failed to save role assignments. ${error}`, 'Error');
       
       // Scroll to top to show the error notification

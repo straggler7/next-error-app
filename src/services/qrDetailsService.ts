@@ -58,7 +58,6 @@ export class QRDetailsService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching QR details:', error);
       
       // Re-throw 422 errors with their specific message intact
       if (error && typeof error === 'object' && (error as any).status === 422) {
