@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 // import { User } from '../types';
+import mockUsers from '../data/mockUsers.json';
 
-const mockUsers: string[] = [
-  '1pzwb',
-  'f3wpb'
-];
+// const mockUsers: string[] = [
+//   '1pzwb',
+//   'f3wpb'
+// ];
 
 export default function DevBanner() {
   const { isDevelopmentMode, user, refreshAuth } = useAuth();
@@ -117,20 +118,20 @@ export default function DevBanner() {
             </button>
             
             {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-64">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-96">
                 <div className="py-1">
-                  {mockUsers.map((seid) => (
+                  {mockUsers.map((mockUser) => (
                     <button
-                      key={seid}
+                      key={mockUser.seid}
                       onClick={async () => {
-                        await handleUserSelect(seid);
+                        await handleUserSelect(mockUser.seid);
                       }}
                       className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                        user?.seid === seid ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                        user?.seid === mockUser.seid ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                       }`}
                     >
-                      <div className="text-xs text-gray-500">
-                        {seid}
+                      <div className="font-medium">
+                        {mockUser.name} ({mockUser.seid})
                       </div>
                     </button>
                   ))}
