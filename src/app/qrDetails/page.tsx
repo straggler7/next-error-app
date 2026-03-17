@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef, Suspense } from "react";
+import { InfoAlert } from "@era/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { User } from "lucide-react";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
-import InfoAlert from "../../components/InfoAlert";
 import newFieldConfig from "../../data/fieldConfig4868.json";
 import { QRDetailsService, QRDetailsData } from "../../services/qrDetailsService";
 import { QRInventoryRecord } from "../../services/qrInventoryService";

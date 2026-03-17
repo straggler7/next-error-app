@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { DatePicker } from '@era/ui';
 import WorkLogCard from './WorkLogCard';
-import DatePicker from './DatePicker';
 import { ReportsService, ReportPayload, ReportRecord } from '../services/reportsService';
 import { useSeid } from '../hooks/useSeid';
 

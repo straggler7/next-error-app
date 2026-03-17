@@ -4,9 +4,10 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   distDir: 'dist',
   reactStrictMode: false,
-  experimental: {
-    // Extend API route timeout to 2 minutes (120 seconds)
-    serverComponentsExternalPackages: [],
+  transpilePackages: ["@era/ui"],
+  serverExternalPackages: [],
+  turbopack: {
+    root: process.cwd(),
   },
   // Configure API route timeouts
   async headers() {

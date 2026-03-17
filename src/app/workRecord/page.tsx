@@ -11,11 +11,11 @@ import {
   useRef,
   useCallback,
 } from "react";
+import { InfoAlert } from "@era/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import Header from "../../components/Header";
 import Breadcrumbs, { createBreadcrumbs } from "../../components/Breadcrumbs";
-import InfoAlert from "../../components/InfoAlert";
 import FormSection, {
   FormField,
   FormInput,

@@ -1,0 +1,78 @@
+"use client";
+
+import { forwardRef } from "react";
+import { AlertTriangle, Info, X } from "lucide-react";
+
+interface InfoAlertProps {
+  message: string;
+  onClose?: () => void;
+  className?: string;
+  variant?: "info" | "warning";
+  showDismissButton?: boolean;
+  dismissButtonText?: string;
+}
+
+const InfoAlert = forwardRef<HTMLDivElement, InfoAlertProps>(
+  (
+    {
+      message,
+      onClose,
+      className = "",
+      variant = "info",
+      showDismissButton = false,
+      dismissButtonText = "Dismiss",
+    },
+    ref,
+  ) => {
+    const isWarning = variant === "warning";
+
+    const containerClasses = isWarning
+      ? `border rounded-lg p-4 bg-yellow-50 border-yellow-200 text-yellow-900 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${className}`
+      : `border rounded-lg p-4 bg-blue-50 border-blue-200 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${className}`;
+
+    const iconClasses = isWarning ? "text-yellow-600" : "text-blue-600";
+    const textClasses = isWarning ? "text-yellow-800" : "text-blue-800";
+
+    return (
+      <div ref={ref} tabIndex={-1} className={containerClasses}>
+        <div className="flex items-start gap-3">
+          {isWarning ? (
+            <AlertTriangle size={20} className={iconClasses} />
+          ) : (
+            <Info size={20} className={iconClasses} />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className={`text-sm leading-relaxed ${textClasses}`}>{message}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {showDismissButton && onClose && (
+              <button
+                onClick={onClose}
+                className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+                  isWarning
+                    ? "bg-yellow-200 text-yellow-900 hover:bg-yellow-300"
+                    : "bg-blue-200 text-blue-900 hover:bg-blue-300"
+                }`}
+              >
+                {dismissButtonText}
+              </button>
+            )}
+            {onClose && !showDismissButton && (
+              <button
+                onClick={onClose}
+                className="flex-shrink-0 text-gray-400 transition-colors hover:text-gray-600"
+                aria-label="Close alert"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  },
+);
+
+InfoAlert.displayName = "InfoAlert";
+
+export default InfoAlert;

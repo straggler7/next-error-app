@@ -4,6 +4,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
+import { ErrorAlert } from '@era/ui';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserGroup, useSeid } from '../../hooks/useSeid';
@@ -13,7 +14,6 @@ import ComboBox, { ComboBoxOption } from '../../components/ComboBox';
 import ExaminerCard, { ExaminerData } from '../../components/ExaminerCard';
 import ProgramRoleGrid, { Program, RoleAssignment } from '../../components/ProgramRoleGrid';
 import { SuspenseCodesService, SuspenseCode } from '../../services/suspenseCodesService';
-import ErrorAlert from '../../components/ErrorAlert';
 
 // Interface for user profile API response
 interface UserProfile {

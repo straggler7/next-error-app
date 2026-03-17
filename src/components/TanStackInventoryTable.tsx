@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { StatusBadge } from '@era/ui';
 import Link from 'next/link';
 import {
   useReactTable,
@@ -10,7 +11,6 @@ import {
   ColumnDef,
 } from '@tanstack/react-table';
 import { SubmissionRecord } from '../types';
-import StatusBadge from './StatusBadge';
 
 interface TanStackInventoryTableProps<T = SubmissionRecord> {
   records: T[];

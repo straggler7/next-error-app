@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { DatePicker } from '@era/ui';
 import { ReportsService } from '../../../services/reportsService';
 import { useSeid } from '../../../hooks/useSeid';
 import { RefreshCw, Download } from 'lucide-react';
-import DatePicker from '../../../components/DatePicker';
 
 interface Report1747Data {
   // New Receipts section

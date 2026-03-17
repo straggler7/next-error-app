@@ -23,6 +23,12 @@
       }
     ],
     "paths": {
+      "@era/ui": [
+        "./packages/ui/src/index.ts"
+      ],
+      "@era/ui/*": [
+        "./packages/ui/src/*"
+      ],
       "@/*": [
         "./src/*"
       ]

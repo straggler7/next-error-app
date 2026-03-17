@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { StatusBadge } from '@era/ui';
 import Link from 'next/link';
 import { SubmissionRecord } from '../types';
-import StatusBadge from './StatusBadge';
 
 interface InventoryTableProps {
   records: SubmissionRecord[];

@@ -2,17 +2,14 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Download, RefreshCw } from 'lucide-react';
+import { DatePicker, ErrorAlert, LoadingSpinner, Pagination, TableLoadingState } from '@era/ui';
 import { getServiceCenterName, serviceCenters } from '../utils/serviceCenters';
 import { formatISOTimestamp } from '../utils/dateFormatters';
 import { ReportRecord, ReportPayload } from '../services/reportsService';
 import ColumnSelector, { ColumnConfig } from './ColumnSelector';
-import DatePicker from './DatePicker';
-import Pagination from './Pagination';
 import { PaginationState } from '../types';
-import LoadingSpinner, { TableLoadingState } from './LoadingSpinner';
 import TanStackInventoryTable from './TanStackInventoryTable';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
-import ErrorAlert from './ErrorAlert';
 
 interface BaseReportProps {
   title: string;

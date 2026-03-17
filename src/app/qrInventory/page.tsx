@@ -4,6 +4,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
+import { ErrorAlert, LoadingSpinner, Pagination, TableLoadingState } from '@era/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Header from '../../components/Header';
@@ -12,9 +13,6 @@ import FilterBar from '../../components/FilterBar';
 import TanStackInventoryTable from '../../components/TanStackInventoryTable';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import ActionDropdown from '../../components/ActionDropdown';
-import Pagination from '../../components/Pagination';
-import LoadingSpinner, { TableLoadingState } from '../../components/LoadingSpinner';
-import ErrorAlert from '../../components/ErrorAlert';
 import { FilterState, PaginationState } from '../../types';
 import { QRInventoryService, QRInventoryRecord, QRInventoryFilters } from '../../services/qrInventoryService';
 import { useSeid } from '../../hooks/useSeid';
