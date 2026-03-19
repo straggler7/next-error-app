@@ -3622,3 +3622,9 @@ autoscaling:
   minReplicas: 3
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+
+
+
+
+# git Branches
+mvp-march-era-ui-packages
