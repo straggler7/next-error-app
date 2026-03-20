@@ -40,17 +40,15 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useSeid, useUserGroup } from "../../hooks/useSeid";
 import { getServiceCenterName } from "../../utils/serviceCenters";
 // import DevBanner from "../../components/DevBanner";
-import newFieldConfig from "../../data/fieldConfig4868.json";
-import errorConfig from "../../data/errorConfig4868.json";
-
-// Convert new field config array to lookup object for compatibility
-const fieldConfig = newFieldConfig.reduce((acc: any, field: any) => {
-  acc[field.key] = {
-    label: field.label,
-    validation: field.validation
-  };
-  return acc;
-}, {});
+import {
+  getFormDef,
+  getFieldDefById,
+  getAllSectionFields,
+  getSectionAllFields,
+  getErrorDef,
+} from "../../forms/registry";
+import type { FormDef, SectionDef } from "../../forms/types";
+import SectionTabNav from "../../components/SectionTabNav";
 
 // Timeout constants for auto-closeout functionality
 const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
@@ -65,39 +63,25 @@ const toLabel = (key: string) =>
     .trim()
     .replace(/^\w/, (c) => c.toUpperCase());
 
-// Create Zod schema from field configuration
-const createZodSchema = (fieldKey: string) => {
-  const config = (fieldConfig as any)[fieldKey]?.validation;
-  // if (!config) return z.string().optional();
-  if (!config) return z.union([z.string(), z.number()]).optional();
+// Build a Zod schema from a FieldDef's validation config
+const createZodSchemaFromDef = (formDef: FormDef, fieldId: string) => {
+  const validation = getFieldDefById(formDef, fieldId)?.validation;
+  if (!validation) return z.union([z.string(), z.number()]).optional();
 
   let schema = z.string();
-
-  if (config.required) {
-    schema = schema.min(1, config.messages.required);
-  }
-
-  if (config.minLength) {
-    schema = schema.min(config.minLength, config.messages.minLength);
-  }
-
-  if (config.maxLength) {
-    schema = schema.max(config.maxLength, config.messages.maxLength);
-  }
-
-  if (config.pattern) {
-    schema = schema.regex(new RegExp(config.pattern), config.messages.pattern);
-  }
-
+  if (validation.required) schema = schema.min(1, validation.messages.required ?? "Required");
+  if (validation.minLength) schema = schema.min(validation.minLength, validation.messages.minLength ?? `Min ${validation.minLength} chars`);
+  if (validation.maxLength) schema = schema.max(validation.maxLength, validation.messages.maxLength ?? `Max ${validation.maxLength} chars`);
+  if (validation.pattern) schema = schema.regex(new RegExp(validation.pattern), validation.messages.pattern ?? "Invalid format");
   return schema;
 };
 
-// Validate a single field
-const validateField = (fieldKey: string, value: string): string | null => {
+// Validate a single field against the form definition
+const validateField = (fieldKey: string, value: string, formDef: FormDef): string | null => {
   try {
-    const schema = createZodSchema(fieldKey);
+    const schema = createZodSchemaFromDef(formDef, fieldKey);
     schema.parse(value);
-    return null; // No error
+    return null;
   } catch (error) {
     if (error instanceof z.ZodError) {
       return error.issues[0]?.message || "Invalid value";
@@ -126,6 +110,17 @@ function Form4868ERSPageContent() {
   // const [landingSearchData, setLandingSearchData] = useState<any>(null);
   const [landingSelectionData, setLandingSelectionData] = useState<any>(null);
 
+  // Form definition — derived from the form type in the loaded ERA DTO
+  const formDef = useMemo<FormDef>(() => {
+    const formType = eraDto?.workRecord?.formType || eraDto?.formType;
+    return getFormDef(formType ?? "4868");
+  }, [eraDto]);
+
+  // Active section tab (empty string = default to first visible section)
+  const [activeSectionId, setActiveSectionId] = useState<string>("");
+  // Active right-panel tab
+  const [activeRightTab, setActiveRightTab] = useState<"notes" | "errors">("notes");
+
   // Validation state
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
@@ -148,63 +143,52 @@ function Form4868ERSPageContent() {
       // Create form elements based on displayFields structure
       const formElements: FormElement[] = [];
 
-      // Iterate through newFieldConfig array to maintain JSON order
-      newFieldConfig.forEach((fieldConfigItem: any) => {
-        const fieldKey = fieldConfigItem.key;
-        const displayFieldConfig = displayFields[fieldKey];
-        
-        // Only process fields that exist in displayFields
-        if (displayFieldConfig) {
-          const fieldValue = dataSource[fieldKey] || "";
-          const fieldLabel = fieldConfigItem.label || toLabel(fieldKey);
+      // Iterate through form definition fields (registry order) to build elements
+      const formType = dataSource?.formType || eraData?.formType || "4868";
+      const def = getFormDef(formType);
+      const allConfigFields = getAllSectionFields(def);
 
-          const formElement: FormElement = {
-            id: fieldKey,
-            name: fieldKey,
-            label: fieldLabel,
-            value: fieldValue,
-            type: "text",
+      return allConfigFields.reduce<FormElement[]>((acc, fieldDef) => {
+        const displayFieldConfig = displayFields[fieldDef.id];
+        if (displayFieldConfig) {
+          acc.push({
+            id: fieldDef.id,
+            name: fieldDef.id,
+            label: fieldDef.label,
+            value: dataSource[fieldDef.id] ?? "",
+            type: fieldDef.type,
             editable: displayFieldConfig.editable,
             hasFieldError: displayFieldConfig.hasFieldError || false,
-          };
-
-          // Add to formElements array in the order they appear in newFieldConfig
-          formElements.push(formElement);
+          });
         }
-      });
-
-      // Return form elements in the exact order from newFieldConfig
-      return formElements;
+        return acc;
+      }, []);
     }
 
-    // Fallback to fieldConfig approach
-    const formElements: FormElement[] = [];
+    // Fallback: use form def fields directly (no displayFields from API)
+    const formType = dataSource?.formType || eraData?.formType || "4868";
+    const def = getFormDef(formType);
+    const allConfigFields = getAllSectionFields(def);
     const editableFields: FormElement[] = [];
     const nonEditableFields: FormElement[] = [];
 
-    Object.entries(fieldConfig).forEach(
-      ([fieldKey, config]: [string, any], index) => {
-        const fieldValue = dataSource[fieldKey] || "";
-
-        const formElement: FormElement = {
-          id: fieldKey,
-          name: fieldKey,
-          label: config.label,
-          value: fieldValue,
-          type: "text",
-          editable: config.editable || false,
-          hasFieldError: false,
-        };
-
-        if (config.editable) {
-          editableFields.push(formElement);
-        } else {
-          nonEditableFields.push(formElement);
-        }
+    allConfigFields.forEach((fieldDef) => {
+      const element: FormElement = {
+        id: fieldDef.id,
+        name: fieldDef.id,
+        label: fieldDef.label,
+        value: dataSource[fieldDef.id] ?? "",
+        type: fieldDef.type,
+        editable: fieldDef.editable,
+        hasFieldError: false,
+      };
+      if (fieldDef.editable) {
+        editableFields.push(element);
+      } else {
+        nonEditableFields.push(element);
       }
-    );
+    });
 
-    // Return editable fields first, then non-editable fields
     return [...editableFields, ...nonEditableFields];
   }, []);
   const [loading, setLoading] = useState(true);
@@ -221,17 +205,16 @@ function Form4868ERSPageContent() {
     const displayFields =
       eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
-      return newFieldConfig
-        .filter((fieldConfigItem: any) => {
-          const displayFieldConfig = displayFields[fieldConfigItem.key];
+      return getAllSectionFields(formDef)
+        .filter((fieldDef) => {
+          const displayFieldConfig = displayFields[fieldDef.id];
           return displayFieldConfig && displayFieldConfig.editable;
         })
-        .map((fieldConfigItem: any) => fieldConfigItem.key);
+        .map((fieldDef) => fieldDef.id);
     }
 
-    // Default fallback - return empty array if no structure found
     return [];
-  }, [formElements, eraDto]);
+  }, [formElements, eraDto, formDef]);
 
   // Non-editable fields list from formElements
   const nonEditableFieldKeys: string[] = useMemo(() => {
@@ -239,20 +222,19 @@ function Form4868ERSPageContent() {
       return formElements.filter((el) => !el.editable).map((el) => el.name);
     }
 
-    // Check for displayFields structure
     const displayFields =
       eraDto?.displayFields || eraDto?.workRecord?.displayFields;
     if (displayFields) {
-      return newFieldConfig
-        .filter((fieldConfigItem: any) => {
-          const displayFieldConfig = displayFields[fieldConfigItem.key];
+      return getAllSectionFields(formDef)
+        .filter((fieldDef) => {
+          const displayFieldConfig = displayFields[fieldDef.id];
           return displayFieldConfig && !displayFieldConfig.editable;
         })
-        .map((fieldConfigItem: any) => fieldConfigItem.key);
+        .map((fieldDef) => fieldDef.id);
     }
 
     return [];
-  }, [formElements, eraDto]);
+  }, [formElements, eraDto, formDef]);
 
   // Map DTO keys to actual WorkRecord property names (simplified)
   const dtoToRecordKey = useMemo(
@@ -354,10 +336,9 @@ function Form4868ERSPageContent() {
     if (errorSource && ersReasonCds.length > 0) {
 
       const filteredErrors = ersReasonCds.filter((code: string) => {
-        // Check if this is a field error
-        const errorConfigItem = (errorConfig as any)[code];
-        const fieldMappings = errorConfigItem?.fieldMappings || [];
-        const isFieldError = fieldMappings.length > 0;
+        // Check if this is a field error using form registry
+        const errorDef = getErrorDef(formDef, code);
+        const isFieldError = errorDef?.category === "field" || (errorDef?.affectedFieldIds.length ?? 0) > 0;
 
         // Field errors are never cleared by clear codes
         if (isFieldError) {
@@ -377,12 +358,11 @@ function Form4868ERSPageContent() {
       
 
       filteredErrors.forEach((code: string) => {
-        // Look up error configuration
-        const errorConfigItem = (errorConfig as any)[code];
-        const description =
-          errorConfigItem?.description || `Error code: ${code}`;
-        const fieldMappings = errorConfigItem?.fieldMappings || [];
-        const isFieldError = fieldMappings.length > 0;
+        // Look up error definition from form registry
+        const errorDef = getErrorDef(formDef, code);
+        const description = errorDef?.description || `Error code: ${code}`;
+        const affectedFields = errorDef?.affectedFieldIds || [];
+        const isFieldError = errorDef?.category === "field" || affectedFields.length > 0;
 
         const errorItem = {
           id: `ers-error-${errorIndex}`,
@@ -390,10 +370,10 @@ function Form4868ERSPageContent() {
           description: description,
           type: "Error" as const,
           status: "active" as const,
-          errorFields: fieldMappings, // Use fieldMappings from error config
-          errorConfigKey: isFieldError ? code : undefined, // Add error config key for field errors only
-          isFieldError: isFieldError, // Flag to identify field errors
-          irm: {
+          errorFields: affectedFields,
+          errorConfigKey: isFieldError ? code : undefined,
+          isFieldError: isFieldError,
+          irm: errorDef?.irm || {
             title: `IRM 3.12.${180 + errorIndex} - Error Resolution`,
             content: `Resolve the following error: ${description}`,
             steps: [
@@ -425,18 +405,14 @@ function Form4868ERSPageContent() {
             let errorConfigKey: string | undefined;
             let description = `Field error: ${fieldKey}`;
 
-            // Look for error config entries that map to this field
-            Object.entries(errorConfig).forEach(
-              ([errorCode, errorConfigItem]: [string, any]) => {
-                if (
-                  errorConfigItem.fieldMappings &&
-                  errorConfigItem.fieldMappings.includes(fieldKey)
-                ) {
-                  errorConfigKey = errorCode;
-                  description = errorConfigItem.description || description;
-                }
-              }
+            // Find error def that maps to this field
+            const matchingErrorDef = formDef.errors.find(
+              (e) => e.affectedFieldIds.includes(fieldKey)
             );
+            if (matchingErrorDef) {
+              errorConfigKey = matchingErrorDef.code;
+              description = matchingErrorDef.description;
+            }
 
             // If no specific error config found, use field config for description
             if (!errorConfigKey) {
@@ -493,7 +469,7 @@ function Form4868ERSPageContent() {
     }
 
     return finalErrorItems;
-  }, [eraDto, jsonWorkRecord]);
+  }, [eraDto, jsonWorkRecord, formDef]);
 
   // Fetch suspense codes on component mount
   useEffect(() => {
@@ -519,6 +495,27 @@ function Form4868ERSPageContent() {
   }, [currentUserSeid]);
 
   useEffect(() => {
+    // DEV PREVIEW: ?preview=940 loads mock Form 940 data without needing the API
+    if (process.env.NODE_ENV === "development") {
+      const previewForm = searchParams.get("preview");
+      if (previewForm) {
+        import(`../../data/eraDto${previewForm}.json`)
+          .then((mod) => {
+            const eraDtoData = mod.default;
+            sessionStorage.setItem("eraDto", JSON.stringify(eraDtoData));
+            sessionStorage.setItem("selectionData", JSON.stringify({
+              serviceCenter: "16",
+              program: eraDtoData.programId,
+            }));
+            window.location.replace(`/workRecord`);
+          })
+          .catch(() => {
+            console.warn(`No mock data found for form: ${previewForm}`);
+          });
+        return;
+      }
+    }
+
     // Load ERA DTO from sessionStorage
     const storedEraDto = sessionStorage.getItem("eraDto");
     const storedSelectionData = sessionStorage.getItem("selectionData");
@@ -756,7 +753,7 @@ function Form4868ERSPageContent() {
     });
 
     // Validate the field value
-    const validationError = validateField(fieldKey, val);
+    const validationError = validateField(fieldKey, val, formDef);
     
 
     // Update validation errors state
@@ -799,7 +796,16 @@ function Form4868ERSPageContent() {
       setHighlightedFields(error.errorFields || []);
       setSelectedErrorId(error.id);
 
-      // Only focus on fields for field errors, not other errors
+      // Switch to the section that owns this error
+      const errorDef = getErrorDef(formDef, error.code);
+      if (errorDef?.sectionId) {
+        setActiveSectionId(errorDef.sectionId);
+      }
+
+      // Open Error Details panel so examiner sees IRM guidance immediately
+      setActiveRightTab("errors");
+
+      // Focus the first affected field for field errors
       if (
         error.isFieldError &&
         error.errorFields &&
@@ -815,7 +821,7 @@ function Form4868ERSPageContent() {
               block: "center",
             });
           }
-        }, 100); // Small delay to ensure DOM is updated
+        }, 100);
       }
     }
   };
@@ -834,24 +840,16 @@ function Form4868ERSPageContent() {
 
   // Helper function to get form element label by name
   const getFormElementLabel = (name: string): string => {
-    // Always prioritize fieldConfig4868.json for labels
-    const fieldConfigItem = (fieldConfig as any)[name];
-    if (fieldConfigItem?.label) {
-      return fieldConfigItem.label;
-    }
+    // Prefer label from form registry
+    const fieldDef = getFieldDefById(formDef, name);
+    if (fieldDef?.label) return fieldDef.label;
 
-    // Fallback to form element label if fieldConfig doesn't have it
+    // Fall back to the label on the runtime form element (from API)
     if (formElements.length > 0) {
-      const element = workAssignmentService.getFormElementByName(
-        formElements,
-        name
-      );
-      if (element?.label) {
-        return String(element.label);
-      }
+      const element = workAssignmentService.getFormElementByName(formElements, name);
+      if (element?.label) return String(element.label);
     }
 
-    // Final fallback to generated label
     return toLabel(name);
   };
 
@@ -927,7 +925,7 @@ function Form4868ERSPageContent() {
     const errors: Record<string, string> = {};
     editableFieldKeys.forEach((fieldKey) => {
       const value = getFormElementValue(fieldKey);
-      const error = validateField(fieldKey, value);
+      const error = validateField(fieldKey, value, formDef);
       if (error) {
         errors[fieldKey] = error;
       }
@@ -944,7 +942,7 @@ function Form4868ERSPageContent() {
       // Only validate if field was changed by user
       if (fieldWithErrors.includes(fieldKey)) {
         const value = getFormElementValue(fieldKey);
-        const error = validateField(fieldKey, value);
+        const error = validateField(fieldKey, value, formDef);
         if (error) {
           changedFieldErrors[fieldKey] = error;
         }
@@ -1003,10 +1001,82 @@ function Form4868ERSPageContent() {
   // Helper function to check if the currently displayed non-field error is clearable
   const isCurrentErrorClearable = useMemo(() => {
     if (!currentNonFieldError) return false;
+    return getErrorDef(formDef, currentNonFieldError.code)?.clearable === true;
+  }, [currentNonFieldError, formDef]);
 
-    const errorConfigItem = (errorConfig as any)[currentNonFieldError.code];
-    return errorConfigItem?.clearable === true;
-  }, [currentNonFieldError]);
+  // ─── Section navigation memos ────────────────────────────────────────────
+
+  // Currently selected error (for Error Details panel)
+  const selectedError = useMemo(() => {
+    return selectedErrorId
+      ? errorItems.find((e) => e.id === selectedErrorId) ?? null
+      : null;
+  }, [selectedErrorId, errorItems]);
+
+  // Error counts per section (drives red badges on section tabs)
+  const errorCountBySection = useMemo(() => {
+    const counts: Record<string, number> = {};
+    errorItems.forEach((error) => {
+      const sectionId = getErrorDef(formDef, error.code)?.sectionId;
+      if (sectionId) {
+        counts[sectionId] = (counts[sectionId] ?? 0) + 1;
+      }
+    });
+    return counts;
+  }, [formDef, errorItems]);
+
+  // Sections visible given current field values (evaluates section conditions)
+  const visibleSections = useMemo(() => {
+    const fieldValues: Record<string, string> = {};
+    formElements.forEach((el) => { fieldValues[el.id] = el.value; });
+
+    return formDef.sections.filter((section) => {
+      if (!section.condition) return true;
+      const { fieldId, operator, value } = section.condition;
+      const fieldValue = fieldValues[fieldId] ?? "";
+      switch (operator) {
+        case "eq":     return fieldValue === value;
+        case "neq":    return fieldValue !== value;
+        case "truthy": return !!fieldValue && fieldValue !== "false" && fieldValue !== "0";
+        case "falsy":  return !fieldValue || fieldValue === "false" || fieldValue === "0";
+        case "in":     return Array.isArray(value) && value.includes(fieldValue);
+        default:       return true;
+      }
+    });
+  }, [formDef, formElements]);
+
+  // The resolved active section (falls back to first visible if state is stale/empty)
+  const effectiveActiveSectionId = useMemo(() => {
+    if (activeSectionId && visibleSections.some((s) => s.id === activeSectionId)) {
+      return activeSectionId;
+    }
+    return visibleSections[0]?.id ?? "";
+  }, [activeSectionId, visibleSections]);
+
+  const activeSection = useMemo<SectionDef | null>(() => {
+    return visibleSections.find((s) => s.id === effectiveActiveSectionId) ?? null;
+  }, [visibleSections, effectiveActiveSectionId]);
+
+  // Field IDs belonging to the active section (includes subsections)
+  const activeSectionFieldIds = useMemo(() => {
+    if (!activeSection) return new Set<string>();
+    return new Set(getSectionAllFields(activeSection).map((f) => f.id));
+  }, [activeSection]);
+
+  // Editable / non-editable keys scoped to the active section (for rendering only)
+  const activeSectionEditableKeys = useMemo(() => {
+    if (activeSectionFieldIds.size === 0) return editableFieldKeys;
+    return editableFieldKeys.filter((k) => activeSectionFieldIds.has(k));
+  }, [activeSectionFieldIds, editableFieldKeys]);
+
+  const activeSectionNonEditableKeys = useMemo(() => {
+    if (activeSectionFieldIds.size === 0) return nonEditableFieldKeys;
+    return nonEditableFieldKeys.filter((k) => activeSectionFieldIds.has(k));
+  }, [activeSectionFieldIds, nonEditableFieldKeys]);
+
+  // Look up line number for a field from the form definition
+  const getLineNumber = (fieldId: string): string | undefined =>
+    getFieldDefById(formDef, fieldId)?.lineNumber;
 
   // Track previous error code to only clear input when error actually changes
   const prevErrorCodeRef = useRef<string | null>(null);
@@ -2327,47 +2397,98 @@ function Form4868ERSPageContent() {
         </div>
       )}
 
-      {/* Main Content Grid - 60% Form / 40% Notes */}
+      {/* Main Content Grid - 60% Form / 40% Side Panel */}
       <div id="main-content" className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
-        {/* Form Section (Left 60%) */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
-          <div className="flex-1 overflow-y-auto">
-            <form className="space-y-8">
-              <FormSection title="Form 4868 - Application for Automatic Extension">
-                <div className="space-y-8 px-1">
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-2">
-                      <FormField label="Clear Codes" required={false} htmlFor="clearCodesInput">
-                        <FormInput
-                          id="clearCodesInput"
-                          value={clearCodesInput}
-                          onChange={(value) => {
-                            // Only allow 'C' or 'c' characters
-                            const filteredValue = value.replace(/[^Cc]/g, "");
-                            // Limit to single character
-                            const singleChar = filteredValue.slice(0, 1);
-                            setClearCodesInput(singleChar);
-                          }}
-                          placeholder={
-                            hasFieldErrors
-                              ? "Disabled - resolve field errors first"
-                              : isCurrentErrorClearable
-                              ? "Enter 'C' to clear error"
-                              : "Current error not clearable"
-                          }
-                          disabled={hasFieldErrors || !isCurrentErrorClearable}
-                        />
-                        {/* <div className="mt-1 text-xs text-gray-600">
-                          {hasFieldErrors ? "Clear codes disabled when field errors are present" : (isCurrentErrorClearable ? "Enter 'C' to clear the current error" : "Current error is not clearable")}
-                        </div> */}
-                      </FormField>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {editableFieldKeys.map((key) => (
+        {/* ── Form Panel (Left 60%) ─────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col min-w-0 overflow-hidden">
+
+          {/* Form Header */}
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 rounded-t-lg flex-shrink-0">
+            <h3 className="text-sm font-bold text-gray-800 tracking-tight">
+              Form {eraDto?.workRecord?.formType || eraDto?.formType || "4868"} — {formDef.formName}
+            </h3>
+            <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-gray-500">
+              {(eraDto?.workRecord?.taxYr || eraDto?.workRecord?.TaxPeriodEndDt) && (
+                <span>Tax Year: {eraDto?.workRecord?.taxYr || eraDto?.workRecord?.TaxPeriodEndDt?.slice(0, 4)}</span>
+              )}
+              {eraDto?.workRecord?.dln && (
+                <span>DLN: {eraDto.workRecord.dln}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Section Tab Navigator — shown only for multi-section forms */}
+          {visibleSections.length > 1 && (
+            <div className="flex-shrink-0">
+              <SectionTabNav
+                tabs={visibleSections.map((s) => ({
+                  id: s.id,
+                  label: s.label,
+                  errorCount: errorCountBySection[s.id] ?? 0,
+                }))}
+                activeId={effectiveActiveSectionId}
+                onChange={setActiveSectionId}
+              />
+            </div>
+          )}
+
+          {/* Section Content */}
+          <div
+            id={`section-panel-${effectiveActiveSectionId}`}
+            role="tabpanel"
+            className="flex-1 overflow-y-auto p-6"
+          >
+            {activeSection && (
+              <form className="space-y-6">
+                {/* Section title + instructions */}
+                <div className="mb-2 pb-3 border-b-2 border-gray-200">
+                  <h4 className="text-base font-bold text-gray-800 tracking-tight">
+                    {visibleSections.length > 1
+                      ? `${activeSection.label}: ${activeSection.title}`
+                      : activeSection.title}
+                  </h4>
+                  {activeSection.instructions && (
+                    <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+                      {activeSection.instructions}
+                    </p>
+                  )}
+                </div>
+
+                {/* Clear Codes — visible when current section has a clearable error */}
+                <div className="grid grid-cols-1 gap-4">
+                  <FormField label="Clear Codes" required={false} htmlFor="clearCodesInput">
+                    <FormInput
+                      id="clearCodesInput"
+                      value={clearCodesInput}
+                      onChange={(value) => {
+                        const filteredValue = value.replace(/[^Cc]/g, "");
+                        setClearCodesInput(filteredValue.slice(0, 1));
+                      }}
+                      placeholder={
+                        hasFieldErrors
+                          ? "Disabled - resolve field errors first"
+                          : isCurrentErrorClearable
+                          ? "Enter 'C' to clear error"
+                          : "Current error not clearable"
+                      }
+                      disabled={hasFieldErrors || !isCurrentErrorClearable}
+                    />
+                  </FormField>
+                </div>
+
+                {/* Editable Fields */}
+                {activeSectionEditableKeys.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {activeSectionEditableKeys.map((key) => {
+                      const lineNum = getLineNumber(key);
+                      const label = lineNum
+                        ? `${lineNum}. ${getFormElementLabel(key)}`
+                        : getFormElementLabel(key);
+                      return (
                         <FormField
                           key={key}
-                          label={getFormElementLabel(key)}
+                          label={label}
                           htmlFor={key}
                           originalValue={getOriginalValue(key)}
                           currentValue={getFormElementValue(key)}
@@ -2384,37 +2505,45 @@ function Form4868ERSPageContent() {
                             error={getFieldHasError(key)}
                           />
                         </FormField>
-                      ))}
-                    </div>
-
-                    {/* Non-Editable Fields Section */}
-                    {nonEditableFieldKeys.length > 0 && (
-                      <div className="mt-2">
-                        <div className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2"></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {nonEditableFieldKeys.map((key) => (
-                            <FormField
-                              key={key}
-                              label={getFormElementLabel(key)}
-                              htmlFor={key}
-                              error={getValidationError(key)}
-                            >
-                              <FormInput
-                                id={key}
-                                value={getFormElementValue(key)}
-                                disabled={true}
-                                error={getFieldHasError(key)}
-                              />
-                            </FormField>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
-                </div>
-              </FormSection>
-              <FormSection title="">
-                <div>
+                )}
+
+                {/* Non-Editable Fields */}
+                {activeSectionNonEditableKeys.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 border-b border-gray-100 pb-1">
+                      Reference Fields
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {activeSectionNonEditableKeys.map((key) => {
+                        const lineNum = getLineNumber(key);
+                        const label = lineNum
+                          ? `${lineNum}. ${getFormElementLabel(key)}`
+                          : getFormElementLabel(key);
+                        return (
+                          <FormField
+                            key={key}
+                            label={label}
+                            htmlFor={key}
+                            error={getValidationError(key)}
+                          >
+                            <FormInput
+                              id={key}
+                              value={getFormElementValue(key)}
+                              disabled={true}
+                              error={getFieldHasError(key)}
+                            />
+                          </FormField>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Code */}
+                <div className="pt-2 border-t border-gray-100">
                   <FormField label="Action Code" required htmlFor="actionCodeSelect">
                     <FormSelect
                       id="actionCodeSelect"
@@ -2431,10 +2560,7 @@ function Form4868ERSPageContent() {
                           : "Select action code"}
                       </option>
                       {suspenseCodes.map((suspenseCode) => (
-                        <option
-                          key={suspenseCode.code}
-                          value={suspenseCode.code}
-                        >
+                        <option key={suspenseCode.code} value={suspenseCode.code}>
                           {suspenseCode.code} - {suspenseCode.description} (
                           {suspenseCode.daysSuspended} days)
                         </option>
@@ -2442,156 +2568,269 @@ function Form4868ERSPageContent() {
                     </FormSelect>
                   </FormField>
                 </div>
-              </FormSection>
-            </form>
+              </form>
+            )}
           </div>
         </div>
 
-        {/* Notes Section (Right 40%) */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col h-full min-w-0 overflow-hidden">
-          <div className="notes-title text-lg font-semibold mb-4 pb-2 border-b border-gray-200 text-gray-700 flex-shrink-0">
-            Notes
+        {/* ── Side Panel (Right 40%) ────────────────────────────────────────── */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full min-w-0 overflow-hidden">
+
+          {/* Tab Strip */}
+          <div className="flex border-b border-gray-200 flex-shrink-0" role="tablist">
+            <button
+              role="tab"
+              aria-selected={activeRightTab === "errors"}
+              onClick={() => setActiveRightTab("errors")}
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00599c] ${
+                activeRightTab === "errors"
+                  ? "border-[#00599c] text-[#00599c]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Error Details
+              {selectedError && (
+                <span className="w-2 h-2 bg-red-500 rounded-full" aria-hidden="true" />
+              )}
+            </button>
+            <button
+              role="tab"
+              aria-selected={activeRightTab === "notes"}
+              onClick={() => setActiveRightTab("notes")}
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00599c] ${
+                activeRightTab === "notes"
+                  ? "border-[#00599c] text-[#00599c]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Notes
+              {notes.length > 0 && (
+                <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-bold bg-gray-200 text-gray-600 rounded-full">
+                  {notes.length}
+                </span>
+              )}
+            </button>
           </div>
 
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Additional Notes Input */}
-            <div className="additional-notes-input mb-4 flex-shrink-0">
-              <label htmlFor="additionalNotesTextarea" className="block text-sm font-medium text-gray-700 mb-2">
-                Add Additional Notes:
-              </label>
-              <textarea
-                id="additionalNotesTextarea"
-                value={additionalNotes}
-                onChange={(e) => setAdditionalNotes(e.target.value)}
-                placeholder="Enter additional notes here..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                rows={3}
-              />
-            </div>
+          {/* Error Details Tab */}
+          {activeRightTab === "errors" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              {selectedError ? (
+                <div className="space-y-4">
+                  {/* Error header */}
+                  <div className="pb-4 border-b border-gray-200">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-base font-bold text-gray-800 font-mono">
+                        {selectedError.code}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        selectedError.isFieldError
+                          ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}>
+                        {selectedError.isFieldError ? "Field Error" : "Consistency"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-snug">
+                      {selectedError.description}
+                    </p>
+                  </div>
 
-            <div className="notes-content flex-1 space-y-4">
-              {notes.length === 0 ? (
-                <div className="text-gray-500 text-sm">No notes available</div>
-              ) : (
-                notes.map((note, index) => (
-                  <div
-                    key={index}
-                    className="note-entry border-b border-gray-100 pb-4 last:border-b-0"
-                  >
-                    <div className="note-header mb-2">
-                      <div className="text-sm font-medium text-gray-700">
-                        Author: {note.author || "Unknown"}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Created At:{" "}
-                        {note.createdTime
-                          ? new Date(note.createdTime).toLocaleString()
-                          : "Unknown"}
+                  {/* Affected fields */}
+                  {selectedError.errorFields && selectedError.errorFields.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        Affected Fields
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedError.errorFields.map((f) => (
+                          <span
+                            key={f}
+                            className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded border border-gray-200 font-mono"
+                          >
+                            {f}
+                          </span>
+                        ))}
                       </div>
                     </div>
+                  )}
 
-                    {note.comments &&
-                      (() => {
-                        try {
-                          // Handle different comment formats
-                          let parsedComments = note.comments;
+                  {/* IRM guidance */}
+                  {selectedError.irm && (
+                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 space-y-3">
+                      <p className="text-xs font-bold text-blue-800">
+                        {selectedError.irm.title}
+                      </p>
+                      <p className="text-xs text-blue-700 leading-relaxed">
+                        {selectedError.irm.content}
+                      </p>
+                      {selectedError.irm.steps && selectedError.irm.steps.length > 0 && (
+                        <ol className="list-decimal list-inside space-y-1">
+                          {selectedError.irm.steps.map((step, i) => (
+                            <li key={i} className="text-xs text-blue-700 leading-relaxed">
+                              {step}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                  <svg
+                    className="w-10 h-10 text-gray-300 mb-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <p className="text-sm text-gray-400">
+                    Select an error badge above to see details and resolution steps
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
-                          // If comments is a string, try to parse it as JSON first
-                          if (typeof note.comments === "string") {
-                            try {
-                              parsedComments = JSON.parse(note.comments);
-                            } catch {
-                              // If JSON parsing fails, treat it as a plain string
-                              parsedComments = note.comments;
+          {/* Notes Tab */}
+          {activeRightTab === "notes" && (
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden p-6">
+              {/* Additional Notes Input */}
+              <div className="mb-4 flex-shrink-0">
+                <label
+                  htmlFor="additionalNotesTextarea"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Add Additional Notes:
+                </label>
+                <textarea
+                  id="additionalNotesTextarea"
+                  value={additionalNotes}
+                  onChange={(e) => setAdditionalNotes(e.target.value)}
+                  placeholder="Enter additional notes here..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-4">
+                {notes.length === 0 ? (
+                  <div className="text-gray-500 text-sm">No notes available</div>
+                ) : (
+                  notes.map((note, index) => (
+                    <div
+                      key={index}
+                      className="note-entry border-b border-gray-100 pb-4 last:border-b-0"
+                    >
+                      <div className="note-header mb-2">
+                        <div className="text-sm font-medium text-gray-700">
+                          Author: {note.author || "Unknown"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Created At:{" "}
+                          {note.createdTime
+                            ? new Date(note.createdTime).toLocaleString()
+                            : "Unknown"}
+                        </div>
+                      </div>
+
+                      {note.comments &&
+                        (() => {
+                          try {
+                            let parsedComments = note.comments;
+                            if (typeof note.comments === "string") {
+                              try {
+                                parsedComments = JSON.parse(note.comments);
+                              } catch {
+                                parsedComments = note.comments;
+                              }
                             }
-                          }
 
+                            if (typeof parsedComments === "string") {
+                              return (
+                                <div className="note-comments">
+                                  <div className="text-sm text-gray-700 whitespace-pre-line">
+                                    {parsedComments}
+                                  </div>
+                                </div>
+                              );
+                            }
 
-                          // Handle case where parsedComments is a plain string
-                          if (typeof parsedComments === "string") {
                             return (
                               <div className="note-comments">
-                                <div className="text-sm text-gray-700 whitespace-pre-line">
-                                  {parsedComments}
-                                </div>
+                                {parsedComments.action && (
+                                  <div className="action-note mb-3">
+                                    <div className="text-sm font-semibold text-red-600">
+                                      {parsedComments.action}
+                                    </div>
+                                  </div>
+                                )}
+                                {parsedComments.errorsBeingCorrected &&
+                                  parsedComments.errorsBeingCorrected.length > 0 && (
+                                    <div className="errors-being-corrected mb-2">
+                                      <div className="text-sm font-medium text-gray-600 mb-1">
+                                        Error(s) Shown:
+                                      </div>
+                                      <div className="text-sm text-gray-700 ml-4">
+                                        {parsedComments.errorsBeingCorrected.join(", ")}
+                                      </div>
+                                    </div>
+                                  )}
+                                {parsedComments.fieldChanges &&
+                                  parsedComments.fieldChanges.length > 0 && (
+                                    <div className="field-changes mb-3">
+                                      <div className="text-sm font-medium text-gray-600 mb-1">
+                                        Field Changes:
+                                      </div>
+                                      <div className="ml-4 space-y-1">
+                                        {parsedComments.fieldChanges.map(
+                                          (change: any, changeIndex: number) => (
+                                            <div
+                                              key={changeIndex}
+                                              className="text-xs text-gray-600"
+                                            >
+                                              <span className="font-medium">
+                                                {change.fieldName}:
+                                              </span>{" "}
+                                              {change.beforeValue} →{" "}
+                                              {change.afterValue}
+                                            </div>
+                                          )
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                {parsedComments.additionalComments && (
+                                  <div className="additional-comments mb-3">
+                                    <div className="text-sm font-medium text-gray-600 mb-1">
+                                      Additional Comments:
+                                    </div>
+                                    <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
+                                      {parsedComments.additionalComments}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          } catch (error) {
+                            return (
+                              <div className="text-xs text-red-500">
+                                Error displaying comments
                               </div>
                             );
                           }
-
-                          // Handle case where parsedComments is an object with properties
-                          return (
-                            <div className="note-comments">
-                              {parsedComments.action && (
-                                <div className="action-note mb-3">
-                                  <div className="text-sm font-semibold text-red-600">
-                                    {parsedComments.action}
-                                  </div>
-                                </div>
-                              )}
-
-                              {parsedComments.errorsBeingCorrected &&
-                                parsedComments.errorsBeingCorrected.length > 0 && (
-                                  <div className="errors-being-corrected">
-                                    <div className="text-sm font-medium text-gray-600 mb-1">
-                                      Error(s) Shown:
-                                    </div>
-                                    <div className="text-sm text-gray-700 ml-4">
-                                      {parsedComments.errorsBeingCorrected.join(", ")}
-                                    </div>
-                                  </div>
-                                )}
-
-                              {parsedComments.fieldChanges &&
-                                parsedComments.fieldChanges.length > 0 && (
-                                  <div className="field-changes mb-3">
-                                    <div className="text-sm font-medium text-gray-600 mb-1">
-                                      Field Changes:
-                                    </div>
-                                    <div className="ml-4 space-y-1">
-                                      {parsedComments.fieldChanges.map(
-                                        (change: any, changeIndex: number) => (
-                                          <div
-                                            key={changeIndex}
-                                            className="text-xs text-gray-600"
-                                          >
-                                            <span className="font-medium">
-                                              {change.fieldName}:
-                                            </span>{" "}
-                                            {change.beforeValue} →{" "}
-                                            {change.afterValue}
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-
-                              {parsedComments.additionalComments && (
-                                <div className="additional-comments mb-3">
-                                  <div className="text-sm font-medium text-gray-600 mb-1">
-                                    Additional Comments:
-                                  </div>
-                                  <div className="text-sm text-gray-700 whitespace-pre-line ml-4">
-                                    {parsedComments.additionalComments}
-                                  </div>
-                                </div>
-                              )}
-
-                            </div>
-                          );
-                        } catch (error) {
-                          return (
-                            <div className="text-xs text-red-500">
-                              Error displaying comments
-                            </div>
-                          );
-                        }
-                      })()}
-                  </div>
-                ))
-              )}
+                        })()}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

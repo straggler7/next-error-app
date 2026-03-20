@@ -1,0 +1,181 @@
+{
+  "inventoryId": 42,
+  "serviceCenterId": 16,
+  "programId": "94000",
+  "notes": [
+    {
+      "author": "examiner1",
+      "createdTime": "2025-03-01T14:22:10.000Z",
+      "comments": {
+        "action": "SUSPEND",
+        "errorsBeingCorrected": ["R03"],
+        "fieldChanges": [
+          { "fieldName": "3. Total payments to all employees", "beforeValue": "450000.00", "afterValue": "478500.00" }
+        ],
+        "additionalComments": "Wage discrepancy found after comparing W-2 aggregate. Updated Line 3."
+      }
+    }
+  ],
+  "workRecord": {
+    "type": "F940WorkRecord",
+    "formType": "940",
+    "dln": "98765432101234",
+    "taxYr": "2024",
+    "ein": "12-3456789",
+    "employerName": "ACME CORPORATION",
+    "returnType": "original",
+    "multiStateEmployer": "false",
+    "creditReductionState": "false",
+    "totalPayments": "478500.00",
+    "fringeExempt": "12000.00",
+    "groupTermLifeExempt": "5000.00",
+    "retirementPensionExempt": "18500.00",
+    "dependentCareExempt": "0.00",
+    "otherExempt": "0.00",
+    "totalExemptPayments": "35500.00",
+    "paymentsOverThreshold": "155000.00",
+    "subtotal": "190500.00",
+    "taxableWages": "288000.00",
+    "futaTaxBefore": "1728.00",
+    "allExcludedFromStateUnempl": "",
+    "someExcludedFromStateUnempl": "",
+    "creditReductionAmount": "",
+    "totalFutaAfterAdjustments": "1728.00",
+    "futaDeposited": "1500.00",
+    "balanceDue": "228.00",
+    "overpayment": "",
+    "liabilityQ1": "432.00",
+    "liabilityQ2": "432.00",
+    "liabilityQ3": "432.00",
+    "liabilityQ4": "200.00",
+    "totalLiability": "1496.00",
+    "ersReasonCds": ["R03", "Q16"],
+    "displayFields": {
+      "returnType": {
+        "ref": "returnType",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "multiStateEmployer": {
+        "ref": "multiStateEmployer",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "creditReductionState": {
+        "ref": "creditReductionState",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "totalPayments": {
+        "ref": "totalPayments",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "fringeExempt": {
+        "ref": "fringeExempt",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "groupTermLifeExempt": {
+        "ref": "groupTermLifeExempt",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "retirementPensionExempt": {
+        "ref": "retirementPensionExempt",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "dependentCareExempt": {
+        "ref": "dependentCareExempt",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "otherExempt": {
+        "ref": "otherExempt",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "totalExemptPayments": {
+        "ref": "totalExemptPayments",
+        "editable": false,
+        "hasFieldError": false
+      },
+      "paymentsOverThreshold": {
+        "ref": "paymentsOverThreshold",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "subtotal": {
+        "ref": "subtotal",
+        "editable": false,
+        "hasFieldError": false
+      },
+      "taxableWages": {
+        "ref": "taxableWages",
+        "editable": false,
+        "hasFieldError": false
+      },
+      "futaTaxBefore": {
+        "ref": "futaTaxBefore",
+        "editable": false,
+        "hasFieldError": false
+      },
+      "allExcludedFromStateUnempl": {
+        "ref": "allExcludedFromStateUnempl",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "someExcludedFromStateUnempl": {
+        "ref": "someExcludedFromStateUnempl",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "totalFutaAfterAdjustments": {
+        "ref": "totalFutaAfterAdjustments",
+        "editable": false,
+        "hasFieldError": false
+      },
+      "futaDeposited": {
+        "ref": "futaDeposited",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "balanceDue": {
+        "ref": "balanceDue",
+        "editable": false,
+        "hasFieldError": false
+      },
+      "overpayment": {
+        "ref": "overpayment",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "liabilityQ1": {
+        "ref": "liabilityQ1",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "liabilityQ2": {
+        "ref": "liabilityQ2",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "liabilityQ3": {
+        "ref": "liabilityQ3",
+        "editable": true,
+        "hasFieldError": false
+      },
+      "liabilityQ4": {
+        "ref": "liabilityQ4",
+        "editable": true,
+        "hasFieldError": true
+      },
+      "totalLiability": {
+        "ref": "totalLiability",
+        "editable": false,
+        "hasFieldError": false
+      }
+    }
+  }
+}
