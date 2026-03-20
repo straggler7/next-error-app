@@ -48,7 +48,7 @@ import {
   getErrorDef,
 } from "../../forms/registry";
 import type { FormDef, SectionDef } from "../../forms/types";
-import SectionTabNav from "../../components/SectionTabNav";
+import SectionSideNav from "../../components/SectionSideNav";
 
 // Timeout constants for auto-closeout functionality
 const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
@@ -2418,19 +2418,31 @@ function Form4868ERSPageContent() {
             </div>
           </div>
 
-          {/* Section Tab Navigator — shown only for multi-section forms */}
+          {/* Body: left side nav (multi-section) + section content */}
+          <div className="flex flex-1 overflow-hidden">
+
+          {/* Section Side Nav — shown only for multi-section forms */}
           {visibleSections.length > 1 && (
-            <div className="flex-shrink-0">
-              <SectionTabNav
-                tabs={visibleSections.map((s) => ({
-                  id: s.id,
-                  label: s.label,
-                  errorCount: errorCountBySection[s.id] ?? 0,
-                }))}
-                activeId={effectiveActiveSectionId}
-                onChange={setActiveSectionId}
-              />
-            </div>
+            <SectionSideNav
+              items={visibleSections.map((s, i) => ({
+                id: s.id,
+                label: s.label,
+                stepNumber: i + 1,
+                errorCount: errorCountBySection[s.id] ?? 0,
+              }))}
+              activeId={effectiveActiveSectionId}
+              onChange={setActiveSectionId}
+              footerContent={
+                (eraDto?.workRecord?.taxYr || eraDto?.workRecord?.TaxPeriodEndDt) ? (
+                  <div>
+                    <div>Tax year</div>
+                    <div className="text-[15px] font-medium text-[#1a1a18] mt-0.5">
+                      {eraDto?.workRecord?.taxYr || eraDto?.workRecord?.TaxPeriodEndDt?.slice(0, 4)}
+                    </div>
+                  </div>
+                ) : undefined
+              }
+            />
           )}
 
           {/* Section Content */}
@@ -2571,6 +2583,7 @@ function Form4868ERSPageContent() {
               </form>
             )}
           </div>
+          </div>{/* end flex body row */}
         </div>
 
         {/* ── Side Panel (Right 40%) ────────────────────────────────────────── */}
