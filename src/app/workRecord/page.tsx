@@ -1057,6 +1057,14 @@ function Form4868ERSPageContent() {
     return visibleSections.find((s) => s.id === effectiveActiveSectionId) ?? null;
   }, [visibleSections, effectiveActiveSectionId]);
 
+  // Errors belonging to the currently active section (or all errors for single-section forms)
+  const activeSectionErrors = useMemo(() => {
+    if (visibleSections.length <= 1) return errorItems;
+    return errorItems.filter(
+      (error) => getErrorDef(formDef, error.code)?.sectionId === effectiveActiveSectionId
+    );
+  }, [errorItems, formDef, visibleSections.length, effectiveActiveSectionId]);
+
   // Field IDs belonging to the active section (includes subsections)
   const activeSectionFieldIds = useMemo(() => {
     if (!activeSection) return new Set<string>();
@@ -2351,51 +2359,6 @@ function Form4868ERSPageContent() {
         </div>
       </div>
 
-      {/* Error Badges Section - Only show if there are visible errors */}
-      {errorItems.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-5 mx-4 mb-6 border border-gray-100">
-          <h2 className="error-badges-title text-base font-semibold mb-4 text-gray-700">
-            Errors
-          </h2>
-          <div className="error-badges-container flex flex-wrap gap-2">
-            {errorItems.map((error) => (
-              <div
-                key={error.id}
-                className={`error-badge cursor-pointer transition-all duration-200 px-3.5 py-2 rounded-2xl text-sm font-medium flex items-center gap-2 ${
-                  selectedErrorId === error.id
-                    ? "bg-red-100 text-red-800 border border-red-300 shadow-md transform -translate-y-0.5"
-                    : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300 hover:transform hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                }`}
-                onClick={() => handleErrorClick(error)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleErrorClick(error);
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`Error ${error.code}: ${error.description}. Click to ${selectedErrorId === error.id ? 'deselect' : 'select'} this error.`}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="opacity-80"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="15" y1="9" x2="9" y2="15"></line>
-                  <line x1="9" y1="9" x2="15" y2="15"></line>
-                </svg>
-                {error.code} - {error.description}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Main Content Grid - 60% Form / 40% Side Panel */}
       <div id="main-content" className="grid grid-cols-1 lg:grid-cols-[1fr_0.67fr] gap-6 px-4 pb-4 min-h-[600px] max-w-full overflow-hidden">
@@ -2466,6 +2429,39 @@ function Form4868ERSPageContent() {
                     </p>
                   )}
                 </div>
+
+                {/* Inline Error Badges — errors for this section */}
+                {activeSectionErrors.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeSectionErrors.map((error) => (
+                      <div
+                        key={error.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleErrorClick(error)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleErrorClick(error);
+                          }
+                        }}
+                        aria-label={`Error ${error.code}: ${error.description}`}
+                        className={`cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-1 ${
+                          selectedErrorId === error.id
+                            ? "bg-red-100 text-red-800 border border-red-300 shadow-sm"
+                            : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300"
+                        }`}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-70" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="15" y1="9" x2="9" y2="15" />
+                          <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        {error.code} — {error.description}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Clear Codes — visible when current section has a clearable error */}
                 <div className="grid grid-cols-1 gap-4">
