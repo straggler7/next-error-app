@@ -3622,3 +3622,13 @@ autoscaling:
   minReplicas: 3
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+
+
+git branches:
+  main
+  mvp-december-dln-no-auto-assign
+  mvp-december-work-record-timeout
+  mvp-december-work-record-timeout-prod-bug-03122026
+
+  mvp-march
+  

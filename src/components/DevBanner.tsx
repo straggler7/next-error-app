@@ -14,6 +14,7 @@ export default function DevBanner() {
   const { isDevelopmentMode, user, refreshAuth } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [customSeid, setCustomSeid] = useState('');
 
   // Only show in development mode
   if (!isDevelopmentMode) {
@@ -50,6 +51,14 @@ export default function DevBanner() {
     }
     
     setIsDropdownOpen(false);
+    setCustomSeid(''); // Clear custom input after selection
+  };
+
+  const handleCustomSeidSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customSeid.trim()) {
+      await handleUserSelect(customSeid.trim());
+    }
   };
 
   return (
@@ -119,7 +128,29 @@ export default function DevBanner() {
             
             {isDropdownOpen && (
               <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-96">
-                <div className="py-1">
+                {/* Custom SEID Input */}
+                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                  <form onSubmit={handleCustomSeidSubmit} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customSeid}
+                      onChange={(e) => setCustomSeid(e.target.value)}
+                      placeholder="Enter custom SEID..."
+                      className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!customSeid.trim()}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                  <p className="text-xs text-gray-600 mt-1">Enter any SEID to test with</p>
+                </div>
+
+                {/* Mock Users List */}
+                <div className="py-1 max-h-64 overflow-y-auto">
                   {mockUsers.map((mockUser) => (
                     <button
                       key={mockUser.seid}
