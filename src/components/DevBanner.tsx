@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 // import { User } from '../types';
 import mockUsers from '../data/mockUsers.json';
@@ -60,6 +60,28 @@ export default function DevBanner() {
       await handleUserSelect(customSeid.trim());
     }
   };
+
+  // Auto-select first mock user on mount if no SEID is stored
+  useEffect(() => {
+    const storedSeid = localStorage.getItem('dev-selected-seid');
+    
+    // Only auto-select if:
+    // 1. We're in development mode
+    // 2. No SEID is already stored in localStorage
+    // 3. We have mock users available
+    if (isDevelopmentMode && !storedSeid && mockUsers.length > 0) {
+      const firstUserSeid = mockUsers[0].seid;
+      console.log('🔄 DevBanner: Auto-selecting first mock user:', firstUserSeid);
+      
+      // Store the first user's SEID
+      localStorage.setItem('dev-selected-seid', firstUserSeid);
+      
+      // Trigger auth refresh to load the user
+      if (refreshAuth) {
+        refreshAuth();
+      }
+    }
+  }, [isDevelopmentMode, refreshAuth]);
 
   return (
     <div className="bg-yellow-500 text-black px-4 py-2 text-sm font-medium">
