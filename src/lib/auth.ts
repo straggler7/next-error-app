@@ -126,6 +126,45 @@ function createDevUser(seid: string): User | null {
 }
 
 /**
+ * Attempt to auto-create a user profile via SSO headers.
+ * Returns a User on success, null on failure.
+ */
+async function autoCreateUser(): Promise<User | null> {
+  try {
+    const response = await fetch('/api/auth/auto-create-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.status === 409) {
+      // User was created by another request; retry profile fetch
+      console.log('User already exists (409), retrying profile fetch');
+      return null; // Will fall through; caller can retry if needed
+    }
+
+    if (!response.ok) {
+      console.error('Auto-create user failed:', response.status, response.statusText);
+      return null;
+    }
+
+    const userProfile: UserProfileResponse = await response.json();
+    const user: User = {
+      name: userProfile.userName,
+      role: userProfile.designation,
+      group: mapDesignationToGroup(userProfile.designation),
+      seid: userProfile.seid,
+      profile: userProfile,
+    };
+
+    console.log('Auto-created user profile:', user);
+    return user;
+  } catch (error) {
+    console.error('Error during auto-create user:', error);
+    return null;
+  }
+}
+
+/**
  * Get user details from SEID by calling the user profile API
  */
 export async function getUserFromSeid(seid: string): Promise<User | null> {
@@ -142,14 +181,21 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
 
     if (!response.ok) {
       console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
-      
+
+      // If profile not found, attempt auto-creation from SSO headers
+      if (response.status === 404) {
+        console.log('Profile not found, attempting auto-creation for SEID:', seid);
+        const createdUser = await autoCreateUser();
+        if (createdUser) return createdUser;
+      }
+
       // Check if DEV_ROLE is set and return dev user
       const devUser = createDevUser(seid);
       if (devUser) {
         console.log('🔧 Using dev user due to API failure:', devUser);
         return devUser;
       }
-      
+
       return null;
     }
 
