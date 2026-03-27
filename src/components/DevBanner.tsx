@@ -16,51 +16,6 @@ export default function DevBanner() {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [customSeid, setCustomSeid] = useState('');
 
-  // Only show in development mode
-  if (!isDevelopmentMode) {
-    return null;
-  }
-
-  const devRole = process.env.NEXT_PUBLIC_DEV_ROLE;
-  const availableRoles = ['managers', 'tax_examiners'];
-
-  const handleRoleChange = (newRole: string) => {
-    console.log('🔄 DevBanner: Role change requested to:', newRole);
-    // This would require a page reload to change the environment variable effect
-    // For now, we'll just show a message
-    alert(`To change role to ${newRole}, set NEXT_PUBLIC_DEV_ROLE=${newRole} in your .env.local file and restart the dev server.`);
-    setIsRoleDropdownOpen(false);
-  };
-
-  const handleUserSelect = async (selectedSeid: string) => {
-    console.log('🔄 DevBanner: User selected:', selectedSeid);
-    
-    // Store selected SEID in localStorage to persist across page reloads
-    localStorage.setItem('dev-selected-seid', selectedSeid);
-    console.log('🔄 DevBanner: Stored SEID in localStorage');
-    
-    // Refresh auth context without page reload
-    if (refreshAuth) {
-      console.log('🔄 DevBanner: Calling refreshAuth');
-      await refreshAuth();
-      console.log('🔄 DevBanner: refreshAuth completed');
-    } else {
-      console.log('🔄 DevBanner: refreshAuth not available, reloading page');
-      // Fallback to page reload if refreshAuth is not available
-      window.location.reload();
-    }
-    
-    setIsDropdownOpen(false);
-    setCustomSeid(''); // Clear custom input after selection
-  };
-
-  const handleCustomSeidSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (customSeid.trim()) {
-      await handleUserSelect(customSeid.trim());
-    }
-  };
-
   // Auto-select first mock user on mount if no SEID is stored
   useEffect(() => {
     const storedSeid = localStorage.getItem('dev-selected-seid');
@@ -82,6 +37,51 @@ export default function DevBanner() {
       }
     }
   }, [isDevelopmentMode, refreshAuth]);
+
+  // Only show in development mode
+  if (!isDevelopmentMode) {
+    return null;
+  }
+
+  const devRole = process.env.NEXT_PUBLIC_DEV_ROLE;
+  const availableRoles = ['managers', 'tax_examiners'];
+
+  const handleRoleChange = (newRole: string) => {
+    console.log('🔄 DevBanner: Role change requested to:', newRole);
+    // This would require a page reload to change the environment variable effect
+    // For now, we'll just show a message
+    alert(`To change role to ${newRole}, set NEXT_PUBLIC_DEV_ROLE=${newRole} in your .env.local file and restart the dev server.`);
+    setIsRoleDropdownOpen(false);
+  };
+
+  const handleUserSelect = async (selectedSeid: string) => {
+    console.log('🔄 DevBanner: User selected:', selectedSeid);
+
+    // Store selected SEID in localStorage to persist across page reloads
+    localStorage.setItem('dev-selected-seid', selectedSeid);
+    console.log('🔄 DevBanner: Stored SEID in localStorage');
+
+    // Refresh auth context without page reload
+    if (refreshAuth) {
+      console.log('🔄 DevBanner: Calling refreshAuth');
+      await refreshAuth();
+      console.log('🔄 DevBanner: refreshAuth completed');
+    } else {
+      console.log('🔄 DevBanner: refreshAuth not available, reloading page');
+      // Fallback to page reload if refreshAuth is not available
+      window.location.reload();
+    }
+
+    setIsDropdownOpen(false);
+    setCustomSeid(''); // Clear custom input after selection
+  };
+
+  const handleCustomSeidSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customSeid.trim()) {
+      await handleUserSelect(customSeid.trim());
+    }
+  };
 
   return (
     <div className="bg-yellow-500 text-black px-4 py-2 text-sm font-medium">
