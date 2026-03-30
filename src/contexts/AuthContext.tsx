@@ -1,10 +1,54 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, AuthContext as AuthContextType, UserProfile } from '../types';
 import { extractSeidFromHeaders, getUserFromSeid, validateSeid } from '../lib/auth';
+import mockUsers from '../data/mockUsers.json';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Create a fallback dev user when the backend is unreachable.
+ * Uses mock user name if available, otherwise falls back to SEID.
+ */
+function createFallbackDevUser(userSeid: string): User {
+  const mockUser = mockUsers.find(u => u.seid === userSeid);
+  return {
+    name: mockUser?.name || `Dev User (${userSeid})`,
+    role: 'Tax Examiner',
+    group: 'tax_examiners',
+    seid: userSeid,
+    profile: {
+      userId: userSeid,
+      seid: userSeid,
+      userName: mockUser?.name || `Dev User (${userSeid})`,
+      designation: 'Tax Examiner',
+      teamCode: 'DEV-TEAM',
+      serviceCenterId: '16',
+      activeStatus: true,
+      profile: {
+        profiles: {
+          '44720': {
+            dlnSearch: true,
+            deleteEnabled: false,
+            qualityReviewEnabled: false,
+            leadRoleEnabled: false,
+            rejectsEnabled: true,
+            suspendStatusCodes: []
+          },
+          '44730': {
+            dlnSearch: true,
+            deleteEnabled: false,
+            qualityReviewEnabled: false,
+            leadRoleEnabled: false,
+            rejectsEnabled: true,
+            suspendStatusCodes: []
+          }
+        }
+      }
+    }
+  };
+}
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -33,15 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
-        // Clear localStorage user only on actual page refresh/reload (not on component re-renders)
-        // Check if this is a page refresh by looking for a session flag
-        const isPageRefresh = !sessionStorage.getItem('auth-initialized');
-        if (isPageRefresh) {
-          console.log('🧹 AuthContext: Clearing localStorage user on page refresh');
-          localStorage.removeItem('dev-selected-user'); // Legacy cleanup
-          localStorage.removeItem('dev-selected-seid');
-          sessionStorage.setItem('auth-initialized', 'true');
-        }
+        const isDevelopment = process.env.NODE_ENV === 'development';
 
         // Try to get SEID from various sources
         let userSeid: string | null = null;
@@ -51,6 +87,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (devSelectedSeid) {
           console.log('🔍 AuthContext: Found dev selected SEID:', devSelectedSeid);
           userSeid = devSelectedSeid;
+        }
+
+        // In dev mode, auto-select first mock user if nothing stored
+        if (!userSeid && isDevelopment && mockUsers.length > 0) {
+          const defaultSeid = mockUsers[0].seid;
+          console.log('🔍 AuthContext: No stored SEID, auto-selecting first mock user:', defaultSeid);
+          localStorage.setItem('dev-selected-seid', defaultSeid);
+          userSeid = defaultSeid;
         }
 
         // If not found, try to get from meta tag (set by server)
@@ -100,9 +144,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (userSeid && validateSeid(userSeid)) {
           setSeid(userSeid);
-          const userData = await getUserFromSeid(userSeid);
+          let userData = await getUserFromSeid(userSeid);
+
+          // In dev mode, use fallback user if backend is unreachable
+          if (!userData && isDevelopment) {
+            console.log('🔍 AuthContext: Backend unreachable, using fallback dev user for:', userSeid);
+            userData = createFallbackDevUser(userSeid);
+          }
+
           console.log('🔍 AuthContext: User data with profile:', userData);
-          
           setUser(userData);
         } else {
           // No valid SEID found - user should be redirected by middleware
@@ -123,14 +173,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // Function to refresh auth context (useful for dev user selection)
-  const refreshAuth = async () => {
+  const refreshAuth = useCallback(async () => {
     setIsLoading(true);
     try {
       const devSelectedSeid = localStorage.getItem('dev-selected-seid');
       if (devSelectedSeid && validateSeid(devSelectedSeid)) {
         console.log('🔄 AuthContext: Refreshing with dev selected SEID:', devSelectedSeid);
         setSeid(devSelectedSeid);
-        const userData = await getUserFromSeid(devSelectedSeid);
+        let userData = await getUserFromSeid(devSelectedSeid);
+
+        // In dev mode, use fallback user if backend is unreachable
+        if (!userData && process.env.NODE_ENV === 'development') {
+          console.log('🔄 AuthContext: Backend unreachable, using fallback dev user for:', devSelectedSeid);
+          userData = createFallbackDevUser(devSelectedSeid);
+        }
+
         console.log('🔄 AuthContext: Refreshed user data:', userData);
         setUser(userData);
       } else {
@@ -144,7 +201,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
     }
     setIsLoading(false);
-  };
+  }, []);
 
   const contextValue: AuthContextType = {
     user,
