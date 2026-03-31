@@ -1,10 +1,16 @@
 [
   {
     "seid": "1pzwb",
-    "name": "John Doe"
+    "name": "John Doe",
+    "email": "john.doe@irs.gov",
+    "designation": "Tax Examiner",
+    "serviceCenter": "austin"
   },
   {
     "seid": "f3wpb",
-    "name": "Jane Smith"
+    "name": "Jane Smith",
+    "email": "jane.smith@irs.gov",
+    "designation": "Manager",
+    "serviceCenter": "ogden"
   }
 ]

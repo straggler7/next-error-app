@@ -127,13 +127,19 @@ function createDevUser(seid: string): User | null {
 
 /**
  * Attempt to auto-create a user profile via SSO headers.
+ * In dev mode, passes SEID to look up mock user data.
  * Returns a User on success, null on failure.
  */
-async function autoCreateUser(): Promise<User | null> {
+async function autoCreateUser(seid: string): Promise<User | null> {
   try {
+    console.log('🔧 Attempting to auto-create profile for SEID:', seid);
+    
     const response = await fetch('/api/auth/auto-create-profile', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'SEID': seid
+      },
     });
 
     if (response.status === 409) {
@@ -156,7 +162,7 @@ async function autoCreateUser(): Promise<User | null> {
       profile: userProfile,
     };
 
-    console.log('Auto-created user profile:', user);
+    console.log('✅ Auto-created user profile:', user);
     return user;
   } catch (error) {
     console.error('Error during auto-create user:', error);
@@ -182,10 +188,10 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     if (!response.ok) {
       console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
 
-      // If profile not found, attempt auto-creation from SSO headers
+      // If profile not found, attempt auto-creation
       if (response.status === 404) {
-        console.log('Profile not found, attempting auto-creation for SEID:', seid);
-        const createdUser = await autoCreateUser();
+        console.log('Profile not found (404), attempting auto-creation for SEID:', seid);
+        const createdUser = await autoCreateUser(seid);
         if (createdUser) return createdUser;
       }
 
@@ -246,39 +252,12 @@ function mapDesignationToGroup(designation: string): 'tax_examiners' | 'managers
   return 'tax_examiners';
 }
 
-/**
- * Fallback function for development/testing when API is not available
- */
-// function getFallbackUser(seid: string): User | null {
-//   const mockUsers: Record<string, User> = {
-//     'u1000': {
-//       name: 'Test User u1000',
-//       role: 'Tax Examiner',
-//       group: 'tax_examiners',
-//       seid: 'u1000'
-//     },
-//     'f3wpb': {
-//       name: 'Test User f3wpb',
-//       role: 'Manager',
-//       group: 'managers',
-//       seid: 'f3wpb'
-//     }
-//   };
-
-//   console.log('Using fallback user data for SEID:', seid);
-//   return mockUsers[seid] || {
-//     name: 'Unknown User',
-//     role: 'Tax Examiner',
-//     group: 'tax_examiners',
-//     seid: seid
-//   };
-// }
 
 /**
  * Check if user is authenticated based on SEID
  */
 export function isAuthenticated(seid: string | null): boolean {
-  console.log('Authenticating user with SEID ----------- :', seid);
+  console.log('Authenticating user with SEID:', seid);
   return seid !== null && validateSeid(seid);
 }
 
