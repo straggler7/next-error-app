@@ -8,6 +8,8 @@
  *   xbag-era-dev-taxex-austin
  */
 
+import { getServiceCenterCodes } from '../utils/serviceCenters';
+
 const MEMBEROF_PREFIX_LENGTH = 3; // xbag, era, dev
 
 const DESIGNATION_MAP: Record<string, string> = {
@@ -44,8 +46,8 @@ export function extractServiceCenterFromMemberOf(memberof: string | null): strin
 
 export interface UserCreationData {
   seid: string;
-  name: string;
-  serviceCenter: string;
+  userName: string;
+  serviceCenterId: number;
   designation: string;
   email: string;
 }
@@ -56,22 +58,29 @@ export interface UserCreationData {
  */
 export function extractUserCreationData(headers: Headers): UserCreationData | null {
   const seid = headers.get('employeeId') || headers.get('REMOTE_USER');
-  const name = headers.get('displayName');
+  const userName = headers.get('displayName');
   const email = headers.get('mail');
   const memberof = headers.get('memberof');
 
-  if (!seid || !name || !email || !memberof) {
-    console.log('Missing SSO headers for user creation:', { seid: !!seid, name: !!name, email: !!email, memberof: !!memberof });
+  if (!seid || !userName || !email || !memberof) {
+    console.log('Missing SSO headers for user creation:', { seid: !!seid, userName: !!userName, email: !!email, memberof: !!memberof });
     return null;
   }
 
-  const serviceCenter = extractServiceCenterFromMemberOf(memberof);
+  const serviceCenterName = extractServiceCenterFromMemberOf(memberof);
   const designation = extractDesignationFromMemberOf(memberof);
 
-  if (!serviceCenter || !designation) {
+  if (!serviceCenterName || !designation) {
     console.warn('Could not parse memberof header:', memberof);
     return null;
   }
 
-  return { seid, name, serviceCenter, designation, email };
+  const codes = getServiceCenterCodes(serviceCenterName);
+  if (codes.length === 0) {
+    console.warn('No service center ID found for:', serviceCenterName);
+    return null;
+  }
+  const serviceCenterId = codes[0];
+
+  return { seid, userName, serviceCenterId, designation, email };
 }
