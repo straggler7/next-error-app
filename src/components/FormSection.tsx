@@ -70,7 +70,8 @@ export function FormField({
       {React.isValidElement(children)
         ? React.cloneElement(children as React.ReactElement<any>, {
             'aria-describedby': [errorId, successId].filter(Boolean).join(' ') || undefined,
-            'aria-invalid': error ? 'true' : undefined
+            'aria-invalid': error ? 'true' : undefined,
+            'aria-required': required ? 'true' : undefined,
           })
         : children
       }
@@ -113,24 +114,28 @@ interface FormInputProps {
   error?: boolean;
   className?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   id?: string;
   'aria-describedby'?: string;
   'aria-invalid'?: boolean | 'true' | 'false';
+  'aria-required'?: boolean | 'true' | 'false';
 }
 
-export function FormInput({ 
-  type = 'text', 
+export function FormInput({
+  type = 'text',
   step,
-  placeholder, 
-  value, 
-  onChange, 
+  placeholder,
+  value,
+  onChange,
   onBlur,
   error = false,
   className = '',
   disabled = false,
+  readOnly = false,
   id,
   'aria-describedby': ariaDescribedby,
-  'aria-invalid': ariaInvalid
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }: FormInputProps) {
   return (
     <input
@@ -140,15 +145,18 @@ export function FormInput({
       placeholder={placeholder}
       value={value}
       disabled={disabled}
+      readOnly={readOnly}
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
       aria-describedby={ariaDescribedby}
       aria-invalid={ariaInvalid}
+      aria-required={ariaRequired}
+      aria-readonly={readOnly ? 'true' : undefined}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150
-        ${disabled ? 'bg-gray-200 text-gray-600 border-gray-400 cursor-not-allowed opacity-90' : 'bg-white text-gray-700'}
-        ${error 
-          ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
+        ${disabled ? 'bg-gray-200 text-gray-600 border-gray-400 cursor-not-allowed opacity-90' : readOnly ? 'bg-gray-100 text-gray-700 border-gray-300 cursor-default' : 'bg-white text-gray-700'}
+        ${error
+          ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100'
           : disabled ? 'border-gray-400' : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
         }
         focus:outline-none ${className}
@@ -166,17 +174,23 @@ interface FormSelectProps {
   error?: boolean;
   children: ReactNode;
   className?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean | 'true' | 'false';
+  'aria-required'?: boolean | 'true' | 'false';
 }
 
-export function FormSelect({ 
+export function FormSelect({
   id,
-  value, 
-  onChange, 
+  value,
+  onChange,
   onBlur,
   disabled = false,
-  error = false, 
-  children, 
-  className = '' 
+  error = false,
+  children,
+  className = '',
+  'aria-describedby': ariaDescribedby,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }: FormSelectProps) {
   return (
     <select
@@ -185,6 +199,9 @@ export function FormSelect({
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
       disabled={disabled}
+      aria-describedby={ariaDescribedby}
+      aria-invalid={ariaInvalid}
+      aria-required={ariaRequired}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 cursor-pointer
         ${error 

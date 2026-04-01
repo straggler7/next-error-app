@@ -149,7 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // In dev mode, use fallback user if backend is unreachable
           if (!userData && isDevelopment) {
             console.log('🔍 AuthContext: Backend unreachable, using fallback dev user for:', userSeid);
-            userData = createFallbackDevUser(userSeid);
+            // userData = createFallbackDevUser(userSeid);
           }
 
           console.log('🔍 AuthContext: User data with profile:', userData);
