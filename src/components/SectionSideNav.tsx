@@ -21,13 +21,13 @@ export default function SectionSideNav({
   footerContent,
 }: SectionSideNavProps) {
   return (
-    <div className="w-[200px] flex-shrink-0 bg-[#f9f8f5] border-r border-black/10 flex flex-col py-4">
-      <div className="text-[11px] font-medium text-[#888780] uppercase tracking-[0.06em] px-4 pb-3">
+    <div className="w-48 flex-shrink-0 bg-gray-50 border-r border-gray-200 flex flex-col">
+      <div className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
         Sections
       </div>
 
       <nav
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto py-1"
         role="navigation"
         aria-label="Form sections"
       >
@@ -39,20 +39,20 @@ export default function SectionSideNav({
               key={item.id}
               onClick={() => onChange(item.id)}
               aria-current={isActive ? "true" : undefined}
-              className={`w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-left border-l-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#185FA5] ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left border-l-2 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#185FA5] ${
                 isActive
-                  ? "border-[#185FA5] bg-white text-[#1a1a18] font-medium"
-                  : "border-transparent text-[#5f5e5a] hover:bg-white/60 hover:text-[#1a1a18]"
+                  ? "border-[#185FA5] bg-white text-gray-900 font-medium shadow-[inset_-1px_0_0_0_theme(colors.gray.200)]"
+                  : "border-transparent text-gray-500 hover:bg-white hover:text-gray-700"
               }`}
             >
-              {/* Step dot */}
+              {/* Step number */}
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-medium flex-shrink-0 ${
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0 ${
                   isActive
-                    ? "bg-[#E6F1FB] text-[#185FA5]"
+                    ? "bg-blue-50 text-[#185FA5]"
                     : hasErrors
-                    ? "bg-red-100 text-red-600"
-                    : "bg-[#f1efe8] text-[#888780]"
+                    ? "bg-red-50 text-red-500"
+                    : "bg-gray-200 text-gray-400"
                 }`}
               >
                 {item.stepNumber}
@@ -67,7 +67,7 @@ export default function SectionSideNav({
               {hasErrors && (
                 <span
                   aria-label={`${item.errorCount} error${item.errorCount! > 1 ? "s" : ""}`}
-                  className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-red-500 text-white rounded-full flex-shrink-0"
+                  className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-red-500 text-white rounded-full flex-shrink-0"
                 >
                   {item.errorCount}
                 </span>
@@ -78,7 +78,7 @@ export default function SectionSideNav({
       </nav>
 
       {footerContent && (
-        <div className="mt-auto pt-3 px-4 border-t border-black/10 text-[11px] text-[#888780]">
+        <div className="mt-auto px-4 py-3 border-t border-gray-200 text-xs text-gray-500">
           {footerContent}
         </div>
       )}
