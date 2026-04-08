@@ -59,18 +59,29 @@ export function FormField({
   const hasChanged = showChangeIndicator && originalValue && currentValue && originalValue !== currentValue;
   const errorId = error && htmlFor ? `${htmlFor}-error` : undefined;
   const successId = success && htmlFor ? `${htmlFor}-success` : undefined;
+  const childAriaDescribedBy = React.isValidElement(children)
+    ? (children.props as { 'aria-describedby'?: string })['aria-describedby']
+    : undefined;
+  const describedBy = [childAriaDescribedBy, errorId, successId].filter(Boolean).join(' ') || undefined;
   
   return (
     <div className={`mb-2 ${className} ${isHighlighted ? 'ring-1 ring-red-200 ring-opacity-50 rounded-md p-2 bg-red-50' : ''}`}>
       <label htmlFor={htmlFor} className="block text-sm font-semibold text-gray-700 mb-2 tracking-tight">
         {label}
-        {required && <span className="text-red-600 ml-1">*</span>}
+        {required && (
+          <>
+            <span className="text-red-600 ml-1" aria-hidden="true">*</span>
+            <span className="sr-only">(required)</span>
+          </>
+        )}
       </label>
       {/* Clone children and add ARIA attributes for 508 compliance */}
       {React.isValidElement(children)
         ? React.cloneElement(children as React.ReactElement<any>, {
-            'aria-describedby': [errorId, successId].filter(Boolean).join(' ') || undefined,
-            'aria-invalid': error ? 'true' : undefined
+            'aria-describedby': describedBy,
+            'aria-invalid': error ? 'true' : undefined,
+            required,
+            'aria-required': required ? 'true' : undefined
           })
         : children
       }
@@ -113,9 +124,13 @@ interface FormInputProps {
   error?: boolean;
   className?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   id?: string;
+  required?: boolean;
   'aria-describedby'?: string;
   'aria-invalid'?: boolean | 'true' | 'false';
+  'aria-required'?: boolean | 'true' | 'false';
+  'aria-disabled'?: boolean | 'true' | 'false';
 }
 
 export function FormInput({ 
@@ -128,10 +143,16 @@ export function FormInput({
   error = false,
   className = '',
   disabled = false,
+  readOnly = false,
   id,
+  required,
   'aria-describedby': ariaDescribedby,
-  'aria-invalid': ariaInvalid
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
+  'aria-disabled': ariaDisabled
 }: FormInputProps) {
+  const isReadOnlyLike = disabled || readOnly || ariaDisabled === true || ariaDisabled === 'true';
+
   return (
     <input
       id={id}
@@ -140,16 +161,22 @@ export function FormInput({
       placeholder={placeholder}
       value={value}
       disabled={disabled}
+      readOnly={readOnly}
+      required={required}
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
       aria-describedby={ariaDescribedby}
       aria-invalid={ariaInvalid}
+      aria-required={ariaRequired}
+      aria-disabled={ariaDisabled}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150
-        ${disabled ? 'bg-gray-200 text-gray-600 border-gray-400 cursor-not-allowed opacity-90' : 'bg-white text-gray-700'}
+        ${isReadOnlyLike ? 'bg-gray-200 text-gray-600 border-gray-400 cursor-not-allowed opacity-90' : 'bg-white text-gray-700'}
         ${error 
           ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
-          : disabled ? 'border-gray-400' : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
+          : isReadOnlyLike
+            ? 'border-1 border-gray-400 focus:border-blue-600 focus:bg-gray-200 focus:ring-2 focus:ring-blue-100'
+            : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100'
         }
         focus:outline-none ${className}
       `}
@@ -163,7 +190,12 @@ interface FormSelectProps {
   onChange?: (value: string) => void;
   onBlur?: () => void;
   disabled?: boolean;
+  required?: boolean;
   error?: boolean;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean | 'true' | 'false';
+  'aria-required'?: boolean | 'true' | 'false';
+  'aria-disabled'?: boolean | 'true' | 'false';
   children: ReactNode;
   className?: string;
 }
@@ -174,7 +206,12 @@ export function FormSelect({
   onChange, 
   onBlur,
   disabled = false,
+  required,
   error = false, 
+  'aria-describedby': ariaDescribedby,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
+  'aria-disabled': ariaDisabled,
   children, 
   className = '' 
 }: FormSelectProps) {
@@ -185,11 +222,16 @@ export function FormSelect({
       onChange={(e) => onChange?.(e.target.value)}
       onBlur={onBlur}
       disabled={disabled}
+      required={required}
+      aria-describedby={ariaDescribedby}
+      aria-invalid={ariaInvalid}
+      aria-required={ariaRequired}
+      aria-disabled={ariaDisabled}
       className={`
         w-full px-4 py-3 border rounded-md text-sm transition-all duration-150 bg-gray-50 text-gray-700 cursor-pointer
         ${error 
-          ? 'border-red-600 focus:border-red-600 focus:ring-3 focus:ring-red-100' 
-          : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-3 focus:ring-blue-100'
+          ? 'border-red-600 focus:border-red-600 focus:ring-2 focus:ring-red-100' 
+          : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100'
         }
         focus:outline-none ${className}
       `}

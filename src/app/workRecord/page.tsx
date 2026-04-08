@@ -130,6 +130,8 @@ function Form4868ERSPageContent() {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [formErrorSummary, setFormErrorSummary] = useState<string>("");
+  const [formErrorFieldOrder, setFormErrorFieldOrder] = useState<string[]>([]);
 
   // Track fields that have been edited
   const [fieldWithErrors, setFieldWithErrors] = useState<string[]>([]);
@@ -882,7 +884,7 @@ function Form4868ERSPageContent() {
   };
 
   // Helper function to get form element label by name
-  const getFormElementLabel = (name: string): string => {
+  const getFormElementLabel = useCallback((name: string): string => {
     // Always prioritize fieldConfig4868.json for labels
     const fieldConfigItem = (fieldConfig as any)[name];
     if (fieldConfigItem?.label) {
@@ -902,7 +904,48 @@ function Form4868ERSPageContent() {
 
     // Final fallback to generated label
     return toLabel(name);
+  }, [formElements]);
+
+  const isFieldRequired = (name: string): boolean => {
+    return Boolean((fieldConfig as any)[name]?.validation?.required);
   };
+
+  const formErrorEntries = useMemo(() => {
+    const orderedKeys =
+      formErrorFieldOrder.length > 0
+        ? formErrorFieldOrder
+        : Object.keys(validationErrors);
+
+    return orderedKeys
+      .filter((key) => Boolean(validationErrors[key]))
+      .map((key) => ({
+        key,
+        label: key === "actionCodeSelect" ? "Action Code" : getFormElementLabel(key),
+        message: validationErrors[key],
+      }));
+  }, [formErrorFieldOrder, validationErrors, getFormElementLabel]);
+
+  useEffect(() => {
+    if (formErrorEntries.length > 0 && formErrorSummaryRef.current) {
+      formErrorSummaryRef.current.focus();
+    }
+  }, [formErrorEntries]);
+
+  const focusFieldByKey = useCallback((fieldKey: string) => {
+    const target = document.getElementById(fieldKey);
+    if (target) {
+      target.focus();
+    }
+  }, []);
+
+  const showValidationSummary = useCallback(
+    (errors: Record<string, string>, summary: string) => {
+      setValidationErrors(errors);
+      setFormErrorSummary(summary);
+      setFormErrorFieldOrder(Object.keys(errors));
+    },
+    []
+  );
 
   // Helper function to get original value
   const getOriginalValue = (name: string): string => {
@@ -1156,6 +1199,7 @@ function Form4868ERSPageContent() {
 
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
+  const formErrorSummaryRef = useRef<HTMLDivElement>(null);
 
   // Focus on InfoAlert when it's shown
   useEffect(() => {
@@ -1166,6 +1210,13 @@ function Form4868ERSPageContent() {
       }, 100);
     }
   }, [showInfo]);
+
+  useEffect(() => {
+    if (Object.keys(validationErrors).length === 0) {
+      setFormErrorSummary("");
+      setFormErrorFieldOrder([]);
+    }
+  }, [validationErrors]);
 
   // Helper function to get current time in Eastern timezone as ISO string
   const getEasternTimestamp = () => {
@@ -1268,6 +1319,10 @@ function Form4868ERSPageContent() {
 
   const handleSuspend = async () => {
     if (!inventoryId || !actionCode.trim()) {
+      showValidationSummary(
+        { ...validationErrors, actionCodeSelect: "Action Code is required for Suspend." },
+        "Please correct the errors below before suspending."
+      );
       setFlashMessage("Action Code is required for Suspend.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 3000);
@@ -1279,7 +1334,10 @@ function Form4868ERSPageContent() {
 
     // Check for validation errors before suspending
     if (Object.keys(changedFieldErrors).length > 0) {
-      setValidationErrors(changedFieldErrors);
+      showValidationSummary(
+        changedFieldErrors,
+        "Please fix validation errors before suspending."
+      );
       setFlashMessage("Please fix validation errors before suspending.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -1602,7 +1660,10 @@ function Form4868ERSPageContent() {
 
     // Check for validation errors before deleting
     if (Object.keys(changedFieldErrors).length > 0) {
-      setValidationErrors(changedFieldErrors);
+      showValidationSummary(
+        changedFieldErrors,
+        "Please fix validation errors before deleting."
+      );
       setFlashMessage("Please fix validation errors before deleting.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -1732,7 +1793,10 @@ function Form4868ERSPageContent() {
 
     // If there are validation errors, prevent submission and show errors
     if (Object.keys(validationErrors).length > 0) {
-      setValidationErrors(validationErrors);
+      showValidationSummary(
+        validationErrors,
+        "Please fix validation errors before submitting."
+      );
       setFlashMessage("Please fix validation errors before submitting.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -2464,7 +2528,33 @@ function Form4868ERSPageContent() {
         {/* Form Section (Left 60%) */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
-            <form className="space-y-8">
+            <form className="space-y-8" noValidate>
+              {formErrorEntries.length > 0 && (
+                <div
+                  ref={formErrorSummaryRef}
+                  tabIndex={-1}
+                  role="alert"
+                  aria-live="assertive"
+                  className="rounded-lg border border-red-300 bg-red-50 p-4"
+                >
+                  <h2 className="text-sm font-semibold text-red-800">
+                    {formErrorSummary || "Please correct the following errors:"}
+                  </h2>
+                  <ul className="mt-2 space-y-1 text-sm text-red-700">
+                    {formErrorEntries.map((entry) => (
+                      <li key={entry.key}>
+                        <button
+                          type="button"
+                          onClick={() => focusFieldByKey(entry.key)}
+                          className="text-left underline hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded"
+                        >
+                          {entry.label}: {entry.message}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <FormSection title="Form 4868 - Application for Automatic Extension">
                 <div className="space-y-8 px-1">
                   <div>
@@ -2487,7 +2577,8 @@ function Form4868ERSPageContent() {
                               ? "Enter 'C' to clear error"
                               : "Current error not clearable"
                           }
-                          disabled={hasFieldErrors || !isCurrentErrorClearable}
+                          readOnly={hasFieldErrors || !isCurrentErrorClearable}
+                          aria-disabled={hasFieldErrors || !isCurrentErrorClearable ? 'true' : undefined}
                         />
                         {/* <div className="mt-1 text-xs text-gray-600">
                           {hasFieldErrors ? "Clear codes disabled when field errors are present" : (isCurrentErrorClearable ? "Enter 'C' to clear the current error" : "Current error is not clearable")}
@@ -2500,6 +2591,7 @@ function Form4868ERSPageContent() {
                         <FormField
                           key={key}
                           label={getFormElementLabel(key)}
+                          required={isFieldRequired(key)}
                           htmlFor={key}
                           originalValue={getOriginalValue(key)}
                           currentValue={getFormElementValue(key)}
@@ -2522,19 +2614,25 @@ function Form4868ERSPageContent() {
                     {/* Non-Editable Fields Section */}
                     {nonEditableFieldKeys.length > 0 && (
                       <div className="mt-2">
+                        <p id="readonly-fields-note" className="sr-only">
+                          Read-only field. Value cannot be edited.
+                        </p>
                         <div className="text-md font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2"></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {nonEditableFieldKeys.map((key) => (
                             <FormField
                               key={key}
                               label={getFormElementLabel(key)}
+                              required={isFieldRequired(key)}
                               htmlFor={key}
                               error={getValidationError(key)}
                             >
                               <FormInput
                                 id={key}
                                 value={getFormElementValue(key)}
-                                disabled={true}
+                                readOnly={true}
+                                aria-disabled="true"
+                                aria-describedby="readonly-fields-note"
                                 error={getFieldHasError(key)}
                               />
                             </FormField>
@@ -2551,9 +2649,20 @@ function Form4868ERSPageContent() {
                     <FormSelect
                       id="actionCodeSelect"
                       value={actionCode}
+                      error={Boolean(validationErrors.actionCodeSelect)}
+                      aria-describedby={validationErrors.actionCodeSelect ? "actionCodeSelect-error" : undefined}
                       onChange={(value) => {
                         setActionCode(value);
                         handleInputChange("suspendStatusCode", value);
+                        setValidationErrors((prev) => {
+                          if (!prev.actionCodeSelect) {
+                            return prev;
+                          }
+
+                          const nextErrors = { ...prev };
+                          delete nextErrors.actionCodeSelect;
+                          return nextErrors;
+                        });
                       }}
                       disabled={loadingSuspenseCodes}
                     >
@@ -2572,6 +2681,16 @@ function Form4868ERSPageContent() {
                         </option>
                       ))}
                     </FormSelect>
+                    {validationErrors.actionCodeSelect && (
+                      <span
+                        id="actionCodeSelect-error"
+                        className="block text-red-600 text-xs mt-2 font-medium leading-tight"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        {validationErrors.actionCodeSelect}
+                      </span>
+                    )}
                   </FormField>
                 </div>
               </FormSection>
