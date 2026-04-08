@@ -1029,6 +1029,11 @@ function Form4868ERSPageContent() {
 
   const mockNotes: Note[] = [];
 
+  // Returns true if the field is marked required in fieldConfig (used for aria-required)
+  const isFieldRequired = (fieldKey: string): boolean => {
+    return Boolean((fieldConfig as any)[fieldKey]?.validation?.required);
+  };
+
   // Get error items (reactive to clear codes changes)
   const errorItems = useMemo(() => {
     return convertErsErrorsToErrorItems();
@@ -1156,6 +1161,8 @@ function Form4868ERSPageContent() {
 
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
+  // Ref for form-level error summary (508 compliance focus management)
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   // Focus on InfoAlert when it's shown
   useEffect(() => {
@@ -1280,6 +1287,7 @@ function Form4868ERSPageContent() {
     // Check for validation errors before suspending
     if (Object.keys(changedFieldErrors).length > 0) {
       setValidationErrors(changedFieldErrors);
+      setTimeout(() => errorSummaryRef.current?.focus(), 0);
       setFlashMessage("Please fix validation errors before suspending.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -1733,6 +1741,7 @@ function Form4868ERSPageContent() {
     // If there are validation errors, prevent submission and show errors
     if (Object.keys(validationErrors).length > 0) {
       setValidationErrors(validationErrors);
+      setTimeout(() => errorSummaryRef.current?.focus(), 0);
       setFlashMessage("Please fix validation errors before submitting.");
       setShowFlash(true);
       setTimeout(() => setShowFlash(false), 5000);
@@ -2464,6 +2473,29 @@ function Form4868ERSPageContent() {
         {/* Form Section (Left 60%) */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 flex flex-col min-w-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto">
+            {/* Form-level error summary for 508 compliance */}
+            {Object.keys(validationErrors).length > 0 && (
+              <div
+                ref={errorSummaryRef}
+                role="alert"
+                aria-live="assertive"
+                tabIndex={-1}
+                className="mb-4 p-4 border border-red-600 rounded-md bg-red-50 focus:outline-none"
+              >
+                <p className="text-sm font-bold text-red-700 mb-2">
+                  Please correct the following errors before submitting:
+                </p>
+                <ul className="list-disc list-inside space-y-1">
+                  {Object.entries(validationErrors).map(([key, error]) => (
+                    <li key={key} className="text-sm text-red-600">
+                      <a href={`#${key}`} className="underline hover:text-red-800">
+                        {getFormElementLabel(key)}
+                      </a>: {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <form className="space-y-8">
               <FormSection title="Form 4868 - Application for Automatic Extension">
                 <div className="space-y-8 px-1">
@@ -2501,6 +2533,7 @@ function Form4868ERSPageContent() {
                           key={key}
                           label={getFormElementLabel(key)}
                           htmlFor={key}
+                          required={isFieldRequired(key)}
                           originalValue={getOriginalValue(key)}
                           currentValue={getFormElementValue(key)}
                           showChangeIndicator={true}
@@ -2534,7 +2567,7 @@ function Form4868ERSPageContent() {
                               <FormInput
                                 id={key}
                                 value={getFormElementValue(key)}
-                                disabled={true}
+                                readOnly
                                 error={getFieldHasError(key)}
                               />
                             </FormField>
@@ -2810,7 +2843,7 @@ function Form4868ERSPageContent() {
 
         {/* Field Error Warning Message */}
         {hasAnyFieldErrors() && (
-          <div className="mt-3 text-left">
+          <div className="mt-3 text-left" role="alert" aria-live="polite">
             <p className="text-sm text-red-600 font-medium">
               Field errors need to be fixed for submission
             </p>

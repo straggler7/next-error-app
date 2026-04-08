@@ -76,54 +76,54 @@ interface UserProfileResponse {
 /**
  * Create a development user based on DEV_ROLE environment variable
  */
-function createDevUser(seid: string): User | null {
-  const devRole = process.env.NEXT_PUBLIC_DEV_ROLE;
+// function createDevUser(seid: string): User | null {
+//   const devRole = process.env.NEXT_PUBLIC_DEV_ROLE;
   
-  if (!devRole || (devRole !== 'managers' && devRole !== 'tax_examiners')) {
-    console.log('🔧 DEV_ROLE not set or invalid:', devRole);
-    return null;
-  }
+//   if (!devRole || (devRole !== 'managers' && devRole !== 'tax_examiners')) {
+//     console.log('🔧 DEV_ROLE not set or invalid:', devRole);
+//     return null;
+//   }
   
-  console.log('🔧 Creating dev user with role:', devRole, 'for SEID:', seid);
+//   console.log('🔧 Creating dev user with role:', devRole, 'for SEID:', seid);
   
-  const user: User = {
-    name: `Dev User (${seid})`,
-    role: devRole === 'managers' ? 'Manager' : 'Tax Examiner',
-    group: devRole,
-    seid: seid,
-    profile: {
-      userId: seid,
-      seid: seid,
-      userName: `Dev User (${seid})`,
-      designation: devRole === 'managers' ? 'Manager' : 'Tax Examiner',
-      teamCode: 'DEV-TEAM',
-      serviceCenterId: '16', // Default to Austin
-      activeStatus: true,
-      profile: {
-        profiles: {
-          '44720': {
-            dlnSearch: true,
-            deleteEnabled: devRole === 'managers',
-            qualityReviewEnabled: true,
-            leadRoleEnabled: devRole === 'managers',
-            rejectsEnabled: true,
-            suspendStatusCodes: ['SC-1', 'SC-2', 'SC-3', 'SC-4', 'SC-5']
-          },
-          '44730': {
-            dlnSearch: true,
-            deleteEnabled: devRole === 'managers',
-            qualityReviewEnabled: true,
-            leadRoleEnabled: devRole === 'managers',
-            rejectsEnabled: true,
-            suspendStatusCodes: ['SC-1', 'SC-2', 'SC-3', 'SC-4', 'SC-5']
-          }
-        }
-      }
-    }
-  };
+//   const user: User = {
+//     name: `Dev User (${seid})`,
+//     role: devRole === 'managers' ? 'Manager' : 'Tax Examiner',
+//     group: devRole,
+//     seid: seid,
+//     profile: {
+//       userId: seid,
+//       seid: seid,
+//       userName: `Dev User (${seid})`,
+//       designation: devRole === 'managers' ? 'Manager' : 'Tax Examiner',
+//       teamCode: 'DEV-TEAM',
+//       serviceCenterId: '16', // Default to Austin
+//       activeStatus: true,
+//       profile: {
+//         profiles: {
+//           '44720': {
+//             dlnSearch: true,
+//             deleteEnabled: devRole === 'managers',
+//             qualityReviewEnabled: true,
+//             leadRoleEnabled: devRole === 'managers',
+//             rejectsEnabled: true,
+//             suspendStatusCodes: ['SC-1', 'SC-2', 'SC-3', 'SC-4', 'SC-5']
+//           },
+//           '44730': {
+//             dlnSearch: true,
+//             deleteEnabled: devRole === 'managers',
+//             qualityReviewEnabled: true,
+//             leadRoleEnabled: devRole === 'managers',
+//             rejectsEnabled: true,
+//             suspendStatusCodes: ['SC-1', 'SC-2', 'SC-3', 'SC-4', 'SC-5']
+//           }
+//         }
+//       }
+//     }
+//   };
   
-  return user;
-}
+//   return user;
+// }
 
 /**
  * Attempt to auto-create a user profile via SSO headers.
@@ -189,18 +189,18 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
       console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
 
       // If profile not found, attempt auto-creation
-      if (response.status === 404) {
-        console.log('Profile not found (404), attempting auto-creation for SEID:', seid);
+      if (response.status === 404 || response.status === 401) {
+        console.log('Profile not found (404/401), attempting auto-creation for SEID:', seid);
         const createdUser = await autoCreateUser(seid);
         if (createdUser) return createdUser;
       }
 
       // Check if DEV_ROLE is set and return dev user
-      const devUser = createDevUser(seid);
-      if (devUser) {
-        console.log('🔧 Using dev user due to API failure:', devUser);
-        return devUser;
-      }
+      // const devUser = createDevUser(seid);
+      // if (devUser) {
+      //   console.log('🔧 Using dev user due to API failure:', devUser);
+      //   return devUser;
+      // }
 
       return null;
     }
@@ -223,11 +223,11 @@ export async function getUserFromSeid(seid: string): Promise<User | null> {
     console.error('Error fetching user from SEID:', error);
     
     // Check if DEV_ROLE is set and return dev user
-    const devUser = createDevUser(seid);
-    if (devUser) {
-      console.log('🔧 Using dev user due to API error:', devUser);
-      return devUser;
-    }
+    // const devUser = createDevUser(seid);
+    // if (devUser) {
+    //   console.log('🔧 Using dev user due to API error:', devUser);
+    //   return devUser;
+    // }
     
     return null;
   }
