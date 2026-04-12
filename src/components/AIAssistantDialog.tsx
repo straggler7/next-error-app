@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { aiAgentService } from '../services/aiAgentService';
 import { X, MessageSquare, Send, Sparkles, Loader2, CheckCircle2, AlertCircle, Info, Zap, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface Message {
@@ -49,6 +50,7 @@ interface AIAssistantDialogProps {
     fieldMappings?: string[];
   }>;
   onApplyFixes?: (fixes: ErrorFix[]) => void;
+  dln?: string;
 }
 
 export default function AIAssistantDialog({
@@ -58,6 +60,7 @@ export default function AIAssistantDialog({
   currentError,
   allErrors = [],
   onApplyFixes,
+  dln,
 }: AIAssistantDialogProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -69,8 +72,10 @@ export default function AIAssistantDialog({
   const [showDenyModal, setShowDenyModal] = useState(false);
   const [denyFeedback, setDenyFeedback] = useState("");
   const [isReworking, setIsReworking] = useState(false);
+  const [agentStatus, setAgentStatus] = useState<'idle' | 'submitting' | 'waiting' | 'error'>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const analysisAbortedRef = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -83,6 +88,15 @@ export default function AIAssistantDialog({
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      analysisAbortedRef.current = true;
+      setAgentStatus('idle');
+    } else {
+      analysisAbortedRef.current = false;
     }
   }, [isOpen]);
 
@@ -107,31 +121,71 @@ export default function AIAssistantDialog({
       };
       setMessages(prev => [...prev, analysisMessage]);
       
-      // Simulate analysis
-      setTimeout(() => {
-        const changes = simulateAgentResponse("analyze all");
-        
-        if (changes.length > 0) {
-          setFieldChanges(changes);
-          const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
-          const highConfidence = changes.filter(c => c.confidenceScore >= 0.9).length;
-          
-          const summaryMessage: Message = {
-            role: "assistant",
-            content: `✅ **Analysis Complete**\n\nI've identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction:\n\n**Summary:**\n- Average confidence: ${avgConfidence}%\n- High confidence fields (≥90%): ${highConfidence}\n- Fields requiring review: ${changes.length - highConfidence}\n\n**IRM Guidance - Error 111 (Tax Period/Transaction Date):**\n\nPer IRM 3.12.179-8, Form 4868 (Application for Automatic Extension of Time to File) requires consistency between:\n- **Tax Period (01TXP)**: The tax year for which the extension is requested\n- **Transaction Date (01TDT)**: The MeF receipt date when the extension was filed\n\nThe error occurs when there's a mismatch between these dates. The correction ensures:\n1. The tax period reflects the correct tax year being extended\n2. The transaction date aligns with the filing year\n3. Both dates are consistent with the extension request timeline\n\n**Resolution Applied:**\nBased on the MeF receipt date and filing patterns, both fields have been updated to tax year 2024 to maintain consistency and comply with IRM requirements.\n\n**Proposed Changes:**\nPlease review the table below and select which changes to apply. You can:\n- **Apply**: Apply selected changes to the form\n- **Deny**: Reject changes and provide feedback\n- **Rework**: Request re-analysis with enhanced validation\n\nFeel free to ask me questions about any of the proposed changes!`,
+      const dlnValue = dln || (formData as Record<string, any>)?.workRecord?.dln || (formData as Record<string, any>)?.dln;
+
+      const runAnalysis = async () => {
+        try {
+          if (!dlnValue || !formData) {
+            const noDataMessage: Message = {
+              role: 'assistant',
+              content: '⚠️ **Cannot Start Analysis**\n\nNo DLN found for this work record. Please ensure a work record is loaded.',
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, noDataMessage]);
+            setIsLoading(false);
+            return;
+          }
+
+          setAgentStatus('submitting');
+          await aiAgentService.submitWorkRecord(formData as Record<string, unknown>, dlnValue);
+          if (analysisAbortedRef.current) return;
+
+          setAgentStatus('waiting');
+          const recommendations = await aiAgentService.pollForRecommendations(dlnValue);
+          if (analysisAbortedRef.current) return;
+
+          setAgentStatus('idle');
+          const changes: FieldChange[] = recommendations.map(rec => ({
+            field: rec.field,
+            currentValue: rec.currentValue,
+            proposedValue: rec.proposedValue,
+            confidenceScore: rec.confidenceScore,
+            selected: true,
+          }));
+
+          if (changes.length > 0) {
+            setFieldChanges(changes);
+            const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
+            const highConfidence = changes.filter(c => c.confidenceScore >= 0.9).length;
+            const summaryMessage: Message = {
+              role: 'assistant',
+              content: `✅ **Analysis Complete**\n\nI've identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction:\n\n**Summary:**\n- Average confidence: ${avgConfidence}%\n- High confidence fields (≥90%): ${highConfidence}\n- Fields requiring review: ${changes.length - highConfidence}\n\n**Proposed Changes:**\nPlease review the table below and select which changes to apply. You can:\n- **Apply**: Apply selected changes to the form\n- **Deny**: Reject changes and provide feedback\n- **Rework**: Re-submit for fresh analysis\n\nFeel free to ask me questions about any of the proposed changes!`,
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, summaryMessage]);
+          } else {
+            const noErrorsMessage: Message = {
+              role: 'assistant',
+              content: '✅ **Analysis Complete**\n\nNo field-level corrections were identified. If you have specific questions or need guidance on particular errors, feel free to ask.',
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, noErrorsMessage]);
+          }
+          setIsLoading(false);
+        } catch (error) {
+          if (analysisAbortedRef.current) return;
+          setAgentStatus('error');
+          setIsLoading(false);
+          const errorMessage: Message = {
+            role: 'assistant',
+            content: `❌ **Analysis Failed**\n\n${error instanceof Error ? error.message : 'An unexpected error occurred.'}\n\nYou can try again using the Rework button, or proceed with manual review.`,
             timestamp: new Date(),
           };
-          setMessages(prev => [...prev, summaryMessage]);
-        } else {
-          const noErrorsMessage: Message = {
-            role: "assistant",
-            content: "✅ **Analysis Complete**\n\nI couldn't identify any field-level corrections needed at this time. The form appears to be in good shape!\n\nIf you have specific questions or need guidance on particular errors, feel free to ask.",
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, noErrorsMessage]);
+          setMessages(prev => [...prev, errorMessage]);
         }
-        setIsLoading(false);
-      }, 10000);
+      };
+
+      runAnalysis();
     }
   }, [isOpen, currentError, messages.length, fieldChanges.length]);
 
@@ -289,43 +343,70 @@ export default function AIAssistantDialog({
     setIsLoading(true);
     setProposedFixes(null);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const lowerMessage = userMessage.content.toLowerCase();
-      
-      // Check if user is asking for new analysis
-      if (lowerMessage.includes("analyze") || lowerMessage.includes("fix") || lowerMessage.includes("check")) {
-        const changes = simulateAgentResponse(userMessage.content);
-        
+    const lowerContent = userMessage.content.toLowerCase();
+
+    if (lowerContent.includes('analyze') || lowerContent.includes('fix') || lowerContent.includes('check')) {
+      const dlnValue = dln || (formData as Record<string, any>)?.workRecord?.dln || (formData as Record<string, any>)?.dln;
+      if (!dlnValue || !formData) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: '⚠️ No DLN found for this work record. Cannot submit for agent analysis.',
+          timestamp: new Date(),
+        }]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setAgentStatus('submitting');
+        await aiAgentService.submitWorkRecord(formData as Record<string, unknown>, dlnValue);
+        setAgentStatus('waiting');
+        const recommendations = await aiAgentService.pollForRecommendations(dlnValue);
+        setAgentStatus('idle');
+
+        const changes: FieldChange[] = recommendations.map(rec => ({
+          field: rec.field,
+          currentValue: rec.currentValue,
+          proposedValue: rec.proposedValue,
+          confidenceScore: rec.confidenceScore,
+          selected: true,
+        }));
+
         if (changes.length > 0) {
           setFieldChanges(changes);
           const avgConfidence = (changes.reduce((sum, c) => sum + c.confidenceScore, 0) / changes.length * 100).toFixed(0);
-          const assistantMessage: Message = {
-            role: "assistant",
+          setMessages(prev => [...prev, {
+            role: 'assistant',
             content: `I've analyzed the form and identified ${changes.length} field${changes.length > 1 ? 's' : ''} that require correction with an average confidence of ${avgConfidence}%. Please review the proposed changes in the table below.`,
             timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
+          }]);
         } else {
-          const assistantMessage: Message = {
-            role: "assistant",
-            content: "I couldn't identify any specific field corrections for that request. The current analysis shows all available corrections in the table above.",
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: 'No field-level corrections were identified for that request.',
             timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
+          }]);
         }
-      } else {
-        // Answer questions - combine both plan and agent responses
-        const responseContent = generateCombinedResponse(userMessage.content, fieldChanges, currentError, allErrors);
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: responseContent,
+      } catch (error) {
+        setAgentStatus('error');
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `❌ **Analysis Failed**\n\n${error instanceof Error ? error.message : 'An unexpected error occurred.'}`,
           timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
+        }]);
       }
       setIsLoading(false);
-    }, 1000);
+    } else {
+      setTimeout(() => {
+        const responseContent = generateCombinedResponse(userMessage.content, fieldChanges, currentError, allErrors);
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+        }]);
+        setIsLoading(false);
+      }, 1000);
+    }
   };
 
   const handleToggleFieldSelection = (fieldIndex: number) => {
@@ -423,30 +504,56 @@ export default function AIAssistantDialog({
 
   const handleRework = async () => {
     setIsReworking(true);
-    
-    const reworkMessage: Message = {
-      role: "assistant",
-      content: "🔄 **Reworking Analysis**\n\nI'm re-analyzing the form data with enhanced context and cross-referencing additional knowledge sources. This may take a moment...",
+    analysisAbortedRef.current = false;
+
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: '🔄 **Re-submitting for Analysis**\n\nI\'m re-submitting the work record to the AI agent for a fresh analysis. This may take a moment...',
       timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, reworkMessage]);
-    
-    // Simulate rework process
-    setTimeout(() => {
-      const reworkedChanges = simulateRework(fieldChanges);
+    }]);
+
+    const dlnValue = dln || (formData as Record<string, any>)?.workRecord?.dln || (formData as Record<string, any>)?.dln;
+
+    try {
+      if (!dlnValue || !formData) {
+        throw new Error('No DLN found for this work record.');
+      }
+
+      setAgentStatus('submitting');
+      await aiAgentService.submitWorkRecord(formData as Record<string, unknown>, dlnValue);
+      setAgentStatus('waiting');
+
+      const recommendations = await aiAgentService.pollForRecommendations(dlnValue);
+      setAgentStatus('idle');
+
+      const reworkedChanges: FieldChange[] = recommendations.map(rec => ({
+        field: rec.field,
+        currentValue: rec.currentValue,
+        proposedValue: rec.proposedValue,
+        confidenceScore: rec.confidenceScore,
+        selected: true,
+      }));
+
       setFieldChanges(reworkedChanges);
-      
-      const avgConfidence = (reworkedChanges.reduce((sum, c) => sum + c.confidenceScore, 0) / reworkedChanges.length * 100).toFixed(0);
-      const improvement = reworkedChanges.filter(c => c.confidenceScore >= 0.9).length;
-      
-      const resultMessage: Message = {
-        role: "assistant",
-        content: `✨ **Analysis Complete**\n\nI've reworked the analysis with enhanced validation and cross-referencing:\n\n**Improvements:**\n- Average confidence increased to ${avgConfidence}%\n- ${improvement} field${improvement !== 1 ? 's' : ''} now have high confidence (≥90%)\n- Validated against additional data sources\n\n**Updated Recommendations:**\nPlease review the updated table below. The confidence scores reflect improved analysis based on deeper context evaluation.`,
+      const avgConfidence = reworkedChanges.length > 0
+        ? (reworkedChanges.reduce((sum, c) => sum + c.confidenceScore, 0) / reworkedChanges.length * 100).toFixed(0)
+        : '0';
+
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `✨ **Fresh Analysis Complete**\n\nThe AI agent has re-analyzed the work record:\n\n- ${reworkedChanges.length} correction${reworkedChanges.length !== 1 ? 's' : ''} identified\n- Average confidence: ${avgConfidence}%\n\n**Updated Recommendations:**\nPlease review the updated table below.`,
         timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, resultMessage]);
+      }]);
+    } catch (error) {
+      setAgentStatus('error');
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `❌ **Re-analysis Failed**\n\n${error instanceof Error ? error.message : 'An unexpected error occurred.'}`,
+        timestamp: new Date(),
+      }]);
+    } finally {
       setIsReworking(false);
-    }, 10000);
+    }
   };
 
   const getConfidenceColor = (score: number) => {
@@ -744,7 +851,11 @@ export default function AIAssistantDialog({
             <div className="bg-white text-gray-800 border border-gray-200 rounded-lg px-4 py-2">
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                <span className="text-sm text-gray-600">Analyzing...</span>
+                <span className="text-sm text-gray-600">
+                  {agentStatus === 'submitting' ? 'Submitting to AI agent...' :
+                   agentStatus === 'waiting' ? 'Waiting for analysis...' :
+                   'Analyzing...'}
+                </span>
               </div>
             </div>
           </div>

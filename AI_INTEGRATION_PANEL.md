@@ -1,197 +1,201 @@
-# AI Integration Panel Implementation
+# AI Assistant Dialog — Implementation Reference
 
 ## Overview
-Added an AI Integration Panel above the Notes section on the work record page to assist users with error resolution using two modes: **Plan Mode** and **Agent Mode**.
 
-## Features
+A floating AI chat dialog (`AIAssistantDialog`) accessible from the work record page via a floating action button. Supports two modes:
 
-### Plan Mode (Default)
-- **Purpose**: Provides guidance and resolution steps for errors
-- **Capabilities**:
-  - Shows IRM guidance for current error
-  - Provides step-by-step resolution instructions
-  - Explains what needs to be corrected
-  - Lists all errors on the form
-  - References IRM documentation
+- **Plan Mode** — conversational IRM guidance and Q&A
+- **Agent Mode** — submits the work record to an AWS Strands agent, polls for recommendations, and surfaces proposed field corrections with confidence scores for user review
 
-**Example Prompts**:
-- "How do I resolve the current error?"
-- "Show me steps to fix error 004"
-- "What does error 111 mean?"
+AWS infrastructure (S3 trigger, Strands agent, DynamoDB write) is owned by a separate team. This app only handles the **input (S3 upload)** and **output (DynamoDB poll)** sides.
 
-### Agent Mode
-- **Purpose**: Automatically analyzes and suggests fixes for errors
-- **Capabilities**:
-  - Analyzes current error and proposes fixes
-  - Can fix all errors on the form at once
-  - Shows confidence scores for each proposed fix
-  - Displays before/after values for each field
-  - Requires user approval before applying changes
+---
 
-**Example Prompts**:
-- "Fix the current error"
-- "Fix all errors on this form"
-- "Analyze all errors and show me what you would fix"
+## End-to-End Agent Flow
 
-## UI Components
-
-### Mode Toggle
-- Located in the panel header
-- Easy switching between Plan Mode and Agent Mode
-- Visual indication of active mode
-
-### Chat Interface
-- Message history with timestamps
-- User messages (purple) and AI responses (gray)
-- Loading indicator during AI processing
-- Auto-scrolls to latest message
-
-### Fix Summary Panel (Agent Mode)
-- Shows proposed fixes with:
-  - Error code and description
-  - Confidence score (color-coded: green ≥90%, yellow ≥75%, orange <75%)
-  - Field changes (current value → suggested value)
-  - Reason for each change
-  - Manual review flag for low-confidence fixes
-- "Apply All Fixes" button to implement changes
-- "Cancel" button to dismiss suggestions
-
-## Layout
-
-### Position
-- Located above the Notes section in the right column (40% width)
-- Fixed height of 400px for consistent layout
-- Notes section below takes remaining space
-
-### Responsive Design
-- Adapts to screen size
-- Maintains readability on smaller screens
-- Scrollable message area
-
-## Integration Details
-
-### Props Passed to AI Panel
-```typescript
-currentError: {
-  code: string;           // Error code (e.g., "004")
-  description: string;    // Error description
-  fieldMappings: string[]; // Fields associated with error
-}
-
-allErrors: Array<{
-  code: string;
-  description: string;
-  fieldMappings: string[];
-}>
-
-formData: Record<string, any>  // Current form field values
-
-onApplyFixes: (fixes: ErrorFix[]) => void  // Callback when fixes are applied
+```
+User clicks AI button
+        │
+        ▼
+AIAssistantDialog opens (Agent Mode)
+        │
+        ▼
+POST /api/ai-agent/submit  ──►  S3: input/{dln}.json
+        │                             │
+        │                       (triggers Strands agent)
+        │                             │
+        ▼                             ▼
+GET /api/ai-agent/recommendations  ◄──  DynamoDB: item.dln
+  (polls every 3 s, up to 60 s)
+        │
+        ▼
+recommendations[] mapped to FieldChange[]
+        │
+        ▼
+User reviews: Approve / Deny / Rework
+        │
+        ▼
+onApplyFixes() updates eraDto in workRecord/page.tsx
 ```
 
-### Error Fix Structure
+### Status sequence shown to user
+
+| `agentStatus` | Loading text |
+|---|---|
+| `submitting` | Submitting to AI agent… |
+| `waiting` | Waiting for analysis… |
+| `idle` / `error` | Analyzing… / error message |
+
+---
+
+## Relevant Files
+
+### UI
+
+| File | Role |
+|---|---|
+| `src/components/AIAssistantDialog.tsx` | Main dialog — modes, chat, field-change table, Approve/Deny/Rework actions |
+| `src/components/AIFloatingButton.tsx` | FAB that opens the dialog |
+| `src/app/workRecord/page.tsx` | Renders the dialog; passes `formData`, `dln`, errors, and `onApplyFixes` |
+
+### API Routes (server-side, AWS SDK — never exposed to browser)
+
+| File | Method | Purpose |
+|---|---|---|
+| `src/app/api/ai-agent/submit/route.ts` | `POST` | Accepts `{ eraDto, dln }`, uploads `input/{dln}.json` to S3 |
+| `src/app/api/ai-agent/recommendations/route.ts` | `GET ?dln=` | Reads DynamoDB item by `dln`; returns `{ recommendations, status }` |
+
+### Client Service
+
+| File | Exports |
+|---|---|
+| `src/services/aiAgentService.ts` | `submitWorkRecord(eraDto, dln)`, `pollForRecommendations(dln, options?)` |
+
+---
+
+## Environment Variables
+
+Add to `.env.local` (see `.env.example` for full template):
+
+```bash
+AWS_REGION=us-east-1
+AI_AGENT_S3_BUCKET=<your-input-bucket>
+AI_AGENT_DYNAMO_TABLE=<your-recommendations-table>
+```
+
+AWS credentials are resolved from the standard SDK chain (`~/.aws/credentials`, instance profile, env vars). Never hardcode them.
+
+---
+
+## Key Interfaces
+
+### Props — `AIAssistantDialog`
+
 ```typescript
-interface ErrorFix {
-  errorCode: string;
-  errorDescription: string;
-  proposedFix: Array<{
-    field: string;
-    currentValue: string;
-    suggestedValue: string;
-    reason: string;
+interface AIAssistantDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  formData?: Record<string, any>;   // eraDto passed from workRecord page
+  dln?: string;                     // getDLN() from workRecord page
+  currentError?: {
+    code: string;
+    description: string;
+    fieldMappings?: string[];
+  };
+  allErrors?: Array<{
+    code: string;
+    description: string;
+    fieldMappings?: string[];
   }>;
-  confidenceScore: number;  // 0.0 to 1.0
-  requiresManualReview: boolean;
+  onApplyFixes?: (fixes: ErrorFix[]) => void;
 }
 ```
 
-## User Experience
+### DynamoDB Item Expected Shape
 
-### Plan Mode Flow
-1. User sees welcome message with suggestions
-2. User types question about error resolution
-3. AI provides IRM guidance and step-by-step instructions
-4. User can ask follow-up questions
-5. AI suggests switching to Agent Mode for automatic fixes
+```json
+{
+  "dln": "20261234567890",
+  "status": "COMPLETE",
+  "recommendations": [
+    {
+      "field": "taxPrd",
+      "currentValue": "202411",
+      "proposedValue": "202412",
+      "confidenceScore": 0.95,
+      "reason": "Tax period mismatch based on MeF receipt date"
+    }
+  ],
+  "analyzedAt": "2026-04-12T10:00:00Z"
+}
+```
 
-### Agent Mode Flow
-1. User sees welcome message with available commands
-2. User requests to fix current error or all errors
-3. AI analyzes errors and shows fix summary with confidence scores
-4. User reviews proposed changes
-5. User clicks "Apply All Fixes" or "Cancel"
-6. If applied, form fields are updated and user is notified
+`status` values: `PENDING` | `COMPLETE` | `ERROR`
 
-## Technical Implementation
+### `AgentRecommendation` (from `aiAgentService.ts`)
 
-### Files Created
-- `/src/components/AIIntegrationPanel.tsx` - Main AI panel component
+```typescript
+interface AgentRecommendation {
+  field: string;
+  currentValue: string;
+  proposedValue: string;
+  confidenceScore: number;  // 0.0–1.0
+  reason?: string;
+}
+```
 
-### Files Modified
-- `/src/app/workRecord/page.tsx` - Integrated AI panel above notes section
+---
 
-### Dependencies
-- `lucide-react` - Icons (Sparkles, Send, Loader2, CheckCircle2, AlertCircle, Info, Zap)
-- React hooks for state management
+## Dialog Behavior
 
-## Future Enhancements
+### On open (Agent Mode)
+1. Welcome message shown
+2. `submitWorkRecord(formData, dln)` called immediately
+3. `pollForRecommendations(dln)` starts polling (3 s interval, 60 s timeout)
+4. On success → `FieldChange[]` populates the review table
+5. On timeout/error → error message shown with Rework option
 
-### Planned Features
-1. **Real API Integration**: Replace simulated responses with actual AI service
-2. **Fix Application Logic**: Implement actual form field updates from AI suggestions
-3. **Error History**: Track which errors were fixed by AI vs manually
-4. **Learning System**: Improve suggestions based on user feedback
-5. **Batch Operations**: Queue multiple fix operations
-6. **Undo Functionality**: Allow reverting AI-applied fixes
-7. **Export Guidance**: Save IRM guidance as PDF or print
+### User actions
+- **Approve** — calls `onApplyFixes()`, updates `eraDto` in `workRecord/page.tsx`
+- **Deny** — modal collects feedback; changes discarded
+- **Rework** — re-submits to S3 and re-polls DynamoDB from scratch
 
-### API Integration Points
-- Plan Mode: `/api/ai/guidance` - Get IRM guidance for errors
-- Agent Mode: `/api/ai/analyze` - Analyze errors and suggest fixes
-- Apply Fixes: Update form fields and track AI-assisted changes
+### Plan Mode
+- Q&A only; simulated IRM guidance via `generateCombinedResponse()`
+- No AWS calls; keywords `analyze / fix / check` in chat switch to real agent flow
 
-## Security Considerations
+---
 
-### User Control
-- All fixes require explicit user approval
-- Clear visibility of what will change before applying
-- Confidence scores help users make informed decisions
-- Manual review flag for uncertain fixes
+## Confidence Score Display
 
-### Data Privacy
-- Form data only sent to AI when user initiates action
-- No automatic background processing
-- User can cancel at any time
+| Score | Color | Badge |
+|---|---|---|
+| ≥ 90% | Green | — |
+| ≥ 75% | Yellow | — |
+| < 75% | Orange | "Manual Review" |
 
-## Testing Recommendations
+---
 
-### Manual Testing
-1. Test Plan Mode with various error types
-2. Test Agent Mode fix suggestions
-3. Verify confidence score calculations
-4. Test mode switching during conversation
-5. Verify fix summary display and interactions
-6. Test with no errors present
-7. Test with multiple errors
+## Dependencies
 
-### Integration Testing
-1. Verify form data is correctly passed to AI panel
-2. Test fix application callback
-3. Verify error list updates
-4. Test with different user permissions
+```json
+"@aws-sdk/client-s3": "^3.758.0",
+"@aws-sdk/client-dynamodb": "^3.758.0",
+"@aws-sdk/lib-dynamodb": "^3.758.0"
+```
 
-## Usage Tips
+---
 
-### For Users
-- Start with Plan Mode to understand the error
-- Switch to Agent Mode when ready for automatic fixes
-- Review confidence scores before applying fixes
-- Low confidence (<75%) fixes should be manually reviewed
-- Can ask follow-up questions in Plan Mode
+## Testing Checklist
 
-### For Developers
-- Simulated responses are in place for demo purposes
-- Replace `simulatePlanResponse` and `simulateAgentResponse` with real API calls
-- Implement `onApplyFixes` callback to update form fields
-- Add error handling for API failures
-- Consider adding loading states for long operations
+- [ ] Dialog opens and immediately submits to S3 (`POST /api/ai-agent/submit` returns 200)
+- [ ] Polling shows "Waiting for analysis…" until DynamoDB item is ready
+- [ ] `COMPLETE` item populates field-change table correctly
+- [ ] `ERROR` status from DynamoDB shows error message in chat
+- [ ] 60 s timeout displays timeout message with Rework option
+- [ ] Approve applies all selected changes to the form fields
+- [ ] Deny modal submits feedback and discards changes
+- [ ] Rework re-submits and re-polls successfully
+- [ ] Dialog close aborts ongoing polling (no state updates after unmount)
+- [ ] Plan Mode Q&A still works independently of agent flow
+- [ ] Missing `dln` shows a clear "Cannot start analysis" message

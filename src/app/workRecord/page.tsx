@@ -2829,6 +2829,7 @@ function Form4868ERSPageContent() {
         isOpen={isAIDialogOpen}
         onClose={() => setIsAIDialogOpen(false)}
         formData={eraDto}
+        dln={getDLN()}
         currentError={currentNonFieldError ? {
           code: currentNonFieldError.code,
           description: currentNonFieldError.description,
