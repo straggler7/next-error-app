@@ -538,6 +538,9 @@ git branch: mvp-december-browser-navigation
 git branch: mvp-december-table-sorting
 (12/21/2025)
 
+git branch: mvp-december-ai-02012026-102-v4
+(12/22/2025)
+
 
 {
   "inventoryId": 14,
@@ -3632,3 +3635,26 @@ git branches:
 
   mvp-march
   
+
+"ersReasonCds": ["135", "004", "103", "01TIN", "01NC"],
+
+instead of simulating the agent response, want to start implementing the actual flow. This will be the flow:
+- when a user clicks on the agent button, the work record json will be posted to S3 bucket
+- that would trigger a strands agent and agent recommendations will be stored to dynamo db (key is the dln number). All the setup on the AWS is being handled by a different project/team, assume all that is in place. On our end, we need to have setup to post the json payload to S3 and then read from the response in Dynamo DB
+- use best practices, reactjs nextjs recommended conventions etc
+come up with a plan to implement this
+
+{
+  "dln": "20261234567890",
+  "status": "COMPLETE",
+  "recommendations": [
+    {
+      "field": "taxPrd",
+      "currentValue": "202411",
+      "proposedValue": "202412",
+      "confidenceScore": 0.95,
+      "reason": "Tax period mismatch based on MeF receipt date"
+    }
+  ],
+  "analyzedAt": "2026-04-15T14:00:00Z"
+}
