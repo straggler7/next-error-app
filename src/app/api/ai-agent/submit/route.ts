@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import { writeFile, unlink } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 export const dynamic = 'force-dynamic';
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const execFileAsync = promisify(execFile);
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,16 +30,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const region = process.env.AWS_REGION || 'us-east-1';
     const key = `input/${dln}.json`;
+    const tmpFile = join(tmpdir(), `era-agent-${dln}.json`);
 
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: JSON.stringify(eraDto),
-        ContentType: 'application/json',
-      })
-    );
+    await writeFile(tmpFile, JSON.stringify(eraDto));
+
+    try {
+      await execFileAsync('aws', [
+        's3', 'cp', tmpFile,
+        `s3://${bucket}/${key}`,
+        '--region', region,
+        '--content-type', 'application/json',
+        '--no-verify-ssl',
+      ]);
+    } finally {
+      await unlink(tmpFile).catch(() => {});
+    }
 
     console.log(`AI agent: submitted work record for DLN ${dln} → s3://${bucket}/${key}`);
 
