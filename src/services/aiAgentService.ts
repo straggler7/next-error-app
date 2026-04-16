@@ -33,10 +33,12 @@ class AIAgentService {
     }
   }
 
-  async getRecommendations(dln: string): Promise<AgentRecommendationsResponse> {
-    const response = await fetch(
-      `/api/ai-agent/recommendations?dln=${encodeURIComponent(dln)}`
-    );
+  async getRecommendations(dln: string, taxPrd: string): Promise<AgentRecommendationsResponse> {
+    const response = await fetch('/api/ai-agent/recommendations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dln, taxPrd }),
+    });
 
     if (!response.ok) {
       const error = await response
@@ -50,6 +52,7 @@ class AIAgentService {
 
   pollForRecommendations(
     dln: string,
+    taxPrd: string,
     { intervalMs = 3000, timeoutMs = 60000, onStatusUpdate }: PollOptions = {}
   ): Promise<AgentRecommendation[]> {
     return new Promise((resolve, reject) => {
@@ -57,7 +60,7 @@ class AIAgentService {
 
       const poll = async () => {
         try {
-          const result = await this.getRecommendations(dln);
+          const result = await this.getRecommendations(dln, taxPrd);
 
           if (result.status === 'COMPLETE' && result.recommendations) {
             resolve(result.recommendations);

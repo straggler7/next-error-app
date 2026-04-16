@@ -1,62 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import https from 'https';
 
 export const dynamic = 'force-dynamic';
 
-const dynamoClient = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
-const docClient = DynamoDBDocumentClient.from(dynamoClient);
-
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = request.nextUrl;
-    const dln = searchParams.get('dln');
+    const body = await request.json();
+    const { dln, taxPrd } = body;
 
     if (!dln) {
       return NextResponse.json({ message: 'DLN is required' }, { status: 400 });
     }
 
-    const table = process.env.AI_AGENT_DYNAMO_TABLE;
-    if (!table) {
+    if (!taxPrd) {
+      return NextResponse.json({ message: 'taxPrd is required' }, { status: 400 });
+    }
+
+    const apiGatewayUrl = process.env.AI_AGENT_API_GATEWAY_URL;
+    if (!apiGatewayUrl) {
       return NextResponse.json(
-        { message: 'AI agent DynamoDB table not configured (AI_AGENT_DYNAMO_TABLE)' },
+        { message: 'AI agent API Gateway URL not configured (AI_AGENT_API_GATEWAY_URL)' },
         { status: 500 }
       );
     }
 
-    const result = await docClient.send(
-      new GetCommand({
-        TableName: table,
-        Key: { dln },
-      })
-    );
-
-    if (!result.Item) {
-      return NextResponse.json({ recommendations: null, status: 'PENDING' });
-    }
-
-    const item = result.Item;
-
-    if (item.status === 'ERROR') {
-      return NextResponse.json({
-        recommendations: null,
-        status: 'ERROR',
-        message: item.errorMessage || 'Agent processing failed',
-      });
-    }
-
-    if (item.status !== 'COMPLETE') {
-      return NextResponse.json({ recommendations: null, status: item.status || 'PENDING' });
-    }
-
-    return NextResponse.json({
-      recommendations: item.recommendations || [],
-      status: 'COMPLETE',
-      analyzedAt: item.analyzedAt,
+    const response = await fetch(apiGatewayUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dln, taxPrd }),
+      // @ts-ignore — Node.js fetch accepts agent for SSL bypass (corporate proxy)
+      agent: httpsAgent,
     });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'API Gateway request failed' }));
+      throw new Error(error.message || `API Gateway responded with ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    console.log(`AI agent: fetched recommendations for DLN ${dln} / taxPrd ${taxPrd}`);
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error('AI agent recommendations error:', error);
     return NextResponse.json(

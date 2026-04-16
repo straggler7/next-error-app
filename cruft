@@ -3658,3 +3658,18 @@ come up with a plan to implement this
   ],
   "analyzedAt": "2026-04-15T14:00:00Z"
 }
+
+add to .env.local:
+AI_AGENT_API_GATEWAY_URL=https://your-api-gateway-id.execute-api.us-gov-west-1.amazonaws.com/stage/v1/tp/1040x/agent/recommendation
+The SSL bypass needs to live in [recommendations/route.ts](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/app/api/ai-agent/recommendations/route.ts:0:0-0:0) — that's where the actual external HTTPS call to the API Gateway happens. The [aiAgentService.ts](cci:7://file:///Users/madhub/Documents/s2/ERS_4868/wireframes/next-app/irs-error-resolution/src/services/aiAgentService.ts:0:0-0:0) only calls the local Next.js route over HTTP, so no SSL issue there.
+Now wire the agent into the fetch call:
+Done. The `https.Agent` with `rejectUnauthorized: false` is created once at module level and passed to every API Gateway fetch call.
+
+**One caveat** — Next.js 15 uses Node's undici-based fetch which prefers `dispatcher` over `agent`. If you still get SSL errors after this, the reliable fallback is to add this to your `.env.local`:
+
+```bash
+NODE_TLS_REJECT_UNAUTHORIZED=0
+```
+
+That's the same effect as `--no-verify-ssl` on the CLI, applied globally to the Node.js process. Fine for local dev, never use in production.
+

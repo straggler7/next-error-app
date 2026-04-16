@@ -122,6 +122,7 @@ export default function AIAssistantDialog({
       setMessages(prev => [...prev, analysisMessage]);
       
       const dlnValue = dln || (formData as Record<string, any>)?.workRecord?.dln || (formData as Record<string, any>)?.dln;
+      const taxPrdValue = (formData as Record<string, any>)?.workRecord?.taxPrd || (formData as Record<string, any>)?.taxPrd || '';
 
       const runAnalysis = async () => {
         try {
@@ -141,7 +142,7 @@ export default function AIAssistantDialog({
           if (analysisAbortedRef.current) return;
 
           setAgentStatus('waiting');
-          const recommendations = await aiAgentService.pollForRecommendations(dlnValue);
+          const recommendations = await aiAgentService.pollForRecommendations(dlnValue, taxPrdValue);
           if (analysisAbortedRef.current) return;
 
           setAgentStatus('idle');
@@ -357,11 +358,13 @@ export default function AIAssistantDialog({
         return;
       }
 
+      const taxPrdValue = (formData as Record<string, any>)?.workRecord?.taxPrd || (formData as Record<string, any>)?.taxPrd || '';
+
       try {
         setAgentStatus('submitting');
         await aiAgentService.submitWorkRecord(formData as Record<string, unknown>, dlnValue);
         setAgentStatus('waiting');
-        const recommendations = await aiAgentService.pollForRecommendations(dlnValue);
+        const recommendations = await aiAgentService.pollForRecommendations(dlnValue, taxPrdValue);
         setAgentStatus('idle');
 
         const changes: FieldChange[] = recommendations.map(rec => ({
@@ -520,10 +523,12 @@ export default function AIAssistantDialog({
       }
 
       setAgentStatus('submitting');
+      const taxPrdValue = (formData as Record<string, any>)?.workRecord?.taxPrd || (formData as Record<string, any>)?.taxPrd || '';
+
       await aiAgentService.submitWorkRecord(formData as Record<string, unknown>, dlnValue);
       setAgentStatus('waiting');
 
-      const recommendations = await aiAgentService.pollForRecommendations(dlnValue);
+      const recommendations = await aiAgentService.pollForRecommendations(dlnValue, taxPrdValue);
       setAgentStatus('idle');
 
       const reworkedChanges: FieldChange[] = recommendations.map(rec => ({
