@@ -3673,3 +3673,40 @@ NODE_TLS_REJECT_UNAUTHORIZED=0
 
 That's the same effect as `--no-verify-ssl` on the CLI, applied globally to the Node.js process. Fine for local dev, never use in production.
 
+To test the API Gateway call directly from CLI, mirroring exactly what the route does:
+
+```bash
+aws apigateway test-invoke-method \
+  --rest-api-id <your-api-id> \
+  --resource-id <resource-id> \
+  --http-method POST \
+  --body '{"dln":"20261234567890","taxPrd":"202411"}' \
+  --region us-gov-west-1 \
+  --no-verify-ssl
+```
+
+Or simpler — just use `curl` directly against the full URL:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"dln":"20261234567890","taxPrd":"202411"}' \
+  -k \
+  "https://<your-gateway-id>.execute-api.us-gov-west-1.amazonaws.com/<stage>/v1/tp/1040x/agent/recommendation"
+```
+
+`-k` is the curl equivalent of `--no-verify-ssl`.
+
+If the endpoint requires AWS IAM auth (SigV4 signing), use `awscurl`:
+
+```bash
+awscurl --service execute-api \
+  --region us-gov-west-1 \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"dln":"20261234567890","taxPrd":"202411"}' \
+  --no-verify \
+  "https://<your-gateway-id>.execute-api.us-gov-west-1.amazonaws.com/<stage>/v1/tp/1040x/agent/recommendation"
+```
+
+Install `awscurl` with `pip install awscurl` if not already installed. It handles the SigV4 signature automatically using your `~/.aws/credentials`.
