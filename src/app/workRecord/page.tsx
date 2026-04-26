@@ -1153,6 +1153,8 @@ function Form4868ERSPageContent() {
   const lastActivityRef = useRef<number>(Date.now());
   const visibilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const handleCloseoutRef = useRef<(() => Promise<void>) | null>(null);
+  const timeoutWarningRef = useRef<boolean>(false); // Ref to track current timeout warning state
+  const ignoreActivityRef = useRef<boolean>(false); // Ref to temporarily ignore activity after showing warning
 
   // Ref for InfoAlert to focus on it when shown
   const infoAlertRef = useRef<HTMLDivElement>(null);
@@ -1160,12 +1162,45 @@ function Form4868ERSPageContent() {
   // Focus on InfoAlert when it's shown
   useEffect(() => {
     if (showInfo && infoAlertRef.current) {
-      // Small delay to ensure the component is rendered
-      setTimeout(() => {
-        infoAlertRef.current?.focus();
-      }, 100);
+      // Use requestAnimationFrame for more reliable timing
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (infoAlertRef.current) {
+            infoAlertRef.current.focus();
+            infoAlertRef.current.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest',
+              inline: 'nearest'
+            });
+          }
+        });
+      });
     }
   }, [showInfo]);
+
+  // Ensure timeout warning always gets focus and scrolls into view
+  useEffect(() => {
+    if (timeoutWarning && showInfo && infoAlertRef.current) {
+      // Double requestAnimationFrame ensures DOM is fully updated
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (infoAlertRef.current) {
+            infoAlertRef.current.focus();
+            infoAlertRef.current.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+        });
+      });
+    }
+  }, [timeoutWarning, showInfo]);
+
+  // Keep timeoutWarningRef in sync with timeoutWarning state
+  useEffect(() => {
+    timeoutWarningRef.current = timeoutWarning;
+  }, [timeoutWarning]);
 
   // Helper function to get current time in Eastern timezone as ISO string
   const getEasternTimestamp = () => {
@@ -1555,6 +1590,7 @@ function Form4868ERSPageContent() {
             router.push("/daily-summary");
           }, 2000);
         } else {
+          setTimeoutWarning(false); // Ensure no timeout warning button shows
           setInfoMessage(
             "Record closed out successfully. You will be redirected to the home page in a few seconds."
           );
@@ -2036,6 +2072,15 @@ function Form4868ERSPageContent() {
 
     const resetTimeout = () => {
       lastActivityRef.current = Date.now();
+      
+      // Only hide the info alert if it's showing a timeout warning
+      // Use ref to get current value (avoid stale closure)
+      if (timeoutWarningRef.current) {
+        console.log("Timeout reset - hiding timeout warning alert");
+        setShowInfo(false);
+      } else {
+        console.log("Timeout reset - no warning to hide");
+      }
       setTimeoutWarning(false);
 
       // Clear existing timeouts
@@ -2048,10 +2093,18 @@ function Form4868ERSPageContent() {
 
       // Set warning timeout (8 minutes)
       warningTimeoutRef.current = setTimeout(() => {
+        console.log("⏰ Timeout warning triggered - setting states");
+        // Ignore activity events for 2 seconds to prevent scrollIntoView from hiding the alert
+        ignoreActivityRef.current = true;
+        setTimeout(() => {
+          ignoreActivityRef.current = false;
+          console.log("⏰ Activity tracking re-enabled");
+        }, 2000);
+        
         setTimeoutWarning(true);
         setInfoMessage("Session will timeout in 2 minutes due to inactivity. The record will be automatically closed out.");
         setShowInfo(true);
-        console.log("Timeout warning shown - 2 minutes remaining");
+        console.log("⏰ Timeout warning shown - 2 minutes remaining");
       }, TIMEOUT_DURATION - WARNING_DURATION);
 
       // Set main timeout (10 minutes)
@@ -2072,11 +2125,18 @@ function Form4868ERSPageContent() {
     };
 
     const handleUserActivity = (event: Event) => {
+      // Ignore activity if we just showed the timeout warning (prevents scrollIntoView from hiding it)
+      if (ignoreActivityRef.current) {
+        console.log("⏰ Ignoring activity event (timeout warning just shown)");
+        return;
+      }
+      
       // Only reset timeout for meaningful user interactions
       const target = event.target as HTMLElement;
       
       // Ignore activity on timeout warning elements
-      if (target?.closest('[data-timeout-warning]')) {
+      // Check if target is an Element and has closest method
+      if (target && typeof target.closest === 'function' && target.closest('[data-timeout-warning]')) {
         return;
       }
 
@@ -2084,7 +2144,7 @@ function Form4868ERSPageContent() {
     };
 
     // Activity event listeners
-    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'focus', 'blur'];
+    const activityEvents = ['mousedown', 'keypress', 'scroll', 'touchstart', 'click', 'focus', 'blur'];
     
     // Add event listeners for user activity
     activityEvents.forEach(event => {

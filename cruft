@@ -3631,4 +3631,7 @@ git branches:
   mvp-december-work-record-timeout-prod-bug-03122026
 
   mvp-march
-  
+  1 day
+
+there is an issue with the timeout alert focus. the behavior seems to be incosistent.
+when the timeout warning is shown, the focus is no the warning but if the user interacts with the page, the focus does not seem to be going to the time out warning the next time it is shown
