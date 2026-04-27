@@ -4,7 +4,7 @@
  * memberof format: xbag-era-dev-{designation}-{serviceCenter}
  * Examples:
  *   xbag-era-dev-mgr-austin
- *   xbag-era-dev-analyst-hq-austin
+ *   xbag-era-dev-analyst-hq-analyst (analyst defaults to Austin service center)
  *   xbag-era-dev-taxex-austin
  */
 
@@ -33,7 +33,9 @@ export function extractDesignationFromMemberOf(memberof: string | null): string 
 }
 
 /**
- * Extract service center city name from memberof header (last segment).
+ * Extract service center city name from memberof header.
+ * For analyst role (analyst-hq-analyst format), defaults to 'austin'.
+ * For other roles, extracts from last segment.
  */
 export function extractServiceCenterFromMemberOf(memberof: string | null): string | null {
   if (!memberof) return null;
@@ -41,6 +43,13 @@ export function extractServiceCenterFromMemberOf(memberof: string | null): strin
   const parts = memberof.split('-');
   if (parts.length < MEMBEROF_PREFIX_LENGTH + 2) return null;
 
+  // Check if this is an analyst role (analyst-hq-analyst format)
+  const designationSegments = parts.slice(MEMBEROF_PREFIX_LENGTH, -1).join('-');
+  if (designationSegments === 'analyst-hq') {
+    return 'austin'; // Default service center for analysts
+  }
+
+  // For other roles, extract from last segment
   return parts[parts.length - 1] || null;
 }
 
